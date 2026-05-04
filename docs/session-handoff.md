@@ -1,0 +1,291 @@
+# 会话交接记录
+
+## 当前状态
+- 当前目标：建立 WEEX 活动后台管理页面的可接力操作规范、自动化操作 skill 和会话交接机制。
+- 目标环境：staging，`https://stg-activity.weex.tech`。
+- 当前使用的 skill：项目内 `skills/weex-admin-ops/`，本机也有一份可选安装副本 `/Users/gabriel/.codex/skills/weex-admin-ops`。
+- 最近更新时间：2026-05-04。
+
+## 已完成事项
+- 已安装 LambdaTest `agent-skills` 仓库中的 70 个 skills 到 `/Users/gabriel/.codex/skills`。
+- 已安装 `web-access` skill 到 `/Users/gabriel/.codex/skills/web-access`。
+- 已创建项目级规范文件 `AGENTS.md`。
+- 已创建 `weex-admin-ops` skill，用于 WEEX 后台自然语言操作、参数补全、浏览器执行、结果验证和流程沉淀。
+- 已将 `weex-admin-ops` 复制到当前仓库 `skills/weex-admin-ops/`，作为团队协作和接力的权威版本。
+- 已将 `weex-admin-ops` 的 operation playbooks 改为按业务域拆分，避免长期沉淀导致单个文件过长。
+- 已记录 staging 默认登录账号名为 `auto`；密码和 Google 验证码不写入仓库，改由环境变量或未提交的 `.env.local` 提供。
+- 已新增浏览器自动化可见性规则：默认不可见/后台运行；只有用户明确要求可见操作时，才打开有界面的真实浏览器让测试人员观看。
+- 已新增 `weex-admin-ops` 对 `web-access` 的使用规则：联网/登录态浏览器操作优先使用或遵循 `web-access`，CDP 不可用时再使用内置 Playwright 脚本。
+- 已将常用奖品创建 Playwright 脚本沉淀到 `skills/weex-admin-ops/scripts/create-prizes.mjs`，支持同类批量创建、JSON plan、默认后台运行和 `--visible` 可见模式。
+- 已新增动作缓存层：`scripts/action-cache.json` 维护缓存动作，`scripts/run-cached-action.mjs` 负责按 action 或自然语言 query 命中缓存脚本；命中时优先跑缓存，失败再回退到 `web-access` 或常规浏览器自动化。
+- 已新增脚本增长规范：脚本按 `scripts/lib/`、`scripts/cache/`、`scripts/business/<业务域>/` 分层；入口脚本保持薄封装；单文件原则上控制在 180 行以内，接近 200 行先拆分。
+- 已重构奖品创建缓存脚本：`create-prizes.mjs` 从单文件大脚本拆成 CLI 入口、通用浏览器/Element UI helper、奖品管理业务 plan/create 模块。
+- 已为 `weex-admin-ops` 添加引用资料和追加操作脚本。
+- 已将“活动通用模块管理 / 奖品管理”菜单导航和“奖品管理搜索功能”沉淀到 `skills/weex-admin-ops`。
+- 已走通“新增赠金奖品”流程，并沉淀到 `skills/weex-admin-ops`。
+- 已走通“新增币种奖品”流程，并沉淀到 `skills/weex-admin-ops`。
+- 已走通“新增实物奖品”流程，并沉淀到 `skills/weex-admin-ops`。
+- 已按用户要求批量创建 `虚拟积分或资格` 各子类型奖品；最初成功 11 个，随后补充走通 `仓位空投`，目前 12 个子类型均已创建成功。
+- 已将奖品管理后续复杂流程拆到 `skills/weex-admin-ops/references/operations/prize-management.md`，避免继续追加到已较长的 `activity-common-module.md`。
+- 已通过 `quick_validate.py` 校验 `weex-admin-ops`：`Skill is valid!`。
+- 已添加会话交接规范，要求后续关键操作后更新本文件。
+
+## 已验证链路
+- 登录 WEEX 活动后台并进入假钱账户页面。
+  - 状态：candidate。
+  - 环境：staging。
+  - 入口：`/login?redirect=%2Factivities%2Foffline%2FuserManage`。
+  - 最终页面：`/activities/offline/userManage`。
+  - 成功依据：页面标题为 `活动管理系统`，页面包含 `假钱账户`，表格包含 `UID`、`AccountId`、`API Key` 等字段。
+- 展开左侧菜单“活动通用模块管理”，进入“奖品管理”。
+  - 状态：candidate。
+  - 环境：staging。
+  - 最终页面：`/activity/prize`。
+  - 成功依据：页面面包屑包含 `活动通用模块管理 / 奖品管理`，页面包含 `奖品ID`、`奖品分类`、`奖品名称`、`新增` 和奖品列表。
+- 奖品管理搜索功能已按用户指定用例完成验证。
+  - 状态：candidate。
+  - 环境：staging。
+  - 页面：`/activity/prize`。
+  - 已验证：
+    - 奖品ID搜索：使用当前页 ID `429`，搜索后只展示该 ID。
+    - 奖品ID置空后搜索：恢复展示列表第一页。
+    - 奖品分类下拉：分别验证 `赠金`、`币种`、`实物`、`虚拟积分或资格`，搜索后列表奖品分类均为所选项。
+    - 奖品子类别：修正原理解，必须先选择奖品分类，再选择该分类对应子类别后搜索。已验证：
+      - `赠金 / 赠金`
+      - `币种 / BTC`
+      - `实物 / 实物`
+      - `虚拟积分或资格 / 抽奖次数`
+    - 奖品名称模糊搜索：关键字 `合约`，结果奖品名称均包含该关键字。
+    - 奖品别名模糊搜索：关键字 `合约`，结果奖品别名均包含该关键字。
+- 新增赠金奖品流程已完成。
+  - 状态：candidate。
+  - 环境：staging。
+  - 页面：`/activity/prize`。
+  - 创建记录：
+    - 奖品ID：`430`
+    - 奖品分类：`赠金`
+    - 奖品子分类：`赠金`
+    - 奖品名称：`自动化赠金奖品20260504033445`
+    - 奖品别名：`auto_bonus_20260504033445`
+    - 英语多语言：`Auto Bonus Prize 20260504033445`
+    - 领取后有效期：`1`
+    - 发放有效期：`1`
+    - 奖品单位：`1`
+    - 奖品展示精度：`2`
+    - 抵扣比例：`1`
+  - 默认图片：`assets/default-prize-images/default-bonus-prize.webp`
+  - 成功依据：`/prod-api/common/uploadImgReplace` 返回 200，`/prod-api/activity/prize` 返回 200，页面提示 `新增成功`，按别名搜索返回新记录。
+- 新增币种奖品流程已完成。
+  - 状态：candidate。
+  - 环境：staging。
+  - 页面：`/activity/prize`。
+  - 创建记录：
+    - 奖品ID：`431`
+    - 奖品分类：`币种`
+    - 奖品子分类：`BTC`
+    - 奖品名称：`自动化币种奖品20260504034022`
+    - 奖品别名：`auto_coin_20260504034022`
+    - 英语多语言：`Auto Coin Prize 20260504034022`
+    - 有效时间：`1`
+    - 奖品单位：`1`
+    - 奖品展示精度：`2`
+  - 默认图片：`assets/default-prize-images/default-bonus-prize.webp`
+  - 成功依据：`/prod-api/common/uploadImgReplace` 返回 200，`/prod-api/activity/prize` 返回 200，页面提示 `新增成功`，按别名搜索返回新记录。
+- 新增实物奖品流程已完成。
+  - 状态：candidate。
+  - 环境：staging。
+  - 页面：`/activity/prize`。
+  - 创建记录：
+    - 奖品ID：`432`
+    - 奖品分类：`实物`
+    - 奖品子分类：`实物`
+    - 奖品名称：`自动化实物奖品20260504034431`
+    - 奖品别名：`auto_physical_20260504034431`
+    - 英语多语言：`Auto Physical Prize 20260504034431`
+    - 有效时间：`1`
+    - 奖品单位：`1`
+    - 奖品展示精度：`2`
+  - 默认图片：`assets/default-prize-images/default-bonus-prize.webp`
+  - 成功依据：`/prod-api/common/uploadImgReplace` 返回 200，`/prod-api/activity/prize` 返回 200，页面提示 `新增成功`，按别名搜索返回新记录。
+- 已检查 `虚拟积分或资格` 下全部奖品子类型的新增弹窗字段，未提交新增数据。
+  - 状态：field-discovery。
+  - 环境：staging。
+  - 页面：`/activity/prize`。
+  - 子类型列表：`抽奖次数`、`积分`、`合约抵扣金`、`仓位空投`、`无奖励`、`VIP体验卡`、`提升返还比例档位`、`小丑牌-抽牌次数`、`小丑牌-积分加成`、`虚拟盘合约体验金`、`理财加息券`、`每日固定收益券`。
+  - 字段摘要：
+    - `抽奖次数`：颜色签、奖品名称、奖品别名、有效时间、奖品单位、展示精度、图片。
+    - `积分`：奖品名称、奖品别名、有效时间、奖品单位、展示精度、图片。
+    - `合约抵扣金`：奖品名称、奖品别名、领取后有效期、发放有效期、奖品单位、展示精度、图片。
+    - `仓位空投`：奖品名称、奖品别名、开仓后有效期、发放有效期、币种、交易对、保证金模式、杠杆倍数、数量、图片。
+    - `无奖励`：奖品名称、奖品别名、有效时间、奖品单位、展示精度、图片。
+    - `VIP体验卡`：VIP类型、VIP等级、VIP有效天数、跳转链接、奖品名称、奖品别名、发放有效期、奖品单位、展示精度、图片。
+    - `提升返还比例档位`：奖品名称、奖品别名、奖品单位、展示精度、图片。
+    - `小丑牌-抽牌次数`：奖品名称、奖品别名、有效时间、奖品单位、展示精度、图片。
+    - `小丑牌-积分加成`：奖品名称、奖品别名、有效时间、奖品单位、展示精度、图片。
+    - `虚拟盘合约体验金`：奖品名称、奖品别名、奖品单位、展示精度、图片。
+    - `理财加息券`：奖品名称、奖品别名、领取后有效期、发放有效期、奖品单位、展示精度、图片、适用业务类型、币种、加息利率、加息金额、计息资产最小值、计息资产最大值。
+    - `每日固定收益券`：同 `理财加息券` 字段结构。
+- 已批量创建 `虚拟积分或资格` 子类型奖品。
+  - 状态：candidate。
+  - 环境：staging。
+  - 页面：`/activity/prize`。
+  - 操作类型：新增奖品，改变后台状态。
+  - 执行规则：奖品名称使用 `虚拟积分资格_<子类型名字>`；配置中的下拉框默认选择第一个；低风险数字字段使用默认值；图片使用 `assets/default-prize-images/default-bonus-prize.webp`。
+  - 批次时间戳：`20260504035640`。
+  - 成功创建：
+    - `抽奖次数`：奖品ID `433`，别名 `auto_virtual_01_20260504035640`，颜色签默认选择 `红色`。
+    - `积分`：奖品ID `434`，别名 `auto_virtual_02_20260504035640`。
+    - `合约抵扣金`：奖品ID `435`，别名 `auto_virtual_03_20260504035640`。
+    - `无奖励`：奖品ID `436`，别名 `auto_virtual_05_20260504035640`。
+    - `VIP体验卡`：奖品ID `437`，别名 `auto_virtual_06_20260504035640`。
+    - `提升返还比例档位`：奖品ID `438`，别名 `auto_virtual_07_20260504035640`。
+    - `小丑牌-抽牌次数`：奖品ID `439`，别名 `auto_virtual_08_20260504035640`。
+    - `小丑牌-积分加成`：奖品ID `440`，别名 `auto_virtual_09_20260504035640`。
+    - `虚拟盘合约体验金`：奖品ID `441`，别名 `auto_virtual_10_20260504035640`。
+    - `理财加息券`：奖品ID `442`，别名 `auto_virtual_11_20260504035640`，已选择默认业务类型和币种。
+    - `每日固定收益券`：奖品ID `443`，别名 `auto_virtual_12_20260504035640`，已选择默认业务类型和币种。
+  - 阻塞项：
+    - `仓位空投`：别名 `auto_virtual_04_20260504035640`，提交失败，页面提示 `请选择交易对`。
+    - 用户补充：`交易对` 是多选下拉，选择后需要单击其他空白位置让下拉框收起，才能继续往下填写。
+  - 后续补充成功创建：
+    - `仓位空投`：奖品ID `444`，奖品名称 `虚拟积分资格_仓位空投`，别名 `auto_virtual_position_20260504041023`。
+    - 选择值：币种 `USDT`，交易对 `合约Pro:ADA/USDT`，保证金模式 `逐仓-合仓`。
+    - 关键处理：`交易对` 多选后点击弹窗空白处收起下拉；奖品图片上传要定位到 `奖品图片` 表单项内的 file input，并等待 `/prod-api/common/uploadImgReplace` 返回 200。
+    - 验证依据：`/prod-api/common/uploadImgReplace` 返回 200，`/prod-api/activity/prize` 返回 200，按别名搜索返回奖品ID `444`。
+  - 验证依据：成功项均以唯一别名搜索到新增记录；失败项以页面校验文案判定未创建成功。
+  - 是否可回滚：理论上可通过奖品列表行操作 `删除` 清理，但本次未执行清理。
+- 已按用户要求使用可见浏览器模式随机构造并创建 3 个奖励。
+  - 状态：candidate。
+  - 环境：staging。
+  - 页面：`/activity/prize`。
+  - 操作类型：新增奖品，改变后台状态。
+  - 创建记录：
+    - 奖品ID `445`：`币种 / BTC`，奖品名称 `浏览器模式币种奖励20260504041400`，别名 `browser_coin_20260504041400`。
+    - 奖品ID `446`：`实物 / 实物`，奖品名称 `浏览器模式实物奖励20260504041400`，别名 `browser_physical_20260504041400`。
+    - 奖品ID `447`：`虚拟积分或资格 / 积分`，奖品名称 `浏览器模式积分奖励20260504041400`，别名 `browser_points_20260504041400`。
+  - 默认图片：`assets/default-prize-images/default-bonus-prize.webp`。
+  - 验证依据：每条记录的 `/prod-api/common/uploadImgReplace` 返回 200，`/prod-api/activity/prize` 返回 200，并按唯一别名搜索返回对应奖品ID。
+  - 证据：用户未要求截图，因此未保存截图。
+  - 是否可回滚：理论上可通过奖品列表行操作 `删除` 清理，但本次未执行清理。
+- 已按用户要求再次使用可见浏览器模式创建 3 个不同于上一批的奖励。
+  - 状态：candidate。
+  - 环境：staging。
+  - 页面：`/activity/prize`。
+  - 操作类型：新增奖品，改变后台状态。
+  - 创建记录：
+    - 奖品ID `448`：`赠金 / 赠金`，奖品名称 `浏览器模式赠金奖励20260504041642`，别名 `browser_bonus_20260504041642`。
+    - 奖品ID `449`：`虚拟积分或资格 / 抽奖次数`，奖品名称 `浏览器模式抽奖次数奖励20260504041642`，别名 `browser_draw_20260504041642`，颜色签 `红色`。
+    - 奖品ID `450`：`虚拟积分或资格 / 无奖励`，奖品名称 `浏览器模式无奖励奖品20260504041642`，别名 `browser_none_20260504041642`。
+  - 默认图片：`assets/default-prize-images/default-bonus-prize.webp`。
+  - 验证依据：每条记录的 `/prod-api/common/uploadImgReplace` 返回 200，`/prod-api/activity/prize` 返回 200，并按唯一别名搜索返回对应奖品ID。
+  - 证据：用户未要求截图，因此未保存截图。
+  - 是否可回滚：理论上可通过奖品列表行操作 `删除` 清理，但本次未执行清理。
+- 已按用户要求创建 3 个 `ETH` 币种奖励。
+  - 状态：candidate。
+  - 环境：staging。
+  - 页面：`/activity/prize`。
+  - 操作类型：新增奖品，改变后台状态。
+  - 执行模式：默认不可见/后台浏览器自动化。
+  - 创建记录：
+    - 奖品ID `451`：`币种 / ETH`，奖品名称 `ETH币种奖励1_20260504041846`，别名 `eth_coin_1_20260504041846`。
+    - 奖品ID `452`：`币种 / ETH`，奖品名称 `ETH币种奖励2_20260504041846`，别名 `eth_coin_2_20260504041846`。
+    - 奖品ID `453`：`币种 / ETH`，奖品名称 `ETH币种奖励3_20260504041846`，别名 `eth_coin_3_20260504041846`。
+  - 默认图片：`assets/default-prize-images/default-bonus-prize.webp`。
+  - 验证依据：每条记录的 `/prod-api/common/uploadImgReplace` 返回 200，`/prod-api/activity/prize` 返回 200，并按唯一别名搜索返回对应奖品ID。
+  - 证据：用户未要求截图，因此未保存截图。
+  - 是否可回滚：理论上可通过奖品列表行操作 `删除` 清理，但本次未执行清理。
+- 曾观察到登录后可能跳转到 `/user/profile?tab=googleBind`，表示账号可能需要 Google 身份验证器绑定。
+
+## 证据与截图
+- 截图统一保存到 `artifacts/screenshots/` 下，并按中文业务域分类。
+- 登录成功并进入目标页面截图曾由用户明确要求生成：
+  - 建议路径：`artifacts/screenshots/假钱账户/weex-login-success.png`
+  - 当前仓库中未找到该截图文件，如后续需要可重新生成。
+- 活动通用模块管理 / 奖品管理页面截图，这是用户明确要求后生成的：
+  - `artifacts/screenshots/活动通用模块管理/奖品管理/activity-common-prize-management.png`
+- 奖品管理搜索功能截图，这是用户明确要求后生成的：
+  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/01-奖品ID搜索.png`
+  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/02-奖品ID置空展示全部.png`
+  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/03-奖品分类-赠金.png`
+  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/03-奖品分类-币种.png`
+  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/03-奖品分类-实物.png`
+  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/03-奖品分类-虚拟积分或资格.png`
+  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/04-奖品名称模糊搜索.png`
+  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/05-奖品别名模糊搜索.png`
+- 奖品管理奖品子类别搜索截图，这是用户明确要求后生成的：
+  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/奖品子类别/奖品子类别-赠金-赠金.png`
+  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/奖品子类别/奖品子类别-币种-BTC.png`
+  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/奖品子类别/奖品子类别-实物-实物.png`
+  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/奖品子类别/奖品子类别-虚拟积分或资格-抽奖次数.png`
+- 虚拟积分或资格新增字段检查截图，这是用户明确要求后生成的：
+  - 目录：`artifacts/screenshots/活动通用模块管理/奖品管理/新增虚拟积分资格字段检查/`
+  - 每个子类型目录下有 `01-顶部.png` 和 `02-底部.png`。
+
+## Skill 更新记录
+- 已创建项目内 skill 目录：
+  - `/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/skills/weex-admin-ops`
+- 本机可选安装副本：
+  - `/Users/gabriel/.codex/skills/weex-admin-ops`
+- 已创建或更新项目内文件：
+  - `skills/weex-admin-ops/SKILL.md`
+  - `skills/weex-admin-ops/references/login.md`
+  - `skills/weex-admin-ops/references/credentials.md`
+  - `skills/weex-admin-ops/references/routes.md`
+  - `skills/weex-admin-ops/references/defaults.md`
+  - `skills/weex-admin-ops/references/selectors.md`
+  - `skills/weex-admin-ops/references/assertions.md`
+  - `skills/weex-admin-ops/references/known-issues.md`
+  - `skills/weex-admin-ops/references/action-cache.md`
+  - `skills/weex-admin-ops/references/operations/index.md`
+  - `skills/weex-admin-ops/references/operations/activity-common-module.md`
+  - `skills/weex-admin-ops/references/operations/offline-user-manage.md`
+  - `skills/weex-admin-ops/references/operations/activity-management.md`
+  - `skills/weex-admin-ops/references/operations/reward-issue.md`
+  - `skills/weex-admin-ops/references/operations/risk-control.md`
+  - `skills/weex-admin-ops/references/operations/import-export.md`
+  - `skills/weex-admin-ops/references/operations/prize-management.md`
+  - `skills/weex-admin-ops/references/selectors/offline-user-manage.md`
+  - `skills/weex-admin-ops/references/selectors/prize-management.md`
+  - `skills/weex-admin-ops/references/assertions/offline-user-manage.md`
+  - `skills/weex-admin-ops/references/assertions/prize-management.md`
+  - `skills/weex-admin-ops/scripts/append-operation.py`
+  - `skills/weex-admin-ops/scripts/action-cache.json`
+  - `skills/weex-admin-ops/scripts/create-prizes.mjs`
+  - `skills/weex-admin-ops/scripts/run-cached-action.mjs`
+  - `skills/weex-admin-ops/scripts/lib/cli.mjs`
+  - `skills/weex-admin-ops/scripts/lib/runtime.mjs`
+  - `skills/weex-admin-ops/scripts/lib/browser.mjs`
+  - `skills/weex-admin-ops/scripts/lib/element-ui.mjs`
+  - `skills/weex-admin-ops/scripts/cache/matcher.mjs`
+  - `skills/weex-admin-ops/scripts/cache/command.mjs`
+  - `skills/weex-admin-ops/scripts/business/prize-management/plan.mjs`
+  - `skills/weex-admin-ops/scripts/business/prize-management/create.mjs`
+  - `skills/weex-admin-ops/agents/openai.yaml`
+- 已创建默认奖品图片资产：
+  - `assets/default-prize-images/default-bonus-prize.webp`
+- 已更新图片资产规则：奖品图片从 `assets/default-prize-images/` 选择；单张图片可默认使用，多张图片必须询问用户选择或确认随机，目录为空时才询问是否创建占位图。
+
+## 未解决问题
+- 其他人克隆仓库后可以直接读取项目内 `skills/weex-admin-ops/` 接力；如需 Codex 自动发现，可再复制到本机 `$CODEX_HOME/skills/weex-admin-ops`。
+- “创建一个新手活动，用默认配置”的具体页面路径、必填字段、默认配置和成功断言尚未沉淀。
+- 假钱账户页面链路目前为 `candidate`，需要重复验证或用户确认后再升级为 `verified`。
+- “活动通用模块管理 / 奖品管理”菜单导航已沉淀到 `skills/weex-admin-ops/references/operations/activity-common-module.md`。
+- “奖品管理搜索功能”已沉淀到 `skills/weex-admin-ops/references/operations/activity-common-module.md`。
+- “新增赠金奖品”已沉淀到 `skills/weex-admin-ops/references/operations/activity-common-module.md`。该流程创建了 staging 数据，尚未执行删除清理。
+- “新增币种奖品”已沉淀到 `skills/weex-admin-ops/references/operations/activity-common-module.md`。该流程创建了 staging 数据，尚未执行删除清理。
+- “新增实物奖品”已沉淀到 `skills/weex-admin-ops/references/operations/activity-common-module.md`。该流程创建了 staging 数据，尚未执行删除清理。
+- “虚拟积分或资格”各子类型字段发现和 11 个成功新增流程已沉淀到 `skills/weex-admin-ops/references/operations/prize-management.md`。
+- “仓位空投”新增已补充走通；该字段是多选，选中交易对后必须点击空白处收起下拉框再继续填写。
+
+## 下一步建议
+- 继续探索“新手活动”创建流程，记录页面路径、字段、默认值、风险参数和断言；只有用户明确要求时才保存截图。
+- 每次跑通新后台操作后，按业务域更新 `skills/weex-admin-ops/references/operations/`，并同步更新本交接记录。
+- 如果某个业务域文件接近 250 行，先拆分再继续沉淀。
+- 后续截图统一放到 `artifacts/screenshots/<中文业务域>/<中文页面或操作>/`。
+- 后续页面操作默认使用不可见/后台自动化；如果测试人员要求观察过程，需要在指令中明确说明“可见操作”或类似表达。
+- 如继续处理 `仓位空投`，先打开新增弹窗选择 `虚拟积分或资格 / 仓位空投`，在 `交易对` 多选下拉中选择真实选项，点击空白处收起下拉框后再填写后续字段；上传图片时定位 `奖品图片` 表单项内的 file input。
+
+## 安全说明
+- 不保存真实密码、验证码、token、cookie、API key 或其他敏感信息。
+- 敏感信息统一使用占位符，例如 `<USERNAME>`、`<PASSWORD>`、`<GOOGLE_CODE>`。
+- staging 默认用户名可以记录为 `auto`；密码和 Google 验证码必须通过 `WEEX_ADMIN_PASSWORD`、`WEEX_ADMIN_GOOGLE_CODE` 或本机未提交的 `.env.local` 提供。
