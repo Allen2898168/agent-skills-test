@@ -15,6 +15,19 @@
       "defaultMode": "invisible",
       "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
       "fallback": "Use web-access or manual Playwright browser operation, then update this cache if the fix is reusable."
+    },
+    {
+      "id": "copy_prize_by_id",
+      "status": "candidate",
+      "script": "scripts/copy-prize.mjs",
+      "description": "Copy one prize record by prize ID and verify the copied row.",
+      "domains": ["活动通用模块管理", "奖品管理"],
+      "intentKeywords": ["复制"],
+      "objectKeywords": ["奖品", "奖励"],
+      "requiredParams": ["prizeId"],
+      "defaultMode": "invisible",
+      "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
+      "fallback": "Use the prize-management row action workflow if the cached copy script fails."
     }
   ]
 }

@@ -90,3 +90,14 @@ Observed mappings:
 - `修改`
 - `复制`
 - `删除`
+
+## Row Action Dialogs
+
+- Row action buttons are visible in the table row and can be located by button text after finding the target row by `奖品ID` or `奖品别名`.
+- View dialog title: `查看`.
+- Edit dialog title: `修改`.
+- View/edit dialog container: `.el-dialog:visible`.
+- View/edit form values may be stored in `input.value`; do not rely on `.innerText` for filled values.
+- Copy confirmation container: `.el-message-box:visible`.
+- Delete confirmation container: `.el-message-box:visible`.
+- Confirmation button text: `确定` or `确认`.

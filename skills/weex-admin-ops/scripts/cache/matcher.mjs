@@ -12,7 +12,7 @@ export function matchAction(manifest, args) {
   if (!candidates.length) throw new Error(`No cached action matched query: ${args.query}`);
   return {
     action: candidates[0].action,
-    inferred: inferPrizeParams(args.query),
+    inferred: inferParams(args.query),
     score: candidates[0].score,
   };
 }
@@ -24,6 +24,13 @@ function scoreAction(action, query) {
   if (action.supportedCategories?.some(item => query.includes(item))) score += 1;
   if (action.supportedSubtypes?.some(item => query.toUpperCase().includes(String(item).toUpperCase()))) score += 1;
   return score;
+}
+
+function inferParams(query) {
+  return {
+    ...inferPrizeParams(query),
+    prizeId: inferPrizeId(query),
+  };
 }
 
 function inferPrizeParams(query) {
@@ -52,6 +59,12 @@ function inferPrizeParams(query) {
     namePrefix: subtype ? `${subtype}奖励` : undefined,
     aliasPrefix: subtype ? `cached_${subtype.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "")}` : undefined,
   };
+}
+
+function inferPrizeId(query) {
+  const match = query.match(/(?:奖品\s*(?:id|ID)|prize\s*id)\s*(?:为|是|=|:|：)?\s*(\d+)/i)
+    || query.match(/\bID\s*(?:为|是|=|:|：)?\s*(\d+)/i);
+  return match ? match[1] : undefined;
 }
 
 function isVirtualQuery(query) {

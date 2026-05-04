@@ -18,6 +18,7 @@ The action cache is the first execution layer for workflows that have already be
 | Action ID | Script | Status | Purpose |
 | --- | --- | --- | --- |
 | `create_prizes` | `scripts/create-prizes.mjs` | candidate | Create one or more prize records with known prize-management defaults. |
+| `copy_prize_by_id` | `scripts/copy-prize.mjs` | candidate | Copy one prize by `奖品ID` and verify the copied row appears. |
 
 ## Natural-Language Matching
 
@@ -31,6 +32,8 @@ Examples:
 - `浏览器模式创建2个BTC币种奖品`
 - `创建一个赠金奖励`
 - `创建3个虚拟积分或资格/积分奖品`
+- `复制奖品id为462的奖品`
+- `浏览器模式复制奖品ID 462`
 
 ## Cache Graduation Rules
 

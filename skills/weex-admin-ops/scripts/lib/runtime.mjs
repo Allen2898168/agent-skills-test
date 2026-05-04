@@ -28,6 +28,23 @@ export function adminConfig(repoRoot) {
   };
 }
 
+export function loadLocalEnv(repoRoot) {
+  const envPath = path.join(repoRoot, ".env.local");
+  if (!fs.existsSync(envPath)) return false;
+  const lines = fs.readFileSync(envPath, "utf8").split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const index = line.indexOf("=");
+    if (index < 0) continue;
+    const key = line.slice(0, index).trim();
+    let value = line.slice(index + 1).trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) value = value.slice(1, -1);
+    if (!(key in process.env)) process.env[key] = value;
+  }
+  return true;
+}
+
 export function assertAdminConfig(config) {
   if (!config.password) throw new Error("WEEX_ADMIN_PASSWORD is required");
   if (!config.googleCode) throw new Error("WEEX_ADMIN_GOOGLE_CODE is required for this staging login flow");

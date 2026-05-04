@@ -144,3 +144,81 @@ Known issue:
 Risk and cleanup:
 - This is a staging write operation.
 - Created records can likely be removed with row action `删除`, but deletion was not attempted in this flow.
+
+## Prize Row Actions
+
+Status: candidate
+Last verified: 2026-05-04
+Environment: staging
+
+Purpose:
+Validate the `奖品管理` table row action buttons: `查看`, `修改`, `复制`, and `删除`.
+
+Entry:
+`https://stg-activity.weex.tech/activity/prize`
+
+Preconditions:
+- Logged in to the staging admin.
+- Prize management page is loaded.
+- Use a dedicated test prize where possible, instead of mutating existing business records.
+- If the flow needs to test `删除`, prefer deleting the copied row created in the same test run.
+
+Validated test data:
+- Original test prize ID: `473`.
+- Original category/subtype: `币种 / BTC`.
+- Original alias: `auto_action_btc_20260504161432`.
+- Modified prize name: `操作按钮测试_BTC_20260504161432_已修改`.
+- Copied row ID: `474`.
+- Copied alias observed: `复制从 auto_action_btc_20260504161432`.
+- Copied row was deleted during validation.
+
+Steps:
+1. Search by the dedicated test prize alias.
+2. Click row action `查看`.
+3. Verify the detail dialog opens and its input values contain the expected prize name and alias.
+4. Close the detail dialog.
+5. Search by the test prize alias again.
+6. Click row action `修改`.
+7. Verify the edit dialog opens and pre-fills the current prize values.
+8. Modify `奖品名称` to a unique test value and click `确认`.
+9. Search by the same alias and verify the table row shows the modified name.
+10. Click row action `复制`.
+11. Verify the confirmation message box opens, then click `确定` or `确认`.
+12. Search by the original alias and verify the copied row appears at the top or in the returned result set.
+13. Verify copied row name starts with `复制从 ` and contains the modified original name.
+14. Click `删除` on the copied row.
+15. Verify the delete confirmation message box opens, then click `确定` or `确认`.
+16. Search by the copied row ID and verify the copied row no longer appears.
+
+Validated backend signals:
+- Detail/edit row load: `GET /prod-api/activity/prize/<id>` returns HTTP 200.
+- Edit submit: `PUT /prod-api/activity/prize` returns HTTP 200.
+- Copy submit: `POST /prod-api/activity/prize/copy` returns HTTP 200.
+- Delete submit: `DELETE /prod-api/activity/prize/<copiedId>` returns HTTP 200.
+- Search validation: `GET /prod-api/activity/prize/list?...` returns HTTP 200.
+
+Cached script:
+- `scripts/copy-prize.mjs --prize-id <id>` copies a single prize by `奖品ID`.
+- Natural-language cache examples: `复制奖品id为462的奖品`, `浏览器模式复制奖品ID 462`.
+- Dry-run validates intent and parsed `prizeId` without opening a browser.
+
+Optional screenshots:
+- Directory: `artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/`.
+- Suggested file names:
+  - `00-测试奖品创建后列表.png`
+  - `01-查看详情弹窗.png`
+  - `02-修改弹窗-已回填.png`
+  - `03-修改后列表验证.png`
+  - `04-复制确认弹窗.png`
+  - `05-复制后列表最上方.png`
+  - `06-删除确认弹窗.png`
+  - `07-删除后搜索无结果.png`
+
+Known issue:
+- In the view dialog, some field values are held in `input.value`; dialog `innerText` may show only labels. Do not assert detail content by `innerText` alone.
+
+Risk and cleanup:
+- This is a staging write operation.
+- The copied row was deleted as part of the validation.
+- The original dedicated test prize remained after the test and can be cleaned up later by row `删除` if needed.
+- Additional cache validation copied source prize ID `462` to new prize ID `475`; this copied row remained after validation.
