@@ -14,7 +14,7 @@ function usage() {
 
 Required environment:
   WEEX_ADMIN_PASSWORD       staging password
-  WEEX_ADMIN_GOOGLE_CODE    Google/captcha code when required
+  WEEX_ADMIN_GOOGLE_CODE    Google Authenticator code
 
 Optional environment:
   WEEX_ADMIN_USERNAME       default: auto

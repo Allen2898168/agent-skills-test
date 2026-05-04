@@ -58,3 +58,33 @@ Operations likely available:
 - 修改
 - 复制
 - 删除
+
+### Activity Task Management
+
+Status: candidate
+Last verified: 2026-05-04
+
+Business domain:
+活动通用模块管理 / 活动任务管理。
+
+Path:
+`/activity/task`
+
+Login redirect:
+`/login?redirect=%2Factivity%2Ftask`
+
+Observed page signals:
+- Breadcrumb/page text includes `活动通用模块管理 / 活动任务管理`.
+- Search form includes placeholders `任务编号`, `任务别名`, `任务标签`, `备注`, `开始时间`, `结束时间`, `总分>=转手动发奖`, `标签-转手动发奖`, and `报名国家-转手动发奖`.
+- Table headers include `任务编号`, `任务别名`, `任务内容`, `平台用户参与范围`, `发奖审核类别`, `总分-转手动发奖`, `标签-转手动发奖`, `报名国家-转手动发奖`, `邀请码-转手动发奖`, `合伙人分组-转手动发奖`, `任务标签`, `备注`, `更新时间`, `最近编辑人`.
+
+Operations likely available:
+- 搜索
+- 新增
+- 导出
+- 批量新增/配置动态发奖风控
+- 查看
+- 修改
+- 复制
+- 删除
+- 历史

@@ -6,6 +6,7 @@ Use this file as the table of contents for operation playbooks. Keep full workfl
 
 - Activity management: `activity-management.md`
 - Activity common module: `activity-common-module.md`
+- Activity task management: `activity-task-management.md`
 - Prize management: `prize-management.md`
 - Offline user manage / fake money account: `offline-user-manage.md`
 - Reward issue: `reward-issue.md`
@@ -19,6 +20,9 @@ Use this file as the table of contents for operation playbooks. Keep full workfl
 | Login and open offline user manage | `offline-user-manage.md` | candidate | 2026-05-04 | Opens `/activities/offline/userManage` after login. |
 | Open prize management | `activity-common-module.md` | candidate | 2026-05-04 | Opens `/activity/prize` from `活动通用模块管理 / 奖品管理`. |
 | Prize management search | `activity-common-module.md` | candidate | 2026-05-04 | Validates prize ID, category, name, and alias search. |
+| Open activity task management | `activity-task-management.md` | candidate | 2026-05-04 | Opens `/activity/task` by clicking `活动通用模块管理` then `活动任务管理`. |
+| Activity task management search | `activity-task-management.md` | candidate | 2026-05-04 | Validates task ID, alias, label, remark, time, score, and manual-award multi-select filters. |
+| Create roulette task | `activity-task-management.md` | candidate | 2026-05-04 | Creates `转盘抽奖` task variants; single reward, limited reward, and normal+rights passed. Mixed reward is blocked pending development fix. |
 | Create bonus prize | `activity-common-module.md` | candidate | 2026-05-04 | Creates `赠金 / 赠金` prize with default and English names, validity fields, unit, precision, discount ratio, and image. |
 | Create coin prize | `activity-common-module.md` | candidate | 2026-05-04 | Creates `币种 / BTC` prize with default and English names, alias, valid days, unit, precision, and image. |
 | Create physical prize | `activity-common-module.md` | candidate | 2026-05-04 | Creates `实物 / 实物` prize with default and English names, alias, valid days, unit, precision, and image. |

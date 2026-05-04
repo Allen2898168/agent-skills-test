@@ -121,6 +121,37 @@
 - 首次跑通的链路标记为 `candidate`。
 - 重复验证通过或用户明确确认后，标记为 `verified`。
 
+## Temp Workflow Staging
+- `temp/` 是本项目的本地流程暂存区，用于保存“已经跑通，但用户明确要求暂时不写入 skill、也不写交接文档”的后台操作流程。
+- 只有用户明确提出某条流程本次不写入 skill 和交接文档时，才把跑通结果写入 `temp/`；不要把普通交接内容自动写入 `temp/`。
+- `temp/` 必须按业务域分级，例如：
+  - `temp/weex-admin-ops/activity-management/lottery/`
+  - `temp/weex-admin-ops/prize-management/`
+  - `temp/weex-admin-ops/activity-task-management/`
+- 暂存内容必须包含：
+  - 操作名称。
+  - 适用环境。
+  - 入口 URL。
+  - 前置条件。
+  - 已验证配置项。
+  - 操作步骤。
+  - 成功断言。
+  - 失败重试记录和业务限制。
+  - 最近验证日期。
+  - 是否已经纳入 skill。
+- 暂存内容不得写入真实密码、验证码、token、cookie、API key、个人隐私数据或完整账号凭证。
+- 如果用户提出相似后台操作，而 `skills/weex-admin-ops/` 中没有对应流程，必须先检查 `temp/` 是否已有暂存流程；如果有，应参考暂存流程执行，并说明它尚未正式沉淀到 skill。
+- 新会话开始时，agent 必须在读取 `AGENTS.md`、`docs/session-handoff.md` 和相关 skill references 后，检查 `temp/` 是否存在暂存流程：
+  - 如果存在，先向用户汇总暂存区内容。
+  - 询问用户是从暂存区流程继续，还是将暂存区内容落到 skill。
+  - 用户未确认前，不要自动把暂存区内容迁入 skill。
+- 当用户要求将暂存区某条流程落到 skill 时：
+  - 按 `Skill Growth Management` 拆分到 operations、selectors、assertions、defaults 或 scripts。
+  - 更新必要索引和交接记录。
+  - 验证迁移后没有遗漏关键步骤和断言。
+  - 清除 `temp/` 中已经被纳入 skill 的对应内容，或明确标记为已迁移。
+- `temp/README.md` 只记录暂存区使用规则和索引，不保存大量页面细节。
+
 ## Skill Growth Management
 - 更新 `skills/weex-admin-ops/` 时必须按业务域分类拆分，不把所有流程追加到单个大文件。
 - `SKILL.md` 只保留核心工作流、规则和 reference 导航，不写大量页面细节。

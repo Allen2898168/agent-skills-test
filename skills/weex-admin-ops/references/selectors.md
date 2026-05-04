@@ -7,6 +7,7 @@ Prefer visible text and stable placeholders observed in the real page. Re-check 
 - Account: placeholder `账号`
 - Password: placeholder `密码`
 - Google code: placeholder `谷歌验证码`
+- Ordinary captcha: placeholder `验证码`; in staging this is transient when `/prod-api/captchaImage` returns `captchaEnabled=false`, so wait for it to disappear and do not fill it with the Google code.
 - Submit: button text `登 录`
 
 ## Offline User Manage / Fake Money Account
