@@ -38,3 +38,4 @@ Optional screenshots:
 - Single reward branch: after selecting a reward, fill both `输入最小数值` and `输入最大数值`; otherwise the page displays `请填写正常奖励数值`.
 - When validating created single-reward condition tasks, search or inspect by task name. The generated `任务标签` is not the same as the list search field `任务别名`.
 - `首次登录APP` single-reward branch should not use the default lottery-count reward; the backend returned `任务奖品只能选择合约抵扣金` when `抽奖次数` was used.
+- `新老现货划转任务` can be blocked by a backend uniqueness rule. If `POST /prod-api/activity/task` returns `code=500` with `新老划转任务重复，已配置新老划转任务的编号是:<id>`, treat the form flow as reaching backend validation, not as a UI fill failure.
