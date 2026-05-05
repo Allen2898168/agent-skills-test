@@ -428,7 +428,7 @@
 - 操作类型：字段发现和新增活动任务；新增任务改变后台状态。
 - 已完成事项：
   - 已确认 `任务条件1` 的任务类型选项共 14 个：`kyc任务`、`注册任务`、`划转任务`、`充值任务`、`邀请任务`、`合约交易量`、`现货交易量`、`现货持仓`、`收益额`、`KOL绑定`、`分享链接`、`合约&现货交易量`、`新老现货划转任务`、`首次登录APP`。
-  - 已记录每个任务类型展开后的字段，详见 `skills/weex-admin-ops/references/operations/activity-task-management.md`。
+  - 已记录每个任务类型展开后的字段，拆分后详见 `skills/weex-admin-ops/references/operations/activity-task-roulette-conditions.md`。
   - 已确认 `单一奖励 / 正常奖励` 选择奖品后还必须填写 `输入最小数值` 和 `输入最大数值`。
   - 已确认验证时应按任务名称检查列表；本次脚本里的 `roulette_single_cond_*` 是任务标签，不是列表 `任务别名` 搜索字段对应值。
 - 已创建并验证的 staging 任务：
@@ -530,7 +530,7 @@
   - 已更新 `AGENTS.md`，要求任何“第一次链路失败、重试后出现稳定路径”的情况，一旦验证稳定，就必须补充到对应 skill 并同步更新交接文档。
   - 已更新 `skills/weex-admin-ops/SKILL.md`，要求创建、编辑、删除前先汇总当前链路的配置项、默认项和限制，并在参数不合理时先提示用户。
   - 已更新 `skills/weex-admin-ops/references/defaults.md`，明确“默认配置”只是候选值，不等于用户确认；用户说“用默认配置”时，也必须先展示可配置项和默认值再执行。
-  - 已更新 `skills/weex-admin-ops/references/operations/activity-task-management.md`，为 `转盘抽奖` 创建流程增加需求确认清单与合理性检查。
+  - 已更新 `skills/weex-admin-ops/references/operations/activity-task-management.md`；后续拆分后，`转盘抽奖` 创建流程的需求确认清单与合理性检查主要位于 `skills/weex-admin-ops/references/operations/activity-task-roulette-reward-modes.md` 和 `skills/weex-admin-ops/references/operations/activity-task-roulette-conditions.md`。
   - 已补充 `转盘抽奖 / 单一奖励` 当前建议默认值：用户未指定时，默认建议 `输入最小数值=10`，`输入最大数值` 默认留空，但执行前仍需用户确认。
 - 影响范围：
   - 后续处理后台创建类需求时，不能直接把默认值写入页面后执行。
@@ -544,14 +544,84 @@
 - 当前阻塞点：无。
 - 下一步建议：后续如再出现“首轮失败、二次成功”的页面链路，应按本规则立即补充到具体业务域文档，不要只在口头说明中保留。
 
+## 2026-05-05 skill 合规检查与 operation 文档拆分
+
+- 当前目标：按 `AGENTS.md` 重新检查 `skills/weex-admin-ops/` 是否符合项目规范，并修复已发现的文件长度问题。
+- 已完成事项：
+  - 已读取 `AGENTS.md`、本交接文档和项目内 `skills/weex-admin-ops/` 相关 references。
+  - 已检查暂存区，当前存在 `temp/weex-admin-ops/activity-management/lottery/2026-05-04-lottery-create-flow.md`，内容为“转盘抽奖活动新增草稿流程”，状态 `candidate`，尚未纳入 skill。本次只做汇总和保留，没有自动迁移到 skill。
+  - 已将超长 operation 文档按业务链路拆分，避免继续违反单个 markdown 文件接近 250 行时必须拆分的规则。
+- 已更新 skill 文件：
+  - `skills/weex-admin-ops/references/operations/activity-common-module.md`
+  - `skills/weex-admin-ops/references/operations/prize-management-search.md`
+  - `skills/weex-admin-ops/references/operations/prize-management-basic-create.md`
+  - `skills/weex-admin-ops/references/operations/activity-task-management.md`
+  - `skills/weex-admin-ops/references/operations/activity-task-search.md`
+  - `skills/weex-admin-ops/references/operations/activity-task-roulette-reward-modes.md`
+  - `skills/weex-admin-ops/references/operations/activity-task-roulette-conditions.md`
+  - `skills/weex-admin-ops/references/operations/index.md`
+- 拆分结果：
+  - `activity-common-module.md` 只保留“活动通用模块管理 / 奖品管理”入口导航。
+  - `prize-management-search.md` 保存奖品管理搜索流程。
+  - `prize-management-basic-create.md` 保存赠金、币种、实物基础新增流程。
+  - `activity-task-management.md` 只保留“活动任务管理”入口导航。
+  - `activity-task-search.md` 保存活动任务搜索流程。
+  - `activity-task-roulette-reward-modes.md` 保存转盘抽奖奖励模式新增链路。
+  - `activity-task-roulette-conditions.md` 保存转盘抽奖任务条件发现和单一奖励按条件创建链路。
+- 验证依据：
+  - 拆分后 operation markdown 最大文件为 `prize-management-basic-create.md`，231 行，低于 250 行拆分阈值。
+  - `git diff --check` 通过。
+  - `quick_validate.py` 通过：由于当前 Python 环境缺少 `PyYAML` 模块，本次用已安装的 `ruamel.yaml` 兼容注入后执行原校验脚本，输出 `Skill is valid!`。
+- 当前阻塞点：
+  - 无。
+- 下一步建议：
+  - 如果要继续处理 `temp/` 中的转盘抽奖活动新增草稿流程，应先由用户确认是继续暂存，还是正式迁移到 `skills/weex-admin-ops/`。
+
+## 2026-05-05 关联关系与组件复用沉淀规则
+
+- 当前目标：补充后管自动化 skill 构建过程中的“业务关联关系标记”和“组件操作复用抽离”规范。
+- 已完成事项：
+  - 已在 `AGENTS.md` 新增 `Relationship And Reuse Management`，要求每次沉淀流程时识别列表、配置项、下拉数据源、接口、缓存脚本之间的关联关系。
+  - 已要求有关联性的业务对象记录到 `skills/weex-admin-ops/references/relationships.md`，可复用组件操作记录到 `skills/weex-admin-ops/references/components.md`。
+  - 已在 `skills/weex-admin-ops/SKILL.md` 增加 reference 导航和更新 skill 时的检查项。
+  - 已新增 `relationships.md`，记录奖品记录与任务奖励下拉、奖品分类与子类型、活动类型与任务配置、活动配置类型与报名模板兼容性的已知关联。
+  - 已新增 `components.md`，记录 Element UI 单选下拉、多选下拉、多语言字段、图片上传、表格横向滚动和确认弹窗等可复用组件操作。
+- 已更新文件：
+  - `AGENTS.md`
+  - `skills/weex-admin-ops/SKILL.md`
+  - `skills/weex-admin-ops/references/relationships.md`
+  - `skills/weex-admin-ops/references/components.md`
+- 当前阻塞点：无。
+- 下一步建议：
+  - 后续每次跑通新流程时，除更新 operation 外，同步检查是否需要补充 `relationships.md` 或 `components.md`；如果组件操作已可脚本化，应优先抽到 `scripts/lib/`。
+
+## 2026-05-05 AGENTS.md 精简为项目级规范
+
+- 当前目标：修正 `AGENTS.md` 过长、混入 skill 细节、与 `weex-admin-ops` references 重复的问题。
+- 已完成事项：
+  - 已将 `AGENTS.md` 从 235 行精简到 87 行。
+  - `AGENTS.md` 现在只保留项目级硬规则：语言、项目背景、启动读取、安全、敏感信息、浏览器与证据、缺失信息、skill 更新纪律、关联与复用、暂存区、交接记录和变更纪律。
+  - 具体执行细节下沉到 `skills/weex-admin-ops/SKILL.md` 和 references：
+    - 默认值、账号、资产选择、风险字段：`skills/weex-admin-ops/references/defaults.md`
+    - 缓存脚本策略：`skills/weex-admin-ops/references/action-cache.md`
+    - 组件复用：`skills/weex-admin-ops/references/components.md`
+    - 业务关联关系：`skills/weex-admin-ops/references/relationships.md`
+    - 暂存区细则：`temp/README.md`
+- 已更新文件：
+  - `AGENTS.md`
+  - `docs/session-handoff.md`
+- 当前阻塞点：无。
+- 下一步建议：
+  - 后续新增项目级规则时，先判断是否属于 `AGENTS.md`；如果是执行细节或业务细节，优先写入 skill references。
+
 - 其他人克隆仓库后可以直接读取项目内 `skills/weex-admin-ops/` 接力；如需 Codex 自动发现，可再复制到本机 `$CODEX_HOME/skills/weex-admin-ops`。
 - “创建一个新手活动，用默认配置”的具体页面路径、必填字段、默认配置和成功断言尚未沉淀。
 - 假钱账户页面链路目前为 `candidate`，需要重复验证或用户确认后再升级为 `verified`。
 - “活动通用模块管理 / 奖品管理”菜单导航已沉淀到 `skills/weex-admin-ops/references/operations/activity-common-module.md`。
-- “奖品管理搜索功能”已沉淀到 `skills/weex-admin-ops/references/operations/activity-common-module.md`。
-- “新增赠金奖品”已沉淀到 `skills/weex-admin-ops/references/operations/activity-common-module.md`。该流程创建了 staging 数据，尚未执行删除清理。
-- “新增币种奖品”已沉淀到 `skills/weex-admin-ops/references/operations/activity-common-module.md`。该流程创建了 staging 数据，尚未执行删除清理。
-- “新增实物奖品”已沉淀到 `skills/weex-admin-ops/references/operations/activity-common-module.md`。该流程创建了 staging 数据，尚未执行删除清理。
+- “奖品管理搜索功能”已沉淀到 `skills/weex-admin-ops/references/operations/prize-management-search.md`。
+- “新增赠金奖品”已沉淀到 `skills/weex-admin-ops/references/operations/prize-management-basic-create.md`。该流程创建了 staging 数据，尚未执行删除清理。
+- “新增币种奖品”已沉淀到 `skills/weex-admin-ops/references/operations/prize-management-basic-create.md`。该流程创建了 staging 数据，尚未执行删除清理。
+- “新增实物奖品”已沉淀到 `skills/weex-admin-ops/references/operations/prize-management-basic-create.md`。该流程创建了 staging 数据，尚未执行删除清理。
 - “虚拟积分或资格”各子类型字段发现和 11 个成功新增流程已沉淀到 `skills/weex-admin-ops/references/operations/prize-management.md`。
 - “仓位空投”新增已补充走通；该字段是多选，选中交易对后必须点击空白处收起下拉框再继续填写。
 

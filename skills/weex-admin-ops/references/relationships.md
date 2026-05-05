@@ -1,0 +1,111 @@
+# Relationship Reference
+
+Use this file for relationships between WEEX admin lists, config items, dropdown data sources, backend rules, and workflows.
+
+Do not store one-off operation steps here. Operation steps belong in `operations/`; selectors belong in `selectors/`; assertions belong in `assertions/`.
+
+## Recording Format
+
+For each relationship, record:
+
+- Name.
+- Status: `candidate` or `verified`.
+- Last verified date.
+- Source object: list, API, config page, backend rule, or existing record.
+- Consumer object: dropdown, form field, task reward, activity config, search filter, or validation rule.
+- Link field or displayed text.
+- Dependency or limitation.
+- Related operation playbooks.
+- Related selectors, assertions, defaults, or scripts.
+
+## Known Relationships
+
+### Prize Records Feed Task Reward Selectors
+
+Status: candidate  
+Last verified: 2026-05-04
+
+Source object:
+- Prize management records under `活动通用模块管理 / 奖品管理`.
+- API sources observed during activity-task creation:
+  - `/prod-api/activity/prize/all`
+  - `/prod-api/activity/prize/all?prizeSubType=LOTTERY_COUNT`
+  - `/prod-api/activity/prize/getListByPrizeType`
+
+Consumer object:
+- Activity task reward selectors under `活动通用模块管理 / 活动任务管理`.
+
+Dependency or limitation:
+- `单一奖励` normal reward selectors for `转盘抽奖` are scoped to lottery-count prizes.
+- `限时奖励不同` and `混合奖励` can expose all prize types.
+- `正常奖励+权益奖励` uses lottery-count prizes for normal reward and virtual qualification VIP prizes for rights reward.
+- `首次登录APP` with default lottery-count prize failed because backend required a contract-deduction prize.
+
+Related playbooks:
+- `operations/prize-management-basic-create.md`
+- `operations/prize-management.md`
+- `operations/activity-task-roulette-reward-modes.md`
+- `operations/activity-task-roulette-conditions.md`
+
+### Prize Category Controls Prize Subcategory Options
+
+Status: candidate  
+Last verified: 2026-05-04
+
+Source object:
+- Prize category dropdown in prize-management search and add dialogs.
+
+Consumer object:
+- Prize subcategory dropdown.
+
+Dependency or limitation:
+- Subcategory options are populated only after selecting a prize category.
+- Validated examples:
+  - `赠金` exposes `赠金`.
+  - `币种` exposes coin/ticker options; `BTC` and `ETH` were used in validated flows.
+  - `实物` exposes `实物`.
+  - `虚拟积分或资格` exposes virtual qualification subtypes such as `抽奖次数`, `积分`, `合约抵扣金`, `仓位空投`, `无奖励`, and VIP-related options.
+
+Related playbooks:
+- `operations/prize-management-search.md`
+- `operations/prize-management-basic-create.md`
+- `operations/prize-management.md`
+
+### Activity Type Controls Task Combo And Reward Branches
+
+Status: candidate  
+Last verified: 2026-05-04
+
+Source object:
+- Activity task add dialog field `活动类型`.
+
+Consumer object:
+- Task combo, task condition fields, judge start time, and reward-mode branch fields.
+
+Dependency or limitation:
+- For `转盘抽奖`, `任务组合` only exposed `单一任务条件`.
+- Selecting a task type under `任务条件1` changes the rest of the condition section.
+- Reward mode determines which reward selectors and extra fields appear.
+- `混合奖励` was blocked by a backend/page issue even though submit returned HTTP 200.
+
+Related playbooks:
+- `operations/activity-task-roulette-reward-modes.md`
+- `operations/activity-task-roulette-conditions.md`
+
+### Activity Config Type Controls Registration Template Compatibility
+
+Status: candidate  
+Last verified: 2026-05-04
+
+Source object:
+- Activity config type and registration template in lottery activity creation.
+
+Consumer object:
+- Activity config save validation.
+
+Dependency or limitation:
+- Test activities require a registration template whose participant scope is fake-money accounts.
+- Formal activities can reuse broader registration templates in the validated lottery draft flow.
+
+Related staged flow:
+- `temp/weex-admin-ops/activity-management/lottery/2026-05-04-lottery-create-flow.md`

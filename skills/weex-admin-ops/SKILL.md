@@ -26,6 +26,8 @@ This skill is not only for testing. It should help Codex interpret natural-langu
    - Page-specific locators: `references/selectors/<page-or-domain>.md`
    - Success checks: `references/assertions.md`
    - Page-specific success checks: `references/assertions/<page-or-domain>.md`
+   - Cross-page business dependencies: `references/relationships.md`
+   - Reusable UI component operations: `references/components.md`
    - Known redirects, permission issues, and failures: `references/known-issues.md`
 3. For state-changing operations, identify missing required parameters before acting.
 4. Before creating, editing, or deleting records, summarize the current chain's required fields, configurable fields, safe defaults, and known limits, then ask the tester which items should use defaults and which should be explicitly set.
@@ -106,6 +108,8 @@ When a route or operation is proven in a real session, update the relevant refer
 - `references/assertions.md` for success checks.
 - `references/assertions/<page-or-domain>.md` for page-specific success checks.
 - `references/defaults.md` for safe defaults and confirmation policy.
+- `references/relationships.md` for dependencies between lists, config items, dropdown data sources, rewards, tasks, templates, activity types, and backend validation rules.
+- `references/components.md` for reusable UI component operation patterns and related helper functions.
 - `references/known-issues.md` for redirects, permissions, environment issues, and recurring failures.
 - `scripts/action-cache.json` and `references/action-cache.md` when a proven workflow has a reusable script.
 
@@ -114,6 +118,13 @@ Use `scripts/append-operation.py` when adding a new operation from a markdown sn
 When a workflow has been successfully repeated or is stable enough to script, add or update a script under `scripts/`, register it in `scripts/action-cache.json`, and make future matching requests try that cached script before manual browser work.
 
 If a workflow first failed but a retry exposed a stable path, treat that retry path as a required documentation update. Record the stable retry path in the relevant references and add a handoff summary in `docs/session-handoff.md`.
+
+Before adding or updating a workflow, check whether the flow reveals a reusable relationship or component operation:
+
+- Record cross-page or cross-module dependencies in `references/relationships.md`.
+- Record reusable UI behavior in `references/components.md`.
+- Reference those files from the operation playbook instead of repeating long explanations.
+- If the reusable operation is scripted, put the helper in `scripts/lib/` and keep business orchestration under `scripts/business/<business-domain>/`.
 
 ## Growth Management
 
@@ -133,6 +144,8 @@ Keep the skill small, searchable, and organized by business domain.
 - Store page-specific selectors in `references/selectors/<page-or-domain>.md`.
 - Store shared assertions in `references/assertions.md`.
 - Store page-specific assertions in `references/assertions/<page-or-domain>.md`.
+- Store business relationships in `references/relationships.md` when a list, config item, dropdown, API source, or backend rule affects another page or workflow.
+- Store reusable UI component operation patterns in `references/components.md`; component scripts belong in `scripts/lib/`.
 - If any markdown file approaches 250 lines, split it before adding more content.
 - Do not duplicate long steps, selectors, routes, defaults, or assertions across files. Reference existing files instead.
 - When creating a new business-domain file, add it to `references/operations/index.md`.
