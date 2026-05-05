@@ -281,7 +281,7 @@ Validated created records:
 
 Known gaps:
 - `首次登录APP`: using an `抽奖次数` prize returned `code=500`, message `任务奖品只能选择合约抵扣金`. Retry this branch with a contract-deduction prize instead of the default lottery-count prize.
-- `新老现货划转任务`: exact task-type selection still left `任务条件1` with `请填写完整任务条件`; treat it as pending investigation.
+- `新老现货划转任务`: field handling was resolved on 2026-05-05. For this task type, `判定开始时间` only shows `活动开始时间`; do not try to select `报名活动后`. Submit reached the backend but returned `code=500`, message `新老划转任务重复，已配置新老划转任务的编号是:964`. Treat creation as blocked by a business uniqueness rule unless the existing task can be reused, modified, or removed.
 
 Reasonableness checks before submit:
 - Do not keep the default `抽奖次数` prize when the selected task type is known to require another reward type, such as `首次登录APP`.
