@@ -28,13 +28,15 @@ This skill is not only for testing. It should help Codex interpret natural-langu
    - Page-specific success checks: `references/assertions/<page-or-domain>.md`
    - Known redirects, permission issues, and failures: `references/known-issues.md`
 3. For state-changing operations, identify missing required parameters before acting.
-4. Use stored defaults only for low-risk fields. Ask the tester to confirm high-risk values such as activity time, reward amount, reward scope, user scope, enable/disable state, and risk-control behavior.
-5. Check the action cache. If the request matches a cached script and required parameters are available, run `scripts/run-cached-action.mjs` first.
-6. If the cached script fails or matching confidence is low, fall back to normal browser operation. For any networked browser operation, use or follow the `web-access` skill. Prefer its CDP workflow when available. If CDP is unavailable or a deterministic stored workflow is better, use the bundled Playwright scripts.
-7. Execute browser automation in invisible/background mode by default. If the user explicitly requests visible operation, open a headed real browser so the tester can watch the page actions.
-8. Verify success using URL, page text, table/form state, toast/message, API response, or user-requested screenshot evidence. Do not treat a completed click as success by itself.
-9. Save screenshots only when the user explicitly asks for screenshots or visual evidence. Store them under `artifacts/screenshots/<中文业务域>/<中文页面或操作>/`.
-10. If a flow is newly discovered or improved, update the references with placeholders instead of secrets.
+4. Before creating, editing, or deleting records, summarize the current chain's required fields, configurable fields, safe defaults, and known limits, then ask the tester which items should use defaults and which should be explicitly set.
+5. Use stored defaults only for low-risk fields. Ask the tester to confirm high-risk values such as activity time, reward amount, reward scope, user scope, enable/disable state, and risk-control behavior.
+6. If the tester's requested parameters conflict with the proven workflow, page constraints, or known backend rules, explain the issue first and wait for confirmation or corrected inputs.
+7. Check the action cache. If the request matches a cached script and required parameters are available, run `scripts/run-cached-action.mjs` first.
+8. If the cached script fails or matching confidence is low, fall back to normal browser operation. For any networked browser operation, use or follow the `web-access` skill. Prefer its CDP workflow when available. If CDP is unavailable or a deterministic stored workflow is better, use the bundled Playwright scripts.
+9. Execute browser automation in invisible/background mode by default. If the user explicitly requests visible operation, open a headed real browser so the tester can watch the page actions.
+10. Verify success using URL, page text, table/form state, toast/message, API response, or user-requested screenshot evidence. Do not treat a completed click as success by itself.
+11. Save screenshots only when the user explicitly asks for screenshots or visual evidence. Store them under `artifacts/screenshots/<中文业务域>/<中文页面或操作>/`.
+12. If a flow is newly discovered or improved, update the references with placeholders instead of secrets.
 
 ## Browser Execution
 
@@ -84,10 +86,13 @@ When the user asks for an operation like "创建一个新手活动，用默认�
    - Target environment.
    - Target operation.
    - Required inputs still missing.
+   - Configurable items exposed by the proven chain.
    - Defaults that can be applied.
    - Any high-risk fields needing confirmation.
-4. Execute only after required information is available and risk confirmation has been handled.
-5. Report final URL, result, evidence, screenshot path if one was requested, and whether the flow was recorded or updated.
+   - Any requested values that appear invalid, risky, or inconsistent with the chain.
+4. Ask the tester to confirm which configurable items should use defaults and which should use explicit values.
+5. Execute only after required information is available and risk confirmation has been handled.
+6. Report final URL, result, evidence, screenshot path if one was requested, and whether the flow was recorded or updated.
 
 ## Updating This Skill
 
@@ -107,6 +112,8 @@ When a route or operation is proven in a real session, update the relevant refer
 Use `scripts/append-operation.py` when adding a new operation from a markdown snippet. Mark first-time flows as `candidate`; promote to `verified` only after repeated validation or explicit user confirmation.
 
 When a workflow has been successfully repeated or is stable enough to script, add or update a script under `scripts/`, register it in `scripts/action-cache.json`, and make future matching requests try that cached script before manual browser work.
+
+If a workflow first failed but a retry exposed a stable path, treat that retry path as a required documentation update. Record the stable retry path in the relevant references and add a handoff summary in `docs/session-handoff.md`.
 
 ## Growth Management
 

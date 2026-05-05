@@ -23,6 +23,14 @@ These can be suggested, but still mention them before execution when creating or
 - First-time workflow status: `candidate`.
 - Secret placeholders: `<USERNAME>`, `<PASSWORD>`, `<GOOGLE_CODE>`.
 
+## Default Confirmation Policy
+
+- Stored defaults are candidate values, not implicit user approval.
+- When the user says `用默认配置` or equivalent, first list the proven configurable items for the current chain and show which of them have defaults.
+- Ask the user which items should keep defaults and which items should be overridden before executing any state-changing action.
+- If the chain has missing verified defaults for a required field, say so explicitly instead of inventing one.
+- If the requested combination is unreasonable, conflicts with the proven chain, or is blocked by page/backend validation, explain the issue before execution and wait for updated inputs or confirmation.
+
 ## Browser Visibility Defaults
 
 - Run browser automation in invisible/background mode by default.
@@ -72,6 +80,14 @@ When the user asks to create a newbie activity with default configuration:
 1. Search `operations.md` for a verified playbook.
 2. If no verified playbook exists, ask for the target activity type/page and required high-risk fields.
 3. Do not invent reward, time, scope, or enablement settings.
+
+## Roulette Task Defaults
+
+- For `转盘抽奖 / 单一奖励`, if the user does not specify reward range values:
+  - default suggested `输入最小数值=10`
+  - default suggested `输入最大数值` left blank
+- These values must still be shown to the user as defaults and confirmed before execution.
+- If the chosen task condition or backend rule requires a different prize type, do not keep the default lottery-count reward. Explain the restriction and ask for a valid reward choice.
 
 ## Prize Image Defaults
 
