@@ -10,6 +10,8 @@ Use this file as the table of contents for operation playbooks. Keep full workfl
 - Activity task search: `activity-task-search.md`
 - Activity task roulette reward modes: `activity-task-roulette-reward-modes.md`
 - Activity task roulette conditions: `activity-task-roulette-conditions.md`
+- Activity task roulette participant scopes: `activity-task-roulette-participant-scopes.md`
+- Activity user registration management: `activity-register-management.md`
 - Prize management: `prize-management.md`
 - Prize management search: `prize-management-search.md`
 - Prize management basic create: `prize-management-basic-create.md`
@@ -36,3 +38,7 @@ Use this file as the table of contents for operation playbooks. Keep full workfl
 | Prize row actions | `prize-management.md` | candidate | 2026-05-04 | Validates row `查看`, `修改`, `复制`, and `删除`; use a dedicated test prize and delete the copied row. |
 | Roulette task condition discovery | `activity-task-roulette-conditions.md` | candidate | 2026-05-04 | Documents available `转盘抽奖` task condition types and fields. |
 | Create roulette single-reward tasks by condition | `activity-task-roulette-conditions.md` | candidate | 2026-05-04 | Creates single-reward tasks by condition; records blocked branches and backend uniqueness limits. |
+| Roulette participant scope discovery | `activity-task-roulette-participant-scopes.md` | candidate | 2026-05-05 | Documents `任务参与范围` options and extra fields for `转盘抽奖`. |
+| Create roulette tasks by participant scope | `activity-task-roulette-participant-scopes.md` | candidate | 2026-05-05 | Creates one single-reward roulette task per participant scope; records UID and country multi-select constraints. |
+| Activity user registration management search and field discovery | `activity-register-management.md` | candidate | 2026-05-05 | Validates search fields and documents add-dialog scope/sign-up branches in visible and invisible modes. |
+| Create activity user registration templates | `activity-register-management.md` | candidate | 2026-05-05 | Creates all-platform registration templates for four signup modes; visible and invisible modes verified. |

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-05-04",
+  "updatedAt": "2026-05-05",
   "actions": [
     {
       "id": "create_prizes",
@@ -28,6 +28,39 @@
       "defaultMode": "invisible",
       "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
       "fallback": "Use the prize-management row action workflow if the cached copy script fails."
+    },
+    {
+      "id": "create_roulette_participant_scope_tasks",
+      "status": "candidate",
+      "script": "scripts/create-roulette-participant-scope-tasks.mjs",
+      "description": "Create roulette activity tasks by participant scope with the validated single-reward defaults.",
+      "domains": ["活动通用模块管理", "活动任务管理", "转盘抽奖"],
+      "intentKeywords": ["创建", "新增", "生成"],
+      "objectKeywords": ["任务", "活动任务", "转盘抽奖"],
+      "scopeKeywords": ["参与范围", "报名的所有用户", "指定代理", "指定用户", "指定国家或地区", "VIP", "注册新用户", "未充值新用户", "老用户"],
+      "supportedScopes": ["all", "vip", "newuser", "nocharge", "olduser", "agent", "user", "country"],
+      "requiredParams": ["uid for agent/user scopes", "country or country-first for country scope"],
+      "defaultMode": "invisible",
+      "verifiedModes": ["visible_browser", "invisible_browser"],
+      "lastVerifiedAt": "2026-05-05",
+      "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
+      "fallback": "Use the roulette participant-scope browser workflow if the cached script fails, then update the cache with the stable selector change."
+    },
+    {
+      "id": "create_register_templates",
+      "status": "candidate",
+      "script": "scripts/create-register-templates.mjs",
+      "description": "Create activity user registration templates with all-platform user scope, no restriction scope, and selected signup modes.",
+      "domains": ["活动通用模块管理", "活动用户报名管理"],
+      "intentKeywords": ["创建", "新增", "生成"],
+      "objectKeywords": ["报名模板", "用户报名模板", "活动用户报名管理"],
+      "supportedSignupModes": ["auto", "manual", "team", "auto_manual"],
+      "supportedPermissions": ["signup", "view"],
+      "defaultMode": "invisible",
+      "verifiedModes": ["visible_browser", "invisible_browser"],
+      "lastVerifiedAt": "2026-05-05",
+      "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
+      "fallback": "Use the activity-register-management browser workflow if the cached script fails, then update the cache with stable selector changes."
     }
   ]
 }

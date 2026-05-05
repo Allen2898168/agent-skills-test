@@ -614,6 +614,557 @@
 - 下一步建议：
   - 后续新增项目级规则时，先判断是否属于 `AGENTS.md`；如果是执行细节或业务细节，优先写入 skill references。
 
+## 2026-05-05 创建转盘抽奖活动任务
+
+- 当前目标：按用户确认，在 staging 后台创建几个 `转盘抽奖` 活动任务；用户明确要求 `temp` 不迁移。
+- 执行环境：staging，`https://stg-activity.weex.tech/activity/task`。
+- 执行模式：后台不可见 Playwright 自动化；CDP 检查未连接，已按规则回退。
+- 已完成事项：
+  - 已读取 `AGENTS.md`、`docs/session-handoff.md`、项目内 `skills/weex-admin-ops/SKILL.md`、活动任务和转盘抽奖相关 references。
+  - 已检查 `temp/`，发现转盘抽奖活动新增草稿流程；本次未迁移。
+  - 已检查动作缓存，未命中可创建转盘抽奖活动任务的缓存脚本。
+  - 已创建 3 条 `转盘抽奖 / 单一奖励` 活动任务，均使用 `kyc任务`、`无kyc限制`、`报名的所有用户`、`不审核KYC`、`报名活动后`、`仅1次，直至结束`、每日领奖上限 `5`、总领奖上限 `50`。
+- 创建记录：
+  - 任务编号 `4778`，任务别名 `转盘抽奖_single_20260505114700`，奖励 `495 - auto_test_prize_08_1777974000001`。
+  - 任务编号 `4779`，任务别名 `转盘抽奖_single_extra1_20260505114824`，奖励 `495 - auto_test_prize_08_1777974000001`。
+  - 任务编号 `4780`，任务别名 `转盘抽奖_single_extra2_20260505114824`，奖励 `495 - auto_test_prize_08_1777974000001`。
+- 验证依据：
+  - 每条创建均观察到 `POST /prod-api/activity/task` 返回 HTTP 200，响应 `code=200`、`msg=操作成功`。
+  - 每条创建后按任务别名搜索，`GET /prod-api/activity/task/list?name=<任务别名>` 返回 HTTP 200，列表中出现对应任务编号和别名。
+- 执行中发现：
+  - 多语言英语输入存在隐藏 input，直接用全局 `input[placeholder="英语"]` 容易定位到不可见元素；后续脚本化应改为表单项内可见输入定位，或仅在确认需要时处理多语言。
+  - `任务次数更新` 虽然只有 `仅1次，直至结束` 一个选项，但页面不会自动选中；创建时必须显式点击。
+  - 尝试创建 `限时奖励不同` 时，`奖励变化` 下拉未能稳定展开到 `+` 选项，本次未提交该分支，未创建失败记录。
+- 当前状态：
+  - `temp` 未迁移。
+  - `skills/weex-admin-ops/` 未更新；如需沉淀本次稳定路径，需要用户另行确认后再写入 skill references 和可复用脚本。
+
+## 2026-05-05 创建带英语多语言的转盘抽奖限时奖励任务
+
+- 当前目标：按用户确认，创建 3 条 `转盘抽奖 / 限时奖励不同` 任务，覆盖 `限时开始时间` 的 3 个选项，并填写中文和英语多语言字段。
+- 执行环境：staging，`https://stg-activity.weex.tech/activity/task`。
+- 执行模式：后台不可见 Playwright 自动化；`temp` 未迁移，`skills/weex-admin-ops/` 未更新。
+- 通用配置：
+  - 活动类型：`转盘抽奖`。
+  - 任务条件：`kyc任务`，`无kyc限制`。
+  - 参与范围：`报名的所有用户`。
+  - 风控：`不审核KYC`。
+  - 任务次数更新：`仅1次，直至结束`。
+  - 奖励模式：`限时奖励不同`。
+  - 限时奖励：`496 - 固定收益券test质押`。
+  - 限时奖励数值：`1`。
+  - 奖励变化倒计时：`1` hour。
+  - 奖励变化：`+`，奖励变化值 `1`。
+  - 每日领奖人数上限：`5`，总领奖人数上限：`50`。
+  - 多语言：已为 `任务名称`、`任务内容`、`任务标签` 填写中文主值和英语值。
+- 创建记录：
+  - 任务编号 `4781`，任务别名 `转盘抽奖_limited_register_20260505115523`，限时开始时间 `用户完成注册或KYC`。
+  - 任务编号 `4782`，任务别名 `转盘抽奖_limited_apply_20260505115523`，限时开始时间 `用户报名时间`。
+  - 任务编号 `4783`，任务别名 `转盘抽奖_limited_update_20260505115523`，限时开始时间 `任务更新后`。
+- 验证依据：
+  - 每条创建均观察到 `POST /prod-api/activity/task` 返回 HTTP 200，响应 `code=200`、`msg=操作成功`。
+  - 每条创建后按任务别名搜索，`GET /prod-api/activity/task/list?name=<任务别名>` 返回 HTTP 200，列表中出现对应任务编号和别名。
+- 执行中发现：
+  - 多语言字段需要在对应表单项内点击 `多语言` 开关，再定位该表单项内可见的 `英语` 输入；全局查找容易命中隐藏 input。
+  - `奖励变化` 必须精确匹配表单项标签，避免误命中 `奖励变化倒计时`。
+  - 后台页面接口鉴权依赖页面运行时鉴权头；脱离页面 axios 直接 `fetch /prod-api/activity/task/list` 会返回 `code=401`，不作为本次验证依据。
+
+## 2026-05-05 转盘抽奖任务参与范围字段发现
+
+- 当前目标：按用户要求，用可见浏览器模式检查 `转盘抽奖` 活动任务新增弹窗中 `任务参与范围` 的选项，以及单独点击每个选项后新增的字段。
+- 执行环境：staging，`https://stg-activity.weex.tech/activity/task`。
+- 执行模式：可见浏览器 Playwright 自动化；只切换新增弹窗字段，不点击确认，不创建任务；未截图。
+- 已确认 `任务参与范围` 选项：
+  - `报名的所有用户`
+  - `指定代理`
+  - `指定用户`
+  - `指定国家或地区`
+  - `VIP 等级`
+  - `注册新用户`
+  - `未充值新用户`
+  - `老用户`
+- 单独选择后的新增字段：
+  - `报名的所有用户`：无新增字段。
+  - `指定代理`：新增 `指定代理` textarea，placeholder 提示多个 UID 用中文逗号分隔示例。
+  - `指定用户`：新增 `指定用户UID` textarea，placeholder 提示多个 UID 用中文逗号分隔示例。
+  - `指定国家或地区`：新增 `指定国家或地区` 多选下拉，placeholder `请选择（多选）`。
+  - `VIP 等级`：新增 `VIP等级`，含 `起始等级`、`结束等级` 两个下拉；新增 `VIP白名单允许` 单选，选项 `同等级允许`、`全部允许`、`全部不允许`。
+  - `注册新用户`：新增 `新用户` 下拉，placeholder `请选择`。
+  - `未充值新用户`：无新增字段。
+  - `老用户`：新增 `老用户` 下拉，placeholder `请选择`。
+- 执行中发现：
+  - `任务参与范围` 可以像 checkbox 一样叠加选择；连续点击不同范围会累计显示字段。要确认单个范围字段，必须重开新增弹窗或先清除已选项。
+- 当前状态：
+  - 只读发现已完成。
+  - `skills/weex-admin-ops/` 未更新；如需沉淀到 skill，需要用户确认后再写入 `activity-task-roulette-conditions.md` 或单独参与范围 reference。
+
+## 2026-05-05 创建不同参与范围的转盘抽奖任务
+
+- 当前目标：按用户确认，用可见浏览器模式创建不同 `任务参与范围` 的 `转盘抽奖 / 单一奖励` 任务；用户确认 UID 暂用 `123456`，所有下拉使用第一个可用选项，`VIP白名单允许` 用 `同等级允许`。
+- 执行环境：staging，`https://stg-activity.weex.tech/activity/task`。
+- 通用配置：
+  - 活动类型：`转盘抽奖`。
+  - 任务条件：`kyc任务`，`无kyc限制`。
+  - 风控：`不审核KYC`。
+  - 任务组合：`单一任务条件`。
+  - 判定开始时间：`报名活动后`。
+  - 任务次数更新：`仅1次，直至结束`。
+  - 奖励模式：`单一奖励`。
+  - 正常奖励：`495 - auto_test_prize_08_1777974000001`，最小值 `10`，最大值留空。
+  - 每日领奖人数上限：`5`，总领奖人数上限：`50`。
+- 成功创建：
+  - `报名的所有用户`：任务编号 `4784`，任务别名 `转盘抽奖_scope_all_20260505120514`。
+  - `VIP 等级`：任务编号 `4785`，任务别名 `转盘抽奖_scope_vip_20260505120939`，起始等级 `VIP 0`，结束等级 `VIP 0`，VIP 白名单允许 `同等级允许`。
+  - `注册新用户`：任务编号 `4786`，任务别名 `转盘抽奖_scope_newuser_20260505120939`，新用户下拉选项 `活动期间注册用户`。
+  - `未充值新用户`：任务编号 `4787`，任务别名 `转盘抽奖_scope_nocharge_20260505120939`。
+  - `老用户`：任务编号 `4788`，任务别名 `转盘抽奖_scope_olduser_20260505120939`，老用户下拉选项 `活动开始前注册用户`。
+- 验证依据：
+  - 成功项均观察到 `POST /prod-api/activity/task` 返回 HTTP 200，响应 `code=200`、`msg=操作成功`。
+  - 成功项创建后均按任务别名搜索，`GET /prod-api/activity/task/list?name=<任务别名>` 返回 HTTP 200，列表中出现对应任务编号和别名。
+- 未创建 / 阻塞项：
+  - `指定代理`：使用 UID `123456` 提交时页面校验 `请填写正确的uid`，未发出成功的创建请求，未创建记录。
+  - `指定用户`：使用 UID `123456` 提交时页面校验 `请填写正确的uid`，未发出成功的创建请求，未创建记录。
+  - `指定国家或地区`：确认该字段为多选并需点击空白区域收起；自动化尝试选择第一个可用选项后，提交仍提示 `请选择国加或地区`，同时后续奖励下拉被干扰。该分支未创建记录，需要后续用更稳定的多选组件操作或手动确认具体国家选项后重试。
+- 当前状态：
+  - 本轮完成 5 条参与范围任务创建。
+  - 仍需有效 UID 才能创建 `指定代理`、`指定用户`。
+  - `指定国家或地区` 需要继续修复多选下拉落值路径。
+  - `skills/weex-admin-ops/` 未更新；如需沉淀稳定路径和阻塞项，需要用户确认后再写入 skill references。
+
+## 2026-05-05 补充创建参与范围阻塞项
+
+- 当前目标：按用户补充，重试前一轮未创建的 `指定代理`、`指定用户`、`指定国家或地区` 三种参与范围任务。
+- 执行环境：staging，`https://stg-activity.weex.tech/activity/task`。
+- 用户补充参数：
+  - UID 改用 `9881271952`。
+  - `指定国家或地区` 是多选下拉，选项点击后需要点击父级 dialog 空白区域收起。
+- 通用配置：沿用前一轮 `转盘抽奖 / 单一奖励` 默认配置，正常奖励 `495 - auto_test_prize_08_1777974000001`，最小值 `10`，每日上限 `5`，总上限 `50`。
+- 成功创建：
+  - `指定代理`：任务编号 `4789`，任务别名 `转盘抽奖_scope_agent_retry_20260505121529`，UID `9881271952`。
+  - `指定用户`：任务编号 `4790`，任务别名 `转盘抽奖_scope_user_retry_20260505121529`，UID `9881271952`。
+  - `指定国家或地区`：任务编号 `4791`，任务别名 `转盘抽奖_scope_country_retry_20260505121529`，国家/地区选择 `中国`。
+- 验证依据：
+  - 三条创建均观察到 `POST /prod-api/activity/task` 返回 HTTP 200，响应 `code=200`、`msg=操作成功`。
+  - 三条创建后均按任务别名搜索，`GET /prod-api/activity/task/list?name=<任务别名>` 返回 HTTP 200，列表中出现对应任务编号和别名。
+- 执行中发现：
+  - UID `123456` 会被 `指定代理` 和 `指定用户` 校验为无效；UID `9881271952` 可用。
+  - `指定国家或地区` 多选稳定路径：定位 `指定国家或地区` 表单项内 `.el-select` 父容器，打开下拉后选择可用项，随后点击 `.el-dialog` 空白区域收起；需校验表单项内出现 `.el-tag` 文案，本次为 `中国`。
+- 当前状态：
+  - 不同参与范围 8 条单独任务均已创建完成。
+  - `skills/weex-admin-ops/` 未更新；如需沉淀稳定路径，需要用户确认后再写入 skill references 和可复用脚本。
+
+## 2026-05-05 沉淀转盘抽奖参与范围链路到 skill
+
+- 当前目标：按用户确认，把已走通的 `转盘抽奖` 任务参与范围字段发现、创建链路、阻塞与重试规则沉淀到项目内 `skills/weex-admin-ops/`；不迁移 `temp/`。
+- 已更新文件：
+  - `skills/weex-admin-ops/references/operations/activity-task-roulette-participant-scopes.md`
+  - `skills/weex-admin-ops/references/operations/index.md`
+  - `skills/weex-admin-ops/references/selectors/activity-task-management.md`
+  - `skills/weex-admin-ops/references/components.md`
+  - `skills/weex-admin-ops/references/relationships.md`
+  - `docs/session-handoff.md`
+- 沉淀内容：
+  - 参与范围 8 个选项和单独选择后的新增字段。
+  - 单一奖励默认创建路径和 8 条已创建记录。
+  - UID 校验规则：`123456` 无效，`9881271952` 可用。
+  - `指定国家或地区` 多选稳定操作：点击表单项内 `.el-select`，选择选项后点击父级 `.el-dialog` 空白区域收起，并断言 `.el-tag` 出现。
+- 当前状态：
+  - `temp/` 未修改。
+  - 尚未新增缓存脚本；后续如该链路需要重复创建，可抽成 `scripts/business/activity-task-management/` 脚本并登记 action cache。
+
+## 2026-05-05 调整 skill 沉淀确认规则
+
+- 当前目标：按用户确认，调整 `AGENTS.md` 中“修改 skill 文件前确认”的规则。
+- 已更新文件：
+  - `AGENTS.md`
+  - `docs/session-handoff.md`
+- 新规则摘要：
+  - 修改 `AGENTS.md` 前仍需先说明将写入什么，并等待用户 `ok`、`确认` 或明确同意。
+  - 新跑通且当前 skill 未覆盖、并且不是仅通过调整参数就能复用既有链路的新链路，必须在跑通后立即询问用户是否沉淀到 `skills/weex-admin-ops/`。
+  - 用户确认沉淀后再更新 skill；未确认前不得写入 skill。
+  - `temp/` 迁移仍需用户单独确认。
+
+## 2026-05-05 补充链路沉淀与动作缓存规则
+
+- 当前目标：按用户要求，确保已跑通链路不只写 skill，也要评估和登记动作缓存；浏览器模式和默认不可见模式可能是两套路径，需分别记录验证状态。
+- 已更新文件：
+  - `AGENTS.md`
+  - `skills/weex-admin-ops/SKILL.md`
+  - `skills/weex-admin-ops/references/action-cache.md`
+  - `skills/weex-admin-ops/references/operations/activity-task-roulette-participant-scopes.md`
+  - `skills/weex-admin-ops/scripts/action-cache.json`
+  - `skills/weex-admin-ops/scripts/cache/command.mjs`
+  - `skills/weex-admin-ops/scripts/cache/matcher.mjs`
+  - `skills/weex-admin-ops/scripts/create-roulette-participant-scope-tasks.mjs`
+  - `skills/weex-admin-ops/scripts/business/activity-task-management/roulette-participant-plan.mjs`
+  - `skills/weex-admin-ops/scripts/business/activity-task-management/roulette-participant-create.mjs`
+  - `skills/weex-admin-ops/scripts/lib/browser.mjs`
+  - `docs/session-handoff.md`
+- 新规则摘要：
+  - 新跑通链路沉淀时必须同时评估 skill 文档和动作缓存。
+  - 可复用且参数化成本合理的链路需要脚本化并登记 `scripts/action-cache.json`；暂不缓存时必须说明原因。
+  - 可见浏览器模式和默认不可见模式要分别记录验证状态，未验证的模式不得写成已跑通。
+- 新增动作缓存：
+  - Action ID：`create_roulette_participant_scope_tasks`
+  - 脚本：`scripts/create-roulette-participant-scope-tasks.mjs`
+  - 用途：按参与范围创建 `转盘抽奖 / 单一奖励` 活动任务。
+  - 默认模式：不可见浏览器；传 `--visible` 使用可见浏览器。
+  - 当前验证状态：可见模式由 2026-05-05 手工浏览器链路实际跑通；新增缓存脚本本轮只做 dry-run 校验，不额外创建后台记录。
+- `temp/` 未修改，暂存流程仍未迁移。
+
+## 2026-05-05 不可见模式创建 8 条转盘抽奖参与范围任务
+
+- 当前目标：按用户要求，使用默认不可见浏览器模式，通过动作缓存创建 8 条不同 `任务参与范围` 的 `转盘抽奖 / 单一奖励` 任务。
+- 执行命令：`node skills/weex-admin-ops/scripts/run-cached-action.mjs --action create_roulette_participant_scope_tasks --scopes all,vip,newuser,nocharge,olduser,agent,user,country --uid 9881271952 --country 中国`
+- 执行环境：staging，最终页面 `https://stg-activity.weex.tech/activity/task`。
+- 本轮创建成功：
+  - `4792`：`报名的所有用户`，任务别名 `转盘抽奖_scope_all_20260505124634`。
+  - `4793`：`VIP 等级`，任务别名 `转盘抽奖_scope_vip_20260505124634`，起止等级 `VIP 0` 到 `VIP 0`，白名单 `同等级允许`。
+  - `4794`：`注册新用户`，任务别名 `转盘抽奖_scope_newuser_20260505124634`，选项 `活动期间注册用户`。
+  - `4795`：`未充值新用户`，任务别名 `转盘抽奖_scope_nocharge_20260505124634`。
+  - `4796`：`老用户`，任务别名 `转盘抽奖_scope_olduser_20260505124634`，选项 `活动开始前注册用户`。
+  - `4797`：`指定代理`，任务别名 `转盘抽奖_scope_agent_20260505124634`，UID `9881271952`。
+  - `4798`：`指定用户`，任务别名 `转盘抽奖_scope_user_20260505124634`，UID `9881271952`。
+  - `4799`：`指定国家或地区`，任务别名 `转盘抽奖_scope_country_20260505124634`，国家/地区 `中国`。
+- 验证依据：
+  - 每条创建均观察到 `POST /prod-api/activity/task` 返回 HTTP 200，响应 `code=200`、`msg=操作成功`。
+  - 每条创建后均按任务别名搜索，`GET /prod-api/activity/task/list?name=<任务别名>` 返回 HTTP 200，列表出现对应任务编号。
+- 不可见模式修复点：
+  - 本地普通 Node 未解析到 Playwright 时，需要设置 `NODE_PATH=/Users/gabriel/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules` 或使用内置 Node runtime。
+  - 多语言英语控件存在隐藏 textarea；脚本只填写可见英语控件。
+  - `任务组合` 在不可见 DOM 中是下拉框，placeholder `请选择任务数`，需选择第一个可用项。
+  - `KYC限制` 是 radio，需点击 `无kyc限制`，不能按下拉处理。
+  - `任务备注` 为必填字段。
+  - Element UI 下拉点击应优先点击 `.el-select` 容器，避免内层 span 拦截。
+- 已同步更新：
+  - `skills/weex-admin-ops/references/operations/activity-task-roulette-participant-scopes.md`
+  - `skills/weex-admin-ops/references/action-cache.md`
+  - `skills/weex-admin-ops/references/components.md`
+  - `skills/weex-admin-ops/scripts/action-cache.json`
+  - `skills/weex-admin-ops/scripts/business/activity-task-management/roulette-participant-create.mjs`
+  - `skills/weex-admin-ops/scripts/business/activity-task-management/roulette-participant-ui.mjs`
+  - `skills/weex-admin-ops/scripts/lib/element-ui.mjs`
+- `temp/` 未修改，未迁移。
+
+## 2026-05-05 创建带英语多语言字段的转盘抽奖任务
+
+- 当前目标：按用户要求，创建 1 条任意 `转盘抽奖` 任务，且任务名称、任务内容、任务标签均配置英语多语言。
+- 执行模式：默认不可见浏览器模式，复用动作缓存脚本 `scripts/create-roulette-participant-scope-tasks.mjs`。
+- 执行环境：staging，最终页面 `https://stg-activity.weex.tech/activity/task`。
+- 创建成功：
+  - 任务编号 `4800`
+  - 任务别名 `转盘抽奖_英语多语言_all_20260505125346`
+  - 参与范围 `报名的所有用户`
+  - 中文任务内容 `自动化转盘抽奖参与范围任务`
+  - 任务标签 `roulette_scope_all`
+  - 英语字段由脚本在提交前填入：任务名称 `Roulette scope all 20260505125346`，任务内容 `Automated roulette participant scope task`，任务标签 `roulette_scope_all`。
+- 验证依据：
+  - `POST /prod-api/activity/task` 返回 HTTP 200，响应 `code=200`、`msg=操作成功`。
+  - 按任务别名搜索，`GET /prod-api/activity/task/list?name=转盘抽奖_英语多语言_all_20260505125346` 返回 HTTP 200，列表出现任务编号 `4800`。
+- 本次是复用既有缓存链路和既有 skill 规则，不是新链路；未新增 skill/cache 结构。
+- `temp/` 未修改，未迁移。
+
+## 2026-05-05 修正任务 4800 的任务内容和任务标签英语多语言
+
+- 用户反馈：任务 `4800` 的 `任务内容` 和 `任务标签` 没有配置英语。
+- 原因确认：
+  - 编辑弹窗内 `任务名称`、`任务内容`、`任务标签` 各自有独立的多语言开关。
+  - 原脚本只填到了第一个可见英语输入框，实际只绑定了 `任务名称` 英语，`任务内容` 和 `任务标签` 的英语控件仍隐藏且为空。
+- 已修正任务 `4800`：
+  - `nameI18`: `en = Roulette scope all 20260505125346`
+  - `contentI18`: `en = Automated roulette task content`
+  - `labelI18`: `en = roulette_scope_all_en`
+- 验证依据：
+  - 修改提交返回 HTTP 200。
+  - 按任务别名搜索接口返回任务 `4800`，`nameI18`、`contentI18`、`labelI18` 均包含 `lang: en`。
+- 已修复缓存脚本：
+  - `scripts/business/activity-task-management/roulette-participant-ui.mjs` 现在按表单项分别打开并填写 `任务名称`、`任务内容`、`任务标签` 的英语多语言。
+  - 已补充 `references/components.md` 和 `operations/activity-task-roulette-participant-scopes.md`，说明活动任务多语言字段必须按表单项分别处理。
+- `temp/` 未修改，未迁移。
+
+## 2026-05-05 创建 VIP 才能参与的转盘抽奖任务
+
+- 当前目标：按用户要求创建 1 条 `VIP 等级` 才能参与的 `转盘抽奖 / 单一奖励` 任务。
+- 执行模式：默认不可见浏览器模式，复用动作缓存脚本 `scripts/create-roulette-participant-scope-tasks.mjs`。
+- 执行环境：staging，最终页面 `https://stg-activity.weex.tech/activity/task`。
+- 创建成功：
+  - 任务编号 `4801`
+  - 任务别名 `转盘抽奖_VIP参与_vip_20260505130715`
+  - 参与范围 `VIP 等级`
+  - VIP 起止等级 `VIP 0` 到 `VIP 0`
+  - `VIP白名单允许` 为 `同等级允许`
+- 验证依据：
+  - `POST /prod-api/activity/task` 返回 HTTP 200，响应 `code=200`、`msg=操作成功`。
+  - 按任务别名搜索，`GET /prod-api/activity/task/list?name=转盘抽奖_VIP参与_vip_20260505130715` 返回 HTTP 200，列表出现任务编号 `4801`。
+- 本次是复用既有缓存链路，不是新链路；未新增 skill/cache 结构。
+- `temp/` 未修改，未迁移。
+
+## 2026-05-05 进入活动用户报名管理模块
+
+- 当前目标：按用户要求，分别用可见浏览器模式和默认不可见模式尝试进入 `活动通用模块管理 / 活动用户报名管理`。
+- 动作缓存检查：`scripts/run-cached-action.mjs --query "进入活动通用模块管理下面的活动用户报名管理" --dry-run` 未命中缓存。
+- 可见浏览器模式：
+  - 入口：登录后从侧边栏点击 `活动用户报名管理`。
+  - 最终 URL：`https://stg-activity.weex.tech/activity/register`。
+  - 验证依据：页面面包屑包含 `活动通用模块管理 / 活动用户报名管理`，表格头包含 `用户报名模板id`、`用户管理模板名称`、`平台用户参与范围`、`更新时间`、`最近编辑人`、`操作`。
+  - 关键接口：`GET /prod-api/activity/apply/list?pageNum=1&pageSize=10` 返回 HTTP 200，`GET /prod-api/activity/apply/all` 返回 HTTP 200。
+- 默认不可见模式：
+  - 同样从侧边栏点击 `活动用户报名管理`。
+  - 最终 URL：`https://stg-activity.weex.tech/activity/register`。
+  - 验证依据同可见模式，`GET /prod-api/activity/apply/list?pageNum=1&pageSize=10` 和 `GET /prod-api/activity/apply/all` 均返回 HTTP 200。
+- 页面初步字段：
+  - 搜索区 placeholder：`用户管理模板名称`、`更新开始时间`、`更新结束时间`、`输入id或模板名称`、`请输入邀请码`、`请输入最近编辑人`、`请选择`。
+  - 按钮：`搜索`、`新增`。
+  - 行操作：`查看`、`修改`、`删除`。
+- 本轮只是只读进入与验证，没有新增、修改、删除数据。
+- 尚未沉淀到 `skills/weex-admin-ops/`，如需复用，应由用户确认后新增 routes/selectors/assertions/operation reference，并评估是否需要导航缓存。
+- `temp/` 未修改，未迁移。
+
+## 2026-05-05 活动用户报名管理搜索与新增弹窗探测
+
+- 当前目标：按用户要求探测 `活动通用模块管理 / 活动用户报名管理` 的搜索字段、新增弹窗字段、`平台用户参与范围`、`限制用户参与范围`、`用户报名方式`，分别覆盖可见浏览器模式和默认不可见模式。
+- 执行环境：staging，页面 `https://stg-activity.weex.tech/activity/register`。
+- 搜索字段已在可见和不可见模式验证：
+  - `用户管理模板名称`：普通输入，按模板名搜索后 URL 带 `name=<模板名>`，列表返回命中模板。
+  - `用户报名模板id`：远程多选下拉，不是普通 input；需输入 id 后选择真实选项，例如 `【2709】 自动化测试 - 全平台用户手动报名`，URL 带 `ids[0]=2709`。
+  - `邀请码`：普通输入；不存在的邀请码返回空列表也可作为搜索生效验证。
+  - `最近编辑人`：普通输入；按编辑人搜索后列表行编辑人匹配。
+  - `更新开始时间`、`更新结束时间`：Element UI 日期选择器，必须点击日期面板里的真实日期单元格；只写 input value 不会绑定 Vue 状态。
+- 新增弹窗标题：`用户报名管理（新增）`。
+- 新增弹窗基础字段：
+  - 必填：`用户管理模板名称`、`限制用户参与范围`、`用户报名方式`。
+  - 非必填：`平台用户参与范围`、`可参与注册时间范围`、`限制用户权限`、`报名人数限制`。
+  - `平台用户参与范围` radio：`全平台用户`、`指定参赛代理或用户`、`指定渠道码或邀请码`、`自然流量`、`非活跃用户`、`仅限渠道用户`、`混合条件`、`指定华语用户`、`指定海外用户`、`假钱账户`。
+  - `限制用户权限` checkbox：`报名`、`看到和进入页面`。
+  - `用户报名方式` checkbox：`注册即报名`、`用户手动点击报名`、`团体报名方式`、`注册+手动点击报名方式`。
+- `限制用户参与范围` 分支在可见和不可见模式结构一致：
+  - `无`：无额外字段。
+  - `代理及其直客`：新增 `代理及其直客`，radio `输入`/`导入`；输入态占位 `请输入代理uid，多个请用英文逗号隔开`。
+  - `代理+下级代理+所有直客`：新增 `代理+下级代理+直客`，radio `输入`/`导入`；输入态占位同代理 uid。
+  - `用户`：新增 `用户`，radio `输入`/`导入`；输入态占位 `请输入用户uid，多个请用英文逗号隔开`。
+  - `国家或区域`：新增 `国家地区` 多选下拉；示例选项从 `中国` 开始，后续为国家/地区列表。多选下拉需点击 dialog 空白区域收起。
+  - `KYC`：新增 `kyc限制区域` 下拉/多选；示例选项同国家/地区列表。
+  - `设备`：新增 `设备` 输入，占位 `请输入设备ID，多个请用英文逗号隔开`。
+  - `VIP等级`：新增 `VIP等级` 下拉，选项 `VIP0` 到 `VIP8`；新增 `VIP白名单限制` radio：`同等级限制`、`全部限制`、`全部不限制`。
+  - `风控标签`：新增 `风控标签` 下拉；数据来自远端，示例包含 `同ip多账号登录`、`AB仓`、`黑牌用户` 等，排序/分页在两种模式下可能不同。
+  - `合约账户余额`：新增 `合约账户余额` 输入。
+  - `灰：海外做市商户`：无额外字段。
+  - `限制渠道码/邀请码`：新增 `限制渠道码` 输入，占位 `请输入渠道码,多个请用英文逗号隔开`；新增 `限制邀请码` 输入，占位 `请输入邀请码,多个请用英文逗号隔开`。
+  - `非KYC用户`、`非绑定手机号用户`：无额外字段。
+- `用户报名方式` 分支在可见和不可见模式结构一致：
+  - `注册即报名`：无额外字段。
+  - `用户手动点击报名`：无额外字段。
+  - `团体报名方式`：新增 `最小团队人数` 输入。
+  - `注册+手动点击报名方式`：无额外字段。
+- 探测验证依据：
+  - 两种模式最终 URL 均为 `https://stg-activity.weex.tech/activity/register`。
+  - 页面和弹窗文案可见，`GET /prod-api/activity/apply/list?pageNum=1&pageSize=10`、`GET /prod-api/activity/apply/all`、`GET /prod-api/activity/apply/vipLevel/list`、`GET /prod-api/activity/apply/selectAgencyGroupList` 返回 HTTP 200。
+- 本轮到此仍是只读探测，未点击新增提交，未创建报名模板。
+- 尚未沉淀到 `skills/weex-admin-ops/` 或动作缓存；如创建流程跑通，应询问用户是否沉淀，并评估是否新增报名模板创建缓存。
+- `temp/` 未修改，未迁移。
+
+## 2026-05-05 创建活动用户报名模板并沉淀 skill/cache
+
+- 用户已确认：
+  - 按默认参数创建 8 条 `活动用户报名管理` 模板。
+  - 创建跑通后沉淀到项目内 `skills/weex-admin-ops/` 并评估动作缓存。
+- 执行环境：staging，页面 `https://stg-activity.weex.tech/activity/register`。
+- 创建参数：
+  - `平台用户参与范围`: `全平台用户`。
+  - `限制用户参与范围`: `无`。
+  - `可参与注册时间范围`: 关闭。
+  - `限制用户权限`: 不勾选。
+  - `报名人数限制`: 留空。
+  - `团体报名方式`: `最小团队人数=2`。
+- 可见浏览器模式创建成功：
+  - `2710`: `自动化报名模板_可见_auto_20260505151322`，`注册即报名`。
+  - `2711`: `自动化报名模板_可见_manual_20260505151322`，`用户手动点击报名`。
+  - `2712`: `自动化报名模板_可见_team_20260505151322`，`团体报名方式`，`最小团队人数=2`。
+  - `2713`: `自动化报名模板_可见_auto_manual_20260505151322`，`注册+手动点击报名方式`。
+- 默认不可见模式创建成功：
+  - `2714`: `自动化报名模板_不可见_auto_20260505151322`，`注册即报名`。
+  - `2715`: `自动化报名模板_不可见_manual_20260505151322`，`用户手动点击报名`。
+  - `2716`: `自动化报名模板_不可见_team_20260505151322`，`团体报名方式`，`最小团队人数=2`。
+  - `2717`: `自动化报名模板_不可见_auto_manual_20260505151322`，`注册+手动点击报名方式`。
+- 验证依据：
+  - 每条创建均观察到 `POST /prod-api/activity/apply` 返回 HTTP 200，响应 `code=200`、`msg=操作成功`。
+  - 每条创建后均按 `用户管理模板名称` 搜索，列表出现对应 `用户报名模板id`、模板名称、`平台用户参与范围=全平台用户`、最近编辑人 `auto`。
+- 首次可见模式创建前，旧登录 helper 的 3 秒等待过短导致一次登录阶段失败；未发出新增请求。已把 `loginToPath` 改为等待 URL 离开 `/login` 最长 18 秒后再判断。
+- 已同步更新：
+  - `skills/weex-admin-ops/references/operations/activity-register-management.md`
+  - `skills/weex-admin-ops/references/operations/index.md`
+  - `skills/weex-admin-ops/references/routes.md`
+  - `skills/weex-admin-ops/references/selectors/activity-register-management.md`
+  - `skills/weex-admin-ops/references/assertions/activity-register-management.md`
+  - `skills/weex-admin-ops/references/components.md`
+  - `skills/weex-admin-ops/references/components/activity-register-management.md`
+  - `skills/weex-admin-ops/references/relationships.md`
+  - `skills/weex-admin-ops/references/action-cache.md`
+  - `skills/weex-admin-ops/scripts/action-cache.json`
+  - `skills/weex-admin-ops/scripts/create-register-templates.mjs`
+  - `skills/weex-admin-ops/scripts/business/activity-register-management/plan.mjs`
+  - `skills/weex-admin-ops/scripts/business/activity-register-management/create.mjs`
+  - `skills/weex-admin-ops/scripts/cache/command.mjs`
+  - `skills/weex-admin-ops/scripts/cache/matcher.mjs`
+  - `skills/weex-admin-ops/scripts/lib/browser.mjs`
+- 新缓存动作：`create_register_templates`。
+  - dry-run 示例：`node skills/weex-admin-ops/scripts/run-cached-action.mjs --action create_register_templates --signup-modes auto,manual,team,auto_manual --dry-run`
+  - 可见模式示例：`node skills/weex-admin-ops/scripts/run-cached-action.mjs --action create_register_templates --signup-modes team --min-team 2 --visible`
+- `temp/` 未修改，未迁移。
+
+## 2026-05-05 创建限制用户权限为看到和进入页面的报名模板
+
+- 用户要求：再创建 1 条 `活动用户报名管理` 模板，`限制用户权限` 选择 `看到和进入页面`，使用浏览器模式。
+- 缓存检查：
+  - `run-cached-action.mjs --query "浏览器模式创建活动用户报名模板 限制用户权限 看到和进入页面" --dry-run` 命中 `create_register_templates`。
+  - 但当前缓存脚本未暴露 `限制用户权限` 参数，dry-run 只能表达默认模板，因此未按缓存执行，回退可见浏览器手动链路。
+- 创建参数：
+  - `平台用户参与范围`: `全平台用户`。
+  - `限制用户参与范围`: `无`。
+  - `限制用户权限`: `看到和进入页面`。
+  - `用户报名方式`: `注册即报名`。
+  - 其他字段保持默认空/关闭。
+- 创建成功：
+  - `用户报名模板id`: `2718`
+  - `用户管理模板名称`: `自动化报名模板_可见_权限进入_20260505152312`
+  - 模式：可见浏览器模式。
+- 验证依据：
+  - `POST /prod-api/activity/apply` 返回 HTTP 200，响应 `code=200`、`msg=操作成功`。
+  - 按模板名称搜索，列表返回模板 `2718`，`平台用户参与范围=全平台用户`，最近编辑人 `auto`。
+- 后续可优化：将 `限制用户权限` 参数补到 `create_register_templates` 缓存脚本，支持 `报名` / `看到和进入页面` / 两者组合。
+- `temp/` 未修改，未迁移。
+
+## 2026-05-05 创建报名人数限制为 100 的报名模板
+
+- 用户要求：再创建 1 条 `活动用户报名管理` 模板，`报名人数限制=100`。
+- 执行模式：默认不可见浏览器模式。
+- 缓存检查：
+  - `run-cached-action.mjs --action create_register_templates --signup-modes auto --people-limit 100 --dry-run` 参数正确。
+  - 实际执行复用 `create_register_templates` 缓存脚本。
+- 创建参数：
+  - `平台用户参与范围`: `全平台用户`。
+  - `限制用户参与范围`: `无`。
+  - `用户报名方式`: `注册即报名`。
+  - `报名人数限制`: `100`。
+- 创建成功：
+  - `用户报名模板id`: `2719`
+  - `用户管理模板名称`: `自动化报名模板_auto_20260505152502`
+- 验证依据：
+  - `POST /prod-api/activity/apply` 返回 HTTP 200，响应 `code=200`、`msg=操作成功`。
+  - 按模板名称搜索，列表返回模板 `2719`，`平台用户参与范围=全平台用户`，最近编辑人 `auto`。
+  - 打开 `用户报名管理（编辑）` 弹窗只读复查，`报名人数限制` 字段值为 `100`；未提交修改。
+- 本次是既有缓存链路的参数化使用，不新增 skill/cache 结构。
+- `temp/` 未修改，未迁移。
+
+## 2026-05-05 补充报名模板限制用户权限缓存参数
+
+- 用户追问：`限制用户权限=看到和进入页面` 为什么没有入缓存。
+- 原因：`create_register_templates` 已有缓存动作，但当时脚本未暴露 `限制用户权限` 参数；可见浏览器创建成功后只记录了后续优化，没有立即补缓存参数。
+- 已按用户确认补齐缓存参数：
+  - `--permissions signup` 映射 `限制用户权限=报名`。
+  - `--permissions view` 映射 `限制用户权限=看到和进入页面`。
+  - 支持组合：`--permissions signup,view`。
+- 已更新：
+  - `skills/weex-admin-ops/scripts/business/activity-register-management/plan.mjs`
+  - `skills/weex-admin-ops/scripts/business/activity-register-management/create.mjs`
+  - `skills/weex-admin-ops/scripts/create-register-templates.mjs`
+  - `skills/weex-admin-ops/scripts/cache/command.mjs`
+  - `skills/weex-admin-ops/scripts/cache/matcher.mjs`
+  - `skills/weex-admin-ops/scripts/run-cached-action.mjs`
+  - `skills/weex-admin-ops/scripts/action-cache.json`
+  - `skills/weex-admin-ops/references/action-cache.md`
+  - `skills/weex-admin-ops/references/operations/activity-register-management.md`
+- 验证：
+  - 直接 dry-run：`create-register-templates.mjs --signup-modes auto --permissions view --dry-run`，计划包含 `permissions=["看到和进入页面"]`。
+  - 组合 dry-run：`create-register-templates.mjs --signup-modes auto --permissions signup,view --people-limit 100 --dry-run`，计划包含 `permissions=["报名","看到和进入页面"]` 和 `peopleLimit=100`。
+  - 自然语言 dry-run：`run-cached-action.mjs --query "浏览器模式创建活动用户报名模板 限制用户权限 看到和进入页面" --dry-run`，命令包含 `--permissions view --visible --dry-run`。
+  - 自然语言误判已修复：`报名模板` 中的 `报名` 不再误判为权限 `signup`。
+- 本次只更新缓存参数和文档，未创建新后台数据。
+- `temp/` 未修改，未迁移。
+
+## 2026-05-05 浏览器模式探测报名模板指定参赛代理或用户参数
+
+- 用户要求：在 `活动用户报名管理` 新增弹窗中，选择 `平台用户参与范围=指定参赛代理或用户`，先看需要什么参数，使用浏览器模式。
+- 缓存检查：
+  - `run-cached-action.mjs --query "浏览器模式 活动用户报名管理 指定参赛代理或用户 参数探测" --dry-run` 命中默认 `create_register_templates`。
+  - dry-run 只能表达默认创建，不能表达 `指定参赛代理或用户` 参数探测，因此未按缓存执行。
+- 执行模式：可见浏览器模式，只读探测，未点击 `确认`，未创建数据。
+- 页面：`https://stg-activity.weex.tech/activity/register`。
+- 选择 `指定参赛代理或用户` 后新增/变化字段：
+  - `合伙人分组`：下拉选择；示例选项包括 `bjzhou`、`bjAmy`、`商务Lan`、`商务Melissa`、`bdaaron123`、`0820bdrick`、`t2`、`t2674392986`、`lucas`、`cobb` 等。
+  - `指定代理`：radio `输入` / `导入`。
+    - `输入`：textarea，占位 `请输入代理uid，多个请用英文逗号隔开`。
+    - `导入`：只读 textarea，占位 `请上传代理uid`；按钮 `代理uid模版下载`、`代理uid上传`；存在 1 个 file input。
+  - `代理角色细分`：switch。
+  - `指定用户UID`：radio `输入` / `导入`。
+    - `输入`：textarea，占位 `请输入用户uid，多个请用英文逗号隔开`。
+    - `导入`：只读 textarea，占位 `请上传用户uid`；按钮 `用户uid模版下载`、`用户uid上传`；存在 1 个 file input。
+  - `用户报名方式` 额外出现选项：`活动开始后，满足条件的用户系统自动报名`。
+- 仍需配置的基础必填字段：
+  - `用户管理模板名称`：必填。
+  - `限制用户参与范围`：必填，至少选一个；此分支下可选项不包含 `限制渠道码/邀请码`，可见选项包括 `无`、代理/用户/国家/KYC/设备/VIP/风控/余额等。
+  - `用户报名方式`：必填。
+- 可选字段：
+  - `可参与注册时间范围` switch。
+  - `限制用户权限`：`报名`、`看到和进入页面`。
+  - `报名人数限制`。
+- 关键接口：
+  - `GET /prod-api/activity/apply/list?pageNum=1&pageSize=10` HTTP 200。
+  - `GET /prod-api/activity/apply/all` HTTP 200。
+  - `GET /prod-api/activity/apply/vipLevel/list` HTTP 200。
+  - `GET /prod-api/activity/apply/selectAgencyGroupList` HTTP 200。
+- 本轮发现比当前 `activity-register-management.md` 更细的分支字段；如用户确认，应沉淀到 skill，并评估是否把 `create_register_templates` 扩展为支持 `平台用户参与范围=指定参赛代理或用户`、UID 输入、合伙人分组、系统自动报名选项。
+- `temp/` 未修改，未迁移。
+
+## 2026-05-05 浏览器模式批量创建转盘抽奖任务和报名模板
+
+- 用户要求：浏览器模式创建 7 个任意 `转盘抽奖` 任务，然后创建 6 个 `活动用户报名模板`。
+- 执行前按规则 dry-run 并让用户确认缓存参数：
+  - 转盘任务：`create_roulette_participant_scope_tasks --scopes all,vip,newuser,nocharge,olduser,agent,user --uid 9881271952 --visible`。
+  - 报名模板第一批：`create_register_templates --signup-modes auto,manual,team,auto_manual --visible`。
+  - 报名模板第二批：`create_register_templates --signup-modes auto,manual --name-prefix 自动化报名模板_补充 --visible`。
+- 初次执行转盘任务时，登录 helper 两次误判普通验证码可见，未创建任何数据；只读检查确认 `/prod-api/captchaImage` 返回 `captchaEnabled=false`，页面只有 `账号`、`密码`、`谷歌验证码`。已修复 `scripts/lib/browser.mjs`：普通验证码判断改为 DOM 精确匹配 `placeholder === "验证码"`，避免误判 `谷歌验证码` 或隐藏输入。
+- 转盘抽奖任务创建成功 7 条，均为可见浏览器模式：
+  - `4802`: `转盘抽奖_scope_all_20260505155743`，参与范围 `报名的所有用户`。
+  - `4803`: `转盘抽奖_scope_vip_20260505155743`，参与范围 `VIP 等级`，`VIP 0` 到 `VIP 0`，`VIP白名单允许=同等级允许`。
+  - `4804`: `转盘抽奖_scope_newuser_20260505155743`，参与范围 `注册新用户`，选择 `活动期间注册用户`。
+  - `4805`: `转盘抽奖_scope_nocharge_20260505155743`，参与范围 `未充值新用户`。
+  - `4806`: `转盘抽奖_scope_olduser_20260505155743`，参与范围 `老用户`，选择 `活动开始前注册用户`。
+  - `4807`: `转盘抽奖_scope_agent_20260505155743`，参与范围 `指定代理`，UID `9881271952`。
+  - `4808`: `转盘抽奖_scope_user_20260505155743`，参与范围 `指定用户`，UID `9881271952`。
+- 转盘任务验证依据：
+  - 每条均观察到 `POST /prod-api/activity/task` HTTP 200，响应 `code=200`、`msg=操作成功`。
+  - 每条创建后均按任务别名搜索，列表返回对应任务编号和参与范围。
+- 活动用户报名模板创建成功 6 条，均为可见浏览器模式：
+  - `2720`: `自动化报名模板_auto_20260505160032`，`注册即报名`。
+  - `2721`: `自动化报名模板_manual_20260505160032`，`用户手动点击报名`。
+  - `2722`: `自动化报名模板_team_20260505160032`，`团体报名方式`，`最小团队人数=2`。
+  - `2723`: `自动化报名模板_auto_manual_20260505160032`，`注册+手动点击报名方式`。
+  - `2724`: `自动化报名模板_补充_auto_20260505160137`，`注册即报名`。
+  - `2725`: `自动化报名模板_补充_manual_20260505160137`，`用户手动点击报名`。
+- 报名模板验证依据：
+  - 每条均观察到 `POST /prod-api/activity/apply` HTTP 200，响应 `code=200`、`msg=操作成功`。
+  - 每条创建后均按模板名称搜索，列表返回对应模板 ID，`平台用户参与范围=全平台用户`，最近编辑人 `auto`。
+- 本次是复用既有缓存链路和已记录参数；除登录 helper 误判修复外，未新增业务参数。
+- `temp/` 未修改，未迁移。
+
+## 2026-05-05 稳定登录等待逻辑
+
+- 用户确认：staging 登录页没有普通图形验证码，短暂出现 `placeholder="验证码"` 是页面未完全加载/状态未稳定导致。
+- 只读验证：
+  - `/prod-api/captchaImage` 返回 `captchaEnabled=false`、`code=200`，且无图片。
+  - 页面稳定后只有 `账号`、`密码`、`谷歌验证码` 必填登录输入。
+- 已修复 `skills/weex-admin-ops/scripts/lib/browser.mjs`：
+  - 以 `/prod-api/captchaImage` 的 `captchaEnabled` 为准。
+  - `captchaEnabled=false` 时，等待普通验证码输入隐藏，但短暂残留不再中止登录。
+  - 只有 `captchaEnabled=true` 且独立普通验证码输入可见时，才报需要普通验证码处理。
+  - 登录按钮点击改为 DOM 内部点击，并观察 `/prod-api/login`；如果未观察到登录请求，会重试一次点击。
+  - 登录响应和最终 URL 只用于流程判断，不记录 token。
+- 验证结果：
+  - 可见浏览器模式登录 `/activity/register` 成功，最终 URL `https://stg-activity.weex.tech/activity/register`，`/prod-api/login` 返回 `code=200`。
+  - 可见浏览器模式登录 `/activity/task` 成功，最终 URL `https://stg-activity.weex.tech/activity/task`。
+- `temp/` 未修改，未迁移。
+
 - 其他人克隆仓库后可以直接读取项目内 `skills/weex-admin-ops/` 接力；如需 Codex 自动发现，可再复制到本机 `$CODEX_HOME/skills/weex-admin-ops`。
 - “创建一个新手活动，用默认配置”的具体页面路径、必填字段、默认配置和成功断言尚未沉淀。
 - 假钱账户页面链路目前为 `candidate`，需要重复验证或用户确认后再升级为 `verified`。

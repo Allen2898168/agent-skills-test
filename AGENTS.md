@@ -44,10 +44,11 @@
 ## Browser And Evidence
 - 页面操作优先使用真实浏览器自动化。
 - 自动化操作默认不可见/后台运行；只有用户明确要求“可见操作”“打开浏览器操作”“让我看着操作”等表达时，才打开有界面的真实浏览器。
+- 同一业务链路在可见浏览器模式和默认不可见模式下可能存在不同执行路径；沉淀时必须记录已验证的模式，未验证的模式不得写成已跑通。
 - 操作成功不能只看点击完成，必须验证至少一种结果：URL、页面关键文案、表格或表单状态、toast/message、关键接口响应或用户要求的截图证据。
 - 默认不保存截图；只有用户明确要求“截图”“保存截图”“留证据图”等指令时才保存截图。
 - 截图统一保存到 `artifacts/screenshots/<中文业务域>/<中文页面或操作>/`。
-- 最终回复必须说明最终 URL、操作结果、验证依据；如果用户要求截图，说明截图路径；如果更新了 skill，也要说明。
+- 最终回复必须说明最终 URL、操作结果、验证依据；如果用户要求截图，说明截图路径；如果更新了 skill 或动作缓存，也要说明。
 
 ## Missing Information
 - 如果操作缺少必要参数，必须先列出缺失项。
@@ -57,12 +58,13 @@
 
 ## Skill Update Discipline
 - 当后台操作链路被实际跑通后，必须询问是否沉淀到项目内 `skills/weex-admin-ops/`；如果用户已提前授权自动沉淀，则直接更新。
-- 稳定、重复出现或多次跑通的链路，应优先沉淀成可复用脚本，并登记到 `scripts/action-cache.json`。
+- 新跑通链路沉淀时必须同时评估 skill 文档和动作缓存；当前 skill 未覆盖的新链路写入对应 reference，可复用且参数化成本合理的链路还必须沉淀成脚本并登记到 `scripts/action-cache.json`。
+- 稳定、重复出现或多次跑通的链路，应优先沉淀成可复用脚本，并登记到 `scripts/action-cache.json`；如果暂不缓存，必须在交接记录和最终回复中说明原因。
 - 第一次失败但重试后出现稳定路径时，必须把稳定路径补充到对应 skill，并同步更新 `docs/session-handoff.md`。
 - skill 更新必须按业务域拆分，不把所有流程追加到单个大文件。
 - `SKILL.md` 只保留核心工作流和 reference 导航；页面细节、默认配置、选择器、断言、关联关系、组件操作分别写入对应 references。
 - 单个 markdown 文件接近 250 行时，必须先拆分再继续追加。
-- 脚本分层、缓存、组件复用和文件长度规则以 `skills/weex-admin-ops/SKILL.md`、`references/action-cache.md`、`references/components.md` 为准。
+- 脚本分层、缓存、组件复用、浏览器模式和文件长度规则以 `skills/weex-admin-ops/SKILL.md`、`references/action-cache.md`、`references/components.md` 为准。
 
 ## Relationships And Reuse
 - 每次沉淀流程时，必须检查是否产生新的业务关联关系或可复用组件操作。
@@ -82,6 +84,8 @@
 - 如果某条链路已经沉淀到 `weex-admin-ops` skill，交接记录只保留摘要和 skill 文件路径，不重复粘贴完整流程。
 
 ## Change Discipline
-- 修改 `AGENTS.md` 或 skill 文件前，先说明将写入什么。
-- 用户说 `ok`、`确认` 或明确同意后再写入讨论中的规范正文。
+- 修改 `AGENTS.md` 前，先说明将写入什么；用户说 `ok`、`确认` 或明确同意后再写入讨论中的规范正文。
+- 只要有新跑通的、当前 skill 尚未覆盖的、且不是仅调整参数就能复用既有链路实现的新链路，必须在跑通后立即询问用户是否沉淀到项目内 `skills/weex-admin-ops/`，并同步说明是否适合登记动作缓存。
+- 用户确认沉淀后，再更新 skill 和适用的动作缓存；未确认前不得写入 skill 或缓存。
+- `temp/` 迁移仍需用户单独确认。
 - 不改无关文件。

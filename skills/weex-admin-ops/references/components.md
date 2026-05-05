@@ -22,7 +22,7 @@ For each component pattern, record:
 
 ### Element UI Single Select
 
-Status: candidate  
+Status: candidate
 Last verified: 2026-05-04
 
 Where it appears:
@@ -34,7 +34,7 @@ Locator strategy:
 
 Operation steps:
 1. Locate the form item by label.
-2. Click its `.el-select` input or suffix icon.
+2. Click its `.el-select` container or suffix icon; this is more reliable than clicking the readonly input directly in headless mode.
 3. Wait for a visible `.el-select-dropdown`.
 4. Click the exact visible option text.
 5. Wait until the selected text appears in the control or the dependent field updates.
@@ -46,18 +46,20 @@ Success assertion:
 Common failure modes:
 - Multiple hidden dropdowns exist in the DOM; only interact with the visible dropdown.
 - Fuzzy label matching can hit a longer label that contains the same text.
+- In invisible browser mode, inner radio or select spans can intercept pointer events when clicking the input directly.
 
 Related helper:
 - `scripts/lib/element-ui.mjs`
 
 ### Element UI Multi Select With Blur
 
-Status: candidate  
+Status: candidate
 Last verified: 2026-05-04
 
 Where it appears:
 - Prize `仓位空投` trade-pair selector.
 - Activity task filters `标签-转手动发奖` and `报名国家-转手动发奖`.
+- Activity task add dialog field `指定国家或地区`.
 
 Locator strategy:
 - Prefer form label plus `.el-select`.
@@ -76,13 +78,22 @@ Success assertion:
 Common failure modes:
 - Selecting text without choosing a real dropdown option does not bind the value.
 - Leaving the dropdown open can block later fields or submit buttons.
+- In the activity task add dialog, the multi-select tags input can intercept pointer events. Prefer clicking the `.el-select` parent container scoped to the form item, then assert a visible `.el-tag` before continuing.
 
 Related helper:
 - `scripts/lib/element-ui.mjs`
 
+### Activity Register Management Components
+
+Status: candidate
+Last verified: 2026-05-05
+
+Detailed component patterns for `活动用户报名管理` search filters are split out to keep this shared file small:
+- `components/activity-register-management.md`
+
 ### Multilingual Field Expansion
 
-Status: candidate  
+Status: candidate
 Last verified: 2026-05-04
 
 Where it appears:
@@ -107,13 +118,14 @@ Success assertion:
 Common failure modes:
 - Clicking the wrong multilingual button when several fields expose the same component.
 - English tab or row is hidden until the component expands.
+- Activity task fields each have their own multilingual switch. Filling only the first visible `英语` input can update `任务名称` while leaving `任务内容` and `任务标签` English values empty. Open and fill multilingual values per form item label.
 
 Related helper:
 - `scripts/lib/element-ui.mjs`
 
 ### Image Upload
 
-Status: candidate  
+Status: candidate
 Last verified: 2026-05-04
 
 Where it appears:
@@ -145,7 +157,7 @@ Related helpers:
 
 ### Table Horizontal Scroll
 
-Status: candidate  
+Status: candidate
 Last verified: 2026-05-04
 
 Where it appears:
@@ -171,7 +183,7 @@ Related helper:
 
 ### Confirmation Dialog
 
-Status: candidate  
+Status: candidate
 Last verified: 2026-05-04
 
 Where it appears:

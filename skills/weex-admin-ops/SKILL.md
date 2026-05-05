@@ -39,6 +39,7 @@ This skill is not only for testing. It should help Codex interpret natural-langu
 10. Verify success using URL, page text, table/form state, toast/message, API response, or user-requested screenshot evidence. Do not treat a completed click as success by itself.
 11. Save screenshots only when the user explicitly asks for screenshots or visual evidence. Store them under `artifacts/screenshots/<中文业务域>/<中文页面或操作>/`.
 12. If a flow is newly discovered or improved, update the references with placeholders instead of secrets.
+13. For newly proven reusable flows, evaluate both documentation and action-cache updates. If a flow is cacheable, add or update the script and cache manifest; if it is not cached, record the reason.
 
 ## Browser Execution
 
@@ -125,6 +126,7 @@ Before adding or updating a workflow, check whether the flow reveals a reusable 
 - Record reusable UI behavior in `references/components.md`.
 - Reference those files from the operation playbook instead of repeating long explanations.
 - If the reusable operation is scripted, put the helper in `scripts/lib/` and keep business orchestration under `scripts/business/<business-domain>/`.
+- Record whether the proven path used visible browser mode or default invisible mode. Treat untested mode variants as unverified until they are run and checked.
 
 ## Growth Management
 

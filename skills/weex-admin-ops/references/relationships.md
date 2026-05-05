@@ -20,9 +20,33 @@ For each relationship, record:
 
 ## Known Relationships
 
+### Activity Registration Templates Feed Template Selectors
+
+Status: candidate
+Last verified: 2026-05-05
+
+Source object:
+- Activity user registration templates under `活动通用模块管理 / 活动用户报名管理`.
+
+Consumer object:
+- The same page's `用户报名模板id` search filter.
+- Activity configuration pages that select a user registration template.
+
+Dependency or limitation:
+- Templates are displayed by `用户报名模板id` and `用户管理模板名称`.
+- The `用户报名模板id` search field is a remote multi-select. Typed text must be converted into a selected option before the id is bound.
+- Downstream activity pages may impose compatibility constraints based on activity type and template participant scope; verify the consuming page before assuming a template can be used.
+
+Related playbooks:
+- `operations/activity-register-management.md`
+
+Related references:
+- `selectors/activity-register-management.md`
+- `components.md`
+
 ### Prize Records Feed Task Reward Selectors
 
-Status: candidate  
+Status: candidate
 Last verified: 2026-05-04
 
 Source object:
@@ -49,7 +73,7 @@ Related playbooks:
 
 ### Prize Category Controls Prize Subcategory Options
 
-Status: candidate  
+Status: candidate
 Last verified: 2026-05-04
 
 Source object:
@@ -73,7 +97,7 @@ Related playbooks:
 
 ### Activity Type Controls Task Combo And Reward Branches
 
-Status: candidate  
+Status: candidate
 Last verified: 2026-05-04
 
 Source object:
@@ -92,9 +116,34 @@ Related playbooks:
 - `operations/activity-task-roulette-reward-modes.md`
 - `operations/activity-task-roulette-conditions.md`
 
+### Participant Scope Controls Activity Task Extra Fields
+
+Status: candidate
+Last verified: 2026-05-05
+
+Source object:
+- Activity task add dialog field `任务参与范围` for `转盘抽奖`.
+
+Consumer object:
+- Extra eligibility fields and backend validation in activity task creation.
+
+Dependency or limitation:
+- `指定代理` and `指定用户` require valid UID values. UID `123456` failed validation; UID `9881271952` passed in staging.
+- `指定国家或地区` depends on a multi-select value being bound. The selected country must appear as a visible tag before submit.
+- `VIP 等级` requires start and end levels plus `VIP白名单允许`.
+- `注册新用户` and `老用户` require their corresponding dropdown values.
+- `未充值新用户` did not expose an extra field in the validated flow.
+
+Related playbooks:
+- `operations/activity-task-roulette-participant-scopes.md`
+
+Related references:
+- `selectors/activity-task-management.md`
+- `components.md`
+
 ### Activity Config Type Controls Registration Template Compatibility
 
-Status: candidate  
+Status: candidate
 Last verified: 2026-05-04
 
 Source object:

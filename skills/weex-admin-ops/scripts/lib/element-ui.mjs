@@ -52,9 +52,13 @@ export async function selectFirstByLabel(page, label, required = true, blur = fa
   try {
     const item = await formItem(page, label);
     await item.scrollIntoViewIfNeeded();
-    const input = await item.$("input");
-    if (!input) throw new Error(`Select input not found: ${label}`);
-    await input.click();
+    const opened = await item.evaluate(root => {
+      const select = root.querySelector(".el-select");
+      if (!select) return false;
+      select.click();
+      return true;
+    });
+    if (!opened) throw new Error(`Select input not found: ${label}`);
     await sleep(800);
     const selected = await page.evaluate(selectFirstVisibleOption);
     if (!selected) throw new Error(`No option found: ${label}`);
@@ -69,6 +73,46 @@ export async function selectFirstByLabel(page, label, required = true, blur = fa
     if (required) throw error;
     return null;
   }
+}
+
+export async function clickVisibleDialogText(page, text) {
+  const d = await dialog(page);
+  const clicked = await d.evaluate((root, targetText) => {
+    const visible = el => {
+      const r = el.getBoundingClientRect();
+      return r.width > 0 && r.height > 0;
+    };
+    const all = [...root.querySelectorAll("label, span, button, div")].filter(el => visible(el));
+    const exact = all.filter(el => (el.innerText || "").trim() === targetText);
+    const candidates = (exact.length ? exact : all.filter(el => {
+      const text = (el.innerText || "").trim();
+      return text.includes(targetText) && text.length <= targetText.length + 12;
+    }))
+      .sort((a, b) => a.querySelectorAll("*").length - b.querySelectorAll("*").length);
+    if (!candidates.length) return false;
+    candidates[0].click();
+    return true;
+  }, text);
+  if (!clicked) throw new Error(`Visible dialog text not found: ${text}`);
+  await sleep(500);
+}
+
+export async function clickFirstVisibleChoiceByLabel(page, label) {
+  const item = await formItem(page, label);
+  await item.scrollIntoViewIfNeeded();
+  const clicked = await item.evaluate(root => {
+    const visible = el => {
+      const r = el.getBoundingClientRect();
+      return r.width > 0 && r.height > 0;
+    };
+    const choice = [...root.querySelectorAll(".el-radio, .el-checkbox")]
+      .find(el => visible(el));
+    if (!choice) return false;
+    choice.click();
+    return true;
+  });
+  if (!clicked) throw new Error(`Visible choice not found: ${label}`);
+  await sleep(600);
 }
 
 export async function setEnglish(page, enName) {

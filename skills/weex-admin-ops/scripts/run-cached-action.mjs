@@ -28,11 +28,19 @@ Options:
   --count <n>         Count for create_prizes
   --name-prefix <x>   Name prefix for create_prizes
   --alias-prefix <x>  Alias prefix for create_prizes
+  --scopes <csv>      Scopes for create_roulette_participant_scope_tasks
+  --uid <uid>         UID for agent/user participant scopes
+  --country <text>    Country/region for country participant scope
+  --country-first     Choose first country/region option
+  --signup-modes <csv> Signup modes for create_register_templates
+  --min-team <n>      Minimum team size for team signup mode
+  --permissions <csv> Permission limits for create_register_templates: signup,view
+  --people-limit <n>  Optional registration people limit
 `;
 }
 
 function parseCacheArgs() {
-  const parsed = parseFlags(process.argv.slice(2), { booleans: ["--list", "--visible", "--dry-run"] });
+  const parsed = parseFlags(process.argv.slice(2), { booleans: ["--list", "--visible", "--dry-run", "--country-first"] });
   const passthrough = {};
   for (const [key, value] of Object.entries(parsed)) {
     if (!["help", "list", "visible", "dryRun", "query", "action"].includes(key)) passthrough[key] = value;
