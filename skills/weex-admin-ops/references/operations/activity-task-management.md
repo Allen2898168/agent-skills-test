@@ -113,6 +113,19 @@ Create `转盘抽奖` activity tasks and validate the reward-mode branches.
 Entry:
 `https://stg-activity.weex.tech/activity/task`
 
+Request confirmation checklist before execution:
+- Confirm the task type or reward-mode branch to create.
+- Confirm whether the user wants default values or explicit values for each configurable field.
+- For this chain, explicitly list at least:
+  - `任务条件1` task type
+  - reward mode
+  - reward prize or prize type
+  - reward range fields when shown
+  - participant scope
+  - risk control
+  - visible or invisible browser mode
+- If a requested combination conflicts with page behavior or known backend rules, explain the conflict first and wait for updated inputs.
+
 Common defaults:
 - Activity type: `转盘抽奖`.
 - Enable multilingual settings for `任务名称`, `任务内容`, and `任务标签`; fill the default value and English value.
@@ -128,6 +141,8 @@ Common defaults:
 Reward-mode branches:
 - `单一奖励`:
   - Reward selector is scoped to lottery-count prizes.
+  - If the user does not specify reward range values, the current suggested defaults are `输入最小数值=10` and leaving `输入最大数值` blank.
+  - These defaults must be shown to the user and confirmed before execution.
   - Validated by selecting a prize containing `抽奖次数`.
   - Created task ID `4737`, name `转盘抽奖_single_1777916448621`.
 - `限时奖励不同`:
@@ -229,9 +244,19 @@ Environment: staging
 Purpose:
 Create `转盘抽奖` tasks using reward mode `单一奖励` with different `任务条件1` task types.
 
+Request confirmation checklist before execution:
+- `任务条件1` task type
+- condition-specific extra fields exposed by that task type
+- reward prize to use
+- whether reward range should use defaults or explicit values
+- participant scope
+- risk control
+- visible or invisible browser mode
+- If the user only says `按默认配置`, first present the confirmed defaults below and ask for approval.
+
 Common defaults:
 - Reward selector: choose an `抽奖次数` prize.
-- Single reward requires both reward range inputs: set `输入最小数值=1` and `输入最大数值=1`.
+- Single reward reward-range defaults: set `输入最小数值=10`; leave `输入最大数值` blank unless the user explicitly asks to set it.
 - Task participant scope: `报名的所有用户`.
 - Task risk: `不审核KYC`.
 - Judge start time: `报名活动后`.
@@ -257,6 +282,11 @@ Validated created records:
 Known gaps:
 - `首次登录APP`: using an `抽奖次数` prize returned `code=500`, message `任务奖品只能选择合约抵扣金`. Retry this branch with a contract-deduction prize instead of the default lottery-count prize.
 - `新老现货划转任务`: field handling was resolved on 2026-05-05. For this task type, `判定开始时间` only shows `活动开始时间`; do not try to select `报名活动后`. Submit reached the backend but returned `code=500`, message `新老划转任务重复，已配置新老划转任务的编号是:964`. Treat creation as blocked by a business uniqueness rule unless the existing task can be reused, modified, or removed.
+
+Reasonableness checks before submit:
+- Do not keep the default `抽奖次数` prize when the selected task type is known to require another reward type, such as `首次登录APP`.
+- If page validation or backend rules reject the user's requested combination, stop and explain the constraint instead of repeatedly retrying the same invalid combination.
+- If min/max fields are visible, confirm whether the user accepts the default `最小数值=10` and `最大数值留空` or wants explicit values.
 
 Success assertions:
 - `POST /prod-api/activity/task` returns HTTP 200 with `code=200` and `msg=操作成功`.

@@ -522,6 +522,28 @@
 - 当前阻塞点：无。
 - 下一步建议：后续新增登录脚本时，先等待 `/prod-api/captchaImage` 与登录表单稳定，只填写 `谷歌验证码`；不要把 `<GOOGLE_CODE>` 复用到普通 `验证码`。
 
+## 2026-05-05 任务需求确认与稳定重试路径沉淀规则
+
+- 当前目标：补充 `weex-admin-ops` 的需求确认、默认值确认和稳定重试路径沉淀规则。
+- 已完成事项：
+  - 已更新 `AGENTS.md`，要求后续用户提出创建类需求时，agent 必须先基于当前已验证链路整理必填项、可配置项、可建议默认值和已知限制，再等待用户确认。
+  - 已更新 `AGENTS.md`，要求任何“第一次链路失败、重试后出现稳定路径”的情况，一旦验证稳定，就必须补充到对应 skill 并同步更新交接文档。
+  - 已更新 `skills/weex-admin-ops/SKILL.md`，要求创建、编辑、删除前先汇总当前链路的配置项、默认项和限制，并在参数不合理时先提示用户。
+  - 已更新 `skills/weex-admin-ops/references/defaults.md`，明确“默认配置”只是候选值，不等于用户确认；用户说“用默认配置”时，也必须先展示可配置项和默认值再执行。
+  - 已更新 `skills/weex-admin-ops/references/operations/activity-task-management.md`，为 `转盘抽奖` 创建流程增加需求确认清单与合理性检查。
+  - 已补充 `转盘抽奖 / 单一奖励` 当前建议默认值：用户未指定时，默认建议 `输入最小数值=10`，`输入最大数值` 默认留空，但执行前仍需用户确认。
+- 影响范围：
+  - 后续处理后台创建类需求时，不能直接把默认值写入页面后执行。
+  - 如果用户给出的配置与页面限制、后端规则或已验证链路冲突，必须先解释冲突点，不得硬做。
+  - 重试后验证稳定的新路径，不再只停留在会话经验，必须正式写入 skill 和本交接文档。
+- 已更新 skill 文件：
+  - `AGENTS.md`
+  - `skills/weex-admin-ops/SKILL.md`
+  - `skills/weex-admin-ops/references/defaults.md`
+  - `skills/weex-admin-ops/references/operations/activity-task-management.md`
+- 当前阻塞点：无。
+- 下一步建议：后续如再出现“首轮失败、二次成功”的页面链路，应按本规则立即补充到具体业务域文档，不要只在口头说明中保留。
+
 - 其他人克隆仓库后可以直接读取项目内 `skills/weex-admin-ops/` 接力；如需 Codex 自动发现，可再复制到本机 `$CODEX_HOME/skills/weex-admin-ops`。
 - “创建一个新手活动，用默认配置”的具体页面路径、必填字段、默认配置和成功断言尚未沉淀。
 - 假钱账户页面链路目前为 `candidate`，需要重复验证或用户确认后再升级为 `verified`。
