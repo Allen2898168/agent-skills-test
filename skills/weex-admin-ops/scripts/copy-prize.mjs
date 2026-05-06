@@ -8,8 +8,8 @@ const { repoRoot } = pathsFrom(import.meta.url);
 
 function usage() {
   return `Usage:
-  node skills/weex-admin-ops/scripts/copy-prize.mjs --prize-id 462
-  node skills/weex-admin-ops/scripts/copy-prize.mjs --prize-id 462 --visible
+  node scripts/copy-prize.mjs --prize-id 462
+  node scripts/copy-prize.mjs --prize-id 462 --visible
 
 Required environment:
   WEEX_ADMIN_PASSWORD       staging password

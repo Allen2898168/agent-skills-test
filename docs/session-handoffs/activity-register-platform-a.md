@@ -1,0 +1,83 @@
+# 活动用户报名管理平台范围 A
+
+## 2026-05-06 活动用户报名管理指定参赛代理或用户流程
+
+- 当前目标：跑通 `活动通用模块管理 / 活动用户报名管理 / 新增` 中 `平台用户参与范围=指定参赛代理或用户`，并覆盖可用的 `限制用户参与范围` 分支。
+- 执行环境：staging，页面 `/activity/register`。
+- 执行模式：
+  - 可见浏览器模式：已跑通。
+  - 默认不可见浏览器模式：已跑通。
+- 通用输入：
+  - `用户报名方式`：`注册即报名`。
+  - `限制用户权限`：不额外勾选；页面默认 `报名` 为 disabled checked。
+  - `可参与注册时间范围`：关闭。
+  - `报名人数限制`：留空。
+  - `指定代理`、`指定用户UID`、限制范围内代理 UID：`9881271952`。
+  - `代理角色细分`：打开并勾选 `总代理`、`代理`、`直客`。
+  - `合伙人分组`：多选下拉，选择第一个可用项并通过 Escape/点击弹窗空白处收起。
+- 已确认置灰逻辑：
+  - 在 `指定参赛代理或用户` 下，`限制用户参与范围` 中 `用户`、`国家或区域`、`设备` 为 disabled。
+- 可见模式创建结果：
+  - `2731`：`指定_无_20260506085609`
+  - `2732`：`指定_代理及其直客_20260506085609`
+  - `2733`：`指定_代理下级代理所有直客_20260506085609`
+  - `2734`：`指定_KYC_20260506085609`
+  - `2735`：`指定_VIP等级_20260506085809`
+  - `2736`：`指定_风控标签_20260506085809`
+  - `2737`：`指定_合约账户余额_20260506085809`
+  - `2738`：`指定_灰海外做市商户_20260506085809`
+  - `2739`：`指定_非KYC用户_20260506085809`
+  - `2740`：`指定_非绑定手机号用户_20260506085809`
+- 不可见模式创建结果：
+  - `2741`：`指定_无_20260506085947`
+  - `2742`：`指定_代理及其直客_20260506085947`
+  - `2743`：`指定_代理下级代理所有直客_20260506085947`
+  - `2744`：`指定_KYC_20260506085947`
+  - `2745`：`指定_VIP等级_20260506085947`
+  - `2746`：`指定_风控标签_20260506085947`
+  - `2747`：`指定_合约账户余额_20260506085947`
+  - `2748`：`指定_灰海外做市商户_20260506085947`
+  - `2749`：`指定_非KYC用户_20260506085947`
+  - `2750`：`指定_非绑定手机号用户_20260506085947`
+- 分支默认项：
+  - `KYC`：下拉多选选择第一个可用区域；不可见模式记录为 `中国`。
+  - `VIP等级`：选择 `VIP0`，`VIP白名单限制=同等级限制`。
+  - `风控标签`：选择第一个可用风控标签；可见模式曾选到 `红黄牌用户`，不可见模式选到 `锁仓`。
+  - `合约账户余额`：填 `0`。
+- 验证依据：
+  - 每条均观察到 `POST /prod-api/activity/apply` HTTP 200，响应 `code=200`、`msg=操作成功`。
+  - 每条创建后均按模板名称搜索，列表返回对应模板 ID，`平台用户参与范围=指定参赛代理或用户`，最近编辑人 `auto`。
+- 已修复并收敛脚本组件逻辑：
+  - `skills/weex-admin-ops/scripts/create-register-templates.mjs`
+  - `skills/weex-admin-ops/scripts/business/activity-register-management/plan.mjs`
+  - `skills/weex-admin-ops/scripts/business/activity-register-management/create.mjs`
+  - `skills/weex-admin-ops/scripts/business/activity-task-management/roulette-participant-ui.mjs`
+  - `skills/weex-admin-ops/scripts/business/prize-management/copy.mjs`
+  - `skills/weex-admin-ops/scripts/business/prize-management/create.mjs`
+  - `skills/weex-admin-ops/scripts/lib/element-ui.mjs`
+  - 关键修正：多选/单选下拉选择后必须收起；选择 Element UI 下拉项时取最后打开的可见 dropdown，避免旧 dropdown 干扰。
+  - 已将表单 label 定位、输入填充、checkbox/radio 选择、checkbox 清空、switch、按钮点击、表格行操作、下拉选择/关闭等组件级行为收敛到 `scripts/lib/element-ui.mjs`，业务脚本只保留编排。
+- 已补充规范：
+  - `AGENTS.md` 和 `skills/weex-admin-ops/SKILL.md` 明确要求新链路写脚本前先检查 `references/components.md`、页面级 components 和 `scripts/lib/`。
+  - 发现下拉、单选、多选、开关、日期、上传、表格、弹窗、搜索表单等组件级行为时，优先复用或扩展公共 helper。
+- 已正式沉淀：
+  - `skills/weex-admin-ops/references/operations/activity-register-management.md`
+  - `skills/weex-admin-ops/references/components.md`
+  - `skills/weex-admin-ops/references/action-cache.md`
+  - `skills/weex-admin-ops/scripts/action-cache.json`
+- 收敛后最小基准：
+  - 活动用户报名管理：
+    - 可见浏览器模式：创建 `2751`，模板名 `基准可见_VIP等级_20260506091052`，`POST /prod-api/activity/apply` HTTP 200，响应 `code=200`，按名称搜索返回表格行。
+    - 不可见浏览器模式：创建 `2752`，模板名 `基准不可见_VIP等级_20260506091130`，`POST /prod-api/activity/apply` HTTP 200，响应 `code=200`，按名称搜索返回表格行。
+  - 奖品管理创建：
+    - 可见浏览器模式：创建 `506`，名称 `基准可见币种奖励_20260506091455`，别名 `baseline_visible_coin_20260506091455`，`/prod-api/common/uploadImgReplace` 和 `POST /prod-api/activity/prize` 均 HTTP 200，按别名搜索返回表格行。
+    - 不可见浏览器模式：创建 `505`，名称 `基准不可见币种奖励_20260506091404`，别名 `baseline_invisible_coin_20260506091404`，`/prod-api/common/uploadImgReplace` 和 `POST /prod-api/activity/prize` 均 HTTP 200，按别名搜索返回表格行。
+    - 首次并行跑可见/不可见时，可见模式登录态不稳定跳回 `/login?redirect=%2Findex`；串行重跑可见模式通过。后续基准建议串行跑浏览器脚本。
+  - 奖品管理复制：
+    - 可见浏览器模式：复制 `506` 成功，生成 `508`，`POST /prod-api/activity/prize/copy` HTTP 200，按原别名搜索返回复制行。
+    - 不可见浏览器模式：复制 `505` 成功，生成 `507`，`POST /prod-api/activity/prize/copy` HTTP 200，按原别名搜索返回复制行。
+    - 首次并行跑可见/不可见时，可见登录失败且两个复制进程在浏览器关闭阶段挂住；已结束该批进程，串行重跑通过。后续不要并行运行会共用登录态的浏览器基准。
+  - 活动任务管理国家范围：
+    - 可见浏览器模式：创建 `4862`，任务名 `基准可见国家任务_country_20260506091808`，选择国家 `中国`，`POST /prod-api/activity/task` HTTP 200，响应 `code=200`，按任务名搜索返回表格行。
+    - 不可见浏览器模式：创建 `4863`，任务名 `基准不可见国家任务_country_20260506091858`，选择国家 `中国`，`POST /prod-api/activity/task` HTTP 200，响应 `code=200`，按任务名搜索返回表格行。
+- 注意：`scripts/lib/element-ui.mjs` 由于承担公共组件 helper 较多，后续若继续增长应拆分为 select/form/table/dialog 等子模块。

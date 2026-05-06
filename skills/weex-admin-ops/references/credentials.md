@@ -7,7 +7,7 @@ Do not store real passwords, Google codes, tokens, cookies, or API keys in this 
 Use this profile when the user does not provide another account.
 
 - Environment: staging
-- Username: `auto`
+- Username source: `WEEX_ADMIN_USERNAME`; fallback username: `auto`
 - Password source: `WEEX_ADMIN_PASSWORD`
 - Google code source: `WEEX_ADMIN_GOOGLE_CODE`
 
@@ -15,10 +15,17 @@ Resolution order:
 1. User-provided account/password/code in the current request.
 2. Environment variables from the current shell.
 3. Local untracked `.env.local` file if the active tooling loads it.
-4. Ask the user for the missing secret.
+4. If username is still missing, use staging default `auto` and state that default explicitly.
+5. If password or Google code is missing, stop before login and ask the user to set the missing environment variable.
 
 Local setup:
 1. Copy `.env.example` to `.env.local`.
 2. Keep `WEEX_ADMIN_USERNAME=auto` unless using another account.
-3. Fill password and Google code locally.
+3. Fill `WEEX_ADMIN_PASSWORD` and `WEEX_ADMIN_GOOGLE_CODE` locally; both are required for login operations.
 4. Do not commit `.env.local`.
+
+Startup check:
+- At the start of a new project task that may require login or admin page operation, check whether `WEEX_ADMIN_USERNAME`, `WEEX_ADMIN_PASSWORD`, and `WEEX_ADMIN_GOOGLE_CODE` are present.
+- Do not print the actual values.
+- Missing `WEEX_ADMIN_USERNAME` is allowed only for staging because `auto` is the documented fallback.
+- Missing `WEEX_ADMIN_PASSWORD` or `WEEX_ADMIN_GOOGLE_CODE` must be reported before any login or state-changing admin operation.

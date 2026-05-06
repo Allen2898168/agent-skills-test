@@ -1,0 +1,123 @@
+# 活动任务管理核心链路 A
+
+## 2026-05-04 19:05 CEST 活动任务管理搜索验证
+
+- 当前目标：进入 `活动通用模块管理 / 活动任务管理`，并逐项验证搜索功能。
+- 环境：staging。
+- 页面：`/activity/task`。
+- 执行模式：用户要求浏览器模式，已使用可见浏览器执行；CDP 未连接，按 skill 规则使用项目 Playwright 兜底。
+- 操作类型：只读搜索和截图，不改变后台状态。
+- 已完成事项：
+  - 按左侧菜单顺序点击 `活动通用模块管理` -> `活动任务管理`，成功进入活动任务管理页面。
+  - 已分别设置并验证以下搜索项，每项单独执行并截图：`任务编号`、`任务别名`、`任务标签`、`备注`、`开始时间`、`结束时间`、`总分>=转手动发奖`、`标签-转手动发奖`、`报名国家-转手动发奖`。
+  - `标签-转手动发奖` 为多选下拉，已验证选项 `同设备多账号登录`；选中后页面立即请求列表接口，参数为 `dynamicAuditLabels[0]`。
+  - `报名国家-转手动发奖` 为多选下拉，已验证第一项 `中国`；选中后页面请求列表接口，参数为 `dynamicAuditCountryIds[0]=1`。
+  - 已验证列表可横向右滑并截图。
+- 验证依据：
+  - `/prod-api/activity/task/list` 在各搜索条件下返回 200。
+  - `getRiskLabelList`、`getAreaInfoList`、`selectAgencyGroupList` 等选项接口返回 200。
+- 截图路径：
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/00-进入活动任务管理.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/01-任务编号搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/02-任务别名搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/03-任务标签搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/04-备注搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/05-开始时间搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/06-结束时间搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/07-总分转手动发奖搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/08-标签转手动发奖多选.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/09-报名国家转手动发奖多选.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/10-列表右滑展示更多列.png`
+- 已更新 skill 文件：
+  - `skills/weex-admin-ops/references/routes.md`
+  - `skills/weex-admin-ops/references/operations/index.md`
+  - `skills/weex-admin-ops/references/operations/activity-task-management.md`
+  - `skills/weex-admin-ops/references/selectors/activity-task-management.md`
+  - `skills/weex-admin-ops/references/assertions/activity-task-management.md`
+- 当前阻塞点：无。
+- 下一步建议：继续活动任务管理的新增、查看、修改、复制、删除或历史功能时，优先读取本次新增的 activity-task-management references。
+
+## 2026-05-04 19:48 CEST 活动任务管理新增转盘抽奖验证
+
+- 当前目标：验证 `活动通用模块管理 / 活动任务管理` 的新增链路，活动类型为 `转盘抽奖`，并分别尝试四种任务奖励模式。
+- 环境：staging。
+- 页面：`/activity/task`。
+- 执行模式：用户要求浏览器模式，已使用可见浏览器执行；CDP 未连接，按 skill 规则使用项目 Playwright 兜底。
+- 操作类型：新增活动任务，改变后台状态。
+- 通用配置：
+  - `任务名称`、`任务内容`、`任务标签` 均点击 `多语言` 并填写英语。
+  - `任务参与范围` 使用单选式配置，成功创建时选 `报名的所有用户`。
+  - `任务风控` 实际表现为单选，成功创建时选 `不审核KYC`。
+  - `任务组合` 选择 `单一任务条件`。
+  - `任务条件1` 选择第一个任务类型 `kyc任务` 后出现 `KYC限制`，选择 `无kyc限制`。
+  - `判定开始时间` 选择 `报名活动后`。
+  - `任务次数更新` 选择 `仅1次，直至结束`。
+- 已完成事项：
+  - `单一奖励`：创建成功。任务ID `4737`，任务别名 `转盘抽奖_single_1777916448621`，`POST /prod-api/activity/task` 返回 200，搜索别名返回该任务。
+  - `限时奖励不同`：重试成功。任务ID `4739`，任务别名 `转盘抽奖_limited_1777917234014`，`POST /prod-api/activity/task` 返回 200，搜索别名返回该任务。`奖励变化` 下拉选项为 `X`、`+`、`归0`，本次选择 `+` 并填写变化值 `1`。注意必须精确定位 `奖励变化`，否则容易误命中 `奖励变化倒计时`。
+  - `正常奖励+权益奖励`：创建成功。任务ID `4738`，任务别名 `转盘抽奖_rights_1777916626416`，`POST /prod-api/activity/task` 返回 200，搜索别名返回该任务。权益奖励路径为 `虚拟积分或资格` -> `VIP` -> 第一项 VIP 奖励。
+  - `混合奖励`：提交前字段已填写并截图；`POST /prod-api/activity/task` 返回 200，但页面提示 `system busy, please retry later` 和 `保存任务失败`，按任务别名 `转盘抽奖_mix_1777916693695` 搜索未返回结果。
+- 截图路径：
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/00-新增弹窗初始.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/01-选择转盘抽奖后表单.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/02-任务组合后字段.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/奖励模式-单一奖励.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/奖励模式-限时奖励不同.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/奖励模式-正常奖励权益奖励.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/奖励模式-混合奖励.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/03-单一奖励-提交前.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/04-单一奖励-创建后搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/05-限时奖励不同-提交前.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/06-限时奖励不同-错误.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/限时奖励不同-奖励变化下拉前.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/限时奖励不同-奖励变化下拉展开.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/05-限时奖励不同-重试提交前.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/06-限时奖励不同-重试创建后搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/07-正常奖励权益奖励-提交前.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/08-正常奖励权益奖励-创建后搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/09-混合奖励-提交前.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/10-混合奖励-创建后搜索.png`
+- 已更新 skill 文件：
+  - `skills/weex-admin-ops/references/operations/index.md`
+  - `skills/weex-admin-ops/references/operations/activity-task-management.md`
+  - `skills/weex-admin-ops/references/selectors/activity-task-management.md`
+  - `skills/weex-admin-ops/references/assertions/activity-task-management.md`
+- 当前阻塞点：
+  - `混合奖励` 标记为阻断：提交接口返回 200 但页面提示 `system busy, please retry later` 和 `保存任务失败`，后续搜索确认未创建。需要开发修复后再重新走该链路。
+- 下一步建议：
+  - 暂停继续重试 `混合奖励`，等待开发修复后再验证；不要仅用 HTTP 200 判定成功。
+  - 如需清理本次创建的任务，可按任务ID `4737`、`4738`、`4739` 执行删除；该删除会改变 staging 后台状态，执行前需确认。
+- 是否可回滚：成功创建的 `4737`、`4738`、`4739` 仍保留，可通过行操作 `删除` 清理。
+
+## 未解决问题
+
+## 2026-05-04 20:45 CEST 活动任务管理任务条件与单一奖励
+
+- 当前目标：确认 `转盘抽奖 / 单一任务条件` 下不同任务条件的选项和展开字段，并尝试创建不同任务条件的 `单一奖励` 任务。
+- 环境：staging。
+- 页面：`/activity/task`。
+- 操作类型：字段发现和新增活动任务；新增任务改变后台状态。
+- 已完成事项：
+  - 已确认 `任务条件1` 的任务类型选项共 14 个：`kyc任务`、`注册任务`、`划转任务`、`充值任务`、`邀请任务`、`合约交易量`、`现货交易量`、`现货持仓`、`收益额`、`KOL绑定`、`分享链接`、`合约&现货交易量`、`新老现货划转任务`、`首次登录APP`。
+  - 已记录每个任务类型展开后的字段，拆分后详见 `skills/weex-admin-ops/references/operations/activity-task-roulette-conditions.md`。
+  - 已确认 `单一奖励 / 正常奖励` 选择奖品后还必须填写 `输入最小数值` 和 `输入最大数值`。
+  - 已确认验证时应按任务名称检查列表；本次脚本里的 `roulette_single_cond_*` 是任务标签，不是列表 `任务别名` 搜索字段对应值。
+- 已创建并验证的 staging 任务：
+  - `4740`：`kyc任务`，任务名 `转盘抽奖_kyc任务_20260504203222`。
+  - `4741`：`注册任务`，任务名 `转盘抽奖_注册任务_20260504203222`。
+  - `4742`：`KOL绑定`，任务名 `转盘抽奖_KOL绑定_20260504203222`。
+  - `4743`：`划转任务`，任务名 `转盘抽奖_划转任务_20260504203222`。
+  - `4744`：`充值任务`，任务名 `转盘抽奖_充值任务_20260504203222`。
+  - `4745`：`收益额`，任务名 `转盘抽奖_收益额_20260504203222`。
+  - `4746`：`合约&现货交易量`，任务名 `转盘抽奖_合约&现货交易量_20260504203222`。
+  - `4747`：`kyc任务` 探针重跑，任务名 `roulette_kyc_probe_20260504203739`。
+- 当前阻塞点：
+  - `混合奖励` 已标记为阻断，等待开发修复后再验证。
+  - `首次登录APP` 单一奖励使用默认 `抽奖次数` 奖品时，后端返回 `任务奖品只能选择合约抵扣金`，后续需要改用合约抵扣金奖品重跑。
+  - `新老现货划转任务` 已精确选择任务类型，但仍提示 `任务条件1` 未填写完整，尚未完成创建验证。
+- 已更新 skill 文件：
+  - `skills/weex-admin-ops/references/operations/activity-task-management.md`
+  - `skills/weex-admin-ops/references/selectors/activity-task-management.md`
+  - `skills/weex-admin-ops/references/assertions/activity-task-management.md`
+- 截图：用户本轮未要求截图，未新增截图。
+- 是否可回滚：成功创建的任务可通过活动任务管理行操作删除；本次未清理。

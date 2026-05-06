@@ -1,5 +1,5 @@
 import { sleep } from "../../lib/browser.mjs";
-import { tableRows } from "../../lib/element-ui.mjs";
+import { clickRowActionByText, fillLabel, tableRows } from "../../lib/element-ui.mjs";
 
 export async function copyPrizeById(page, config, prizeId) {
   const original = await searchPrizeById(page, config, prizeId);
@@ -24,29 +24,14 @@ async function searchPrizeById(page, config, prizeId) {
 async function searchPrizeByAlias(page, config, alias) {
   await page.goto(`${config.baseUrl}/activity/prize`, { waitUntil: "domcontentloaded" });
   await sleep(1300);
-  const handle = await page.evaluateHandle(() => {
-    const norm = value => (value || "").replace(/\s/g, "");
-    const item = [...document.querySelectorAll(".el-form-item")]
-      .find(node => norm(node.querySelector(".el-form-item__label")?.innerText).includes("奖品别名"));
-    return item?.querySelector("input") || null;
-  });
-  const input = handle.asElement();
-  if (!input) throw new Error("Prize alias search input not found");
-  await input.fill(alias);
+  await fillLabel(page, "奖品别名", alias);
   await page.locator('button:has-text("搜索")').first().click();
   await sleep(1800);
   return tableRows(page);
 }
 
 async function clickRowActionById(page, prizeId, action) {
-  const index = await page.evaluate(id => [...document.querySelectorAll(".el-table__body-wrapper tbody tr")]
-    .findIndex(row => row.innerText.includes(String(id))), String(prizeId));
-  if (index < 0) throw new Error(`Row not found for prize ID: ${prizeId}`);
-  const fixedRows = page.locator(".el-table__fixed-right .el-table__fixed-body-wrapper tbody tr");
-  const mainRows = page.locator(".el-table__body-wrapper tbody tr");
-  const rows = await fixedRows.count() > index ? fixedRows : mainRows;
-  await rows.nth(index).locator(`button:has-text("${action}")`).first().click();
-  await sleep(900);
+  await clickRowActionByText(page, prizeId, action);
 }
 
 async function confirmMessageBox(page) {

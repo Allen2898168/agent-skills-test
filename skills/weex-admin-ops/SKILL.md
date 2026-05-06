@@ -1,6 +1,6 @@
 ---
 name: weex-admin-ops
-description: Operate, validate, and document WEEX activity admin workflows with web-access browser handling and bundled Playwright scripts. Use when Codex is asked to log in to the WEEX admin, navigate admin pages, create or edit activities or prizes, run browser-driven backend operations, apply default admin configurations, ask testers for missing business parameters, capture screenshots when explicitly requested, or update stored WEEX admin routes, selectors, assertions, defaults, known issues, and operation playbooks.
+description: Operate, validate, and document WEEX activity admin workflows with bundled Playwright scripts and optional web-access/CDP browser handling. Use when Codex is asked to log in to the WEEX admin, navigate admin pages, create or edit activities or prizes, run browser-driven backend operations, apply default admin configurations, ask testers for missing business parameters, capture screenshots when explicitly requested, or update stored WEEX admin routes, selectors, assertions, defaults, known issues, and operation playbooks.
 ---
 
 # WEEX Admin Ops
@@ -26,17 +26,28 @@ This skill is not only for testing. It should help Codex interpret natural-langu
    - Page-specific locators: `references/selectors/<page-or-domain>.md`
    - Success checks: `references/assertions.md`
    - Page-specific success checks: `references/assertions/<page-or-domain>.md`
+   - Cross-page business dependencies: `references/relationships.md`
+   - Reusable UI component operations: `references/components.md`
    - Known redirects, permission issues, and failures: `references/known-issues.md`
+   - Skill failure review index: `FAILURES.md`
+   - Relevant business failure reviews: `failure-reviews/<business-domain>.md`
 3. For state-changing operations, identify missing required parameters before acting.
 4. Before creating, editing, or deleting records, summarize the current chain's required fields, configurable fields, safe defaults, and known limits, then ask the tester which items should use defaults and which should be explicitly set.
 5. Use stored defaults only for low-risk fields. Ask the tester to confirm high-risk values such as activity time, reward amount, reward scope, user scope, enable/disable state, and risk-control behavior.
 6. If the tester's requested parameters conflict with the proven workflow, page constraints, or known backend rules, explain the issue first and wait for confirmation or corrected inputs.
-7. Check the action cache. If the request matches a cached script and required parameters are available, run `scripts/run-cached-action.mjs` first.
-8. If the cached script fails or matching confidence is low, fall back to normal browser operation. For any networked browser operation, use or follow the `web-access` skill. Prefer its CDP workflow when available. If CDP is unavailable or a deterministic stored workflow is better, use the bundled Playwright scripts.
-9. Execute browser automation in invisible/background mode by default. If the user explicitly requests visible operation, open a headed real browser so the tester can watch the page actions.
-10. Verify success using URL, page text, table/form state, toast/message, API response, or user-requested screenshot evidence. Do not treat a completed click as success by itself.
-11. Save screenshots only when the user explicitly asks for screenshots or visual evidence. Store them under `artifacts/screenshots/<中文业务域>/<中文页面或操作>/`.
-12. If a flow is newly discovered or improved, update the references with placeholders instead of secrets.
+7. Before executing a known failure-prone workflow, check `FAILURES.md` and the relevant `failure-reviews/` file for existing solutions.
+8. Check the action cache. If the request matches a cached script and required parameters are available, run `scripts/run-cached-action.mjs` first.
+9. If the cached script fails or matching confidence is low, fall back to project Playwright browser automation. Use optional `web-access`/CDP only when reusing the user's Chrome login state, exploring a dynamic page through an existing browser session, or when CDP behavior is explicitly needed.
+10. Execute browser automation in invisible/background mode by default. If the user explicitly requests visible operation, open a headed real browser so the tester can watch the page actions.
+11. When the tester explicitly requests `浏览器模式`, visible operation, or watching the operation, state-changing work must be performed through real UI actions: click buttons, fill fields, select dropdown/radio/checkbox controls, upload files, and click submit/confirm in the page. Do not replace visible-mode writes with a direct API call. API calls may be used only for read-only verification or evidence after the UI action.
+12. Invisible/background mode does not require user-like clicks when a proven script can safely use a faster page-context or API-assisted path; still verify business response and result lookup.
+13. Before adding new browser script logic, check `references/components.md`, page-specific component references, and `scripts/lib/` for existing helpers. Reuse or extend shared helpers for dropdowns, radios, checkboxes, switches, date pickers, uploads, tables, dialogs, search forms, buttons, and form-label lookup.
+14. Keep business scripts as orchestration only. If a component-level helper cannot be reused, document why and evaluate extraction after the flow succeeds.
+15. Verify success using URL, page text, table/form state, toast/message, API response, or user-requested screenshot evidence. Do not treat a completed click as success by itself.
+16. Save screenshots only when the user explicitly asks for screenshots or visual evidence. Store them under `artifacts/screenshots/<中文业务域>/<中文页面或操作>/`.
+17. If a flow is newly discovered or improved, update the references with placeholders instead of secrets.
+18. For newly proven reusable flows, evaluate both documentation and action-cache updates. If a flow is cacheable, add or update the script and cache manifest; if it is not cached, record the reason.
+19. If any failure, blocker, false assumption, retry success, script error, cache mismatch, or backend validation problem occurred, update `FAILURES.md` or the relevant `failure-reviews/` file before finishing the task.
 
 ## Browser Execution
 
@@ -45,16 +56,19 @@ This skill is not only for testing. It should help Codex interpret natural-langu
   - Reference: `references/action-cache.md`
   - Runner: `scripts/run-cached-action.mjs`
   - Use this before manual exploration for requests that look like already-scripted workflows.
-  - Dry-run example: `node skills/weex-admin-ops/scripts/run-cached-action.mjs --query "创建3个ETH币种奖励" --dry-run`
-  - If cached execution fails, report the failure and continue with `web-access` or conventional browser automation.
-- Use `web-access` for login-state web access and browser operations whenever it is available in the session.
+  - Dry-run example: `node scripts/run-cached-action.mjs --query "创建3个ETH币种奖励" --dry-run`
+  - If cached execution fails, report the failure and continue with bundled Playwright browser automation unless CDP/login-state reuse is required.
+- Project Playwright scripts are the default execution path for deterministic stored workflows.
+- Visible browser mode is a UI-operation commitment, not only a headed browser flag. For state-changing operations, headed scripts must drive the page controls and submit buttons just as a tester would; direct API writes are not valid visible-mode verification.
+- Invisible/background scripts may use a faster API-assisted path only when the workflow has been proven and the result is independently verified.
+- `web-access` is optional. Use it for CDP browser operations when Chrome remote debugging is available and the task benefits from the user's existing browser login state.
 - Run `web-access/scripts/check-deps.mjs` before CDP browser operations. If it reports Chrome remote debugging is not connected, use a bundled Playwright script or explain the fallback.
 - Bundled prize creation script:
   - Path: `scripts/create-prizes.mjs`
   - Use when creating one or more prize records with stored defaults.
   - It reads secrets from `WEEX_ADMIN_PASSWORD` and `WEEX_ADMIN_GOOGLE_CODE`; never pass secrets as CLI arguments.
   - Default mode is invisible/background. Pass `--visible` only when the user asks for browser-visible operation.
-  - Example: `node skills/weex-admin-ops/scripts/create-prizes.mjs --category 币种 --subtype ETH --count 3 --name-prefix ETH币种奖励 --alias-prefix eth_coin`
+  - Example: `node scripts/create-prizes.mjs --category 币种 --subtype ETH --count 3 --name-prefix ETH币种奖励 --alias-prefix eth_coin`
   - Dry run: add `--dry-run` to print the planned records without opening a browser.
 
 ## Script Organization
@@ -65,6 +79,7 @@ This skill is not only for testing. It should help Codex interpret natural-langu
 - Put business-specific automation under `scripts/business/<business-domain>/`, for example `scripts/business/prize-management/`.
 - Keep each script module around 180 lines or less. If a file approaches 200 lines, split by responsibility before adding more behavior.
 - Do not duplicate login, dropdown, upload, table, or assertion helpers across business scripts.
+- Do not duplicate component-level DOM logic such as form-label lookup, checkbox/radio selection, switches, search form inputs, button clicks, date pickers, or message-box handling across business scripts.
 - Cached scripts should support dry-run or an equivalent non-mutating preview whenever practical.
 
 ## Safety Rules
@@ -106,6 +121,8 @@ When a route or operation is proven in a real session, update the relevant refer
 - `references/assertions.md` for success checks.
 - `references/assertions/<page-or-domain>.md` for page-specific success checks.
 - `references/defaults.md` for safe defaults and confirmation policy.
+- `references/relationships.md` for dependencies between lists, config items, dropdown data sources, rewards, tasks, templates, activity types, and backend validation rules.
+- `references/components.md` for reusable UI component operation patterns and related helper functions.
 - `references/known-issues.md` for redirects, permissions, environment issues, and recurring failures.
 - `scripts/action-cache.json` and `references/action-cache.md` when a proven workflow has a reusable script.
 
@@ -113,7 +130,23 @@ Use `scripts/append-operation.py` when adding a new operation from a markdown sn
 
 When a workflow has been successfully repeated or is stable enough to script, add or update a script under `scripts/`, register it in `scripts/action-cache.json`, and make future matching requests try that cached script before manual browser work.
 
-If a workflow first failed but a retry exposed a stable path, treat that retry path as a required documentation update. Record the stable retry path in the relevant references and add a handoff summary in `docs/session-handoff.md`.
+If a workflow first failed but a retry exposed a stable path, treat that retry path as a required documentation update. Record the stable retry path in the relevant references. When this skill is used inside a repository that has a handoff file, add a short handoff summary there as well.
+
+If a workflow fails, update the skill failure review docs:
+
+- `FAILURES.md` for the skill index and high-frequency summary.
+- `failure-reviews/common.md` for cross-business login, browser, component, script, cache, or environment failures.
+- `failure-reviews/<business-domain>.md` for page or business-specific failures.
+
+When the same failure appears repeatedly, do not only add another review entry. Change the original workflow, reference, helper, or cached script so the known solution is applied before failure, then validate the corrected path.
+
+Before adding or updating a workflow, check whether the flow reveals a reusable relationship or component operation:
+
+- Record cross-page or cross-module dependencies in `references/relationships.md`.
+- Record reusable UI behavior in `references/components.md`.
+- Reference those files from the operation playbook instead of repeating long explanations.
+- If the reusable operation is scripted, put the helper in `scripts/lib/` and keep business orchestration under `scripts/business/<business-domain>/`.
+- Record whether the proven path used visible browser mode or default invisible mode. Treat untested mode variants as unverified until they are run and checked.
 
 ## Growth Management
 
@@ -133,6 +166,10 @@ Keep the skill small, searchable, and organized by business domain.
 - Store page-specific selectors in `references/selectors/<page-or-domain>.md`.
 - Store shared assertions in `references/assertions.md`.
 - Store page-specific assertions in `references/assertions/<page-or-domain>.md`.
+- Store business relationships in `references/relationships.md` when a list, config item, dropdown, API source, or backend rule affects another page or workflow.
+- Store reusable UI component operation patterns in `references/components.md`; component scripts belong in `scripts/lib/`.
 - If any markdown file approaches 250 lines, split it before adding more content.
 - Do not duplicate long steps, selectors, routes, defaults, or assertions across files. Reference existing files instead.
 - When creating a new business-domain file, add it to `references/operations/index.md`.
+- Failure review docs follow the same growth rule: keep `FAILURES.md` as an index, store details under `failure-reviews/`, and split any `failure-reviews/**/*.md` file before it exceeds 250 lines.
+- After updating skill knowledge or failure review docs, run `node scripts/maintenance/validate-knowledge-structure.mjs` from the skill root when available.

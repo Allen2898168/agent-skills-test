@@ -1,0 +1,71 @@
+# 项目搭建与 Skill 文件归档
+
+## 已完成事项
+- 已安装 LambdaTest `agent-skills` 仓库中的 70 个 skills 到 `/Users/gabriel/.codex/skills`。
+- 已安装 `web-access` skill 到 `/Users/gabriel/.codex/skills/web-access`。
+- 已创建项目级规范文件 `AGENTS.md`。
+- 已创建 `weex-admin-ops` skill，用于 WEEX 后台自然语言操作、参数补全、浏览器执行、结果验证和流程沉淀。
+- 已将 `weex-admin-ops` 复制到当前仓库 `skills/weex-admin-ops/`，作为团队协作和接力的权威版本。
+- 已将 `weex-admin-ops` 的 operation playbooks 改为按业务域拆分，避免长期沉淀导致单个文件过长。
+- 已记录 staging 默认登录账号名为 `auto`；新会话若需登录或后台页面操作，需先检查 `WEEX_ADMIN_USERNAME`、`WEEX_ADMIN_PASSWORD`、`WEEX_ADMIN_GOOGLE_CODE` 是否设置。用户名缺失时可说明并使用默认 `auto`，密码和 Google 验证码必须由环境变量或未提交的 `.env.local` 提供，缺失时先提示用户设置。
+- 已新增浏览器自动化可见性规则：默认不可见/后台运行；只有用户明确要求可见操作时，才打开有界面的真实浏览器让测试人员观看。
+- 已澄清 `weex-admin-ops` 与 `web-access` 的关系：项目内动作缓存和 Playwright 脚本是默认执行路径；`web-access` 仅作为可选 CDP/用户 Chrome 登录态复用能力，不是硬依赖。
+- 已将常用奖品创建 Playwright 脚本沉淀到 `skills/weex-admin-ops/scripts/create-prizes.mjs`，支持同类批量创建、JSON plan、默认后台运行和 `--visible` 可见模式。
+- 已新增动作缓存层：`scripts/action-cache.json` 维护缓存动作，`scripts/run-cached-action.mjs` 负责按 action 或自然语言 query 命中缓存脚本；命中时优先跑缓存，失败后默认回退到项目内 Playwright 浏览器自动化，只有需要 CDP/用户 Chrome 登录态复用时才使用 `web-access`。
+- 已新增脚本增长规范：脚本按 `scripts/lib/`、`scripts/cache/`、`scripts/business/<业务域>/` 分层；入口脚本保持薄封装；单文件原则上控制在 180 行以内，接近 200 行先拆分。
+- 已重构奖品创建缓存脚本：`create-prizes.mjs` 从单文件大脚本拆成 CLI 入口、通用浏览器/Element UI helper、奖品管理业务 plan/create 模块。
+- 已为 `weex-admin-ops` 添加引用资料和追加操作脚本。
+- 已将“活动通用模块管理 / 奖品管理”菜单导航和“奖品管理搜索功能”沉淀到 `skills/weex-admin-ops`。
+- 已走通“新增赠金奖品”流程，并沉淀到 `skills/weex-admin-ops`。
+- 已走通“新增币种奖品”流程，并沉淀到 `skills/weex-admin-ops`。
+- 已走通“新增实物奖品”流程，并沉淀到 `skills/weex-admin-ops`。
+- 已按用户要求批量创建 `虚拟积分或资格` 各子类型奖品；最初成功 11 个，随后补充走通 `仓位空投`，目前 12 个子类型均已创建成功。
+- 已将奖品管理后续复杂流程拆到 `skills/weex-admin-ops/references/operations/prize-management.md`，避免继续追加到已较长的 `activity-common-module.md`。
+- 已通过 `quick_validate.py` 校验 `weex-admin-ops`：`Skill is valid!`。
+- 已添加会话交接规范，要求后续关键操作后更新本文件。
+
+## Skill 更新记录
+- 已创建项目内 skill 目录：
+  - `/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/skills/weex-admin-ops`
+- 本机可选安装副本：
+  - `/Users/gabriel/.codex/skills/weex-admin-ops`
+- 已创建或更新项目内文件：
+  - `skills/weex-admin-ops/SKILL.md`
+  - `skills/weex-admin-ops/references/login.md`
+  - `skills/weex-admin-ops/references/credentials.md`
+  - `skills/weex-admin-ops/references/routes.md`
+  - `skills/weex-admin-ops/references/defaults.md`
+  - `skills/weex-admin-ops/references/selectors.md`
+  - `skills/weex-admin-ops/references/assertions.md`
+  - `skills/weex-admin-ops/references/known-issues.md`
+  - `skills/weex-admin-ops/references/action-cache.md`
+  - `skills/weex-admin-ops/references/operations/index.md`
+  - `skills/weex-admin-ops/references/operations/activity-common-module.md`
+  - `skills/weex-admin-ops/references/operations/offline-user-manage.md`
+  - `skills/weex-admin-ops/references/operations/activity-management.md`
+  - `skills/weex-admin-ops/references/operations/reward-issue.md`
+  - `skills/weex-admin-ops/references/operations/risk-control.md`
+  - `skills/weex-admin-ops/references/operations/import-export.md`
+  - `skills/weex-admin-ops/references/operations/prize-management.md`
+  - `skills/weex-admin-ops/references/selectors/offline-user-manage.md`
+  - `skills/weex-admin-ops/references/selectors/prize-management.md`
+  - `skills/weex-admin-ops/references/assertions/offline-user-manage.md`
+  - `skills/weex-admin-ops/references/assertions/prize-management.md`
+  - `skills/weex-admin-ops/scripts/append-operation.py`
+  - `skills/weex-admin-ops/scripts/action-cache.json`
+  - `skills/weex-admin-ops/scripts/create-prizes.mjs`
+  - `skills/weex-admin-ops/scripts/copy-prize.mjs`
+  - `skills/weex-admin-ops/scripts/run-cached-action.mjs`
+  - `skills/weex-admin-ops/scripts/lib/cli.mjs`
+  - `skills/weex-admin-ops/scripts/lib/runtime.mjs`
+  - `skills/weex-admin-ops/scripts/lib/browser.mjs`
+  - `skills/weex-admin-ops/scripts/lib/element-ui.mjs`
+  - `skills/weex-admin-ops/scripts/cache/matcher.mjs`
+  - `skills/weex-admin-ops/scripts/cache/command.mjs`
+  - `skills/weex-admin-ops/scripts/business/prize-management/plan.mjs`
+  - `skills/weex-admin-ops/scripts/business/prize-management/create.mjs`
+  - `skills/weex-admin-ops/scripts/business/prize-management/copy.mjs`
+  - `skills/weex-admin-ops/agents/openai.yaml`
+- 已创建默认奖品图片资产：
+  - `skills/weex-admin-ops/assets/default-prize-images/default-bonus-prize.webp`
+- 已更新图片资产规则：奖品图片从 `skills/weex-admin-ops/assets/default-prize-images/` 选择；单张图片可默认使用，多张图片必须询问用户选择或确认随机，目录为空时才询问是否创建占位图。

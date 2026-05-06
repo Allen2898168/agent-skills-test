@@ -18,8 +18,8 @@
 - staging 后台可登录。
 - 登录只需要账号、密码、`谷歌验证码`；普通 `验证码` 在当前 staging 流程中不需要填写。
 - 默认账号为 `auto`，密码和 Google code 从本机环境变量或未提交的 `.env.local` 读取。
-- 默认奖品图片目录：`assets/default-prize-images/`。
-- 本次使用默认图片：`assets/default-prize-images/default-bonus-prize.webp`。
+- 默认奖品图片目录：`skills/weex-admin-ops/assets/default-prize-images/`。
+- 本次使用默认图片：`skills/weex-admin-ops/assets/default-prize-images/default-bonus-prize.webp`。
 - 需要已有可用的转盘抽奖活动作为参考配置，本次使用活动 `8358`。
 - 需要已有可用的报名模板、奖品和转盘抽奖任务。
 

@@ -1,3 +1,3 @@
 display_name: WEEX Admin Ops
 short_description: WEEX admin workflow operator with browser scripts
-default_prompt: Use this skill for WEEX activity admin operations, web-access browser handling, Playwright prize scripts, browser validation, and workflow capture.
+default_prompt: Use this skill for WEEX activity admin operations, bundled Playwright scripts, optional web-access/CDP browser handling, browser validation, and workflow capture.

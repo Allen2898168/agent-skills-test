@@ -1,569 +1,166 @@
 # 会话交接记录
 
 ## 当前状态
-- 当前目标：建立 WEEX 活动后台管理页面的可接力操作规范、自动化操作 skill 和会话交接机制。
+- 当前目标：建立并维护 WEEX 活动后台管理页面的可接力操作规范、自动化操作 skill、动作缓存和会话交接机制。
 - 目标环境：staging，`https://stg-activity.weex.tech`。
-- 当前使用的 skill：项目内 `skills/weex-admin-ops/`，本机也有一份可选安装副本 `/Users/gabriel/.codex/skills/weex-admin-ops`。
-- 最近更新时间：2026-05-04。
+- 权威 skill：项目内 `skills/weex-admin-ops/`。
+- 最近更新时间：2026-05-06。
+- 历史交接已按业务域归档到 `docs/session-handoffs/`；当前文件只保留接力摘要和入口索引。
 
-## 已完成事项
-- 已安装 LambdaTest `agent-skills` 仓库中的 70 个 skills 到 `/Users/gabriel/.codex/skills`。
-- 已安装 `web-access` skill 到 `/Users/gabriel/.codex/skills/web-access`。
-- 已创建项目级规范文件 `AGENTS.md`。
-- 已创建 `weex-admin-ops` skill，用于 WEEX 后台自然语言操作、参数补全、浏览器执行、结果验证和流程沉淀。
-- 已将 `weex-admin-ops` 复制到当前仓库 `skills/weex-admin-ops/`，作为团队协作和接力的权威版本。
-- 已将 `weex-admin-ops` 的 operation playbooks 改为按业务域拆分，避免长期沉淀导致单个文件过长。
-- 已记录 staging 默认登录账号名为 `auto`；密码和 Google 验证码不写入仓库，改由环境变量或未提交的 `.env.local` 提供。
-- 已新增浏览器自动化可见性规则：默认不可见/后台运行；只有用户明确要求可见操作时，才打开有界面的真实浏览器让测试人员观看。
-- 已新增 `weex-admin-ops` 对 `web-access` 的使用规则：联网/登录态浏览器操作优先使用或遵循 `web-access`，CDP 不可用时再使用内置 Playwright 脚本。
-- 已将常用奖品创建 Playwright 脚本沉淀到 `skills/weex-admin-ops/scripts/create-prizes.mjs`，支持同类批量创建、JSON plan、默认后台运行和 `--visible` 可见模式。
-- 已新增动作缓存层：`scripts/action-cache.json` 维护缓存动作，`scripts/run-cached-action.mjs` 负责按 action 或自然语言 query 命中缓存脚本；命中时优先跑缓存，失败再回退到 `web-access` 或常规浏览器自动化。
-- 已新增脚本增长规范：脚本按 `scripts/lib/`、`scripts/cache/`、`scripts/business/<业务域>/` 分层；入口脚本保持薄封装；单文件原则上控制在 180 行以内，接近 200 行先拆分。
-- 已重构奖品创建缓存脚本：`create-prizes.mjs` 从单文件大脚本拆成 CLI 入口、通用浏览器/Element UI helper、奖品管理业务 plan/create 模块。
-- 已为 `weex-admin-ops` 添加引用资料和追加操作脚本。
-- 已将“活动通用模块管理 / 奖品管理”菜单导航和“奖品管理搜索功能”沉淀到 `skills/weex-admin-ops`。
-- 已走通“新增赠金奖品”流程，并沉淀到 `skills/weex-admin-ops`。
-- 已走通“新增币种奖品”流程，并沉淀到 `skills/weex-admin-ops`。
-- 已走通“新增实物奖品”流程，并沉淀到 `skills/weex-admin-ops`。
-- 已按用户要求批量创建 `虚拟积分或资格` 各子类型奖品；最初成功 11 个，随后补充走通 `仓位空投`，目前 12 个子类型均已创建成功。
-- 已将奖品管理后续复杂流程拆到 `skills/weex-admin-ops/references/operations/prize-management.md`，避免继续追加到已较长的 `activity-common-module.md`。
-- 已通过 `quick_validate.py` 校验 `weex-admin-ops`：`Skill is valid!`。
-- 已添加会话交接规范，要求后续关键操作后更新本文件。
+## 必读入口
+- 项目规范：`AGENTS.md`。
+- 后管操作 skill：`skills/weex-admin-ops/SKILL.md`。
+- 操作索引：`skills/weex-admin-ops/references/operations/index.md`。
+- 动作缓存说明：`skills/weex-admin-ops/references/action-cache.md`。
+- 组件复用说明：`skills/weex-admin-ops/references/components.md`。
+- 业务关联关系：`skills/weex-admin-ops/references/relationships.md`。
+- 历史交接索引：`docs/session-handoffs/README.md`。
 
-## 已验证链路
-- 登录 WEEX 活动后台并进入假钱账户页面。
-  - 状态：candidate。
-  - 环境：staging。
-  - 入口：`/login?redirect=%2Factivities%2Foffline%2FuserManage`。
-  - 最终页面：`/activities/offline/userManage`。
-  - 成功依据：页面标题为 `活动管理系统`，页面包含 `假钱账户`，表格包含 `UID`、`AccountId`、`API Key` 等字段。
-- 展开左侧菜单“活动通用模块管理”，进入“奖品管理”。
-  - 状态：candidate。
-  - 环境：staging。
-  - 最终页面：`/activity/prize`。
-  - 成功依据：页面面包屑包含 `活动通用模块管理 / 奖品管理`，页面包含 `奖品ID`、`奖品分类`、`奖品名称`、`新增` 和奖品列表。
-- 奖品管理搜索功能已按用户指定用例完成验证。
-  - 状态：candidate。
-  - 环境：staging。
-  - 页面：`/activity/prize`。
-  - 已验证：
-    - 奖品ID搜索：使用当前页 ID `429`，搜索后只展示该 ID。
-    - 奖品ID置空后搜索：恢复展示列表第一页。
-    - 奖品分类下拉：分别验证 `赠金`、`币种`、`实物`、`虚拟积分或资格`，搜索后列表奖品分类均为所选项。
-    - 奖品子类别：修正原理解，必须先选择奖品分类，再选择该分类对应子类别后搜索。已验证：
-      - `赠金 / 赠金`
-      - `币种 / BTC`
-      - `实物 / 实物`
-      - `虚拟积分或资格 / 抽奖次数`
-    - 奖品名称模糊搜索：关键字 `合约`，结果奖品名称均包含该关键字。
-    - 奖品别名模糊搜索：关键字 `合约`，结果奖品别名均包含该关键字。
-- 新增赠金奖品流程已完成。
-  - 状态：candidate。
-  - 环境：staging。
-  - 页面：`/activity/prize`。
-  - 创建记录：
-    - 奖品ID：`430`
-    - 奖品分类：`赠金`
-    - 奖品子分类：`赠金`
-    - 奖品名称：`自动化赠金奖品20260504033445`
-    - 奖品别名：`auto_bonus_20260504033445`
-    - 英语多语言：`Auto Bonus Prize 20260504033445`
-    - 领取后有效期：`1`
-    - 发放有效期：`1`
-    - 奖品单位：`1`
-    - 奖品展示精度：`2`
-    - 抵扣比例：`1`
-  - 默认图片：`assets/default-prize-images/default-bonus-prize.webp`
-  - 成功依据：`/prod-api/common/uploadImgReplace` 返回 200，`/prod-api/activity/prize` 返回 200，页面提示 `新增成功`，按别名搜索返回新记录。
-- 新增币种奖品流程已完成。
-  - 状态：candidate。
-  - 环境：staging。
-  - 页面：`/activity/prize`。
-  - 创建记录：
-    - 奖品ID：`431`
-    - 奖品分类：`币种`
-    - 奖品子分类：`BTC`
-    - 奖品名称：`自动化币种奖品20260504034022`
-    - 奖品别名：`auto_coin_20260504034022`
-    - 英语多语言：`Auto Coin Prize 20260504034022`
-    - 有效时间：`1`
-    - 奖品单位：`1`
-    - 奖品展示精度：`2`
-  - 默认图片：`assets/default-prize-images/default-bonus-prize.webp`
-  - 成功依据：`/prod-api/common/uploadImgReplace` 返回 200，`/prod-api/activity/prize` 返回 200，页面提示 `新增成功`，按别名搜索返回新记录。
-- 新增实物奖品流程已完成。
-  - 状态：candidate。
-  - 环境：staging。
-  - 页面：`/activity/prize`。
-  - 创建记录：
-    - 奖品ID：`432`
-    - 奖品分类：`实物`
-    - 奖品子分类：`实物`
-    - 奖品名称：`自动化实物奖品20260504034431`
-    - 奖品别名：`auto_physical_20260504034431`
-    - 英语多语言：`Auto Physical Prize 20260504034431`
-    - 有效时间：`1`
-    - 奖品单位：`1`
-    - 奖品展示精度：`2`
-  - 默认图片：`assets/default-prize-images/default-bonus-prize.webp`
-  - 成功依据：`/prod-api/common/uploadImgReplace` 返回 200，`/prod-api/activity/prize` 返回 200，页面提示 `新增成功`，按别名搜索返回新记录。
-- 已检查 `虚拟积分或资格` 下全部奖品子类型的新增弹窗字段，未提交新增数据。
-  - 状态：field-discovery。
-  - 环境：staging。
-  - 页面：`/activity/prize`。
-  - 子类型列表：`抽奖次数`、`积分`、`合约抵扣金`、`仓位空投`、`无奖励`、`VIP体验卡`、`提升返还比例档位`、`小丑牌-抽牌次数`、`小丑牌-积分加成`、`虚拟盘合约体验金`、`理财加息券`、`每日固定收益券`。
-  - 字段摘要：
-    - `抽奖次数`：颜色签、奖品名称、奖品别名、有效时间、奖品单位、展示精度、图片。
-    - `积分`：奖品名称、奖品别名、有效时间、奖品单位、展示精度、图片。
-    - `合约抵扣金`：奖品名称、奖品别名、领取后有效期、发放有效期、奖品单位、展示精度、图片。
-    - `仓位空投`：奖品名称、奖品别名、开仓后有效期、发放有效期、币种、交易对、保证金模式、杠杆倍数、数量、图片。
-    - `无奖励`：奖品名称、奖品别名、有效时间、奖品单位、展示精度、图片。
-    - `VIP体验卡`：VIP类型、VIP等级、VIP有效天数、跳转链接、奖品名称、奖品别名、发放有效期、奖品单位、展示精度、图片。
-    - `提升返还比例档位`：奖品名称、奖品别名、奖品单位、展示精度、图片。
-    - `小丑牌-抽牌次数`：奖品名称、奖品别名、有效时间、奖品单位、展示精度、图片。
-    - `小丑牌-积分加成`：奖品名称、奖品别名、有效时间、奖品单位、展示精度、图片。
-    - `虚拟盘合约体验金`：奖品名称、奖品别名、奖品单位、展示精度、图片。
-    - `理财加息券`：奖品名称、奖品别名、领取后有效期、发放有效期、奖品单位、展示精度、图片、适用业务类型、币种、加息利率、加息金额、计息资产最小值、计息资产最大值。
-    - `每日固定收益券`：同 `理财加息券` 字段结构。
-- 已批量创建 `虚拟积分或资格` 子类型奖品。
-  - 状态：candidate。
-  - 环境：staging。
-  - 页面：`/activity/prize`。
-  - 操作类型：新增奖品，改变后台状态。
-  - 执行规则：奖品名称使用 `虚拟积分资格_<子类型名字>`；配置中的下拉框默认选择第一个；低风险数字字段使用默认值；图片使用 `assets/default-prize-images/default-bonus-prize.webp`。
-  - 批次时间戳：`20260504035640`。
-  - 成功创建：
-    - `抽奖次数`：奖品ID `433`，别名 `auto_virtual_01_20260504035640`，颜色签默认选择 `红色`。
-    - `积分`：奖品ID `434`，别名 `auto_virtual_02_20260504035640`。
-    - `合约抵扣金`：奖品ID `435`，别名 `auto_virtual_03_20260504035640`。
-    - `无奖励`：奖品ID `436`，别名 `auto_virtual_05_20260504035640`。
-    - `VIP体验卡`：奖品ID `437`，别名 `auto_virtual_06_20260504035640`。
-    - `提升返还比例档位`：奖品ID `438`，别名 `auto_virtual_07_20260504035640`。
-    - `小丑牌-抽牌次数`：奖品ID `439`，别名 `auto_virtual_08_20260504035640`。
-    - `小丑牌-积分加成`：奖品ID `440`，别名 `auto_virtual_09_20260504035640`。
-    - `虚拟盘合约体验金`：奖品ID `441`，别名 `auto_virtual_10_20260504035640`。
-    - `理财加息券`：奖品ID `442`，别名 `auto_virtual_11_20260504035640`，已选择默认业务类型和币种。
-    - `每日固定收益券`：奖品ID `443`，别名 `auto_virtual_12_20260504035640`，已选择默认业务类型和币种。
-  - 阻塞项：
-    - `仓位空投`：别名 `auto_virtual_04_20260504035640`，提交失败，页面提示 `请选择交易对`。
-    - 用户补充：`交易对` 是多选下拉，选择后需要单击其他空白位置让下拉框收起，才能继续往下填写。
-  - 后续补充成功创建：
-    - `仓位空投`：奖品ID `444`，奖品名称 `虚拟积分资格_仓位空投`，别名 `auto_virtual_position_20260504041023`。
-    - 选择值：币种 `USDT`，交易对 `合约Pro:ADA/USDT`，保证金模式 `逐仓-合仓`。
-    - 关键处理：`交易对` 多选后点击弹窗空白处收起下拉；奖品图片上传要定位到 `奖品图片` 表单项内的 file input，并等待 `/prod-api/common/uploadImgReplace` 返回 200。
-    - 验证依据：`/prod-api/common/uploadImgReplace` 返回 200，`/prod-api/activity/prize` 返回 200，按别名搜索返回奖品ID `444`。
-  - 验证依据：成功项均以唯一别名搜索到新增记录；失败项以页面校验文案判定未创建成功。
-  - 是否可回滚：理论上可通过奖品列表行操作 `删除` 清理，但本次未执行清理。
-- 已按用户要求使用可见浏览器模式随机构造并创建 3 个奖励。
-  - 状态：candidate。
-  - 环境：staging。
-  - 页面：`/activity/prize`。
-  - 操作类型：新增奖品，改变后台状态。
-  - 创建记录：
-    - 奖品ID `445`：`币种 / BTC`，奖品名称 `浏览器模式币种奖励20260504041400`，别名 `browser_coin_20260504041400`。
-    - 奖品ID `446`：`实物 / 实物`，奖品名称 `浏览器模式实物奖励20260504041400`，别名 `browser_physical_20260504041400`。
-    - 奖品ID `447`：`虚拟积分或资格 / 积分`，奖品名称 `浏览器模式积分奖励20260504041400`，别名 `browser_points_20260504041400`。
-  - 默认图片：`assets/default-prize-images/default-bonus-prize.webp`。
-  - 验证依据：每条记录的 `/prod-api/common/uploadImgReplace` 返回 200，`/prod-api/activity/prize` 返回 200，并按唯一别名搜索返回对应奖品ID。
-  - 证据：用户未要求截图，因此未保存截图。
-  - 是否可回滚：理论上可通过奖品列表行操作 `删除` 清理，但本次未执行清理。
-- 已按用户要求再次使用可见浏览器模式创建 3 个不同于上一批的奖励。
-  - 状态：candidate。
-  - 环境：staging。
-  - 页面：`/activity/prize`。
-  - 操作类型：新增奖品，改变后台状态。
-  - 创建记录：
-    - 奖品ID `448`：`赠金 / 赠金`，奖品名称 `浏览器模式赠金奖励20260504041642`，别名 `browser_bonus_20260504041642`。
-    - 奖品ID `449`：`虚拟积分或资格 / 抽奖次数`，奖品名称 `浏览器模式抽奖次数奖励20260504041642`，别名 `browser_draw_20260504041642`，颜色签 `红色`。
-    - 奖品ID `450`：`虚拟积分或资格 / 无奖励`，奖品名称 `浏览器模式无奖励奖品20260504041642`，别名 `browser_none_20260504041642`。
-  - 默认图片：`assets/default-prize-images/default-bonus-prize.webp`。
-  - 验证依据：每条记录的 `/prod-api/common/uploadImgReplace` 返回 200，`/prod-api/activity/prize` 返回 200，并按唯一别名搜索返回对应奖品ID。
-  - 证据：用户未要求截图，因此未保存截图。
-  - 是否可回滚：理论上可通过奖品列表行操作 `删除` 清理，但本次未执行清理。
-- 已按用户要求创建 3 个 `ETH` 币种奖励。
-  - 状态：candidate。
-  - 环境：staging。
-  - 页面：`/activity/prize`。
-  - 操作类型：新增奖品，改变后台状态。
-  - 执行模式：默认不可见/后台浏览器自动化。
-  - 创建记录：
-    - 奖品ID `451`：`币种 / ETH`，奖品名称 `ETH币种奖励1_20260504041846`，别名 `eth_coin_1_20260504041846`。
-    - 奖品ID `452`：`币种 / ETH`，奖品名称 `ETH币种奖励2_20260504041846`，别名 `eth_coin_2_20260504041846`。
-    - 奖品ID `453`：`币种 / ETH`，奖品名称 `ETH币种奖励3_20260504041846`，别名 `eth_coin_3_20260504041846`。
-  - 默认图片：`assets/default-prize-images/default-bonus-prize.webp`。
-  - 验证依据：每条记录的 `/prod-api/common/uploadImgReplace` 返回 200，`/prod-api/activity/prize` 返回 200，并按唯一别名搜索返回对应奖品ID。
-  - 证据：用户未要求截图，因此未保存截图。
-  - 是否可回滚：理论上可通过奖品列表行操作 `删除` 清理，但本次未执行清理。
-- 曾观察到登录后可能跳转到 `/user/profile?tab=googleBind`，表示账号可能需要 Google 身份验证器绑定。
+## 最近完成
+- 本轮按用户要求在可见浏览器模式完成复杂报名模板和活动流程引导配置验证，未保存截图：
+  - 报名模板：通过真实 UI 创建并清理 4 条复杂参与范围记录，ID `2776`-`2779`，覆盖 `指定参赛代理或用户+VIP等级+团体报名`、`指定参赛代理或用户+风控标签+团体报名`、`混合条件+注册+手动点击`、`非活跃用户+注册时间范围+注册+手动点击`。
+  - 报名模板验证：每条均完成列表回查、`查看` 弹窗详情接口 `code=200`、修改名称后 `PUT /prod-api/activity/apply` `code=200`、删除确认后 `DELETE /prod-api/activity/apply/{id}` `code=200`，并按修改后名称回查不存在。
+  - 活动流程引导配置：通过真实 UI 创建并清理 3 条 1/2/3 步记录，ID `84`-`86`，覆盖 `交易大赛/每次访问/1步`、`转盘抽奖/每日首次访问/2步`、`小丑牌活动/用户首次访问/3步`，上传次数分别为 4/8/12 且无上传失败。
+  - 活动流程引导配置验证：每条均完成 `查看`、修改活动类型为 `交易竞速赛` 后详情回查 `activityType=RACE_COMPETITION`、`复制` 生成 ID `87`-`89`、删除复制件和原件并回查不存在。
+  - 环境复盘：系统 Node 缺少 Playwright，已按既有方案切换 Codex bundled runtime 完成执行，并更新 `skills/weex-admin-ops/failure-reviews/common.md`。
+- 已跑通并沉淀 `活动通用模块管理 / 活动流程引导配置` 操作列 `查看 / 修改 / 复制 / 删除`：
+  - 新增脚本：`skills/weex-admin-ops/scripts/guide-template-row-actions.mjs`。
+  - 新增业务模块：`skills/weex-admin-ops/scripts/business/activity-common-module/guide-template-row-actions.mjs`。
+  - 新增动作缓存：`verify_guide_template_row_actions`，自然语言 `活动流程引导配置 操作列 查看 修改 复制 删除 浏览器模式` dry-run 应命中该动作。
+  - 无浏览器模式：临时 ID `80` 创建后，通过页面操作列完成 `查看`、将活动类型修改为 `交易竞速赛`、复制为 ID `81`（名称前缀 `复制从 `）、删除复制件和原件；两条记录均回查不存在。
+  - 可见浏览器模式：临时 ID `82` 通过真实 UI 点击新增、填写、上传 4 个媒体字段并确认创建；随后通过页面操作列完成 `查看`、将活动类型修改为 `交易竞速赛`、复制为 ID `83`、删除复制件和原件；两条记录均回查不存在。
+  - 页面行为确认：`复制` 不弹二次确认，直接触发 `POST /prod-api/activity/guideTemplate/copy`；`删除` 有二次确认弹窗，文案包含 `确认删除该活动吗`。
+  - 已清理失败尝试遗留的临时 ID `79`。
+  - 已更新 `skills/weex-admin-ops/references/operations/activity-guide-template.md`、`references/action-cache.md`、`references/operations/index.md`、`scripts/action-cache.json`、缓存 matcher/command 和失败复盘 `failure-reviews/activity-common-module.md`。
+  - 已修正公共 Element UI 表格 helper：操作列固定列点击先按主表可见行定位序号，再点右侧固定操作列同序号可见按钮。
+- 已将“浏览器模式写操作必须真实 UI 点击”提升为强制规则：
+  - 已更新 `AGENTS.md`、`skills/weex-admin-ops/SKILL.md`、`references/defaults.md`、`references/action-cache.md`。
+  - 规则：用户明确要求 `浏览器模式/可见操作/打开浏览器/让我看着` 时，写操作必须通过页面点击、填写、选择、上传、确认完成；接口只能做只读验证或页面触发后的证据采集。默认不可见模式可继续使用已验证的接口辅助路径。
+- 已修正并重跑原 `create-guide-templates.mjs --visible` 脚本验证：
+  - 新增记录 ID `73`，名称 `浏览器_转盘抽奖_每次访问_3步_01_20260506130517`。
+  - 脚本输出 `writePath=visible_ui_clicks`，上传次数 `uploadCount=12`，`uploadFailures=[]`。
+  - 最终 URL `/activity/guide`，创建结果成功。
+- 已修正“浏览器模式”语义误判：此前 ID `69` 和 ID `71` 虽在可见浏览器会话中运行，但写入是复用认证头调用接口，不算真实 UI 点击创建。
+- 已补跑真实可见浏览器 UI 点击路径，创建 1 条三步骤转盘抽奖流程引导配置：
+  - 名称：`浏览器UI_转盘抽奖_每次访问_3步_01_20260506130117`。
+  - ID：`72`。
+  - UI 行为：点击 `新增`，选择 `转盘抽奖` 和 `每次访问`，点击两次 `新增步骤`，填写 3 个步骤的标题、内容和按钮文案，为每个步骤通过页面上传控件上传 H5/Web 静图和动图，共 12 次上传，最后点击 `确认`。
+  - 创建验证：页面确认触发 `POST /prod-api/activity/guideTemplate`，HTTP 200，业务 `code=200`。
+  - 详情验证：按名称列表回查命中 ID `72`；详情回查 `activityType=LOTTERY`、`displayFrequency=EVERY_VISIT`，且 `step1I18nConfig`、`step2I18nConfig`、`step3I18nConfig` 均存在。
+  - 已修正 `scripts/create-guide-templates.mjs`：`--visible` 现在走真实 UI 点击/上传/确认路径；不可见模式仍走接口写入并验证。
+  - 已记录失败复盘：可见浏览器模式误用接口写入、UI 创建遗漏图片字段。
+- 已按用户要求用可见浏览器模式再创建 1 条三步骤转盘抽奖流程引导配置：
+  - 名称：`浏览器_转盘抽奖_每次访问_3步_01_20260506125815`。
+  - ID：`71`。
+  - 创建验证：`scripts/create-guide-templates.mjs --activity-types lottery --frequencies every_visit --steps 3 --visible` 返回成功，最终 URL `/activity/guide`。
+  - 详情验证：`GET /prod-api/activity/guideTemplate/71` HTTP 200，业务 `code=200`，`activityType=LOTTERY`，`displayFrequency=EVERY_VISIT`，且 `step1I18nConfig`、`step2I18nConfig`、`step3I18nConfig` 均存在。
+  - 用户未要求截图，因此未保存截图。
+- 已按用户要求用默认不可见浏览器模式再创建 1 条三步骤转盘抽奖流程引导配置：
+  - 名称：`无浏览器_转盘抽奖_每次访问_3步_01_20260506125632`。
+  - ID：`70`。
+  - 创建验证：`scripts/create-guide-templates.mjs --activity-types lottery --frequencies every_visit --steps 3` 返回成功，最终 URL `/activity/guide`。
+  - 详情验证：`GET /prod-api/activity/guideTemplate/70` HTTP 200，业务 `code=200`，`activityType=LOTTERY`，`displayFrequency=EVERY_VISIT`，且 `step1I18nConfig`、`step2I18nConfig`、`step3I18nConfig` 均存在。
+  - 用户未要求截图，因此未保存截图。
+- 已按用户要求用可见浏览器模式创建 1 条三步骤转盘抽奖流程引导配置：
+  - 名称：`浏览器_转盘抽奖_每次访问_3步_01_20260506125358`。
+  - ID：`69`。
+  - 创建验证：动作缓存 `create_guide_templates` 命中，最终 URL `/activity/guide`；创建脚本返回成功，按名称回查命中。
+  - 详情验证：`GET /prod-api/activity/guideTemplate/69` HTTP 200，业务 `code=200`，`activityType=LOTTERY`，`displayFrequency=EVERY_VISIT`，且 `step1I18nConfig`、`step2I18nConfig`、`step3I18nConfig` 均存在。
+  - 用户未要求截图，因此未保存截图。
+  - 为支持该单条链路，已扩展 `scripts/create-guide-templates.mjs` 支持 `--activity-types`、`--frequencies`、`--steps` 参数，并扩展自然语言解析 `三个步骤 + 转盘抽奖 + 浏览器模式`。
+- 已在 staging 探索 `活动通用模块管理 / 活动流程引导配置`：
+  - 入口路径：`/activity/guide`，菜单项在 `活动通用模块管理` 下；从 `/activity/prize` 登录后确认该模块已展开，并可点击进入。
+  - 页面搜索字段：`ID`、`模版名称`、`活动类型`；表格列：`ID`、`名称`、`活动类型`、`最近编辑人`、`更新时间`、`操作`。
+  - 搜索验证：`ID=37`、`模版名称=Wesley`、`活动类型=交易大赛` 均触发 `/prod-api/activity/guideTemplate/list`，HTTP 200，业务 `code=200`，列表回查命中预期记录。
+  - 新增弹窗字段：`模版名称`、`活动类型`、`引导弹窗显示频率`，以及每个步骤的 `活动简介标题`、`H5活动简介内容`、`H5配图（静图）`、`H5配图（动图）`、`Web配图（静图）`、`Web配图（动图）`、`按钮文案`。
+  - 活动类型下拉选项共 13 个；显示频率选项为 `每次访问`、`每日首次访问`、`用户首次访问`。
+  - 默认只有 `步骤1` 且无删除按钮；点击 `新增步骤` 后出现 `步骤1`、`步骤2`，两个步骤右上角均出现 `删除`。
+- 已按正式命名规则创建活动流程引导模板，默认步骤内容使用测试文案和既有 staging 图片/动图 URL；用户未要求截图，因此未保存截图：
+  - 不可见模式创建成功 15 条，ID `39`-`53`，覆盖 12 个有效活动类型的首频率、交易大赛另外两个频率、交易大赛首频率两步骤；每条均通过创建接口 `code=200` 和按模板名称列表回查验证。
+  - 可见浏览器模式创建成功 15 条，ID `54`-`68`，覆盖同一组组合；每条均通过创建接口 `code=200` 和按模板名称列表回查验证。
+  - `暂无特殊配置 / NONE` 在两种模式下创建均失败，后端返回 HTTP 200 但业务 `code=500`，提示 `系统繁忙，请稍后再试！`，未创建记录。
+  - 临时认证试跑记录 ID `38` 已清理，`DELETE /prod-api/activity/guideTemplate/38` 返回 `code=200`，按名称回查 `total=0`。
+  - 已按用户确认沉淀该链路到 `skills/weex-admin-ops/`：
+    - 新增 playbook：`skills/weex-admin-ops/references/operations/activity-guide-template.md`。
+    - 新增脚本：`skills/weex-admin-ops/scripts/create-guide-templates.mjs`。
+    - 新增业务模块：`skills/weex-admin-ops/scripts/business/activity-common-module/guide-template-plan.mjs`、`guide-template-create.mjs`。
+    - 新增动作缓存：`create_guide_templates`；默认 dry-run 可预览 15 个已验证组合，真实执行会创建记录，`--visible` 启用可见浏览器模式。
+    - 已更新 operation index、routes、action-cache 和 relationships；`暂无特殊配置 / NONE` 已在 `skills/weex-admin-ops/references/relationships/activity-common-module.md` 标记为后端阻塞分支，脚本默认排除，只有 `--include-none` 才复测。
+    - 已验证脚本 dry-run、显式 action dry-run、自然语言 dry-run、`--include-none` dry-run 和 skill 知识结构校验。
+- 已创建 `非活跃用户` 报名模板：ID `2772`，名称 `非活跃用户报名模板_注册时间_20260506104509`。
+- 该模板的可参与注册时间范围为 `2026-05-06 00:00:00` 到 `2026-05-07 23:59:59`。
+- 创建验证：`POST /prod-api/activity/apply` HTTP 200，响应 `code=200`；按模板名称搜索返回 ID `2772`。
+- 用户未要求截图，因此未保存截图。
+- 已沉淀报名模板注册时间范围能力：新增 `scripts/lib/element-ui-datetime.mjs`，扩展 `create-register-templates.mjs` 的 `--register-start` / `--register-end`，并更新动作缓存自然语言解析。
+- 已拆分报名模板 operation 文档：新增 `activity-register-management-date-range.md` 和 `activity-register-management-platform-scopes.md`。
+- 已拆分公共 Element UI helper：`scripts/lib/element-ui.mjs` 作为兼容导出入口，具体实现拆到 `scripts/lib/element-ui/` 子模块。
+- 已将历史交接从本文件拆分到 `docs/session-handoffs/`，避免单文件过长。
+- 已将 docs 增长管理写入 `AGENTS.md` 和 `skills/weex-admin-ops/SKILL.md`：`docs/session-handoff.md` 只保留当前摘要，历史归档到 `docs/session-handoffs/`，任意 `docs/**/*.md` 接近 250 行必须先拆分。
+- 已新增 `skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs`，用于检查 skill 知识结构和文件长度。
+- 已新增失败复盘体系：`skills/weex-admin-ops/FAILURES.md` 作为入口，`skills/weex-admin-ops/failure-reviews/` 按业务线保存失败场景、原因、解决方式和验证结果。
+- 已将失败复盘强制规则写入 `AGENTS.md` 和 `skills/weex-admin-ops/SKILL.md`：遇到失败必须主动更新复盘；重试前先查复盘；同类失败重复出现时必须反写原流程并验证。
+- 已补强仓库入口 README，明确根目录 `scripts/` 是项目治理脚本、`skills/weex-admin-ops/scripts/` 是后管业务动作脚本。
+- 已修正 `AGENTS.md` 中动作缓存路径歧义，并调整 `temp/` 启动规则：仅在当前任务相关或用户明确要求时汇总暂存流程。
+- 已在默认不可见浏览器模式跑通 `活动用户报名管理` 操作列 `查看 / 修改 / 删除`：
+  - 临时报名模板 ID `2773`，原名称 `操作列临时模板_auto_20260506113121`。
+  - 查看：`GET /prod-api/activity/apply/2773` HTTP 200，响应 `code=200`，弹窗标题 `用户报名管理（查看）`。
+  - 修改：名称改为 `操作列临时模板_auto_20260506113121_已修改`，`PUT /prod-api/activity/apply` HTTP 200，响应 `code=200`，按新名称搜索返回 ID `2773`。
+  - 删除：二次确认弹窗文案包含目标模板名称，确认后 `DELETE /prod-api/activity/apply/2773` HTTP 200，响应 `code=200`，按新名称搜索不再返回该记录。
+  - 本轮未保存截图；用户未要求截图。
+- 已按用户确认沉淀该链路到 `skills/weex-admin-ops/`，并新增动作缓存脚本：
+  - 脚本：`skills/weex-admin-ops/scripts/register-template-row-actions.mjs`。
+  - 缓存动作：`verify_register_template_row_actions`。
+  - 不可见脚本验证：临时 ID `2774` 创建、查看、修改、删除并回查不存在，全部通过。
+  - 可见脚本验证：临时 ID `2775` 创建、查看、修改、删除并回查不存在，全部通过。
+  - 已修正自然语言缓存匹配，`活动用户报名管理 操作列 查看 修改 删除 浏览器模式` dry-run 命中 `verify_register_template_row_actions`。
+- 已记录本轮失败复盘：
+  - 系统 Node 缺少 Playwright，改用 Codex bundled runtime 后通过。
+  - 查看弹窗断言不能依赖 `innerText` 或最后一个可见 `.el-dialog`，已抽出按标题定位业务弹窗的公共 helper。
+  - 操作列自然语言 dry-run 初次误命中创建模板动作，已通过动作评分修正。
+- 已按用户确认，在默认不可见浏览器模式删除 `活动用户报名管理` 下 `最近编辑人=auto` 的报名模板：
+  - 页面搜索接口 `operator=auto` 返回 63 条，其中 ID `177` 的 `operator=auto_test` 属于模糊匹配，已排除。
+  - 精确 `operator=auto` 候选 62 条，已成功删除 61 条。
+  - ID `2729`（`自动化报名模板_auto_manual_20260505161031`）删除失败，后端提示该报名模板已被活动 `8990,8993` 使用，已保留。
+  - 删除后回查：精确 `operator=auto` 仅剩 ID `2729`；模糊匹配还包含已排除的 ID `177`。
+  - 用户未要求截图，因此未保存截图。
+  - 已在 `skills/weex-admin-ops/failure-reviews/activity-register-management.md` 记录“已被活动引用的报名模板不可删除”复盘。
+- 已按用户要求沉淀“按最近编辑人批量删除报名模板”链路：
+  - 新增脚本：`skills/weex-admin-ops/scripts/delete-register-templates-by-operator.mjs`。
+  - 新增业务模块：`skills/weex-admin-ops/scripts/business/activity-register-management/bulk-delete.mjs`。
+  - 新增动作缓存：`delete_register_templates_by_operator`，默认只 dry-run，实际删除必须传 `--confirm-delete`。
+  - 新增 playbook：`skills/weex-admin-ops/references/operations/activity-register-management-bulk-delete.md`。
+  - 已补充报名模板被活动引用后不能删除的关联关系。
+  - 已验证自然语言缓存命中、显式 action dry-run、不可见 dry-run 和可见 dry-run；当前 dry-run 均只列出剩余被引用模板 ID `2729`，并跳过 ID `177`。
+- 已将后管 skill 专用资产和证据目录迁入 `skills/weex-admin-ops/`：
+  - `assets/default-prize-images/default-bonus-prize.webp` 已迁移到 `skills/weex-admin-ops/assets/default-prize-images/default-bonus-prize.webp`。
+  - `artifacts/screenshots/` 已迁移到 `skills/weex-admin-ops/artifacts/screenshots/`，历史截图通过 `git mv` 保留。
+  - 已全量替换 AGENTS、README、docs、temp 和 skill references 中的旧路径。
+  - 已修改 `skills/weex-admin-ops/scripts/lib/runtime.mjs`，默认奖品图片从 skill 内部 assets 读取。
+  - 受影响奖品创建链路验证通过：dry-run 通过；不可见模式创建实物奖品 ID `509`；可见模式创建实物奖品 ID `510`；两次均观察到图片上传接口和奖品创建接口 HTTP 200。
+- 已为“skill 可单独复制复用”继续迁移根目录治理内容：
+  - `FAILURES.md` 已迁移到 `skills/weex-admin-ops/FAILURES.md`。
+  - `failure-reviews/` 已迁移到 `skills/weex-admin-ops/failure-reviews/`。
+  - 原根目录知识结构校验脚本已迁移为 `skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs`。
+  - 校验脚本已改为以 skill 根目录为基准，不依赖根目录 docs。
+  - 已修复 `pathsFrom()` 和 `run-cached-action.mjs` 对仓库外层目录的假设，使 skill 在仓库内和独立复制目录中都能解析默认 assets。
+  - 已复制 skill 到 `/tmp/weex-admin-ops-standalone-test` 做独立验证：结构校验、奖品 dry-run、动作缓存 dry-run 和默认图片路径检查均通过。
+  - 已进一步修正 `scripts/lib/runtime.mjs`，`pathsFrom()` 兼容 `import.meta.url` 和普通文件路径，方便 standalone 维护校验。
+  - 已确认根目录不再保留 skill 专用 `scripts/`、`assets/`、`artifacts/`、`FAILURES.md`、`failure-reviews/`；这些内容均位于 `skills/weex-admin-ops/` 内。
+  - 已清理 skill 内部文档和脚本 usage 注释中的仓库路径前缀，统一改为 skill 根目录相对路径，例如 `scripts/...`、`assets/...`、`artifacts/...`。
+  - 已重新复制 skill 到临时独立目录验证：结构校验、奖品 dry-run、两个动作缓存 dry-run 和默认图片路径检查均通过。
 
-## 证据与截图
-- 截图统一保存到 `artifacts/screenshots/` 下，并按中文业务域分类。
-- 登录成功并进入目标页面截图曾由用户明确要求生成：
-  - 建议路径：`artifacts/screenshots/假钱账户/weex-login-success.png`
-  - 当前仓库中未找到该截图文件，如后续需要可重新生成。
-- 活动通用模块管理 / 奖品管理页面截图，这是用户明确要求后生成的：
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/activity-common-prize-management.png`
-- 奖品管理搜索功能截图，这是用户明确要求后生成的：
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/01-奖品ID搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/02-奖品ID置空展示全部.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/03-奖品分类-赠金.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/03-奖品分类-币种.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/03-奖品分类-实物.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/03-奖品分类-虚拟积分或资格.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/04-奖品名称模糊搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/05-奖品别名模糊搜索.png`
-- 奖品管理奖品子类别搜索截图，这是用户明确要求后生成的：
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/奖品子类别/奖品子类别-赠金-赠金.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/奖品子类别/奖品子类别-币种-BTC.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/奖品子类别/奖品子类别-实物-实物.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/奖品子类别/奖品子类别-虚拟积分或资格-抽奖次数.png`
-- 虚拟积分或资格新增字段检查截图，这是用户明确要求后生成的：
-  - 目录：`artifacts/screenshots/活动通用模块管理/奖品管理/新增虚拟积分资格字段检查/`
-  - 每个子类型目录下有 `01-顶部.png` 和 `02-底部.png`。
+## 当前 Git 状态
+- 当前分支：`dev`。
+- 最近远端同步提交：`9c493e0 feat: 完善后管自动化流程沉淀与复盘规范`。
+- 最近一次推送后，本地 `dev` 与 `origin/dev` 已确认一致。
+- 本轮活动流程引导配置操作列验证、活动用户报名管理操作列验证、skill/cache 沉淀、批量删除报名模板、skill 资产/证据目录迁移、失败复盘和交接摘要更新尚未提交。
 
-## Skill 更新记录
-- 已创建项目内 skill 目录：
-  - `/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/skills/weex-admin-ops`
-- 本机可选安装副本：
-  - `/Users/gabriel/.codex/skills/weex-admin-ops`
-- 已创建或更新项目内文件：
-  - `skills/weex-admin-ops/SKILL.md`
-  - `skills/weex-admin-ops/references/login.md`
-  - `skills/weex-admin-ops/references/credentials.md`
-  - `skills/weex-admin-ops/references/routes.md`
-  - `skills/weex-admin-ops/references/defaults.md`
-  - `skills/weex-admin-ops/references/selectors.md`
-  - `skills/weex-admin-ops/references/assertions.md`
-  - `skills/weex-admin-ops/references/known-issues.md`
-  - `skills/weex-admin-ops/references/action-cache.md`
-  - `skills/weex-admin-ops/references/operations/index.md`
-  - `skills/weex-admin-ops/references/operations/activity-common-module.md`
-  - `skills/weex-admin-ops/references/operations/offline-user-manage.md`
-  - `skills/weex-admin-ops/references/operations/activity-management.md`
-  - `skills/weex-admin-ops/references/operations/reward-issue.md`
-  - `skills/weex-admin-ops/references/operations/risk-control.md`
-  - `skills/weex-admin-ops/references/operations/import-export.md`
-  - `skills/weex-admin-ops/references/operations/prize-management.md`
-  - `skills/weex-admin-ops/references/selectors/offline-user-manage.md`
-  - `skills/weex-admin-ops/references/selectors/prize-management.md`
-  - `skills/weex-admin-ops/references/assertions/offline-user-manage.md`
-  - `skills/weex-admin-ops/references/assertions/prize-management.md`
-  - `skills/weex-admin-ops/scripts/append-operation.py`
-  - `skills/weex-admin-ops/scripts/action-cache.json`
-  - `skills/weex-admin-ops/scripts/create-prizes.mjs`
-  - `skills/weex-admin-ops/scripts/copy-prize.mjs`
-  - `skills/weex-admin-ops/scripts/run-cached-action.mjs`
-  - `skills/weex-admin-ops/scripts/lib/cli.mjs`
-  - `skills/weex-admin-ops/scripts/lib/runtime.mjs`
-  - `skills/weex-admin-ops/scripts/lib/browser.mjs`
-  - `skills/weex-admin-ops/scripts/lib/element-ui.mjs`
-  - `skills/weex-admin-ops/scripts/cache/matcher.mjs`
-  - `skills/weex-admin-ops/scripts/cache/command.mjs`
-  - `skills/weex-admin-ops/scripts/business/prize-management/plan.mjs`
-  - `skills/weex-admin-ops/scripts/business/prize-management/create.mjs`
-  - `skills/weex-admin-ops/scripts/business/prize-management/copy.mjs`
-  - `skills/weex-admin-ops/agents/openai.yaml`
-- 已创建默认奖品图片资产：
-  - `assets/default-prize-images/default-bonus-prize.webp`
-- 已更新图片资产规则：奖品图片从 `assets/default-prize-images/` 选择；单张图片可默认使用，多张图片必须询问用户选择或确认随机，目录为空时才询问是否创建占位图。
-
-## 2026-05-04 18:17 CEST 奖品管理行操作按钮验证
-
-- 当前目标：验证 `活动通用模块管理 / 奖品管理` 列表行操作按钮 `查看 / 修改 / 复制 / 删除`。
-- 环境：staging。
-- 页面：`/activity/prize`。
-- 执行模式：用户要求浏览器模式，已使用可见浏览器执行。
-- 操作类型：新增测试奖品、修改奖品、复制奖品、删除复制奖品，改变后台状态。
-- 已完成事项：
-  - 创建专用测试奖品：奖品ID `473`，`币种 / BTC`，别名 `auto_action_btc_20260504161432`。
-  - `查看`：详情弹窗打开，表单值包含测试奖品名称和别名。
-  - `修改`：将测试奖品名称修改为 `操作按钮测试_BTC_20260504161432_已修改`，`PUT /prod-api/activity/prize` 返回 200，搜索列表显示修改后的名称。
-  - `复制`：确认弹窗打开，`POST /prod-api/activity/prize/copy` 返回 200，复制记录奖品ID `474`，名称为 `复制从 操作按钮测试_BTC_20260504161432_已修改`，别名为 `复制从 auto_action_btc_20260504161432`。
-  - `删除`：删除复制记录 `474`，`DELETE /prod-api/activity/prize/474` 返回 200，按奖品ID `474` 搜索不再展示该复制记录。
-- 截图路径：
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/00-测试奖品创建后列表.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/01-查看详情弹窗.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/02-修改弹窗-已回填.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/03-修改后列表验证.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/04-复制确认弹窗.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/05-复制后列表最上方.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/06-删除确认弹窗.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/07-删除后搜索无结果.png`
-- 已更新 skill 文件：
-  - `skills/weex-admin-ops/references/operations/index.md`
-  - `skills/weex-admin-ops/references/operations/prize-management.md`
-  - `skills/weex-admin-ops/references/selectors/prize-management.md`
-  - `skills/weex-admin-ops/references/assertions/prize-management.md`
-- 当前阻塞点：无。
-- 下一步建议：如需清理本次专用测试奖品，可后续按奖品ID `473` 执行删除；该删除会改变 staging 后台状态，执行前需确认。
-- 是否可回滚：复制记录已删除；原始测试奖品 `473` 仍保留，可通过行操作 `删除` 清理。
-
-## 2026-05-04 18:30 CEST 奖品 ID 复制缓存测试
-
-- 当前目标：按用户自然语言指令“复制奖品id为462的奖品”测试已沉淀 skill。
-- 环境：staging。
-- 页面：`/activity/prize`。
-- 执行模式：默认不可见浏览器自动化；CDP 未连接，按 skill 规则使用项目 Playwright 兜底。
-- 操作类型：复制奖品，改变后台状态。
-- 动作缓存：
-  - 首次 dry-run 未命中专用复制脚本，仅命中创建奖品缓存的参数缺失报错。
-  - 已新增缓存动作 `copy_prize_by_id`，并登记到 `skills/weex-admin-ops/scripts/action-cache.json`。
-  - 新 dry-run 已通过：`复制奖品id为462的奖品` 命中 `scripts/copy-prize.mjs --prize-id 462`。
-- 已完成事项：
-  - 找到源奖品：奖品ID `462`，`虚拟积分或资格 / 理财加息券`，奖品名称 `券7+staking+apy+btc`，别名 `券7+staking+apy+btc`。
-  - 点击源奖品行操作 `复制` 并确认。
-  - `POST /prod-api/activity/prize/copy` 返回 200。
-  - 验证复制记录已出现：新奖品ID `475`，奖品名称 `复制从 券7+staking+apy+btc`，别名 `复制从 券7+staking+apy+btc`。
-- 截图：用户未要求截图，本次未保存截图。
-- 已更新 skill 文件：
-  - `skills/weex-admin-ops/references/action-cache.md`
-  - `skills/weex-admin-ops/references/operations/prize-management.md`
-  - `skills/weex-admin-ops/scripts/action-cache.json`
-  - `skills/weex-admin-ops/scripts/cache/command.mjs`
-  - `skills/weex-admin-ops/scripts/cache/matcher.mjs`
-  - `skills/weex-admin-ops/scripts/copy-prize.mjs`
-  - `skills/weex-admin-ops/scripts/business/prize-management/copy.mjs`
-  - `skills/weex-admin-ops/scripts/lib/runtime.mjs`
-  - `skills/weex-admin-ops/scripts/create-prizes.mjs`
-- 当前阻塞点：无。
-- 下一步建议：如需清理本次复制记录，可按奖品ID `475` 执行删除；该删除会改变 staging 后台状态，执行前需确认。
-- 是否可回滚：复制记录 `475` 仍保留，可通过行操作 `删除` 清理。
-
-## 2026-05-04 19:05 CEST 活动任务管理搜索验证
-
-- 当前目标：进入 `活动通用模块管理 / 活动任务管理`，并逐项验证搜索功能。
-- 环境：staging。
-- 页面：`/activity/task`。
-- 执行模式：用户要求浏览器模式，已使用可见浏览器执行；CDP 未连接，按 skill 规则使用项目 Playwright 兜底。
-- 操作类型：只读搜索和截图，不改变后台状态。
-- 已完成事项：
-  - 按左侧菜单顺序点击 `活动通用模块管理` -> `活动任务管理`，成功进入活动任务管理页面。
-  - 已分别设置并验证以下搜索项，每项单独执行并截图：`任务编号`、`任务别名`、`任务标签`、`备注`、`开始时间`、`结束时间`、`总分>=转手动发奖`、`标签-转手动发奖`、`报名国家-转手动发奖`。
-  - `标签-转手动发奖` 为多选下拉，已验证选项 `同设备多账号登录`；选中后页面立即请求列表接口，参数为 `dynamicAuditLabels[0]`。
-  - `报名国家-转手动发奖` 为多选下拉，已验证第一项 `中国`；选中后页面请求列表接口，参数为 `dynamicAuditCountryIds[0]=1`。
-  - 已验证列表可横向右滑并截图。
-- 验证依据：
-  - `/prod-api/activity/task/list` 在各搜索条件下返回 200。
-  - `getRiskLabelList`、`getAreaInfoList`、`selectAgencyGroupList` 等选项接口返回 200。
-- 截图路径：
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/00-进入活动任务管理.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/01-任务编号搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/02-任务别名搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/03-任务标签搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/04-备注搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/05-开始时间搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/06-结束时间搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/07-总分转手动发奖搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/08-标签转手动发奖多选.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/09-报名国家转手动发奖多选.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/10-列表右滑展示更多列.png`
-- 已更新 skill 文件：
-  - `skills/weex-admin-ops/references/routes.md`
-  - `skills/weex-admin-ops/references/operations/index.md`
-  - `skills/weex-admin-ops/references/operations/activity-task-management.md`
-  - `skills/weex-admin-ops/references/selectors/activity-task-management.md`
-  - `skills/weex-admin-ops/references/assertions/activity-task-management.md`
-- 当前阻塞点：无。
-- 下一步建议：继续活动任务管理的新增、查看、修改、复制、删除或历史功能时，优先读取本次新增的 activity-task-management references。
-
-## 2026-05-04 19:48 CEST 活动任务管理新增转盘抽奖验证
-
-- 当前目标：验证 `活动通用模块管理 / 活动任务管理` 的新增链路，活动类型为 `转盘抽奖`，并分别尝试四种任务奖励模式。
-- 环境：staging。
-- 页面：`/activity/task`。
-- 执行模式：用户要求浏览器模式，已使用可见浏览器执行；CDP 未连接，按 skill 规则使用项目 Playwright 兜底。
-- 操作类型：新增活动任务，改变后台状态。
-- 通用配置：
-  - `任务名称`、`任务内容`、`任务标签` 均点击 `多语言` 并填写英语。
-  - `任务参与范围` 使用单选式配置，成功创建时选 `报名的所有用户`。
-  - `任务风控` 实际表现为单选，成功创建时选 `不审核KYC`。
-  - `任务组合` 选择 `单一任务条件`。
-  - `任务条件1` 选择第一个任务类型 `kyc任务` 后出现 `KYC限制`，选择 `无kyc限制`。
-  - `判定开始时间` 选择 `报名活动后`。
-  - `任务次数更新` 选择 `仅1次，直至结束`。
-- 已完成事项：
-  - `单一奖励`：创建成功。任务ID `4737`，任务别名 `转盘抽奖_single_1777916448621`，`POST /prod-api/activity/task` 返回 200，搜索别名返回该任务。
-  - `限时奖励不同`：重试成功。任务ID `4739`，任务别名 `转盘抽奖_limited_1777917234014`，`POST /prod-api/activity/task` 返回 200，搜索别名返回该任务。`奖励变化` 下拉选项为 `X`、`+`、`归0`，本次选择 `+` 并填写变化值 `1`。注意必须精确定位 `奖励变化`，否则容易误命中 `奖励变化倒计时`。
-  - `正常奖励+权益奖励`：创建成功。任务ID `4738`，任务别名 `转盘抽奖_rights_1777916626416`，`POST /prod-api/activity/task` 返回 200，搜索别名返回该任务。权益奖励路径为 `虚拟积分或资格` -> `VIP` -> 第一项 VIP 奖励。
-  - `混合奖励`：提交前字段已填写并截图；`POST /prod-api/activity/task` 返回 200，但页面提示 `system busy, please retry later` 和 `保存任务失败`，按任务别名 `转盘抽奖_mix_1777916693695` 搜索未返回结果。
-- 截图路径：
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/00-新增弹窗初始.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/01-选择转盘抽奖后表单.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/02-任务组合后字段.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/奖励模式-单一奖励.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/奖励模式-限时奖励不同.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/奖励模式-正常奖励权益奖励.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/奖励模式-混合奖励.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/03-单一奖励-提交前.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/04-单一奖励-创建后搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/05-限时奖励不同-提交前.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/06-限时奖励不同-错误.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/限时奖励不同-奖励变化下拉前.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/限时奖励不同-奖励变化下拉展开.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/05-限时奖励不同-重试提交前.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/06-限时奖励不同-重试创建后搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/07-正常奖励权益奖励-提交前.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/08-正常奖励权益奖励-创建后搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/09-混合奖励-提交前.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/10-混合奖励-创建后搜索.png`
-- 已更新 skill 文件：
-  - `skills/weex-admin-ops/references/operations/index.md`
-  - `skills/weex-admin-ops/references/operations/activity-task-management.md`
-  - `skills/weex-admin-ops/references/selectors/activity-task-management.md`
-  - `skills/weex-admin-ops/references/assertions/activity-task-management.md`
-- 当前阻塞点：
-  - `混合奖励` 标记为阻断：提交接口返回 200 但页面提示 `system busy, please retry later` 和 `保存任务失败`，后续搜索确认未创建。需要开发修复后再重新走该链路。
-- 下一步建议：
-  - 暂停继续重试 `混合奖励`，等待开发修复后再验证；不要仅用 HTTP 200 判定成功。
-  - 如需清理本次创建的任务，可按任务ID `4737`、`4738`、`4739` 执行删除；该删除会改变 staging 后台状态，执行前需确认。
-- 是否可回滚：成功创建的 `4737`、`4738`、`4739` 仍保留，可通过行操作 `删除` 清理。
-
-## 未解决问题
-
-## 2026-05-04 20:45 CEST 活动任务管理任务条件与单一奖励
-
-- 当前目标：确认 `转盘抽奖 / 单一任务条件` 下不同任务条件的选项和展开字段，并尝试创建不同任务条件的 `单一奖励` 任务。
-- 环境：staging。
-- 页面：`/activity/task`。
-- 操作类型：字段发现和新增活动任务；新增任务改变后台状态。
-- 已完成事项：
-  - 已确认 `任务条件1` 的任务类型选项共 14 个：`kyc任务`、`注册任务`、`划转任务`、`充值任务`、`邀请任务`、`合约交易量`、`现货交易量`、`现货持仓`、`收益额`、`KOL绑定`、`分享链接`、`合约&现货交易量`、`新老现货划转任务`、`首次登录APP`。
-  - 已记录每个任务类型展开后的字段，详见 `skills/weex-admin-ops/references/operations/activity-task-management.md`。
-  - 已确认 `单一奖励 / 正常奖励` 选择奖品后还必须填写 `输入最小数值` 和 `输入最大数值`。
-  - 已确认验证时应按任务名称检查列表；本次脚本里的 `roulette_single_cond_*` 是任务标签，不是列表 `任务别名` 搜索字段对应值。
-- 已创建并验证的 staging 任务：
-  - `4740`：`kyc任务`，任务名 `转盘抽奖_kyc任务_20260504203222`。
-  - `4741`：`注册任务`，任务名 `转盘抽奖_注册任务_20260504203222`。
-  - `4742`：`KOL绑定`，任务名 `转盘抽奖_KOL绑定_20260504203222`。
-  - `4743`：`划转任务`，任务名 `转盘抽奖_划转任务_20260504203222`。
-  - `4744`：`充值任务`，任务名 `转盘抽奖_充值任务_20260504203222`。
-  - `4745`：`收益额`，任务名 `转盘抽奖_收益额_20260504203222`。
-  - `4746`：`合约&现货交易量`，任务名 `转盘抽奖_合约&现货交易量_20260504203222`。
-  - `4747`：`kyc任务` 探针重跑，任务名 `roulette_kyc_probe_20260504203739`。
-- 当前阻塞点：
-  - `混合奖励` 已标记为阻断，等待开发修复后再验证。
-  - `首次登录APP` 单一奖励使用默认 `抽奖次数` 奖品时，后端返回 `任务奖品只能选择合约抵扣金`，后续需要改用合约抵扣金奖品重跑。
-  - `新老现货划转任务` 已精确选择任务类型，但仍提示 `任务条件1` 未填写完整，尚未完成创建验证。
-- 已更新 skill 文件：
-  - `skills/weex-admin-ops/references/operations/activity-task-management.md`
-  - `skills/weex-admin-ops/references/selectors/activity-task-management.md`
-  - `skills/weex-admin-ops/references/assertions/activity-task-management.md`
-- 截图：用户本轮未要求截图，未新增截图。
-- 是否可回滚：成功创建的任务可通过活动任务管理行操作删除；本次未清理。
-
-## 2026-05-04 20:55 CEST 活动任务管理未完成项重跑
-
-- 当前目标：按用户要求用浏览器模式重跑未完成的 `转盘抽奖 / 单一奖励` 任务条件。
-- 环境：staging。
-- 页面：`/activity/task`。
-- 执行模式：可见 Chrome；CDP 未连接，使用项目 Playwright 兜底。
-- 操作类型：新增活动任务，改变后台状态。
-- 已成功创建：
-  - `4748`：`合约交易量`，任务名 `转盘抽奖_合约交易量_retry_20260504204324`。
-  - `4749`：`现货交易量`，任务名 `转盘抽奖_现货交易量_retry_20260504204324`。
-  - `4750`：`现货持仓`，任务名 `转盘抽奖_现货持仓_retry_20260504204324`。
-  - `4751`：`分享链接`，任务名 `转盘抽奖_分享链接_retry_20260504204324`。
-  - `4752`：`邀请任务`，任务名 `转盘抽奖_邀请任务_retry3_20260504204857`。
-- 未完成：
-  - `首次登录APP`：`POST /prod-api/activity/task` 返回 HTTP 200，但响应体 `code=500`，信息为 `任务奖品只能选择合约抵扣金`；本轮默认选了 `抽奖次数`，所以未创建。
-  - `新老现货划转任务`：页面校验 `任务条件1：请填写完整任务条件`，未提交成功。
-- 已更新 skill 文件：
-  - `skills/weex-admin-ops/references/operations/activity-task-management.md`
-  - `skills/weex-admin-ops/references/assertions/activity-task-management.md`
-- 截图：用户本轮未要求截图，未新增截图。
-- 是否可回滚：成功创建的任务可通过活动任务管理行操作删除；本次未清理。
-
-## 2026-05-05 11:05 CEST 新老现货划转任务重试
-
-- 当前目标：按用户要求用浏览器模式重新尝试创建 `转盘抽奖 / 新老现货划转任务 / 单一奖励`。
-- 环境：staging。
-- 页面：`/activity/task`。
-- 执行模式：可见 Chrome；CDP 未连接，使用项目 Playwright 兜底。
-- 操作类型：尝试新增活动任务，后端未创建成功。
-- 已完成事项：
-  - 重新检查 `新老现货划转任务` 的 `任务条件1` 控件。
-  - 已确认比较类型下拉选项为 `>=`、`>`。
-  - 已确认填入比较类型 `>=` 和数值 `1` 后，`任务条件1` 的页面校验消失。
-  - 已确认该任务类型下 `判定开始时间` 只显示 `活动开始时间`，不显示 `报名活动后`；后续创建该类型时必须选 `活动开始时间`。
-  - 使用 `活动开始时间` 后成功提交到后端校验。
-- 结果：
-  - `POST /prod-api/activity/task` 返回 HTTP 200，但响应体为 `code=500`。
-  - 后端信息：`新老划转任务重复，已配置新老划转任务的编号是:964`。
-  - 本次未创建新任务。
-- 当前阻塞点：
-  - 该类型存在业务唯一性限制；除非复用、修改或删除已有编号 `964` 的新老划转任务，否则无法继续创建新的同类任务。
-- 已更新 skill 文件：
-  - `skills/weex-admin-ops/references/operations/activity-task-management.md`
-  - `skills/weex-admin-ops/references/assertions/activity-task-management.md`
-- 截图：用户本轮未要求截图，未新增截图。
-
-## 2026-05-04 21:12 CEST 登录页验证码行为修正
-
-- 当前目标：确认 staging 登录页是否需要普通 `验证码`，并修正 skill 中登录等待与验证码填写规则。
-- 环境：staging。
-- 页面：`/login?redirect=%2Factivities%2Flottery%2Fadd`，回归脚本使用 `/login?redirect=%2Factivity%2Fprize`。
-- 操作类型：登录验证与 skill 文档/脚本更新；不改变后台业务数据。
-- 已完成事项：
-  - 使用 3 个独立浏览器会话验证登录：等待登录页稳定后，只填写账号、密码、`谷歌验证码`，不填写普通 `验证码`。
-  - 3 次 `GET /prod-api/captchaImage` 均返回 `captchaEnabled=false`。
-  - 3 次 `POST /prod-api/login` 均返回 `code=200`，最终均进入 `/activities/lottery/add`。
-  - 修正复用登录函数，避免将谷歌验证码写入普通 `验证码` 字段；如果普通验证码仍可见，则提示等待页面加载完成而不是继续误填。
-  - 使用修正后的 `loginToPrizePage` 回归 1 次，登录成功并进入 `/activity/prize`。
-- 已更新 skill 文件：
-  - `skills/weex-admin-ops/references/login.md`
-  - `skills/weex-admin-ops/references/selectors.md`
-  - `skills/weex-admin-ops/scripts/lib/browser.mjs`
-  - `skills/weex-admin-ops/scripts/create-prizes.mjs`
-  - `skills/weex-admin-ops/scripts/copy-prize.mjs`
-- 验证依据：
-  - 登录接口返回 `code=200`。
-  - 最终 URL 离开 `/login` 并进入目标页面。
-  - 未填写普通 `验证码` 字段。
-- 当前阻塞点：无。
-- 下一步建议：后续新增登录脚本时，先等待 `/prod-api/captchaImage` 与登录表单稳定，只填写 `谷歌验证码`；不要把 `<GOOGLE_CODE>` 复用到普通 `验证码`。
-
-## 2026-05-05 任务需求确认与稳定重试路径沉淀规则
-
-- 当前目标：补充 `weex-admin-ops` 的需求确认、默认值确认和稳定重试路径沉淀规则。
-- 已完成事项：
-  - 已更新 `AGENTS.md`，要求后续用户提出创建类需求时，agent 必须先基于当前已验证链路整理必填项、可配置项、可建议默认值和已知限制，再等待用户确认。
-  - 已更新 `AGENTS.md`，要求任何“第一次链路失败、重试后出现稳定路径”的情况，一旦验证稳定，就必须补充到对应 skill 并同步更新交接文档。
-  - 已更新 `skills/weex-admin-ops/SKILL.md`，要求创建、编辑、删除前先汇总当前链路的配置项、默认项和限制，并在参数不合理时先提示用户。
-  - 已更新 `skills/weex-admin-ops/references/defaults.md`，明确“默认配置”只是候选值，不等于用户确认；用户说“用默认配置”时，也必须先展示可配置项和默认值再执行。
-  - 已更新 `skills/weex-admin-ops/references/operations/activity-task-management.md`，为 `转盘抽奖` 创建流程增加需求确认清单与合理性检查。
-  - 已补充 `转盘抽奖 / 单一奖励` 当前建议默认值：用户未指定时，默认建议 `输入最小数值=10`，`输入最大数值` 默认留空，但执行前仍需用户确认。
-- 影响范围：
-  - 后续处理后台创建类需求时，不能直接把默认值写入页面后执行。
-  - 如果用户给出的配置与页面限制、后端规则或已验证链路冲突，必须先解释冲突点，不得硬做。
-  - 重试后验证稳定的新路径，不再只停留在会话经验，必须正式写入 skill 和本交接文档。
-- 已更新 skill 文件：
-  - `AGENTS.md`
-  - `skills/weex-admin-ops/SKILL.md`
-  - `skills/weex-admin-ops/references/defaults.md`
-  - `skills/weex-admin-ops/references/operations/activity-task-management.md`
-- 当前阻塞点：无。
-- 下一步建议：后续如再出现“首轮失败、二次成功”的页面链路，应按本规则立即补充到具体业务域文档，不要只在口头说明中保留。
-
-- 其他人克隆仓库后可以直接读取项目内 `skills/weex-admin-ops/` 接力；如需 Codex 自动发现，可再复制到本机 `$CODEX_HOME/skills/weex-admin-ops`。
-- “创建一个新手活动，用默认配置”的具体页面路径、必填字段、默认配置和成功断言尚未沉淀。
-- 假钱账户页面链路目前为 `candidate`，需要重复验证或用户确认后再升级为 `verified`。
-- “活动通用模块管理 / 奖品管理”菜单导航已沉淀到 `skills/weex-admin-ops/references/operations/activity-common-module.md`。
-- “奖品管理搜索功能”已沉淀到 `skills/weex-admin-ops/references/operations/activity-common-module.md`。
-- “新增赠金奖品”已沉淀到 `skills/weex-admin-ops/references/operations/activity-common-module.md`。该流程创建了 staging 数据，尚未执行删除清理。
-- “新增币种奖品”已沉淀到 `skills/weex-admin-ops/references/operations/activity-common-module.md`。该流程创建了 staging 数据，尚未执行删除清理。
-- “新增实物奖品”已沉淀到 `skills/weex-admin-ops/references/operations/activity-common-module.md`。该流程创建了 staging 数据，尚未执行删除清理。
-- “虚拟积分或资格”各子类型字段发现和 11 个成功新增流程已沉淀到 `skills/weex-admin-ops/references/operations/prize-management.md`。
-- “仓位空投”新增已补充走通；该字段是多选，选中交易对后必须点击空白处收起下拉框再继续填写。
-
-## 下一步建议
-- 继续探索“新手活动”创建流程，记录页面路径、字段、默认值、风险参数和断言；只有用户明确要求时才保存截图。
-- 每次跑通新后台操作后，按业务域更新 `skills/weex-admin-ops/references/operations/`，并同步更新本交接记录。
-- 如果某个业务域文件接近 250 行，先拆分再继续沉淀。
-- 后续截图统一放到 `artifacts/screenshots/<中文业务域>/<中文页面或操作>/`。
-- 后续页面操作默认使用不可见/后台自动化；如果测试人员要求观察过程，需要在指令中明确说明“可见操作”或类似表达。
-- 如继续处理 `仓位空投`，先打开新增弹窗选择 `虚拟积分或资格 / 仓位空投`，在 `交易对` 多选下拉中选择真实选项，点击空白处收起下拉框后再填写后续字段；上传图片时定位 `奖品图片` 表单项内的 file input。
+## 后续接力建议
+- 继续探索“新手活动”创建流程时，先读取相关 operation index、defaults、components 和 relationships。
+- 后台写操作前必须说明动作并处理必要确认；高风险业务参数不能猜测。
+- 新跑通链路若当前 skill 尚未覆盖，按规则询问或按已授权范围沉淀到 `skills/weex-admin-ops/`，并评估动作缓存。
+- 更新交接时只在本文件记录当前摘要；历史细节写入 `docs/session-handoffs/` 对应业务域。
 
 ## 安全说明
-- 不保存真实密码、验证码、token、cookie、API key 或其他敏感信息。
-- 敏感信息统一使用占位符，例如 `<USERNAME>`、`<PASSWORD>`、`<GOOGLE_CODE>`。
-- staging 默认用户名可以记录为 `auto`；密码和 Google 验证码必须通过 `WEEX_ADMIN_PASSWORD`、`WEEX_ADMIN_GOOGLE_CODE` 或本机未提交的 `.env.local` 提供。
+- 不保存真实密码、验证码、token、cookie、API key 或完整账号凭证。
+- staging 默认用户名可以记录为 `auto`；密码和 Google 验证码必须来自环境变量或未提交的本机文件。

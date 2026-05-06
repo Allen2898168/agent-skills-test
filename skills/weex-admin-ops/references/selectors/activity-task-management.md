@@ -67,6 +67,14 @@ Business domain:
 - Multilingual switch text: `多语言`
 - English multilingual input placeholder: `英语`
 - Participant scope label: `任务参与范围`
+- Participant scope options: `报名的所有用户`, `指定代理`, `指定用户`, `指定国家或地区`, `VIP 等级`, `注册新用户`, `未充值新用户`, `老用户`
+- Participant scope extra fields:
+  - `指定代理`: `指定代理` textarea.
+  - `指定用户`: `指定用户UID` textarea.
+  - `指定国家或地区`: `指定国家或地区` multi-select, placeholder `请选择（多选）`.
+  - `VIP 等级`: `VIP等级` start/end selects with placeholders `起始等级` and `结束等级`; `VIP白名单允许` radios.
+  - `注册新用户`: `新用户` select.
+  - `老用户`: `老用户` select.
 - Risk control label: `任务风控`
 - Task combo label: `任务组合`
 - Task condition label: `任务条件1`
