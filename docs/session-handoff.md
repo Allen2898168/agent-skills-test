@@ -29,10 +29,14 @@
 - 已新增 `scripts/validate-docs-structure.mjs`，用于检查交接索引和 docs 文件长度。
 - 已新增失败复盘体系：根目录 `FAILURES.md` 作为入口，`failure-reviews/` 按业务线保存失败场景、原因、解决方式和验证结果。
 - 已将失败复盘强制规则写入 `AGENTS.md` 和 `skills/weex-admin-ops/SKILL.md`：遇到失败必须主动更新复盘；重试前先查复盘；同类失败重复出现时必须反写原流程并验证。
+- 已补强仓库入口 README，明确根目录 `scripts/` 是项目治理脚本、`skills/weex-admin-ops/scripts/` 是后管业务动作脚本。
+- 已修正 `AGENTS.md` 中动作缓存路径歧义，并调整 `temp/` 启动规则：仅在当前任务相关或用户明确要求时汇总暂存流程。
 
-## 当前未提交变更
-- 工作区存在多项未提交变更，包含本轮拆分、此前 skill/cache 更新和历史会话修改。
-- 后续如需提交，先执行 `git diff --stat` 和必要校验，再统一提交到目标分支。
+## 当前 Git 状态
+- 当前分支：`dev`。
+- 最近远端同步提交：`9c493e0 feat: 完善后管自动化流程沉淀与复盘规范`。
+- 最近一次推送后，本地 `dev` 与 `origin/dev` 已确认一致。
+- 本轮 README、AGENTS、handoff 和 gitignore 规范调整尚未提交。
 
 ## 后续接力建议
 - 继续探索“新手活动”创建流程时，先读取相关 operation index、defaults、components 和 relationships。

@@ -18,7 +18,7 @@
   - `skills/weex-admin-ops/SKILL.md`
   - 与当前任务相关的 `skills/weex-admin-ops/references/`
 - 如果当前任务涉及已知失败高发场景，必须先读取 `FAILURES.md` 和对应 `failure-reviews/` 业务线复盘。
-- 如果 `temp/` 存在暂存流程，必须先汇总暂存区内容，并询问用户是继续暂存流程，还是迁移到 skill。
+- 如果 `temp/` 存在暂存流程，新会话只需读取暂存索引摘要；只有当前任务与暂存流程相关，或用户明确要求继续、迁移暂存流程时，才汇总暂存内容并询问用户。
 - 用户未确认前，不要自动把 `temp/` 内容迁入 skill。
 - 首次对话中如果当前任务可能需要登录或后台页面操作，必须先检查环境变量是否设置：
   - `WEEX_ADMIN_USERNAME`
@@ -30,9 +30,10 @@
 ## Skill Authority
 - 后台相关操作优先使用项目内 `skills/weex-admin-ops/`，它是团队协作的权威版本。
 - 本机 `$CODEX_HOME/skills/weex-admin-ops` 只是可选安装副本；如果缺失，先读取项目内 skill。
-- 自然语言后台操作必须先查 `skills/weex-admin-ops/references/operations/index.md` 和 `scripts/action-cache.json`。
-- 如果命中动作缓存，先用 `scripts/run-cached-action.mjs --dry-run` 检查，再决定是否执行。
+- 自然语言后台操作必须先查 `skills/weex-admin-ops/references/operations/index.md` 和 `skills/weex-admin-ops/scripts/action-cache.json`。
+- 如果命中动作缓存，先用 `skills/weex-admin-ops/scripts/run-cached-action.mjs --dry-run` 检查，再决定是否执行。
 - 缓存脚本失败、缺少参数或风险不明确时，回退到项目内 Playwright 浏览器自动化流程；只有需要复用用户 Chrome 登录态或 CDP 探索时，才使用可选的 `web-access`。
+- 根目录 `scripts/` 只放项目治理脚本；后管业务动作脚本必须放在 `skills/weex-admin-ops/scripts/`。
 
 ## Safety
 - 登录、创建、编辑、启用、停用、删除、导入、导出、批量更新、发奖、风控配置等会改变后台状态的操作，执行前必须说明即将执行的动作。
@@ -66,8 +67,8 @@
 
 ## Skill Update Discipline
 - 当后台操作链路被实际跑通后，必须询问是否沉淀到项目内 `skills/weex-admin-ops/`；如果用户已提前授权自动沉淀，则直接更新。
-- 新跑通链路沉淀时必须同时评估 skill 文档和动作缓存；当前 skill 未覆盖的新链路写入对应 reference，可复用且参数化成本合理的链路还必须沉淀成脚本并登记到 `scripts/action-cache.json`。
-- 稳定、重复出现或多次跑通的链路，应优先沉淀成可复用脚本，并登记到 `scripts/action-cache.json`；如果暂不缓存，必须在交接记录和最终回复中说明原因。
+- 新跑通链路沉淀时必须同时评估 skill 文档和动作缓存；当前 skill 未覆盖的新链路写入对应 reference，可复用且参数化成本合理的链路还必须沉淀成脚本并登记到 `skills/weex-admin-ops/scripts/action-cache.json`。
+- 稳定、重复出现或多次跑通的链路，应优先沉淀成可复用脚本，并登记到 `skills/weex-admin-ops/scripts/action-cache.json`；如果暂不缓存，必须在交接记录和最终回复中说明原因。
 - 第一次失败但重试后出现稳定路径时，必须把稳定路径补充到对应 skill，并同步更新 `docs/session-handoff.md`。
 - skill 更新必须按业务域拆分，不把所有流程追加到单个大文件。
 - `SKILL.md` 只保留核心工作流和 reference 导航；页面细节、默认配置、选择器、断言、关联关系、组件操作分别写入对应 references。
@@ -94,6 +95,7 @@
 ## Temp Workflow Staging
 - `temp/` 只用于保存“已经跑通，但用户明确要求暂时不写入 skill、也不写交接文档”的后台操作流程。
 - 普通交接内容不要自动写入 `temp/`。
+- 新会话只需检查 `temp/README.md` 或暂存索引摘要；只有当前任务与暂存流程相关，或用户明确要求继续、迁移暂存流程时，才汇总暂存内容并询问用户。
 - 暂存区结构和迁移规则以 `temp/README.md` 为准。
 
 ## Session Handoff
