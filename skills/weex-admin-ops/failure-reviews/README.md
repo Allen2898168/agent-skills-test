@@ -3,7 +3,7 @@
 ## 目录规则
 - `common.md` 保存跨业务通用失败和解决方式。
 - 业务线复盘按页面或模块拆分，例如 `prize-management.md`、`activity-task-management.md`、`activity-register-management.md`。
-- 单个文件接近 250 行时，按场景或日期继续拆分，并更新根目录 `FAILURES.md`。
+- 单个文件接近 250 行时，按场景或日期继续拆分，并更新 `../FAILURES.md`。
 
 ## 写入时机
 - 页面操作失败、接口业务失败、脚本异常、缓存误命中、登录异常、组件状态误判、验证失败、第一次失败但重试成功，都必须写入复盘。

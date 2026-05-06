@@ -15,8 +15,8 @@ const { repoRoot } = pathsFrom(import.meta.url);
 
 function usage() {
   return `Usage:
-  node skills/weex-admin-ops/scripts/create-register-templates.mjs --signup-modes auto,manual,team,auto_manual
-  node skills/weex-admin-ops/scripts/create-register-templates.mjs --signup-modes team --min-team 2 --visible
+  node scripts/create-register-templates.mjs --signup-modes auto,manual,team,auto_manual
+  node scripts/create-register-templates.mjs --signup-modes team --min-team 2 --visible
 
 Required environment:
   WEEX_ADMIN_PASSWORD       staging password

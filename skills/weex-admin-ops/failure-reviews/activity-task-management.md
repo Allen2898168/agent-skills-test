@@ -7,7 +7,7 @@
 - 失败原因：后端业务处理失败，不能以 HTTP 200 判定创建成功。
 - 解决方式：标记为阻断，等待开发修复后重新验证；成功判断必须包含业务响应、toast/message 和列表回查。
 - 验证结果：当前未走通，未创建任务。
-- 关联文件：`skills/weex-admin-ops/references/operations/activity-task-roulette-reward-modes.md`。
+- 关联文件：`references/operations/activity-task-roulette-reward-modes.md`。
 - 后续处理：开发修复后重新跑该链路，并更新 skill 与复盘。
 
 ## 2026-05-04 首次登录 APP 奖励类型不匹配
@@ -17,7 +17,7 @@
 - 失败原因：该任务条件有后端奖品类型限制，默认抽奖次数奖品不适用。
 - 解决方式：后续创建该任务条件时必须选择合约抵扣金奖品。
 - 验证结果：本轮未重跑成功。
-- 关联文件：`skills/weex-admin-ops/references/operations/activity-task-roulette-conditions.md`。
+- 关联文件：`references/operations/activity-task-roulette-conditions.md`。
 - 后续处理：重跑成功后把限制前置到创建脚本或默认选择逻辑。
 
 ## 2026-05-05 新老现货划转任务业务唯一性限制
@@ -27,5 +27,5 @@
 - 失败原因：后端存在同类任务唯一性限制。
 - 解决方式：除非复用、修改或删除已有编号 `964` 的任务，否则不能继续创建新的同类任务。
 - 验证结果：本轮未创建新任务。
-- 关联文件：`skills/weex-admin-ops/references/operations/activity-task-roulette-conditions.md`。
+- 关联文件：`references/operations/activity-task-roulette-conditions.md`。
 - 后续处理：创建该类型前必须先查询是否已有配置。

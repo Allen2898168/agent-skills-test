@@ -16,9 +16,11 @@
 - `failure-reviews/activity-task-management.md`：活动任务管理相关失败。
 - `failure-reviews/activity-register-management.md`：活动用户报名管理相关失败。
 - `failure-reviews/joker-activity.md`：小丑牌活动相关失败。
+- `failure-reviews/activity-common-module.md`：活动通用模块管理相关失败。
 
 ## 当前已知高频问题摘要
 - Element UI 多选下拉选中后常需要点击弹窗空白、按 Escape 或调用公共 helper 收起，否则后续字段会被遮挡或 Vue 状态未稳定。
 - 页面操作不能只看 HTTP 200；必须同时检查业务响应 `code`、toast/message、列表回查或表单状态。
 - 登录页普通 `验证码` 可能短暂出现，staging 当前以 `/prod-api/captchaImage` 的 `captchaEnabled=false` 为准，不应把 Google 验证码填到普通验证码字段。
 - 多语言字段必须按具体表单项分别打开和回填，不能用全局第一个 `英语` 输入框。
+- 后管 API 手动调用不能只依赖 cookie；页面请求通常带 `Authorization` 头，缺失时可能返回 HTTP 200 但业务 `code=401`。

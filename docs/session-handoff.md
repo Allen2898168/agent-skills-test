@@ -17,6 +17,76 @@
 - 历史交接索引：`docs/session-handoffs/README.md`。
 
 ## 最近完成
+- 本轮按用户要求在可见浏览器模式完成复杂报名模板和活动流程引导配置验证，未保存截图：
+  - 报名模板：通过真实 UI 创建并清理 4 条复杂参与范围记录，ID `2776`-`2779`，覆盖 `指定参赛代理或用户+VIP等级+团体报名`、`指定参赛代理或用户+风控标签+团体报名`、`混合条件+注册+手动点击`、`非活跃用户+注册时间范围+注册+手动点击`。
+  - 报名模板验证：每条均完成列表回查、`查看` 弹窗详情接口 `code=200`、修改名称后 `PUT /prod-api/activity/apply` `code=200`、删除确认后 `DELETE /prod-api/activity/apply/{id}` `code=200`，并按修改后名称回查不存在。
+  - 活动流程引导配置：通过真实 UI 创建并清理 3 条 1/2/3 步记录，ID `84`-`86`，覆盖 `交易大赛/每次访问/1步`、`转盘抽奖/每日首次访问/2步`、`小丑牌活动/用户首次访问/3步`，上传次数分别为 4/8/12 且无上传失败。
+  - 活动流程引导配置验证：每条均完成 `查看`、修改活动类型为 `交易竞速赛` 后详情回查 `activityType=RACE_COMPETITION`、`复制` 生成 ID `87`-`89`、删除复制件和原件并回查不存在。
+  - 环境复盘：系统 Node 缺少 Playwright，已按既有方案切换 Codex bundled runtime 完成执行，并更新 `skills/weex-admin-ops/failure-reviews/common.md`。
+- 已跑通并沉淀 `活动通用模块管理 / 活动流程引导配置` 操作列 `查看 / 修改 / 复制 / 删除`：
+  - 新增脚本：`skills/weex-admin-ops/scripts/guide-template-row-actions.mjs`。
+  - 新增业务模块：`skills/weex-admin-ops/scripts/business/activity-common-module/guide-template-row-actions.mjs`。
+  - 新增动作缓存：`verify_guide_template_row_actions`，自然语言 `活动流程引导配置 操作列 查看 修改 复制 删除 浏览器模式` dry-run 应命中该动作。
+  - 无浏览器模式：临时 ID `80` 创建后，通过页面操作列完成 `查看`、将活动类型修改为 `交易竞速赛`、复制为 ID `81`（名称前缀 `复制从 `）、删除复制件和原件；两条记录均回查不存在。
+  - 可见浏览器模式：临时 ID `82` 通过真实 UI 点击新增、填写、上传 4 个媒体字段并确认创建；随后通过页面操作列完成 `查看`、将活动类型修改为 `交易竞速赛`、复制为 ID `83`、删除复制件和原件；两条记录均回查不存在。
+  - 页面行为确认：`复制` 不弹二次确认，直接触发 `POST /prod-api/activity/guideTemplate/copy`；`删除` 有二次确认弹窗，文案包含 `确认删除该活动吗`。
+  - 已清理失败尝试遗留的临时 ID `79`。
+  - 已更新 `skills/weex-admin-ops/references/operations/activity-guide-template.md`、`references/action-cache.md`、`references/operations/index.md`、`scripts/action-cache.json`、缓存 matcher/command 和失败复盘 `failure-reviews/activity-common-module.md`。
+  - 已修正公共 Element UI 表格 helper：操作列固定列点击先按主表可见行定位序号，再点右侧固定操作列同序号可见按钮。
+- 已将“浏览器模式写操作必须真实 UI 点击”提升为强制规则：
+  - 已更新 `AGENTS.md`、`skills/weex-admin-ops/SKILL.md`、`references/defaults.md`、`references/action-cache.md`。
+  - 规则：用户明确要求 `浏览器模式/可见操作/打开浏览器/让我看着` 时，写操作必须通过页面点击、填写、选择、上传、确认完成；接口只能做只读验证或页面触发后的证据采集。默认不可见模式可继续使用已验证的接口辅助路径。
+- 已修正并重跑原 `create-guide-templates.mjs --visible` 脚本验证：
+  - 新增记录 ID `73`，名称 `浏览器_转盘抽奖_每次访问_3步_01_20260506130517`。
+  - 脚本输出 `writePath=visible_ui_clicks`，上传次数 `uploadCount=12`，`uploadFailures=[]`。
+  - 最终 URL `/activity/guide`，创建结果成功。
+- 已修正“浏览器模式”语义误判：此前 ID `69` 和 ID `71` 虽在可见浏览器会话中运行，但写入是复用认证头调用接口，不算真实 UI 点击创建。
+- 已补跑真实可见浏览器 UI 点击路径，创建 1 条三步骤转盘抽奖流程引导配置：
+  - 名称：`浏览器UI_转盘抽奖_每次访问_3步_01_20260506130117`。
+  - ID：`72`。
+  - UI 行为：点击 `新增`，选择 `转盘抽奖` 和 `每次访问`，点击两次 `新增步骤`，填写 3 个步骤的标题、内容和按钮文案，为每个步骤通过页面上传控件上传 H5/Web 静图和动图，共 12 次上传，最后点击 `确认`。
+  - 创建验证：页面确认触发 `POST /prod-api/activity/guideTemplate`，HTTP 200，业务 `code=200`。
+  - 详情验证：按名称列表回查命中 ID `72`；详情回查 `activityType=LOTTERY`、`displayFrequency=EVERY_VISIT`，且 `step1I18nConfig`、`step2I18nConfig`、`step3I18nConfig` 均存在。
+  - 已修正 `scripts/create-guide-templates.mjs`：`--visible` 现在走真实 UI 点击/上传/确认路径；不可见模式仍走接口写入并验证。
+  - 已记录失败复盘：可见浏览器模式误用接口写入、UI 创建遗漏图片字段。
+- 已按用户要求用可见浏览器模式再创建 1 条三步骤转盘抽奖流程引导配置：
+  - 名称：`浏览器_转盘抽奖_每次访问_3步_01_20260506125815`。
+  - ID：`71`。
+  - 创建验证：`scripts/create-guide-templates.mjs --activity-types lottery --frequencies every_visit --steps 3 --visible` 返回成功，最终 URL `/activity/guide`。
+  - 详情验证：`GET /prod-api/activity/guideTemplate/71` HTTP 200，业务 `code=200`，`activityType=LOTTERY`，`displayFrequency=EVERY_VISIT`，且 `step1I18nConfig`、`step2I18nConfig`、`step3I18nConfig` 均存在。
+  - 用户未要求截图，因此未保存截图。
+- 已按用户要求用默认不可见浏览器模式再创建 1 条三步骤转盘抽奖流程引导配置：
+  - 名称：`无浏览器_转盘抽奖_每次访问_3步_01_20260506125632`。
+  - ID：`70`。
+  - 创建验证：`scripts/create-guide-templates.mjs --activity-types lottery --frequencies every_visit --steps 3` 返回成功，最终 URL `/activity/guide`。
+  - 详情验证：`GET /prod-api/activity/guideTemplate/70` HTTP 200，业务 `code=200`，`activityType=LOTTERY`，`displayFrequency=EVERY_VISIT`，且 `step1I18nConfig`、`step2I18nConfig`、`step3I18nConfig` 均存在。
+  - 用户未要求截图，因此未保存截图。
+- 已按用户要求用可见浏览器模式创建 1 条三步骤转盘抽奖流程引导配置：
+  - 名称：`浏览器_转盘抽奖_每次访问_3步_01_20260506125358`。
+  - ID：`69`。
+  - 创建验证：动作缓存 `create_guide_templates` 命中，最终 URL `/activity/guide`；创建脚本返回成功，按名称回查命中。
+  - 详情验证：`GET /prod-api/activity/guideTemplate/69` HTTP 200，业务 `code=200`，`activityType=LOTTERY`，`displayFrequency=EVERY_VISIT`，且 `step1I18nConfig`、`step2I18nConfig`、`step3I18nConfig` 均存在。
+  - 用户未要求截图，因此未保存截图。
+  - 为支持该单条链路，已扩展 `scripts/create-guide-templates.mjs` 支持 `--activity-types`、`--frequencies`、`--steps` 参数，并扩展自然语言解析 `三个步骤 + 转盘抽奖 + 浏览器模式`。
+- 已在 staging 探索 `活动通用模块管理 / 活动流程引导配置`：
+  - 入口路径：`/activity/guide`，菜单项在 `活动通用模块管理` 下；从 `/activity/prize` 登录后确认该模块已展开，并可点击进入。
+  - 页面搜索字段：`ID`、`模版名称`、`活动类型`；表格列：`ID`、`名称`、`活动类型`、`最近编辑人`、`更新时间`、`操作`。
+  - 搜索验证：`ID=37`、`模版名称=Wesley`、`活动类型=交易大赛` 均触发 `/prod-api/activity/guideTemplate/list`，HTTP 200，业务 `code=200`，列表回查命中预期记录。
+  - 新增弹窗字段：`模版名称`、`活动类型`、`引导弹窗显示频率`，以及每个步骤的 `活动简介标题`、`H5活动简介内容`、`H5配图（静图）`、`H5配图（动图）`、`Web配图（静图）`、`Web配图（动图）`、`按钮文案`。
+  - 活动类型下拉选项共 13 个；显示频率选项为 `每次访问`、`每日首次访问`、`用户首次访问`。
+  - 默认只有 `步骤1` 且无删除按钮；点击 `新增步骤` 后出现 `步骤1`、`步骤2`，两个步骤右上角均出现 `删除`。
+- 已按正式命名规则创建活动流程引导模板，默认步骤内容使用测试文案和既有 staging 图片/动图 URL；用户未要求截图，因此未保存截图：
+  - 不可见模式创建成功 15 条，ID `39`-`53`，覆盖 12 个有效活动类型的首频率、交易大赛另外两个频率、交易大赛首频率两步骤；每条均通过创建接口 `code=200` 和按模板名称列表回查验证。
+  - 可见浏览器模式创建成功 15 条，ID `54`-`68`，覆盖同一组组合；每条均通过创建接口 `code=200` 和按模板名称列表回查验证。
+  - `暂无特殊配置 / NONE` 在两种模式下创建均失败，后端返回 HTTP 200 但业务 `code=500`，提示 `系统繁忙，请稍后再试！`，未创建记录。
+  - 临时认证试跑记录 ID `38` 已清理，`DELETE /prod-api/activity/guideTemplate/38` 返回 `code=200`，按名称回查 `total=0`。
+  - 已按用户确认沉淀该链路到 `skills/weex-admin-ops/`：
+    - 新增 playbook：`skills/weex-admin-ops/references/operations/activity-guide-template.md`。
+    - 新增脚本：`skills/weex-admin-ops/scripts/create-guide-templates.mjs`。
+    - 新增业务模块：`skills/weex-admin-ops/scripts/business/activity-common-module/guide-template-plan.mjs`、`guide-template-create.mjs`。
+    - 新增动作缓存：`create_guide_templates`；默认 dry-run 可预览 15 个已验证组合，真实执行会创建记录，`--visible` 启用可见浏览器模式。
+    - 已更新 operation index、routes、action-cache 和 relationships；`暂无特殊配置 / NONE` 已在 `skills/weex-admin-ops/references/relationships/activity-common-module.md` 标记为后端阻塞分支，脚本默认排除，只有 `--include-none` 才复测。
+    - 已验证脚本 dry-run、显式 action dry-run、自然语言 dry-run、`--include-none` dry-run 和 skill 知识结构校验。
 - 已创建 `非活跃用户` 报名模板：ID `2772`，名称 `非活跃用户报名模板_注册时间_20260506104509`。
 - 该模板的可参与注册时间范围为 `2026-05-06 00:00:00` 到 `2026-05-07 23:59:59`。
 - 创建验证：`POST /prod-api/activity/apply` HTTP 200，响应 `code=200`；按模板名称搜索返回 ID `2772`。
@@ -26,17 +96,64 @@
 - 已拆分公共 Element UI helper：`scripts/lib/element-ui.mjs` 作为兼容导出入口，具体实现拆到 `scripts/lib/element-ui/` 子模块。
 - 已将历史交接从本文件拆分到 `docs/session-handoffs/`，避免单文件过长。
 - 已将 docs 增长管理写入 `AGENTS.md` 和 `skills/weex-admin-ops/SKILL.md`：`docs/session-handoff.md` 只保留当前摘要，历史归档到 `docs/session-handoffs/`，任意 `docs/**/*.md` 接近 250 行必须先拆分。
-- 已新增 `scripts/validate-docs-structure.mjs`，用于检查交接索引和 docs 文件长度。
-- 已新增失败复盘体系：根目录 `FAILURES.md` 作为入口，`failure-reviews/` 按业务线保存失败场景、原因、解决方式和验证结果。
+- 已新增 `skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs`，用于检查 skill 知识结构和文件长度。
+- 已新增失败复盘体系：`skills/weex-admin-ops/FAILURES.md` 作为入口，`skills/weex-admin-ops/failure-reviews/` 按业务线保存失败场景、原因、解决方式和验证结果。
 - 已将失败复盘强制规则写入 `AGENTS.md` 和 `skills/weex-admin-ops/SKILL.md`：遇到失败必须主动更新复盘；重试前先查复盘；同类失败重复出现时必须反写原流程并验证。
 - 已补强仓库入口 README，明确根目录 `scripts/` 是项目治理脚本、`skills/weex-admin-ops/scripts/` 是后管业务动作脚本。
 - 已修正 `AGENTS.md` 中动作缓存路径歧义，并调整 `temp/` 启动规则：仅在当前任务相关或用户明确要求时汇总暂存流程。
+- 已在默认不可见浏览器模式跑通 `活动用户报名管理` 操作列 `查看 / 修改 / 删除`：
+  - 临时报名模板 ID `2773`，原名称 `操作列临时模板_auto_20260506113121`。
+  - 查看：`GET /prod-api/activity/apply/2773` HTTP 200，响应 `code=200`，弹窗标题 `用户报名管理（查看）`。
+  - 修改：名称改为 `操作列临时模板_auto_20260506113121_已修改`，`PUT /prod-api/activity/apply` HTTP 200，响应 `code=200`，按新名称搜索返回 ID `2773`。
+  - 删除：二次确认弹窗文案包含目标模板名称，确认后 `DELETE /prod-api/activity/apply/2773` HTTP 200，响应 `code=200`，按新名称搜索不再返回该记录。
+  - 本轮未保存截图；用户未要求截图。
+- 已按用户确认沉淀该链路到 `skills/weex-admin-ops/`，并新增动作缓存脚本：
+  - 脚本：`skills/weex-admin-ops/scripts/register-template-row-actions.mjs`。
+  - 缓存动作：`verify_register_template_row_actions`。
+  - 不可见脚本验证：临时 ID `2774` 创建、查看、修改、删除并回查不存在，全部通过。
+  - 可见脚本验证：临时 ID `2775` 创建、查看、修改、删除并回查不存在，全部通过。
+  - 已修正自然语言缓存匹配，`活动用户报名管理 操作列 查看 修改 删除 浏览器模式` dry-run 命中 `verify_register_template_row_actions`。
+- 已记录本轮失败复盘：
+  - 系统 Node 缺少 Playwright，改用 Codex bundled runtime 后通过。
+  - 查看弹窗断言不能依赖 `innerText` 或最后一个可见 `.el-dialog`，已抽出按标题定位业务弹窗的公共 helper。
+  - 操作列自然语言 dry-run 初次误命中创建模板动作，已通过动作评分修正。
+- 已按用户确认，在默认不可见浏览器模式删除 `活动用户报名管理` 下 `最近编辑人=auto` 的报名模板：
+  - 页面搜索接口 `operator=auto` 返回 63 条，其中 ID `177` 的 `operator=auto_test` 属于模糊匹配，已排除。
+  - 精确 `operator=auto` 候选 62 条，已成功删除 61 条。
+  - ID `2729`（`自动化报名模板_auto_manual_20260505161031`）删除失败，后端提示该报名模板已被活动 `8990,8993` 使用，已保留。
+  - 删除后回查：精确 `operator=auto` 仅剩 ID `2729`；模糊匹配还包含已排除的 ID `177`。
+  - 用户未要求截图，因此未保存截图。
+  - 已在 `skills/weex-admin-ops/failure-reviews/activity-register-management.md` 记录“已被活动引用的报名模板不可删除”复盘。
+- 已按用户要求沉淀“按最近编辑人批量删除报名模板”链路：
+  - 新增脚本：`skills/weex-admin-ops/scripts/delete-register-templates-by-operator.mjs`。
+  - 新增业务模块：`skills/weex-admin-ops/scripts/business/activity-register-management/bulk-delete.mjs`。
+  - 新增动作缓存：`delete_register_templates_by_operator`，默认只 dry-run，实际删除必须传 `--confirm-delete`。
+  - 新增 playbook：`skills/weex-admin-ops/references/operations/activity-register-management-bulk-delete.md`。
+  - 已补充报名模板被活动引用后不能删除的关联关系。
+  - 已验证自然语言缓存命中、显式 action dry-run、不可见 dry-run 和可见 dry-run；当前 dry-run 均只列出剩余被引用模板 ID `2729`，并跳过 ID `177`。
+- 已将后管 skill 专用资产和证据目录迁入 `skills/weex-admin-ops/`：
+  - `assets/default-prize-images/default-bonus-prize.webp` 已迁移到 `skills/weex-admin-ops/assets/default-prize-images/default-bonus-prize.webp`。
+  - `artifacts/screenshots/` 已迁移到 `skills/weex-admin-ops/artifacts/screenshots/`，历史截图通过 `git mv` 保留。
+  - 已全量替换 AGENTS、README、docs、temp 和 skill references 中的旧路径。
+  - 已修改 `skills/weex-admin-ops/scripts/lib/runtime.mjs`，默认奖品图片从 skill 内部 assets 读取。
+  - 受影响奖品创建链路验证通过：dry-run 通过；不可见模式创建实物奖品 ID `509`；可见模式创建实物奖品 ID `510`；两次均观察到图片上传接口和奖品创建接口 HTTP 200。
+- 已为“skill 可单独复制复用”继续迁移根目录治理内容：
+  - `FAILURES.md` 已迁移到 `skills/weex-admin-ops/FAILURES.md`。
+  - `failure-reviews/` 已迁移到 `skills/weex-admin-ops/failure-reviews/`。
+  - 原根目录知识结构校验脚本已迁移为 `skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs`。
+  - 校验脚本已改为以 skill 根目录为基准，不依赖根目录 docs。
+  - 已修复 `pathsFrom()` 和 `run-cached-action.mjs` 对仓库外层目录的假设，使 skill 在仓库内和独立复制目录中都能解析默认 assets。
+  - 已复制 skill 到 `/tmp/weex-admin-ops-standalone-test` 做独立验证：结构校验、奖品 dry-run、动作缓存 dry-run 和默认图片路径检查均通过。
+  - 已进一步修正 `scripts/lib/runtime.mjs`，`pathsFrom()` 兼容 `import.meta.url` 和普通文件路径，方便 standalone 维护校验。
+  - 已确认根目录不再保留 skill 专用 `scripts/`、`assets/`、`artifacts/`、`FAILURES.md`、`failure-reviews/`；这些内容均位于 `skills/weex-admin-ops/` 内。
+  - 已清理 skill 内部文档和脚本 usage 注释中的仓库路径前缀，统一改为 skill 根目录相对路径，例如 `scripts/...`、`assets/...`、`artifacts/...`。
+  - 已重新复制 skill 到临时独立目录验证：结构校验、奖品 dry-run、两个动作缓存 dry-run 和默认图片路径检查均通过。
 
 ## 当前 Git 状态
 - 当前分支：`dev`。
 - 最近远端同步提交：`9c493e0 feat: 完善后管自动化流程沉淀与复盘规范`。
 - 最近一次推送后，本地 `dev` 与 `origin/dev` 已确认一致。
-- 本轮 README、AGENTS、handoff 和 gitignore 规范调整尚未提交。
+- 本轮活动流程引导配置操作列验证、活动用户报名管理操作列验证、skill/cache 沉淀、批量删除报名模板、skill 资产/证据目录迁移、失败复盘和交接摘要更新尚未提交。
 
 ## 后续接力建议
 - 继续探索“新手活动”创建流程时，先读取相关 operation index、defaults、components 和 relationships。

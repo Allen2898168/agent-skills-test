@@ -6,6 +6,7 @@ Use this file as the table of contents for operation playbooks. Keep full workfl
 
 - Activity management: `activity-management.md`
 - Activity common module: `activity-common-module.md`
+- Activity guide template: `activity-guide-template.md`
 - Activity task management: `activity-task-management.md`
 - Activity task search: `activity-task-search.md`
 - Activity task roulette reward modes: `activity-task-roulette-reward-modes.md`
@@ -14,6 +15,8 @@ Use this file as the table of contents for operation playbooks. Keep full workfl
 - Activity user registration management: `activity-register-management.md`
 - Activity user registration platform scopes: `activity-register-management-platform-scopes.md`
 - Activity user registration date range: `activity-register-management-date-range.md`
+- Activity user registration row actions: `activity-register-management-row-actions.md`
+- Activity user registration bulk delete: `activity-register-management-bulk-delete.md`
 - Joker activity: `joker-activity.md`
 - Prize management: `prize-management.md`
 - Prize management search: `prize-management-search.md`
@@ -29,6 +32,9 @@ Use this file as the table of contents for operation playbooks. Keep full workfl
 | --- | --- | --- | --- | --- |
 | Login and open offline user manage | `offline-user-manage.md` | candidate | 2026-05-04 | Opens `/activities/offline/userManage` after login. |
 | Open prize management | `activity-common-module.md` | candidate | 2026-05-04 | Opens `/activity/prize` from `活动通用模块管理 / 奖品管理`. |
+| Activity guide template discovery and search | `activity-guide-template.md` | candidate | 2026-05-06 | Opens `/activity/guide`, validates search fields, table structure, add-dialog fields, and step add/delete behavior. |
+| Create activity guide template batch | `activity-guide-template.md` | candidate | 2026-05-06 | Creates verified activity-type/frequency/step combinations; visible and invisible modes verified; `暂无特殊配置/NONE` blocked by backend. |
+| Verify activity guide template row actions | `activity-guide-template.md` | candidate | 2026-05-06 | Creates a temporary guide template, verifies `查看` / `修改` / `复制` / `删除`, and deletes temporary records; visible and invisible modes verified. |
 | Prize management search | `prize-management-search.md` | candidate | 2026-05-04 | Validates prize ID, category, name, and alias search. |
 | Open activity task management | `activity-task-management.md` | candidate | 2026-05-04 | Opens `/activity/task` by clicking `活动通用模块管理` then `活动任务管理`. |
 | Activity task management search | `activity-task-search.md` | candidate | 2026-05-04 | Validates task ID, alias, label, remark, time, score, and manual-award multi-select filters. |
@@ -47,4 +53,6 @@ Use this file as the table of contents for operation playbooks. Keep full workfl
 | Create activity user registration templates | `activity-register-management.md` | candidate | 2026-05-05 | Creates all-platform registration templates for four signup modes; visible and invisible modes verified. |
 | Create registration templates by platform scope | `activity-register-management-platform-scopes.md` | candidate | 2026-05-06 | Creates templates for non-default platform scopes including `非活跃用户`, `自然流量`, and `假钱账户`. |
 | Create non-active registration template with register time range | `activity-register-management-date-range.md` | candidate | 2026-05-06 | Creates `非活跃用户` templates with `可参与注册时间范围` enabled and bound via datetime component helper. |
+| Verify registration template row actions | `activity-register-management-row-actions.md` | candidate | 2026-05-06 | Creates a temporary template, verifies `查看` / `修改` / `删除`, and deletes the temporary row; visible and invisible modes verified. |
+| Delete registration templates by recent editor | `activity-register-management-bulk-delete.md` | candidate | 2026-05-06 | Dry-runs and deletes templates whose exact `operator` matches the requested recent editor; referenced templates are blocked by backend validation. |
 | Fill Joker activity multilingual content | `joker-activity.md` | candidate | 2026-05-06 | Reads Chinese and English source content, fills text and rich-text multilingual fields, syncs media-rich gameplay HTML, and verifies with a fresh reload. |

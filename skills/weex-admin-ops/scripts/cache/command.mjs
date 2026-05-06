@@ -4,6 +4,10 @@ export function commandFor(match, args, skillRoot) {
   if (match.action.id === "copy_prize_by_id") return copyPrizeCommand(match, args, skillRoot);
   if (match.action.id === "create_roulette_participant_scope_tasks") return rouletteParticipantScopeCommand(match, args, skillRoot);
   if (match.action.id === "create_register_templates") return registerTemplateCommand(match, args, skillRoot);
+  if (match.action.id === "verify_register_template_row_actions") return registerTemplateRowActionsCommand(match, args, skillRoot);
+  if (match.action.id === "delete_register_templates_by_operator") return deleteRegisterTemplatesByOperatorCommand(match, args, skillRoot);
+  if (match.action.id === "create_guide_templates") return createGuideTemplatesCommand(match, args, skillRoot);
+  if (match.action.id === "verify_guide_template_row_actions") return guideTemplateRowActionsCommand(match, args, skillRoot);
   if (match.action.id !== "create_prizes") throw new Error(`No runner implemented for action: ${match.action.id}`);
   const params = { ...match.inferred, ...args.passthrough };
   if (!params.category || !params.subtype) {
@@ -13,6 +17,50 @@ export function commandFor(match, args, skillRoot) {
   const commandArgs = [script, "--category", params.category, "--subtype", params.subtype, "--count", String(params.count || 1)];
   if (params.namePrefix) commandArgs.push("--name-prefix", params.namePrefix);
   if (params.aliasPrefix) commandArgs.push("--alias-prefix", params.aliasPrefix);
+  if (args.visible || params.visible) commandArgs.push("--visible");
+  if (args.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function guideTemplateRowActionsCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (args.visible || params.visible) commandArgs.push("--visible");
+  if (args.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function createGuideTemplatesCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.modeLabel) commandArgs.push("--mode-label", String(params.modeLabel));
+  if (params.activityTypes) commandArgs.push("--activity-types", String(params.activityTypes));
+  if (params.frequencies) commandArgs.push("--frequencies", String(params.frequencies));
+  if (params.steps) commandArgs.push("--steps", String(params.steps));
+  if (params.includeNone) commandArgs.push("--include-none");
+  if (args.visible || params.visible) commandArgs.push("--visible");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function deleteRegisterTemplatesByOperatorCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script, "--operator", String(params.operator || "auto")];
+  if (params.pageSize) commandArgs.push("--page-size", String(params.pageSize));
+  if (args.visible || params.visible) commandArgs.push("--visible");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  if (args.confirmDelete || params.confirmDelete) commandArgs.push("--confirm-delete");
+  return { script, commandArgs };
+}
+
+function registerTemplateRowActionsCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.namePrefix) commandArgs.push("--name-prefix", String(params.namePrefix));
   if (args.visible || params.visible) commandArgs.push("--visible");
   if (args.dryRun) commandArgs.push("--dry-run");
   return { script, commandArgs };

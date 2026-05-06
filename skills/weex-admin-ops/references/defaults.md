@@ -35,6 +35,9 @@ These can be suggested, but still mention them before execution when creating or
 
 - Run browser automation in invisible/background mode by default.
 - Open a headed visible real browser only when the user explicitly asks for visible operation, such as `可见操作`, `打开浏览器操作`, `让我看着操作`, or `真实浏览器可见执行`.
+- When visible/browser mode is requested for state-changing work, execute the write through real page UI behavior: click, fill, select, upload, and confirm in the browser. Do not substitute a direct API write for the visible-mode operation.
+- API calls in visible/browser mode are allowed only for read-only verification or evidence after the UI action has triggered the write.
+- Invisible/background mode may use faster API-assisted execution for proven low-risk staging workflows, as long as business response and result lookup are verified.
 - Visible operation changes only how the operation is displayed; it does not replace success assertions. Always verify URL, page text, table/form state, toast/message, API response, or requested screenshot evidence.
 - If an invisible run is blocked by browser-only behavior, explain the reason before switching to visible mode.
 

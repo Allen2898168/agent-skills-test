@@ -96,6 +96,10 @@ export async function loginToRegisterPage(page, config) {
   await loginToPath(page, config, "/activity/register");
 }
 
+export async function loginToGuidePage(page, config) {
+  await loginToPath(page, config, "/activity/guide");
+}
+
 export function watchPrizeResponses(page, responses) {
   page.on("response", response => {
     const url = response.url();
@@ -131,6 +135,25 @@ export function watchRegisterResponses(page, responses) {
         method: response.request().method(),
         status: response.status(),
       });
+    }
+  });
+}
+
+export function watchGuideResponses(page, responses) {
+  page.on("response", async response => {
+    const url = response.url();
+    if (url.includes("/prod-api/activity/guideTemplate")) {
+      const entry = {
+        url: url.replace(/^https?:\/\/[^/]+/, ""),
+        method: response.request().method(),
+        status: response.status(),
+      };
+      try {
+        const body = await response.json();
+        entry.code = body?.code;
+        entry.msg = body?.msg;
+      } catch {}
+      responses.push(entry);
     }
   });
 }

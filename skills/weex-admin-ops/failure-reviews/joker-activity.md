@@ -7,5 +7,5 @@
 - 失败原因：只改可见 input、textarea 或 `.ql-editor` DOM，没有同步 Vue 组件模型。
 - 解决方式：`MultiLangInput` 同步 `defaultLangValue`、`langsForm` 和嵌套 `LangInput.formData`；Quill 富文本通过 Editor 实例和 Quill clipboard API 写入，并触发 `input` / `change`。
 - 验证结果：保存后新开 tab 重载同一编辑页，抽查顶部表单、表格单元格、富文本三类字段。
-- 关联文件：`skills/weex-admin-ops/references/operations/joker-activity.md`、`skills/weex-admin-ops/references/components/joker-activity.md`。
+- 关联文件：`references/operations/joker-activity.md`、`references/components/joker-activity.md`。
 - 后续处理：后续小丑牌多语言自动化应优先复用该模型回填策略。

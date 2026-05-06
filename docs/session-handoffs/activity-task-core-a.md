@@ -17,17 +17,17 @@
   - `/prod-api/activity/task/list` 在各搜索条件下返回 200。
   - `getRiskLabelList`、`getAreaInfoList`、`selectAgencyGroupList` 等选项接口返回 200。
 - 截图路径：
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/00-进入活动任务管理.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/01-任务编号搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/02-任务别名搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/03-任务标签搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/04-备注搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/05-开始时间搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/06-结束时间搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/07-总分转手动发奖搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/08-标签转手动发奖多选.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/09-报名国家转手动发奖多选.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/10-列表右滑展示更多列.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/00-进入活动任务管理.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/01-任务编号搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/02-任务别名搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/03-任务标签搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/04-备注搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/05-开始时间搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/06-结束时间搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/07-总分转手动发奖搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/08-标签转手动发奖多选.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/09-报名国家转手动发奖多选.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/搜索功能/10-列表右滑展示更多列.png`
 - 已更新 skill 文件：
   - `skills/weex-admin-ops/references/routes.md`
   - `skills/weex-admin-ops/references/operations/index.md`
@@ -58,25 +58,25 @@
   - `正常奖励+权益奖励`：创建成功。任务ID `4738`，任务别名 `转盘抽奖_rights_1777916626416`，`POST /prod-api/activity/task` 返回 200，搜索别名返回该任务。权益奖励路径为 `虚拟积分或资格` -> `VIP` -> 第一项 VIP 奖励。
   - `混合奖励`：提交前字段已填写并截图；`POST /prod-api/activity/task` 返回 200，但页面提示 `system busy, please retry later` 和 `保存任务失败`，按任务别名 `转盘抽奖_mix_1777916693695` 搜索未返回结果。
 - 截图路径：
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/00-新增弹窗初始.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/01-选择转盘抽奖后表单.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/02-任务组合后字段.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/奖励模式-单一奖励.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/奖励模式-限时奖励不同.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/奖励模式-正常奖励权益奖励.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/奖励模式-混合奖励.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/03-单一奖励-提交前.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/04-单一奖励-创建后搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/05-限时奖励不同-提交前.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/06-限时奖励不同-错误.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/限时奖励不同-奖励变化下拉前.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/限时奖励不同-奖励变化下拉展开.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/05-限时奖励不同-重试提交前.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/06-限时奖励不同-重试创建后搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/07-正常奖励权益奖励-提交前.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/08-正常奖励权益奖励-创建后搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/09-混合奖励-提交前.png`
-  - `artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/10-混合奖励-创建后搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/00-新增弹窗初始.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/01-选择转盘抽奖后表单.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/02-任务组合后字段.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/奖励模式-单一奖励.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/奖励模式-限时奖励不同.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/奖励模式-正常奖励权益奖励.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/奖励模式-混合奖励.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/03-单一奖励-提交前.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/04-单一奖励-创建后搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/05-限时奖励不同-提交前.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/06-限时奖励不同-错误.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/限时奖励不同-奖励变化下拉前.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/限时奖励不同-奖励变化下拉展开.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/05-限时奖励不同-重试提交前.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/06-限时奖励不同-重试创建后搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/07-正常奖励权益奖励-提交前.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/08-正常奖励权益奖励-创建后搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/09-混合奖励-提交前.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/活动任务管理/新增转盘抽奖/10-混合奖励-创建后搜索.png`
 - 已更新 skill 文件：
   - `skills/weex-admin-ops/references/operations/index.md`
   - `skills/weex-admin-ops/references/operations/activity-task-management.md`

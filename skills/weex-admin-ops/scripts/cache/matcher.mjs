@@ -22,6 +22,12 @@ function scoreAction(action, query) {
   if (hasAny(query, action.intentKeywords || [])) score += 2;
   if (hasAny(query, action.objectKeywords || [])) score += 2;
   if (hasAny(query, action.scopeKeywords || [])) score += 2;
+  if (hasAny(query, action.filterKeywords || [])) score += 3;
+  if (action.supportedActions?.some(item => query.includes(item))) score += 3;
+  if (action.id === "verify_register_template_row_actions" && query.includes("操作列")) score += 3;
+  if (action.id === "delete_register_templates_by_operator" && query.includes("最近编辑人") && query.includes("删除")) score += 4;
+  if (action.id === "create_guide_templates" && /活动.*引导.*配置|引导.*流程.*配置|流程.*引导.*配置|活动流程引导配置/.test(query)) score += 8;
+  if (action.id === "verify_guide_template_row_actions" && /活动.*引导.*配置|引导.*流程.*配置|流程.*引导.*配置|活动流程引导配置/.test(query) && query.includes("操作列")) score += 12;
   if (action.supportedCategories?.some(item => query.includes(item))) score += 1;
   if (action.supportedSubtypes?.some(item => query.toUpperCase().includes(String(item).toUpperCase()))) score += 1;
   return score;
@@ -32,7 +38,74 @@ function inferParams(query) {
     ...inferPrizeParams(query),
     ...inferRouletteParticipantParams(query),
     ...inferRegisterTemplateParams(query),
+    ...inferRegisterRowActionParams(query),
+    ...inferRegisterDeleteByOperatorParams(query),
+    ...inferGuideTemplateParams(query),
+    ...inferGuideRowActionParams(query),
     prizeId: inferPrizeId(query),
+  };
+}
+
+function inferGuideRowActionParams(query) {
+  if (!/活动.*引导.*配置|引导.*流程.*配置|流程.*引导.*配置|活动流程引导配置/.test(query)) return {};
+  if (!query.includes("操作列") && !query.includes("查看") && !query.includes("修改") && !query.includes("复制") && !query.includes("删除")) return {};
+  return {
+    visible: /浏览器模式|可见|打开浏览器|让我看着/.test(query),
+  };
+}
+
+function inferGuideTemplateParams(query) {
+  if (!/活动.*引导.*配置|引导.*流程.*配置|流程.*引导.*配置|活动流程引导配置/.test(query)) return {};
+  return {
+    activityTypes: inferGuideActivityType(query),
+    frequencies: inferGuideFrequency(query),
+    steps: inferGuideSteps(query),
+    includeNone: /暂无特殊配置|NONE|所有活动类型/.test(query),
+    visible: /浏览器模式|可见|打开浏览器|让我看着/.test(query),
+  };
+}
+
+function inferGuideActivityType(query) {
+  const map = [
+    ["交易竞速赛", "race_competition"],
+    ["交易大赛", "trading_competition"],
+    ["新手活动", "beginner_task"],
+    ["转盘抽奖", "lottery"],
+    ["小活动型活动", "trace_pro"],
+    ["定制化活动", "customized"],
+    ["充值交易活动", "recharge_trans_task"],
+    ["人人代理活动", "agent"],
+    ["合约挖矿活动", "contract_mining"],
+    ["小丑牌活动", "flip"],
+    ["竞猜大赛", "guess"],
+    ["代理小活动", "agent_trace_pro"],
+    ["暂无特殊配置", "none"],
+  ];
+  return map.find(([word]) => query.includes(word))?.[1];
+}
+
+function inferGuideFrequency(query) {
+  if (query.includes("每日首次访问")) return "daily_first";
+  if (query.includes("用户首次访问")) return "user_first";
+  if (query.includes("每次访问") || query.includes("第一个频率") || query.includes("第一个选项")) return "every_visit";
+  return undefined;
+}
+
+function inferGuideSteps(query) {
+  const digit = query.match(/(\d+)\s*(?:个)?步骤/);
+  if (digit) return digit[1];
+  const map = { 一: 1, 二: 2, 两: 2, 三: 3 };
+  const zh = query.match(/([一二两三])\s*(?:个)?步骤/);
+  return zh ? String(map[zh[1]]) : undefined;
+}
+
+function inferRegisterDeleteByOperatorParams(query) {
+  if (!query.includes("删除") || !/报名模板|活动用户报名管理/.test(query)) return {};
+  if (!/最近编辑人|编辑人|operator/i.test(query)) return {};
+  const operatorMatch = query.match(/(?:最近编辑人|编辑人|operator)\s*(?:是|为|=|:|：)?\s*([A-Za-z0-9_.-]+)/i);
+  return {
+    operator: operatorMatch?.[1] || "auto",
+    visible: /浏览器模式|可见|打开浏览器|让我看着/.test(query),
   };
 }
 
@@ -128,6 +201,15 @@ function inferRegisterTemplateParams(query) {
     peopleLimit: peopleLimitMatch?.[1],
     registerStart: dateRange?.start,
     registerEnd: dateRange?.end,
+    visible: /浏览器模式|可见|打开浏览器|让我看着/.test(query),
+  };
+}
+
+function inferRegisterRowActionParams(query) {
+  if (!query.includes("活动用户报名管理") && !query.includes("报名模板")) return {};
+  if (!query.includes("操作列") && !query.includes("查看") && !query.includes("修改") && !query.includes("删除")) return {};
+  return {
+    namePrefix: "操作列临时模板",
     visible: /浏览器模式|可见|打开浏览器|让我看着/.test(query),
   };
 }

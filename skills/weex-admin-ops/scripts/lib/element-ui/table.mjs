@@ -11,12 +11,25 @@ export async function visibleRowIndexByText(page, text) {
 }
 
 export async function clickRowActionByText(page, rowText, action) {
-  const index = await visibleRowIndexByText(page, rowText);
-  if (index < 0) throw new Error(`Row not found for text: ${rowText}`);
-  const fixedRows = page.locator(".el-table__fixed-right .el-table__fixed-body-wrapper tbody tr");
-  const mainRows = page.locator(".el-table__body-wrapper tbody tr");
-  const rows = await fixedRows.count() > index ? fixedRows : mainRows;
-  await rows.nth(index).locator(`button:has-text("${action}")`).first().click();
+  const clicked = await page.evaluate(({ rowText, action }) => {
+    const visible = element => {
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return rect.width > 0 && rect.height > 0 && style.visibility !== "hidden" && style.display !== "none";
+    };
+    const mainRows = [...document.querySelectorAll(".el-table__body-wrapper tbody tr")].filter(visible);
+    const index = mainRows.findIndex(row => (row.innerText || "").includes(rowText));
+    if (index < 0) return false;
+    const fixedRows = [...document.querySelectorAll(".el-table__fixed-right .el-table__fixed-body-wrapper tbody tr")].filter(visible);
+    const row = fixedRows[index] || mainRows[index];
+    const buttons = [...row.querySelectorAll("button")]
+      .filter(visible)
+      .filter(button => (button.innerText || "").trim().includes(action));
+    if (!buttons.length) return false;
+    buttons[0].click();
+    return true;
+  }, { rowText: String(rowText), action: String(action) });
+  if (!clicked) throw new Error(`Visible row action not found: row=${rowText}; action=${action}`);
   await sleep(900);
-  return index;
+  return true;
 }

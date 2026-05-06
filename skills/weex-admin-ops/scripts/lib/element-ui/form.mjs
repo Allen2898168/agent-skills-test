@@ -1,5 +1,5 @@
 import { sleep } from "../browser.mjs";
-import { formItem, setNativeInputValue } from "./common.mjs";
+import { formItem, formItemInDialog, setNativeInputValue } from "./common.mjs";
 
 export async function fillLabel(page, label, value, required = true) {
   try {
@@ -13,6 +13,36 @@ export async function fillLabel(page, label, value, required = true) {
   } catch (error) {
     if (required) throw error;
     return false;
+  }
+}
+
+export async function fillLabelInDialog(page, dialogText, label, value, required = true) {
+  try {
+    const item = await formItemInDialog(page, dialogText, label);
+    await item.scrollIntoViewIfNeeded();
+    const input = await item.$('input:not([type="file"]):not([readonly]):not([type="radio"]):not([type="checkbox"]), textarea');
+    if (!input) throw new Error(`Input not found: ${label}`);
+    await setNativeInputValue(input, value);
+    await sleep(100);
+    return true;
+  } catch (error) {
+    if (required) throw error;
+    return false;
+  }
+}
+
+export async function labelValueInDialog(page, dialogText, label, required = true) {
+  try {
+    const item = await formItemInDialog(page, dialogText, label);
+    const value = await item.evaluate(root => {
+      const input = root.querySelector('input:not([type="file"]), textarea');
+      if (input) return input.value || input.getAttribute("value") || "";
+      return root.innerText.trim();
+    });
+    return value;
+  } catch (error) {
+    if (required) throw error;
+    return null;
   }
 }
 

@@ -14,14 +14,14 @@
   - `复制`：确认弹窗打开，`POST /prod-api/activity/prize/copy` 返回 200，复制记录奖品ID `474`，名称为 `复制从 操作按钮测试_BTC_20260504161432_已修改`，别名为 `复制从 auto_action_btc_20260504161432`。
   - `删除`：删除复制记录 `474`，`DELETE /prod-api/activity/prize/474` 返回 200，按奖品ID `474` 搜索不再展示该复制记录。
 - 截图路径：
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/00-测试奖品创建后列表.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/01-查看详情弹窗.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/02-修改弹窗-已回填.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/03-修改后列表验证.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/04-复制确认弹窗.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/05-复制后列表最上方.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/06-删除确认弹窗.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/07-删除后搜索无结果.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/00-测试奖品创建后列表.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/01-查看详情弹窗.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/02-修改弹窗-已回填.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/03-修改后列表验证.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/04-复制确认弹窗.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/05-复制后列表最上方.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/06-删除确认弹窗.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/奖品管理/操作按钮功能/07-删除后搜索无结果.png`
 - 已更新 skill 文件：
   - `skills/weex-admin-ops/references/operations/index.md`
   - `skills/weex-admin-ops/references/operations/prize-management.md`

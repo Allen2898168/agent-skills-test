@@ -125,9 +125,9 @@ Created during verification:
 
 Cached script:
 ```bash
-node skills/weex-admin-ops/scripts/create-register-templates.mjs --signup-modes auto,manual,team,auto_manual --dry-run
-node skills/weex-admin-ops/scripts/create-register-templates.mjs --signup-modes team --min-team 2 --visible
-node skills/weex-admin-ops/scripts/create-register-templates.mjs --signup-modes auto --permissions view --dry-run
+node scripts/create-register-templates.mjs --signup-modes auto,manual,team,auto_manual --dry-run
+node scripts/create-register-templates.mjs --signup-modes team --min-team 2 --visible
+node scripts/create-register-templates.mjs --signup-modes auto --permissions view --dry-run
 ```
 
 ## Create Agent/User Scope Registration Templates By Restriction Scope
@@ -186,11 +186,12 @@ Success assertions:
 
 Cached script:
 ```bash
-node skills/weex-admin-ops/scripts/create-register-templates.mjs --platform-scope agent_user --restrict-scopes all --uid 9881271952 --signup-modes auto --dry-run
-node skills/weex-admin-ops/scripts/create-register-templates.mjs --platform-scope agent_user --restrict-scopes vip --uid 9881271952 --signup-modes auto --visible
-node skills/weex-admin-ops/scripts/create-register-templates.mjs --platform-scope agent_user --restrict-scopes vip --uid 9881271952 --signup-modes auto
+node scripts/create-register-templates.mjs --platform-scope agent_user --restrict-scopes all --uid 9881271952 --signup-modes auto --dry-run
+node scripts/create-register-templates.mjs --platform-scope agent_user --restrict-scopes vip --uid 9881271952 --signup-modes auto --visible
+node scripts/create-register-templates.mjs --platform-scope agent_user --restrict-scopes vip --uid 9881271952 --signup-modes auto
 ```
 
-Detailed platform-scope and register-time variants are split to keep this file below the growth threshold:
+Detailed platform-scope, register-time, and row-action variants are split to keep this file below the growth threshold:
 - `activity-register-management-platform-scopes.md`
 - `activity-register-management-date-range.md`
+- `activity-register-management-row-actions.md`

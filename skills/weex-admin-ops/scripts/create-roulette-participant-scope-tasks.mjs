@@ -9,8 +9,8 @@ const { repoRoot } = pathsFrom(import.meta.url);
 
 function usage() {
   return `Usage:
-  node skills/weex-admin-ops/scripts/create-roulette-participant-scope-tasks.mjs --scopes all,vip,newuser,nocharge,olduser,agent,user,country --uid 9881271952 --country 中国
-  node skills/weex-admin-ops/scripts/create-roulette-participant-scope-tasks.mjs --scopes country --country-first --visible
+  node scripts/create-roulette-participant-scope-tasks.mjs --scopes all,vip,newuser,nocharge,olduser,agent,user,country --uid 9881271952 --country 中国
+  node scripts/create-roulette-participant-scope-tasks.mjs --scopes country --country-first --visible
 
 Required environment:
   WEEX_ADMIN_PASSWORD       staging password

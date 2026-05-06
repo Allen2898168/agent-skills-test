@@ -77,7 +77,7 @@ Success assertions:
 
 Cached script:
 ```bash
-node skills/weex-admin-ops/scripts/create-register-templates.mjs --platform-scopes extended --signup-modes auto --dry-run
-node skills/weex-admin-ops/scripts/create-register-templates.mjs --platform-scopes extended --signup-modes auto --visible
-node skills/weex-admin-ops/scripts/create-register-templates.mjs --platform-scopes extended --signup-modes auto
+node scripts/create-register-templates.mjs --platform-scopes extended --signup-modes auto --dry-run
+node scripts/create-register-templates.mjs --platform-scopes extended --signup-modes auto --visible
+node scripts/create-register-templates.mjs --platform-scopes extended --signup-modes auto
 ```

@@ -6,8 +6,10 @@ The action cache is the first execution layer for workflows that have already be
 
 1. Before manual browser exploration, check `scripts/action-cache.json`.
 2. If the user request matches a cached action and required parameters can be inferred or safely defaulted, run `scripts/run-cached-action.mjs`.
-3. If the cached script succeeds, report the result and verification evidence.
-4. If the cached script fails, preserve the failure output, then fall back to the normal workflow:
+3. If the user explicitly requests browser/visible mode for a state-changing operation, the cached script must perform the write through page UI actions. A headed browser plus direct API write is not sufficient.
+4. Invisible/background cached scripts may use API-assisted execution for proven workflows when they still verify the business response and resulting record.
+5. If the cached script succeeds, report the result and verification evidence.
+6. If the cached script fails, preserve the failure output, then fall back to the normal workflow:
    - use project Playwright browser automation by default;
    - use optional `web-access`/CDP only when Chrome login-state reuse or live browser context is required;
    - inspect the current page;
@@ -22,6 +24,10 @@ The action cache is the first execution layer for workflows that have already be
 | `copy_prize_by_id` | `scripts/copy-prize.mjs` | candidate | Copy one prize by `奖品ID` and verify the copied row appears. |
 | `create_roulette_participant_scope_tasks` | `scripts/create-roulette-participant-scope-tasks.mjs` | candidate | Create `转盘抽奖` single-reward tasks by `任务参与范围`; visible and invisible modes verified on 2026-05-05. |
 | `create_register_templates` | `scripts/create-register-templates.mjs` | candidate | Create activity user registration templates by signup mode and selected platform/restriction scopes; visible and invisible modes verified on 2026-05-06. |
+| `verify_register_template_row_actions` | `scripts/register-template-row-actions.mjs` | candidate | Create a temporary registration template, verify `查看` / `修改` / `删除`, and delete the temporary record; visible and invisible modes verified on 2026-05-06. |
+| `delete_register_templates_by_operator` | `scripts/delete-register-templates-by-operator.mjs` | candidate | Dry-run and delete activity registration templates by exact `最近编辑人`; destructive execution requires `--confirm-delete`; invisible deletion and visible/invisible dry-run verified on 2026-05-06. |
+| `create_guide_templates` | `scripts/create-guide-templates.mjs` | candidate | Create activity guide-flow templates for verified activity-type/frequency/step combinations; visible and invisible modes verified on 2026-05-06. |
+| `verify_guide_template_row_actions` | `scripts/guide-template-row-actions.mjs` | candidate | Create a temporary activity guide template, verify `查看` / `修改` / `复制` / `删除`, and delete the temporary records; visible and invisible modes verified on 2026-05-06. |
 
 ## Natural-Language Matching
 
@@ -60,6 +66,36 @@ For activity user registration templates:
 - pass `--people-limit <n>` to fill `报名人数限制`;
 - pass `--register-start "yyyy-MM-dd HH:mm:ss"` and `--register-end "yyyy-MM-dd HH:mm:ss"` to enable and bind `可参与注册时间范围`;
 - run `--dry-run` before any actual creation because the script writes registration-template records.
+
+For activity user registration row actions:
+- use `--action verify_register_template_row_actions` for explicit execution;
+- default browser mode is invisible, and `--visible` enables headed browser mode;
+- the script creates a temporary all-platform template, verifies `查看`, modifies the template name, opens the delete confirmation, confirms deletion, and verifies the row is absent after search;
+- run `--dry-run` before execution because the script creates, modifies, and deletes a registration-template record.
+
+For activity user registration bulk delete:
+- use `--action delete_register_templates_by_operator` for explicit execution;
+- default browser mode is invisible, and `--visible` enables headed browser mode;
+- pass `--operator <name>` to target a recent editor, defaulting to `auto`;
+- run the script with `--dry-run` first to list exact candidates and fuzzy rows that will be skipped;
+- actual deletion requires `--confirm-delete`;
+- the script deletes only rows whose response field `operator` exactly equals the requested operator, then re-queries to verify remaining exact matches.
+
+For activity guide templates:
+- use `--action create_guide_templates` for explicit execution;
+- default browser mode is invisible and uses the authenticated API write path;
+- `--visible` enables headed browser mode and performs the write through page UI clicks, field fills, media uploads, and the dialog `确认` button;
+- the default batch creates the 15 verified combinations: 12 supported activity types with `每次访问`, `交易大赛` with all three frequencies, and `交易大赛` with `每次访问` plus two steps;
+- pass `--activity-types <csv>`, `--frequencies <csv>`, and `--steps <csv>` to create custom combinations, for example `--activity-types lottery --frequencies every_visit --steps 3 --visible`;
+- run with `--dry-run` before actual creation because the script writes guide-template records;
+- `暂无特殊配置 / NONE` is a known blocked branch and is excluded by default; pass `--include-none` only when intentionally retesting the backend failure.
+
+For activity guide-template row actions:
+- use `--action verify_guide_template_row_actions` for explicit execution;
+- default browser mode is invisible; temporary setup may use the authenticated API write path, but row actions are clicked in the browser page;
+- `--visible` enables headed browser mode and performs temporary setup plus all row actions through real UI clicks, field fills, uploads, and confirmation buttons;
+- the script creates a temporary `转盘抽奖` guide template, verifies `查看`, modifies `活动类型` to `交易竞速赛`, verifies `复制` creates `复制从 <原模板名称>`, deletes the copied and original rows, and verifies exact-name searches are absent;
+- run `--dry-run` before execution because the script creates, modifies, copies, and deletes guide-template records.
 
 ## Cache Graduation Rules
 

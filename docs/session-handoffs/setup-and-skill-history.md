@@ -67,5 +67,5 @@
   - `skills/weex-admin-ops/scripts/business/prize-management/copy.mjs`
   - `skills/weex-admin-ops/agents/openai.yaml`
 - 已创建默认奖品图片资产：
-  - `assets/default-prize-images/default-bonus-prize.webp`
-- 已更新图片资产规则：奖品图片从 `assets/default-prize-images/` 选择；单张图片可默认使用，多张图片必须询问用户选择或确认随机，目录为空时才询问是否创建占位图。
+  - `skills/weex-admin-ops/assets/default-prize-images/default-bonus-prize.webp`
+- 已更新图片资产规则：奖品图片从 `skills/weex-admin-ops/assets/default-prize-images/` 选择；单张图片可默认使用，多张图片必须询问用户选择或确认随机，目录为空时才询问是否创建占位图。

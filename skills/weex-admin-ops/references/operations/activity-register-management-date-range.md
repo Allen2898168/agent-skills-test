@@ -48,5 +48,5 @@ Success assertions:
 
 Cached script:
 ```bash
-node skills/weex-admin-ops/scripts/create-register-templates.mjs --platform-scopes non_active --signup-modes auto --register-start "2026-05-06 00:00:00" --register-end "2026-05-07 23:59:59" --visible --dry-run
+node scripts/create-register-templates.mjs --platform-scopes non_active --signup-modes auto --register-start "2026-05-06 00:00:00" --register-end "2026-05-07 23:59:59" --visible --dry-run
 ```

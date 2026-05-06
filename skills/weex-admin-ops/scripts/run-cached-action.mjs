@@ -10,12 +10,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const skillRoot = path.resolve(__dirname, "..");
 const manifestPath = path.join(__dirname, "action-cache.json");
+const executionRoot = path.basename(path.dirname(skillRoot)) === "skills"
+  ? path.resolve(skillRoot, "../..")
+  : skillRoot;
 
 function usage() {
   return `Usage:
-  node skills/weex-admin-ops/scripts/run-cached-action.mjs --list
-  node skills/weex-admin-ops/scripts/run-cached-action.mjs --query "创建3个ETH币种奖励"
-  node skills/weex-admin-ops/scripts/run-cached-action.mjs --action create_prizes --category 币种 --subtype ETH --count 3
+  node scripts/run-cached-action.mjs --list
+  node scripts/run-cached-action.mjs --query "创建3个ETH币种奖励"
+  node scripts/run-cached-action.mjs --action create_prizes --category 币种 --subtype ETH --count 3
 
 Options:
   --query <text>       Natural-language request to match against cached actions
@@ -36,11 +39,18 @@ Options:
   --min-team <n>      Minimum team size for team signup mode
   --permissions <csv> Permission limits for create_register_templates: signup,view
   --people-limit <n>  Optional registration people limit
+  --include-none      Include guide-template 暂无特殊配置/NONE known blocked branch
+  --mode-label <text> Name prefix for create_guide_templates
+  --activity-types <csv> Activity types for create_guide_templates
+  --frequencies <csv> Frequencies for create_guide_templates
+  --steps <csv>      Step counts for create_guide_templates, 1-3
+  --operator <name>   Recent editor/operator for delete_register_templates_by_operator
+  --confirm-delete    Required by delete_register_templates_by_operator for actual deletion
 `;
 }
 
 function parseCacheArgs() {
-  const parsed = parseFlags(process.argv.slice(2), { booleans: ["--list", "--visible", "--dry-run", "--country-first"] });
+  const parsed = parseFlags(process.argv.slice(2), { booleans: ["--list", "--visible", "--dry-run", "--country-first", "--confirm-delete"] });
   const passthrough = {};
   for (const [key, value] of Object.entries(parsed)) {
     if (!["help", "list", "visible", "dryRun", "query", "action"].includes(key)) passthrough[key] = value;
@@ -50,7 +60,7 @@ function parseCacheArgs() {
 
 function runMatchedCommand(commandArgs) {
   const result = spawnSync(process.execPath, commandArgs, {
-    cwd: path.resolve(skillRoot, "../.."),
+    cwd: executionRoot,
     stdio: "inherit",
     env: process.env,
   });

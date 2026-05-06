@@ -1,5 +1,5 @@
 import { sleep } from "../browser.mjs";
-import { dialog, formItem } from "./common.mjs";
+import { dialog, dialogByText, formItem } from "./common.mjs";
 
 export async function clickVisibleDialogText(page, text) {
   const d = await dialog(page);
@@ -39,6 +39,48 @@ export async function clickButton(page, text, scopeSelector = null, required = t
   if (!clicked && required) throw new Error(`Button not found: ${text}`);
   await sleep(100);
   return clicked;
+}
+
+export async function clickButtonInDialog(page, dialogText, buttonText, required = true) {
+  const d = await dialogByText(page, dialogText);
+  const clicked = await d.evaluate((root, text) => {
+    const visible = element => {
+      const rect = element.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    };
+    const button = [...root.querySelectorAll("button")]
+      .filter(visible)
+      .find(item => (item.innerText || "").includes(text));
+    if (!button) return false;
+    button.click();
+    return true;
+  }, buttonText);
+  if (!clicked && required) throw new Error(`Button not found: ${buttonText} in dialog ${dialogText}`);
+  await sleep(100);
+  return clicked;
+}
+
+export async function closeDialogByText(page, dialogText) {
+  const d = await dialogByText(page, dialogText);
+  const closed = await d.evaluate(root => {
+    const button = root.querySelector(".el-dialog__headerbtn");
+    if (!button) return false;
+    button.click();
+    return true;
+  });
+  if (!closed) await page.keyboard.press("Escape");
+  await sleep(500);
+}
+
+export async function confirmMessageBox(page, expectedText = "") {
+  const box = page.locator(".el-message-box:visible, .el-message-box__wrapper:visible").last();
+  await box.waitFor({ timeout: 10000 });
+  const text = await box.innerText();
+  if (expectedText && !text.includes(expectedText)) throw new Error(`Message box did not include expected text: ${expectedText}`);
+  const confirm = page.locator('.el-message-box:visible button:has-text("确定"), .el-message-box__wrapper:visible button:has-text("确定")').last();
+  await confirm.click();
+  await sleep(300);
+  return text;
 }
 
 export async function setEnglish(page, enName) {

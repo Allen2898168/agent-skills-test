@@ -9,8 +9,8 @@ const { repoRoot } = pathsFrom(import.meta.url);
 
 function usage() {
   return `Usage:
-  node skills/weex-admin-ops/scripts/create-prizes.mjs --category 币种 --subtype ETH --count 3 --name-prefix ETH币种奖励 --alias-prefix eth_coin
-  node skills/weex-admin-ops/scripts/create-prizes.mjs --plan /path/to/prizes.json --visible
+  node scripts/create-prizes.mjs --category 币种 --subtype ETH --count 3 --name-prefix ETH币种奖励 --alias-prefix eth_coin
+  node scripts/create-prizes.mjs --plan /path/to/prizes.json --visible
 
 Required environment:
   WEEX_ADMIN_PASSWORD       staging password

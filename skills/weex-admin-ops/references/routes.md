@@ -114,3 +114,31 @@ Operations likely available:
 - 查看
 - 修改
 - 删除
+
+### Activity Guide Template
+
+Status: candidate
+Last verified: 2026-05-06
+
+Business domain:
+活动通用模块管理 / 活动流程引导配置。
+
+Path:
+`/activity/guide`
+
+Login redirect:
+`/login?redirect=%2Factivity%2Fguide`
+
+Observed page signals:
+- Breadcrumb/page text includes `活动通用模块管理 / 活动流程引导配置`.
+- Search form includes `ID`, `模版名称`, and `活动类型`.
+- Table headers include `ID`, `名称`, `活动类型`, `最近编辑人`, `更新时间`, and `操作`.
+- Add dialog includes `模版名称`, `活动类型`, `引导弹窗显示频率`, and step fields.
+
+Operations likely available:
+- 搜索
+- 新增
+- 查看
+- 修改
+- 复制
+- 删除

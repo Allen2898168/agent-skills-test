@@ -48,7 +48,7 @@ Cached action:
 - Verified modes:
   - Visible browser path: manually validated on 2026-05-05.
   - Invisible cached path: validated on 2026-05-05 by creating task IDs `4792` through `4799`.
-- Dry-run example: `node skills/weex-admin-ops/scripts/run-cached-action.mjs --action create_roulette_participant_scope_tasks --scopes all,vip,newuser,nocharge,olduser,agent,user,country --uid 9881271952 --country 中国 --dry-run`
+- Dry-run example: `node scripts/run-cached-action.mjs --action create_roulette_participant_scope_tasks --scopes all,vip,newuser,nocharge,olduser,agent,user,country --uid 9881271952 --country 中国 --dry-run`
 
 Request confirmation checklist before execution:
 - Confirm the participant scopes to create.

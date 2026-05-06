@@ -182,6 +182,29 @@ Related playbooks:
 Related references:
 - `components.md`
 
+## Split Relationship Files
+
+- Activity common module relationships: `relationships/activity-common-module.md`
+
+### Activity Registration Template References Block Deletion
+
+Status: candidate
+Last verified: 2026-05-06
+
+Source object:
+- Activity user registration templates under `活动通用模块管理 / 活动用户报名管理`.
+
+Consumer object:
+- Activity records that reference a registration template.
+
+Dependency or limitation:
+- A registration template already referenced by activity records cannot be deleted directly.
+- Observed example: template ID `2729` was blocked because activities `8990,8993` referenced it.
+- Bulk deletion by recent editor must preserve such records and report the blocking activity IDs.
+
+Related playbooks:
+- `operations/activity-register-management-bulk-delete.md`
+
 ### Joker Gameplay Content Type Controls Translation Strategy
 
 Status: candidate

@@ -14,10 +14,10 @@
 - 新会话开始处理本项目任务时，必须先读取：
   - `AGENTS.md`
   - `docs/session-handoff.md`
-  - `FAILURES.md`
+  - `skills/weex-admin-ops/FAILURES.md`
   - `skills/weex-admin-ops/SKILL.md`
   - 与当前任务相关的 `skills/weex-admin-ops/references/`
-- 如果当前任务涉及已知失败高发场景，必须先读取 `FAILURES.md` 和对应 `failure-reviews/` 业务线复盘。
+- 如果当前任务涉及已知失败高发场景，必须先读取 `skills/weex-admin-ops/FAILURES.md` 和对应 `skills/weex-admin-ops/failure-reviews/` 业务线复盘。
 - 如果 `temp/` 存在暂存流程，新会话只需读取暂存索引摘要；只有当前任务与暂存流程相关，或用户明确要求继续、迁移暂存流程时，才汇总暂存内容并询问用户。
 - 用户未确认前，不要自动把 `temp/` 内容迁入 skill。
 - 首次对话中如果当前任务可能需要登录或后台页面操作，必须先检查环境变量是否设置：
@@ -33,7 +33,7 @@
 - 自然语言后台操作必须先查 `skills/weex-admin-ops/references/operations/index.md` 和 `skills/weex-admin-ops/scripts/action-cache.json`。
 - 如果命中动作缓存，先用 `skills/weex-admin-ops/scripts/run-cached-action.mjs --dry-run` 检查，再决定是否执行。
 - 缓存脚本失败、缺少参数或风险不明确时，回退到项目内 Playwright 浏览器自动化流程；只有需要复用用户 Chrome 登录态或 CDP 探索时，才使用可选的 `web-access`。
-- 根目录 `scripts/` 只放项目治理脚本；后管业务动作脚本必须放在 `skills/weex-admin-ops/scripts/`。
+- 后管业务动作脚本、动作缓存脚本和 skill 维护脚本必须放在 `skills/weex-admin-ops/scripts/`；根目录 `scripts/` 不作为 skill 复用的必需目录。
 
 ## Safety
 - 登录、创建、编辑、启用、停用、删除、导入、导出、批量更新、发奖、风控配置等会改变后台状态的操作，执行前必须说明即将执行的动作。
@@ -53,10 +53,12 @@
 ## Browser And Evidence
 - 页面操作优先使用真实浏览器自动化。
 - 自动化操作默认不可见/后台运行；只有用户明确要求“可见操作”“打开浏览器操作”“让我看着操作”等表达时，才打开有界面的真实浏览器。
+- 用户明确要求“浏览器模式”“可见操作”“打开浏览器操作”“让我看着操作”等表达时，所有会改变后台状态的写操作必须模拟用户真实页面行为：点击按钮、填写表单、选择下拉/单选/多选、上传文件、点击确认/提交；不得用纯接口调用代替页面写操作。接口调用只允许作为只读验证或页面行为触发后的证据采集。
+- 默认不可见/后台模式不强制模拟用户点击；在已沉淀且风险明确的链路中，可以使用脚本化接口或页面上下文加速执行，但仍必须验证业务响应和结果回查。
 - 同一业务链路在可见浏览器模式和默认不可见模式下可能存在不同执行路径；沉淀时必须记录已验证的模式，未验证的模式不得写成已跑通。
 - 操作成功不能只看点击完成，必须验证至少一种结果：URL、页面关键文案、表格或表单状态、toast/message、关键接口响应或用户要求的截图证据。
 - 默认不保存截图；只有用户明确要求“截图”“保存截图”“留证据图”等指令时才保存截图。
-- 截图统一保存到 `artifacts/screenshots/<中文业务域>/<中文页面或操作>/`。
+- 截图统一保存到 `skills/weex-admin-ops/artifacts/screenshots/<中文业务域>/<中文页面或操作>/`。
 - 最终回复必须说明最终 URL、操作结果、验证依据；如果用户要求截图，说明截图路径；如果更新了 skill 或动作缓存，也要说明。
 
 ## Missing Information
@@ -86,11 +88,11 @@
 
 ## Failure Review Discipline
 - 每次后台操作、脚本执行、页面探测、缓存命中或验证过程中出现失败、阻塞、误判、重试成功、环境问题或后端校验问题，都必须主动更新失败复盘。
-- 失败复盘入口为根目录 `FAILURES.md`；具体复盘按业务线写入 `failure-reviews/`，通用问题写入 `failure-reviews/common.md`。
-- 执行新流程或重试失败流程前，必须先查看 `FAILURES.md` 和相关业务线复盘，确认是否已有解决方式。
+- 失败复盘入口为 skill 内 `skills/weex-admin-ops/FAILURES.md`；具体复盘按业务线写入 `skills/weex-admin-ops/failure-reviews/`，通用问题写入 `skills/weex-admin-ops/failure-reviews/common.md`。
+- 执行新流程或重试失败流程前，必须先查看 `skills/weex-admin-ops/FAILURES.md` 和相关业务线复盘，确认是否已有解决方式。
 - 复盘必须写明场景、失败表现、失败原因、解决方式、验证结果、关联流程或脚本、后续处理状态，不得写入真实密码、验证码、token、cookie、API key 或完整账号凭证。
 - 多次遇到同类失败时，不能只追加复盘；必须评估并修改原流程、skill reference、组件 helper 或缓存脚本，把解决方式前置到正常流程中，并验证是否已经走通。
-- 失败复盘也遵守增长管理：任意 `failure-reviews/**/*.md` 接近 250 行时，必须按业务线、场景或时间拆分，并更新 `FAILURES.md` 索引。
+- 失败复盘也遵守增长管理：任意 `skills/weex-admin-ops/failure-reviews/**/*.md` 接近 250 行时，必须按业务线、场景或时间拆分，并更新 `skills/weex-admin-ops/FAILURES.md` 索引。
 
 ## Temp Workflow Staging
 - `temp/` 只用于保存“已经跑通，但用户明确要求暂时不写入 skill、也不写交接文档”的后台操作流程。
@@ -109,7 +111,7 @@
 - 历史交接内容必须按业务域或时间归档到 `docs/session-handoffs/`，并在 `docs/session-handoffs/README.md` 维护索引。
 - 任意 `docs/**/*.md` 接近 250 行时，必须先拆分或归档，再继续追加内容；`docs/session-handoff.md` 超过 250 行视为违规。
 - 已沉淀到 skill 的完整流程不在 docs 中重复粘贴，只保留中文摘要和对应 skill/cache 文件路径。
-- 更新 docs 或失败复盘后应运行 `node scripts/validate-docs-structure.mjs` 检查文档长度和索引。
+- 更新 docs 或失败复盘后应运行 `node skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs` 检查文档长度和索引。
 
 ## Change Discipline
 - 修改 `AGENTS.md` 前，先说明将写入什么；用户说 `ok`、`确认` 或明确同意后再写入讨论中的规范正文。

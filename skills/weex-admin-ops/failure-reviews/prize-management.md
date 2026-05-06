@@ -7,5 +7,5 @@
 - 失败原因：`交易对` 是多选下拉，选中后下拉浮层未收起，后续字段填写和 Vue 状态绑定不稳定。
 - 解决方式：选择真实交易对后点击弹窗空白区域收起下拉，并确认表单项内出现已选 tag，再继续填写后续字段。
 - 验证结果：重试后成功创建仓位空投奖品，按别名搜索返回新增记录。
-- 关联文件：`skills/weex-admin-ops/references/operations/prize-management.md`、`skills/weex-admin-ops/references/components.md`。
+- 关联文件：`references/operations/prize-management.md`、`references/components.md`。
 - 后续处理：多选下拉解决方式已抽为通用组件规则。

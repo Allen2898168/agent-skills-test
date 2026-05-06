@@ -43,7 +43,7 @@
     - 奖品单位：`1`
     - 奖品展示精度：`2`
     - 抵扣比例：`1`
-  - 默认图片：`assets/default-prize-images/default-bonus-prize.webp`
+  - 默认图片：`skills/weex-admin-ops/assets/default-prize-images/default-bonus-prize.webp`
   - 成功依据：`/prod-api/common/uploadImgReplace` 返回 200，`/prod-api/activity/prize` 返回 200，页面提示 `新增成功`，按别名搜索返回新记录。
 - 新增币种奖品流程已完成。
   - 状态：candidate。
@@ -59,7 +59,7 @@
     - 有效时间：`1`
     - 奖品单位：`1`
     - 奖品展示精度：`2`
-  - 默认图片：`assets/default-prize-images/default-bonus-prize.webp`
+  - 默认图片：`skills/weex-admin-ops/assets/default-prize-images/default-bonus-prize.webp`
   - 成功依据：`/prod-api/common/uploadImgReplace` 返回 200，`/prod-api/activity/prize` 返回 200，页面提示 `新增成功`，按别名搜索返回新记录。
 - 新增实物奖品流程已完成。
   - 状态：candidate。
@@ -75,7 +75,7 @@
     - 有效时间：`1`
     - 奖品单位：`1`
     - 奖品展示精度：`2`
-  - 默认图片：`assets/default-prize-images/default-bonus-prize.webp`
+  - 默认图片：`skills/weex-admin-ops/assets/default-prize-images/default-bonus-prize.webp`
   - 成功依据：`/prod-api/common/uploadImgReplace` 返回 200，`/prod-api/activity/prize` 返回 200，页面提示 `新增成功`，按别名搜索返回新记录。
 - 已检查 `虚拟积分或资格` 下全部奖品子类型的新增弹窗字段，未提交新增数据。
   - 状态：field-discovery。
@@ -100,7 +100,7 @@
   - 环境：staging。
   - 页面：`/activity/prize`。
   - 操作类型：新增奖品，改变后台状态。
-  - 执行规则：奖品名称使用 `虚拟积分资格_<子类型名字>`；配置中的下拉框默认选择第一个；低风险数字字段使用默认值；图片使用 `assets/default-prize-images/default-bonus-prize.webp`。
+  - 执行规则：奖品名称使用 `虚拟积分资格_<子类型名字>`；配置中的下拉框默认选择第一个；低风险数字字段使用默认值；图片使用 `skills/weex-admin-ops/assets/default-prize-images/default-bonus-prize.webp`。
   - 批次时间戳：`20260504035640`。
   - 成功创建：
     - `抽奖次数`：奖品ID `433`，别名 `auto_virtual_01_20260504035640`，颜色签默认选择 `红色`。
@@ -133,7 +133,7 @@
     - 奖品ID `445`：`币种 / BTC`，奖品名称 `浏览器模式币种奖励20260504041400`，别名 `browser_coin_20260504041400`。
     - 奖品ID `446`：`实物 / 实物`，奖品名称 `浏览器模式实物奖励20260504041400`，别名 `browser_physical_20260504041400`。
     - 奖品ID `447`：`虚拟积分或资格 / 积分`，奖品名称 `浏览器模式积分奖励20260504041400`，别名 `browser_points_20260504041400`。
-  - 默认图片：`assets/default-prize-images/default-bonus-prize.webp`。
+  - 默认图片：`skills/weex-admin-ops/assets/default-prize-images/default-bonus-prize.webp`。
   - 验证依据：每条记录的 `/prod-api/common/uploadImgReplace` 返回 200，`/prod-api/activity/prize` 返回 200，并按唯一别名搜索返回对应奖品ID。
   - 证据：用户未要求截图，因此未保存截图。
   - 是否可回滚：理论上可通过奖品列表行操作 `删除` 清理，但本次未执行清理。
@@ -146,7 +146,7 @@
     - 奖品ID `448`：`赠金 / 赠金`，奖品名称 `浏览器模式赠金奖励20260504041642`，别名 `browser_bonus_20260504041642`。
     - 奖品ID `449`：`虚拟积分或资格 / 抽奖次数`，奖品名称 `浏览器模式抽奖次数奖励20260504041642`，别名 `browser_draw_20260504041642`，颜色签 `红色`。
     - 奖品ID `450`：`虚拟积分或资格 / 无奖励`，奖品名称 `浏览器模式无奖励奖品20260504041642`，别名 `browser_none_20260504041642`。
-  - 默认图片：`assets/default-prize-images/default-bonus-prize.webp`。
+  - 默认图片：`skills/weex-admin-ops/assets/default-prize-images/default-bonus-prize.webp`。
   - 验证依据：每条记录的 `/prod-api/common/uploadImgReplace` 返回 200，`/prod-api/activity/prize` 返回 200，并按唯一别名搜索返回对应奖品ID。
   - 证据：用户未要求截图，因此未保存截图。
   - 是否可回滚：理论上可通过奖品列表行操作 `删除` 清理，但本次未执行清理。
@@ -160,33 +160,33 @@
     - 奖品ID `451`：`币种 / ETH`，奖品名称 `ETH币种奖励1_20260504041846`，别名 `eth_coin_1_20260504041846`。
     - 奖品ID `452`：`币种 / ETH`，奖品名称 `ETH币种奖励2_20260504041846`，别名 `eth_coin_2_20260504041846`。
     - 奖品ID `453`：`币种 / ETH`，奖品名称 `ETH币种奖励3_20260504041846`，别名 `eth_coin_3_20260504041846`。
-  - 默认图片：`assets/default-prize-images/default-bonus-prize.webp`。
+  - 默认图片：`skills/weex-admin-ops/assets/default-prize-images/default-bonus-prize.webp`。
   - 验证依据：每条记录的 `/prod-api/common/uploadImgReplace` 返回 200，`/prod-api/activity/prize` 返回 200，并按唯一别名搜索返回对应奖品ID。
   - 证据：用户未要求截图，因此未保存截图。
   - 是否可回滚：理论上可通过奖品列表行操作 `删除` 清理，但本次未执行清理。
 - 曾观察到登录后可能跳转到 `/user/profile?tab=googleBind`，表示账号可能需要 Google 身份验证器绑定。
 
 ## 证据与截图
-- 截图统一保存到 `artifacts/screenshots/` 下，并按中文业务域分类。
+- 截图统一保存到 `skills/weex-admin-ops/artifacts/screenshots/` 下，并按中文业务域分类。
 - 登录成功并进入目标页面截图曾由用户明确要求生成：
-  - 建议路径：`artifacts/screenshots/假钱账户/weex-login-success.png`
+  - 建议路径：`skills/weex-admin-ops/artifacts/screenshots/假钱账户/weex-login-success.png`
   - 当前仓库中未找到该截图文件，如后续需要可重新生成。
 - 活动通用模块管理 / 奖品管理页面截图，这是用户明确要求后生成的：
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/activity-common-prize-management.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/奖品管理/activity-common-prize-management.png`
 - 奖品管理搜索功能截图，这是用户明确要求后生成的：
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/01-奖品ID搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/02-奖品ID置空展示全部.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/03-奖品分类-赠金.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/03-奖品分类-币种.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/03-奖品分类-实物.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/03-奖品分类-虚拟积分或资格.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/04-奖品名称模糊搜索.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/05-奖品别名模糊搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/01-奖品ID搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/02-奖品ID置空展示全部.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/03-奖品分类-赠金.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/03-奖品分类-币种.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/03-奖品分类-实物.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/03-奖品分类-虚拟积分或资格.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/04-奖品名称模糊搜索.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/05-奖品别名模糊搜索.png`
 - 奖品管理奖品子类别搜索截图，这是用户明确要求后生成的：
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/奖品子类别/奖品子类别-赠金-赠金.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/奖品子类别/奖品子类别-币种-BTC.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/奖品子类别/奖品子类别-实物-实物.png`
-  - `artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/奖品子类别/奖品子类别-虚拟积分或资格-抽奖次数.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/奖品子类别/奖品子类别-赠金-赠金.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/奖品子类别/奖品子类别-币种-BTC.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/奖品子类别/奖品子类别-实物-实物.png`
+  - `skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/奖品管理/搜索功能/奖品子类别/奖品子类别-虚拟积分或资格-抽奖次数.png`
 - 虚拟积分或资格新增字段检查截图，这是用户明确要求后生成的：
-  - 目录：`artifacts/screenshots/活动通用模块管理/奖品管理/新增虚拟积分资格字段检查/`
+  - 目录：`skills/weex-admin-ops/artifacts/screenshots/活动通用模块管理/奖品管理/新增虚拟积分资格字段检查/`
   - 每个子类型目录下有 `01-顶部.png` 和 `02-底部.png`。
