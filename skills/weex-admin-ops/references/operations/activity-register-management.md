@@ -16,8 +16,8 @@ References:
 
 ## Open Activity User Registration Management
 
-Status: candidate  
-Last verified: 2026-05-05  
+Status: candidate
+Last verified: 2026-05-05
 Verified modes: visible browser, invisible browser
 
 Purpose:
@@ -31,8 +31,8 @@ Success assertions:
 
 ## Search Registration Templates
 
-Status: candidate  
-Last verified: 2026-05-05  
+Status: candidate
+Last verified: 2026-05-05
 Verified modes: visible browser, invisible browser
 
 Validated filters:
@@ -44,8 +44,8 @@ Validated filters:
 
 ## Add Dialog Field Discovery
 
-Status: candidate  
-Last verified: 2026-05-05  
+Status: candidate
+Last verified: 2026-05-05
 Verified modes: visible browser, invisible browser
 
 Dialog title:
@@ -82,8 +82,8 @@ Base fields:
 
 ## Create All-Platform Registration Templates By Signup Mode
 
-Status: candidate  
-Last verified: 2026-05-05  
+Status: candidate
+Last verified: 2026-05-05
 Verified modes: visible browser, invisible browser
 
 Purpose:
@@ -129,3 +129,68 @@ node skills/weex-admin-ops/scripts/create-register-templates.mjs --signup-modes 
 node skills/weex-admin-ops/scripts/create-register-templates.mjs --signup-modes team --min-team 2 --visible
 node skills/weex-admin-ops/scripts/create-register-templates.mjs --signup-modes auto --permissions view --dry-run
 ```
+
+## Create Agent/User Scope Registration Templates By Restriction Scope
+
+Status: candidate
+Last verified: 2026-05-06
+Verified modes: visible browser, invisible browser
+
+Purpose:
+Create `活动用户报名管理` templates where `平台用户参与范围` is `指定参赛代理或用户`, covering the supported `限制用户参与范围` branches.
+
+Default parameters verified:
+- `平台用户参与范围`: `指定参赛代理或用户`.
+- `指定代理`, `指定用户UID`, and restriction-branch agent UID: `9881271952`.
+- `合伙人分组`: select the first available option from the multi-select and close the dropdown.
+- `代理角色细分`: switch on; select `总代理`, `代理`, and `直客`.
+- `用户报名方式`: `注册即报名`.
+- `限制用户权限`: leave `看到和进入页面` unchecked; `报名` is disabled checked by page default.
+- `可参与注册时间范围`: off.
+- `报名人数限制`: blank.
+
+Supported restriction branches:
+- `无`
+- `代理及其直客`
+- `代理+下级代理+所有直客`
+- `KYC`: select the first available `kyc限制区域`.
+- `VIP等级`: select `VIP0`; `VIP白名单限制=同等级限制`.
+- `风控标签`: select the first available tag.
+- `合约账户余额`: fill `0`.
+- `灰：海外做市商户`
+- `非KYC用户`
+- `非绑定手机号用户`
+
+Observed disabled branches under `指定参赛代理或用户`:
+- `用户`
+- `国家或区域`
+- `设备`
+
+Component rules:
+- `合伙人分组`, `kyc限制区域`, `VIP等级`, and `风控标签` use the shared Element UI select helper.
+- Single-select and multi-select dropdowns both select from the last opened visible dropdown.
+- After selecting an option, press `Escape` and click a blank dialog area when the dropdown may remain open.
+- Component logic belongs in `scripts/lib/element-ui.mjs`; business scripts should only orchestrate fields and assertions.
+
+Verification records:
+- Visible mode:
+  - IDs `2731`-`2740` created for the 10 supported branches.
+  - Refactor baseline ID `2751`: `基准可见_VIP等级_20260506091052`.
+- Invisible mode:
+  - IDs `2741`-`2750` created for the 10 supported branches.
+  - Refactor baseline ID `2752`: `基准不可见_VIP等级_20260506091130`.
+
+Success assertions:
+- `POST /prod-api/activity/apply` returns HTTP 200 with `code=200` and `msg=操作成功`.
+- Searching by `用户管理模板名称` returns a table row with `平台用户参与范围=指定参赛代理或用户` and recent editor `auto`.
+
+Cached script:
+```bash
+node skills/weex-admin-ops/scripts/create-register-templates.mjs --platform-scope agent_user --restrict-scopes all --uid 9881271952 --signup-modes auto --dry-run
+node skills/weex-admin-ops/scripts/create-register-templates.mjs --platform-scope agent_user --restrict-scopes vip --uid 9881271952 --signup-modes auto --visible
+node skills/weex-admin-ops/scripts/create-register-templates.mjs --platform-scope agent_user --restrict-scopes vip --uid 9881271952 --signup-modes auto
+```
+
+Detailed platform-scope and register-time variants are split to keep this file below the growth threshold:
+- `activity-register-management-platform-scopes.md`
+- `activity-register-management-date-range.md`

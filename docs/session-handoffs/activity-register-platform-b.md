@@ -1,0 +1,64 @@
+# 活动用户报名管理平台范围 B
+
+## 2026-05-06 活动用户报名管理其他平台用户参与范围流程
+
+- 当前目标：跑通 `活动用户报名管理 / 新增` 中除 `全平台用户`、`指定参赛代理或用户` 外的其他 `平台用户参与范围`。
+- 执行环境：staging，页面 `/activity/register`。
+- 执行模式：
+  - 可见浏览器模式：已跑通。
+  - 默认不可见浏览器模式：已跑通。
+- 共享默认：
+  - `限制用户参与范围`：`无`。
+  - `用户报名方式`：`注册即报名`。
+  - `限制用户权限`：不额外勾选；页面默认 `报名` 为 disabled checked。
+  - `可参与注册时间范围`：关闭。
+  - `报名人数限制`：留空。
+- 平台范围额外字段：
+  - `指定渠道码或邀请码`：`合伙人分组` 多选选第一个可用项，`渠道码=auto_channel_<timestamp>`，`邀请码=auto_invite_<timestamp>`。
+  - `自然流量`：无额外字段。
+  - `非活跃用户`：`非活跃用户范围` 下拉选第一个，`用户区域` 下拉选第一个。
+  - `仅限渠道用户`：无额外字段。
+  - `混合条件`：`条件-1：合伙人分组` 选第一个，`用户UID=9881271952`，`条件关系=且（用户需要满足所有条件）`，`条件-2: 国家或地区` 选第一个。
+  - `指定华语用户`、`指定海外用户`、`假钱账户`：无额外字段。
+- 可见模式创建结果：
+  - `2753`：`平台范围可见_指定渠道码或邀请码_20260506101856`
+  - `2754`：`平台范围可见_自然流量_20260506101856`
+  - `2755`：`平台范围可见_非活跃用户_20260506101856`
+  - `2756`：`平台范围可见_仅限渠道用户_20260506101856`
+  - `2757`：`平台范围可见_混合条件_20260506101856`
+  - `2758`：`平台范围可见_指定华语用户_20260506101856`
+  - `2759`：`平台范围可见_指定海外用户_20260506101856`
+  - `2760`：`平台范围可见_假钱账户_20260506101856`
+- 不可见模式创建结果：
+  - `2761`：`平台范围不可见_指定渠道码或邀请码_20260506102048`
+  - `2762`：`平台范围不可见_自然流量_20260506102048`
+  - `2763`：`平台范围不可见_非活跃用户_20260506102048`
+  - `2764`：`平台范围不可见_仅限渠道用户_20260506102048`
+  - `2765`：`平台范围不可见_混合条件_20260506102048`
+  - `2766`：`平台范围不可见_指定华语用户_20260506102048`
+  - `2767`：`平台范围不可见_指定海外用户_20260506102048`
+  - `2768`：`平台范围不可见_假钱账户_20260506102048`
+- 验证依据：
+  - 每条均观察到 `POST /prod-api/activity/apply` HTTP 200，响应 `code=200`、`msg=操作成功`。
+  - 每条创建后均按模板名称搜索，列表返回对应模板 ID，最近编辑人 `auto`。
+  - 除 `假钱账户` 外，列表 `平台用户参与范围` 列与所选平台范围一致。
+- 已知页面表现：
+  - `假钱账户` 创建成功且可按名称搜索到，但列表 `平台用户参与范围` 单元格为空；可见和不可见模式都一致。
+- 已沉淀到：
+  - `skills/weex-admin-ops/references/operations/activity-register-management.md`
+  - `skills/weex-admin-ops/references/action-cache.md`
+  - `skills/weex-admin-ops/scripts/action-cache.json`
+  - `skills/weex-admin-ops/scripts/create-register-templates.mjs`
+  - `skills/weex-admin-ops/scripts/business/activity-register-management/plan.mjs`
+  - `skills/weex-admin-ops/scripts/business/activity-register-management/create.mjs`
+
+- 其他人克隆仓库后可以直接读取项目内 `skills/weex-admin-ops/` 接力；如需 Codex 自动发现，可再复制到本机 `$CODEX_HOME/skills/weex-admin-ops`。
+- “创建一个新手活动，用默认配置”的具体页面路径、必填字段、默认配置和成功断言尚未沉淀。
+- 假钱账户页面链路目前为 `candidate`，需要重复验证或用户确认后再升级为 `verified`。
+- “活动通用模块管理 / 奖品管理”菜单导航已沉淀到 `skills/weex-admin-ops/references/operations/activity-common-module.md`。
+- “奖品管理搜索功能”已沉淀到 `skills/weex-admin-ops/references/operations/prize-management-search.md`。
+- “新增赠金奖品”已沉淀到 `skills/weex-admin-ops/references/operations/prize-management-basic-create.md`。该流程创建了 staging 数据，尚未执行删除清理。
+- “新增币种奖品”已沉淀到 `skills/weex-admin-ops/references/operations/prize-management-basic-create.md`。该流程创建了 staging 数据，尚未执行删除清理。
+- “新增实物奖品”已沉淀到 `skills/weex-admin-ops/references/operations/prize-management-basic-create.md`。该流程创建了 staging 数据，尚未执行删除清理。
+- “虚拟积分或资格”各子类型字段发现和 11 个成功新增流程已沉淀到 `skills/weex-admin-ops/references/operations/prize-management.md`。
+- “仓位空投”新增已补充走通；该字段是多选，选中交易对后必须点击空白处收起下拉框再继续填写。

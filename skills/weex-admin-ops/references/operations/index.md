@@ -12,6 +12,8 @@ Use this file as the table of contents for operation playbooks. Keep full workfl
 - Activity task roulette conditions: `activity-task-roulette-conditions.md`
 - Activity task roulette participant scopes: `activity-task-roulette-participant-scopes.md`
 - Activity user registration management: `activity-register-management.md`
+- Activity user registration platform scopes: `activity-register-management-platform-scopes.md`
+- Activity user registration date range: `activity-register-management-date-range.md`
 - Joker activity: `joker-activity.md`
 - Prize management: `prize-management.md`
 - Prize management search: `prize-management-search.md`
@@ -43,4 +45,6 @@ Use this file as the table of contents for operation playbooks. Keep full workfl
 | Create roulette tasks by participant scope | `activity-task-roulette-participant-scopes.md` | candidate | 2026-05-05 | Creates one single-reward roulette task per participant scope; records UID and country multi-select constraints. |
 | Activity user registration management search and field discovery | `activity-register-management.md` | candidate | 2026-05-05 | Validates search fields and documents add-dialog scope/sign-up branches in visible and invisible modes. |
 | Create activity user registration templates | `activity-register-management.md` | candidate | 2026-05-05 | Creates all-platform registration templates for four signup modes; visible and invisible modes verified. |
+| Create registration templates by platform scope | `activity-register-management-platform-scopes.md` | candidate | 2026-05-06 | Creates templates for non-default platform scopes including `非活跃用户`, `自然流量`, and `假钱账户`. |
+| Create non-active registration template with register time range | `activity-register-management-date-range.md` | candidate | 2026-05-06 | Creates `非活跃用户` templates with `可参与注册时间范围` enabled and bound via datetime component helper. |
 | Fill Joker activity multilingual content | `joker-activity.md` | candidate | 2026-05-06 | Reads Chinese and English source content, fills text and rich-text multilingual fields, syncs media-rich gameplay HTML, and verifies with a fresh reload. |

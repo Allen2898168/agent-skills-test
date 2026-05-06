@@ -102,6 +102,8 @@ function inferRouletteParticipantParams(query) {
 
 function inferRegisterTemplateParams(query) {
   if (!query.includes("报名模板") && !query.includes("用户报名管理")) return {};
+  const platformScope = inferRegisterPlatformScope(query);
+  const dateRange = inferRegisterDateRange(query);
   const modes = [];
   const modeMap = [
     ["注册即报名", "auto"],
@@ -120,11 +122,56 @@ function inferRegisterTemplateParams(query) {
   const peopleLimitMatch = query.match(/(?:限制报名人数|报名人数限制|报名人数)\s*(?:用|为|是|=|:|：)?\s*(\d+)/);
   return {
     signupModes: modes.length ? modes.join(",") : undefined,
+    platformScopes: platformScope,
     minTeam: minTeamMatch?.[1],
     permissions: permissions.length ? [...new Set(permissions)].join(",") : undefined,
     peopleLimit: peopleLimitMatch?.[1],
+    registerStart: dateRange?.start,
+    registerEnd: dateRange?.end,
     visible: /浏览器模式|可见|打开浏览器|让我看着/.test(query),
   };
+}
+
+function inferRegisterPlatformScope(query) {
+  const map = [
+    ["非活跃用户", "non_active"],
+    ["自然流量", "natural"],
+    ["指定渠道码", "channel_invite"],
+    ["邀请码", "channel_invite"],
+    ["仅限渠道用户", "channel_only"],
+    ["混合条件", "mixed"],
+    ["指定华语用户", "chinese"],
+    ["指定海外用户", "overseas"],
+    ["假钱账户", "fake_money"],
+    ["全平台用户", "all"],
+    ["指定参赛代理或用户", "agent_user"],
+  ];
+  return map.find(([word]) => query.includes(word))?.[1];
+}
+
+function inferRegisterDateRange(query) {
+  if (!/可参与注册时间范围|注册时间范围|报名时间范围/.test(query)) return null;
+  if (/今天.{0,6}明天|今明/.test(query)) {
+    const today = localDateParts(new Date());
+    const tomorrow = localDateParts(new Date(Date.now() + 24 * 60 * 60 * 1000));
+    return {
+      start: `${today} 00:00:00`,
+      end: `${tomorrow} 23:59:59`,
+    };
+  }
+  const explicit = query.match(/(\d{4}-\d{2}-\d{2})(?:\s+\d{2}:\d{2}:\d{2})?.{0,12}(\d{4}-\d{2}-\d{2})(?:\s+\d{2}:\d{2}:\d{2})?/);
+  if (!explicit) return null;
+  return {
+    start: `${explicit[1]} 00:00:00`,
+    end: `${explicit[2]} 23:59:59`,
+  };
+}
+
+function localDateParts(date) {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
 }
 
 function isVirtualQuery(query) {

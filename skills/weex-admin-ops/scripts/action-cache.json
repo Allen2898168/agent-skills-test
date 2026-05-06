@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-05-05",
+  "updatedAt": "2026-05-06",
   "actions": [
     {
       "id": "create_prizes",
@@ -14,7 +14,7 @@
       "supportedSubtypes": ["赠金", "BTC", "ETH", "实物", "积分", "抽奖次数", "无奖励", "仓位空投", "合约抵扣金"],
       "defaultMode": "invisible",
       "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
-      "fallback": "Use web-access or manual Playwright browser operation, then update this cache if the fix is reusable."
+      "fallback": "Use bundled Playwright browser operation by default; use optional web-access/CDP only for Chrome login-state reuse or live browser context, then update this cache if the fix is reusable."
     },
     {
       "id": "copy_prize_by_id",
@@ -50,15 +50,19 @@
       "id": "create_register_templates",
       "status": "candidate",
       "script": "scripts/create-register-templates.mjs",
-      "description": "Create activity user registration templates with all-platform user scope, no restriction scope, and selected signup modes.",
+      "description": "Create activity user registration templates with selected signup modes, all-platform defaults, and specified agent/user platform restriction branches.",
       "domains": ["活动通用模块管理", "活动用户报名管理"],
       "intentKeywords": ["创建", "新增", "生成"],
       "objectKeywords": ["报名模板", "用户报名模板", "活动用户报名管理"],
       "supportedSignupModes": ["auto", "manual", "team", "auto_manual"],
+      "supportedPlatformScopes": ["all", "agent_user", "channel_invite", "natural", "non_active", "channel_only", "mixed", "chinese", "overseas", "fake_money"],
+      "supportedRestrictScopes": ["none", "agent_direct", "agent_tree", "kyc", "vip", "risk", "balance", "gray_market", "non_kyc", "unbound_phone"],
       "supportedPermissions": ["signup", "view"],
+      "supportedDateRangeParams": ["registerStart", "registerEnd"],
+      "requiredParams": ["uid for platform-scope agent_user"],
       "defaultMode": "invisible",
       "verifiedModes": ["visible_browser", "invisible_browser"],
-      "lastVerifiedAt": "2026-05-05",
+      "lastVerifiedAt": "2026-05-06",
       "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
       "fallback": "Use the activity-register-management browser workflow if the cached script fails, then update the cache with stable selector changes."
     }

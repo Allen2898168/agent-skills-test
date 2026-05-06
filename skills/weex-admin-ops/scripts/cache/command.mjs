@@ -27,6 +27,12 @@ function registerTemplateCommand(match, args, skillRoot) {
   if (params.minTeam) commandArgs.push("--min-team", String(params.minTeam));
   if (params.permissions) commandArgs.push("--permissions", String(params.permissions));
   if (params.peopleLimit) commandArgs.push("--people-limit", String(params.peopleLimit));
+  if (params.platformScopes) commandArgs.push("--platform-scopes", String(params.platformScopes));
+  if (params.platformScope) commandArgs.push("--platform-scope", String(params.platformScope));
+  if (params.restrictScopes) commandArgs.push("--restrict-scopes", String(params.restrictScopes));
+  if (params.uid) commandArgs.push("--uid", String(params.uid));
+  if (params.registerStart) commandArgs.push("--register-start", String(params.registerStart));
+  if (params.registerEnd) commandArgs.push("--register-end", String(params.registerEnd));
   if (args.visible || params.visible) commandArgs.push("--visible");
   if (args.dryRun) commandArgs.push("--dry-run");
   return { script, commandArgs };

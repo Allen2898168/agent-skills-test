@@ -2,8 +2,14 @@
 import { parseFlags, printJson } from "./lib/cli.mjs";
 import { bodyText, loginToRegisterPage, watchRegisterResponses } from "./lib/browser.mjs";
 import { adminConfig, assertAdminConfig, loadLocalEnv, loadPlaywright, pathsFrom } from "./lib/runtime.mjs";
-import { buildRegisterTemplatePlan, registerPermissionCatalog, registerSignupModeCatalog } from "./business/activity-register-management/plan.mjs";
-import { createRegisterTemplates, installRegisterDomHelpers } from "./business/activity-register-management/create.mjs";
+import {
+  buildRegisterTemplatePlan,
+  registerPermissionCatalog,
+  registerPlatformScopeCatalog,
+  registerRestrictScopeCatalog,
+  registerSignupModeCatalog,
+} from "./business/activity-register-management/plan.mjs";
+import { createRegisterTemplates } from "./business/activity-register-management/create.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
 
@@ -18,10 +24,21 @@ Required environment:
 
 Options:
   --signup-modes <csv>      auto,manual,team,auto_manual; default all
+  --platform-scope <key>    all,agent_user; default all
+  --platform-scopes <csv>   platform scope keys, or extended for non-all/agent_user scopes
+  --restrict-scopes <csv>   none,agent_direct,agent_tree,kyc,vip,risk,balance,gray_market,non_kyc,unbound_phone
+  --uid <uid>               default for agent/user branches: 9881271952
+  --channel-code <text>     default auto_channel_<timestamp>
+  --invite-code <text>      default auto_invite_<timestamp>
   --name-prefix <text>      default: 自动化报名模板
+  --agent-role-detail <key> none,all; default all for agent_user
+  --contract-balance <n>    default for 合约账户余额: 0
+  --vip-whitelist-mode <x>  default: 同等级限制
   --min-team <n>            default for team mode: 2
   --permissions <csv>       signup,view; default none
   --people-limit <n>        optional 报名人数限制
+  --register-start <time>   enable 可参与注册时间范围; format yyyy-MM-dd HH:mm:ss
+  --register-end <time>     end time for 可参与注册时间范围; format yyyy-MM-dd HH:mm:ss
   --visible                 open a headed browser so the tester can watch
   --dry-run                 print planned templates without opening browser
   --help                    show this message
@@ -50,6 +67,8 @@ async function run() {
       dryRun: true,
       visible: args.visible,
       signupModes: registerSignupModeCatalog(),
+      platformScopes: registerPlatformScopeCatalog(),
+      restrictScopes: registerRestrictScopeCatalog(),
       permissions: registerPermissionCatalog(),
       plan,
     });
@@ -66,7 +85,6 @@ async function run() {
   });
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   const page = await context.newPage();
-  await installRegisterDomHelpers(page);
   watchRegisterResponses(page, responses);
   try {
     await loginToRegisterPage(page, config);

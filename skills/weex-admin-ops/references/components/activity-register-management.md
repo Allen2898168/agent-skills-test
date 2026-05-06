@@ -59,3 +59,31 @@ Success assertion:
 Common failure modes:
 - Setting the input value directly can display text but does not bind Vue state.
 - An open date picker can intercept later button clicks in invisible browser mode.
+
+## Add Dialog Date-Time Range Binding
+
+Status: candidate
+Last verified: 2026-05-06
+
+Where it appears:
+- Add-dialog field `可参与注册时间范围`.
+
+Locator strategy:
+- Locate the visible dialog form item by label `可参与注册时间范围`.
+- After turning on the switch, find the two `.el-date-editor` Vue component instances inside that form item.
+
+Operation steps:
+1. Turn on the `可参与注册时间范围` switch.
+2. Bind the start and end values through the Element UI datetime component, not only the input DOM value.
+3. Emit `input` and `change` from the component and assert the component `value` and `displayValue`.
+4. Continue filling the form only after both values are bound.
+
+Success assertion:
+- Both datetime components expose the requested `value` and `displayValue`.
+- Submitting the form sends `POST /prod-api/activity/apply`.
+
+Common failure modes:
+- Directly setting the two input values can display text, but the form submit may not fire because Vue state is still empty.
+
+Related helper:
+- `../../scripts/lib/element-ui-datetime.mjs`

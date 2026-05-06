@@ -14,17 +14,25 @@
 - 新会话开始处理本项目任务时，必须先读取：
   - `AGENTS.md`
   - `docs/session-handoff.md`
+  - `FAILURES.md`
   - `skills/weex-admin-ops/SKILL.md`
   - 与当前任务相关的 `skills/weex-admin-ops/references/`
+- 如果当前任务涉及已知失败高发场景，必须先读取 `FAILURES.md` 和对应 `failure-reviews/` 业务线复盘。
 - 如果 `temp/` 存在暂存流程，必须先汇总暂存区内容，并询问用户是继续暂存流程，还是迁移到 skill。
 - 用户未确认前，不要自动把 `temp/` 内容迁入 skill。
+- 首次对话中如果当前任务可能需要登录或后台页面操作，必须先检查环境变量是否设置：
+  - `WEEX_ADMIN_USERNAME`
+  - `WEEX_ADMIN_PASSWORD`
+  - `WEEX_ADMIN_GOOGLE_CODE`
+- `WEEX_ADMIN_USERNAME` 未设置时可使用 staging 默认用户名 `auto`，但必须说明正在使用默认用户名。
+- `WEEX_ADMIN_PASSWORD` 和 `WEEX_ADMIN_GOOGLE_CODE` 必须设置；缺失时，在登录或后台操作前提示用户设置，不能继续猜测或把真实值写入文档。
 
 ## Skill Authority
 - 后台相关操作优先使用项目内 `skills/weex-admin-ops/`，它是团队协作的权威版本。
 - 本机 `$CODEX_HOME/skills/weex-admin-ops` 只是可选安装副本；如果缺失，先读取项目内 skill。
 - 自然语言后台操作必须先查 `skills/weex-admin-ops/references/operations/index.md` 和 `scripts/action-cache.json`。
 - 如果命中动作缓存，先用 `scripts/run-cached-action.mjs --dry-run` 检查，再决定是否执行。
-- 缓存脚本失败、缺少参数或风险不明确时，回退到 `web-access` / 浏览器自动化流程。
+- 缓存脚本失败、缺少参数或风险不明确时，回退到项目内 Playwright 浏览器自动化流程；只有需要复用用户 Chrome 登录态或 CDP 探索时，才使用可选的 `web-access`。
 
 ## Safety
 - 登录、创建、编辑、启用、停用、删除、导入、导出、批量更新、发奖、风控配置等会改变后台状态的操作，执行前必须说明即将执行的动作。
@@ -35,9 +43,9 @@
 
 ## Secrets
 - 不把真实密码、验证码、token、cookie、API key 或完整账号凭证写入 `AGENTS.md`、skill、docs、temp 或任何会被提交的文件。
-- staging 默认用户名可以记录为 `auto`。
-- 默认密码从本机环境变量 `WEEX_ADMIN_PASSWORD` 读取。
-- 默认 Google 验证码从本机环境变量 `WEEX_ADMIN_GOOGLE_CODE` 读取。
+- staging 默认用户名可以记录为 `auto`；也可以从本机环境变量 `WEEX_ADMIN_USERNAME` 读取。
+- 默认密码必须从本机环境变量 `WEEX_ADMIN_PASSWORD` 读取。
+- 默认 Google 验证码必须从本机环境变量 `WEEX_ADMIN_GOOGLE_CODE` 读取。
 - 可以用未提交的 `.env.local` 保存本机默认值；仓库只保留 `.env.example` 模板。
 - 如果默认密码或验证码不可用，必须在执行登录前向用户询问。
 
@@ -68,9 +76,20 @@
 
 ## Relationships And Reuse
 - 每次沉淀流程时，必须检查是否产生新的业务关联关系或可复用组件操作。
+- 新后台链路写脚本或浏览器自动化前，必须先检查 `skills/weex-admin-ops/references/components.md`、页面级 `references/components/` 和 `skills/weex-admin-ops/scripts/lib/` 是否已有可复用组件 helper。
+- 下拉、单选、多选、开关、日期、上传、表格、弹窗、搜索表单、按钮点击、表单 label 定位等组件级行为，必须优先复用或扩展公共 helper；业务脚本只保留业务编排。
+- 如果确实不能复用现有 helper，必须在交接记录或最终回复说明原因，并在跑通后评估是否抽到公共 helper。
 - 业务关联关系写入 `skills/weex-admin-ops/references/relationships.md`，例如列表、配置项、下拉数据源、接口、奖品、任务、报名模板、活动类型和后端校验之间的依赖。
 - 可复用组件操作写入 `skills/weex-admin-ops/references/components.md`，并优先抽离到 `skills/weex-admin-ops/scripts/lib/`。
 - 业务脚本只描述业务编排；组件级点击、输入、上传、选择、等待和断言逻辑应放到通用 helper。
+
+## Failure Review Discipline
+- 每次后台操作、脚本执行、页面探测、缓存命中或验证过程中出现失败、阻塞、误判、重试成功、环境问题或后端校验问题，都必须主动更新失败复盘。
+- 失败复盘入口为根目录 `FAILURES.md`；具体复盘按业务线写入 `failure-reviews/`，通用问题写入 `failure-reviews/common.md`。
+- 执行新流程或重试失败流程前，必须先查看 `FAILURES.md` 和相关业务线复盘，确认是否已有解决方式。
+- 复盘必须写明场景、失败表现、失败原因、解决方式、验证结果、关联流程或脚本、后续处理状态，不得写入真实密码、验证码、token、cookie、API key 或完整账号凭证。
+- 多次遇到同类失败时，不能只追加复盘；必须评估并修改原流程、skill reference、组件 helper 或缓存脚本，把解决方式前置到正常流程中，并验证是否已经走通。
+- 失败复盘也遵守增长管理：任意 `failure-reviews/**/*.md` 接近 250 行时，必须按业务线、场景或时间拆分，并更新 `FAILURES.md` 索引。
 
 ## Temp Workflow Staging
 - `temp/` 只用于保存“已经跑通，但用户明确要求暂时不写入 skill、也不写交接文档”的后台操作流程。
@@ -82,6 +101,13 @@
 - 每次完成关键操作、发现新页面链路、更新 skill、遇到阻塞或做出重要决策后，必须更新交接记录。
 - 交接记录必须使用中文摘要，不得写入真实密码、验证码、token、cookie、API key、个人隐私数据或完整账号凭证。
 - 如果某条链路已经沉淀到 `weex-admin-ops` skill，交接记录只保留摘要和 skill 文件路径，不重复粘贴完整流程。
+
+## Docs Growth Management
+- `docs/session-handoff.md` 只保留当前接力摘要、最近完成、阻塞、下一步和历史索引，不保存全量流水记录。
+- 历史交接内容必须按业务域或时间归档到 `docs/session-handoffs/`，并在 `docs/session-handoffs/README.md` 维护索引。
+- 任意 `docs/**/*.md` 接近 250 行时，必须先拆分或归档，再继续追加内容；`docs/session-handoff.md` 超过 250 行视为违规。
+- 已沉淀到 skill 的完整流程不在 docs 中重复粘贴，只保留中文摘要和对应 skill/cache 文件路径。
+- 更新 docs 或失败复盘后应运行 `node scripts/validate-docs-structure.mjs` 检查文档长度和索引。
 
 ## Change Discipline
 - 修改 `AGENTS.md` 前，先说明将写入什么；用户说 `ok`、`确认` 或明确同意后再写入讨论中的规范正文。

@@ -40,9 +40,9 @@ These can be suggested, but still mention them before execution when creating or
 
 ## Browser Tool Defaults
 
-- For networked browser operations, use or follow `web-access` first.
-- Prefer `web-access` CDP when Chrome remote debugging is available and user login state should be reused.
-- If CDP is unavailable, use bundled Playwright scripts for stored deterministic workflows.
+- Use bundled Playwright scripts as the default path for stored deterministic workflows.
+- Use optional `web-access` CDP only when Chrome remote debugging is available and the operation benefits from reusing the user's existing Chrome login state or live browser context.
+- If CDP is unavailable, continue with bundled Playwright scripts; `web-access` is not a hard dependency for this skill.
 - Bundled prize creation script: `scripts/create-prizes.mjs`.
 - Do not pass secrets as command-line arguments. Use `WEEX_ADMIN_PASSWORD` and `WEEX_ADMIN_GOOGLE_CODE`.
 
@@ -51,7 +51,7 @@ These can be suggested, but still mention them before execution when creating or
 - Check `scripts/action-cache.json` before manual browser operation.
 - Use `scripts/run-cached-action.mjs --query "<user request>" --dry-run` to inspect cache matching without changing backend state.
 - If dry-run shows a safe, correct cached command, execute it before conventional exploration.
-- If the cached script fails, keep its output as evidence and fall back to `web-access` or normal browser automation.
+- If the cached script fails, keep its output as evidence and fall back to bundled Playwright browser automation unless CDP/login-state reuse is required.
 - After a fallback succeeds and the fix is reusable, update the cached script or register a new action.
 - Do not cache secrets, cookies, tokens, one-time verification codes, personal data, or high-risk business values.
 
@@ -66,11 +66,12 @@ These can be suggested, but still mention them before execution when creating or
 
 ## Credential Defaults
 
-- If the user does not specify an account, use the staging default username `auto`.
+- At the start of a new project task that may require login or admin page operation, check whether `WEEX_ADMIN_USERNAME`, `WEEX_ADMIN_PASSWORD`, and `WEEX_ADMIN_GOOGLE_CODE` are present without printing their values.
+- If `WEEX_ADMIN_USERNAME` is unavailable and the target is staging, use the staging default username `auto` and state that default explicitly.
 - Do not store the default password or Google code in the skill.
-- Read the password from `WEEX_ADMIN_PASSWORD` when available.
-- Read the Google code from `WEEX_ADMIN_GOOGLE_CODE` when available.
-- If either secret is unavailable, ask the user for it at action time.
+- Read the password from `WEEX_ADMIN_PASSWORD`; it is required before login.
+- Read the Google code from `WEEX_ADMIN_GOOGLE_CODE`; it is required before login.
+- If either `WEEX_ADMIN_PASSWORD` or `WEEX_ADMIN_GOOGLE_CODE` is unavailable, stop before login or state-changing admin operation and ask the user to set the missing environment variable.
 
 ## Activity Defaults
 

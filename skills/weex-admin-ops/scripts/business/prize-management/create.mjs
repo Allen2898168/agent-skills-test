@@ -103,14 +103,7 @@ async function submitPrize(page, alias) {
 async function searchByAlias(page, config, alias) {
   await page.goto(`${config.baseUrl}/activity/prize`, { waitUntil: "domcontentloaded" });
   await sleep(1300);
-  const aliasHandle = await page.evaluateHandle(() => {
-    const item = [...document.querySelectorAll(".el-form-item")]
-      .find(it => (it.querySelector(".el-form-item__label")?.innerText || "").includes("奖品别名"));
-    return item?.querySelector("input") || null;
-  });
-  const aliasInput = aliasHandle.asElement();
-  if (!aliasInput) throw new Error("Alias search input not found");
-  await aliasInput.fill(alias);
+  await fillLabel(page, "奖品别名", alias);
   await page.locator('button:has-text("搜索")').first().click();
   await sleep(2200);
   const row = (await tableRows(page)).find(r => r.join("\n").includes(alias));
