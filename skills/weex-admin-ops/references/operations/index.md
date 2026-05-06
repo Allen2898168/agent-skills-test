@@ -12,6 +12,7 @@ Use this file as the table of contents for operation playbooks. Keep full workfl
 - Activity task roulette conditions: `activity-task-roulette-conditions.md`
 - Activity task roulette participant scopes: `activity-task-roulette-participant-scopes.md`
 - Activity user registration management: `activity-register-management.md`
+- Joker activity: `joker-activity.md`
 - Prize management: `prize-management.md`
 - Prize management search: `prize-management-search.md`
 - Prize management basic create: `prize-management-basic-create.md`
@@ -42,3 +43,4 @@ Use this file as the table of contents for operation playbooks. Keep full workfl
 | Create roulette tasks by participant scope | `activity-task-roulette-participant-scopes.md` | candidate | 2026-05-05 | Creates one single-reward roulette task per participant scope; records UID and country multi-select constraints. |
 | Activity user registration management search and field discovery | `activity-register-management.md` | candidate | 2026-05-05 | Validates search fields and documents add-dialog scope/sign-up branches in visible and invisible modes. |
 | Create activity user registration templates | `activity-register-management.md` | candidate | 2026-05-05 | Creates all-platform registration templates for four signup modes; visible and invisible modes verified. |
+| Fill Joker activity multilingual content | `joker-activity.md` | candidate | 2026-05-06 | Reads Chinese and English source content, fills text and rich-text multilingual fields, syncs media-rich gameplay HTML, and verifies with a fresh reload. |

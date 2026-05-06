@@ -158,3 +158,47 @@ Dependency or limitation:
 
 Related staged flow:
 - `temp/weex-admin-ops/activity-management/lottery/2026-05-04-lottery-create-flow.md`
+
+### Joker Activity Page Structure Controls Multilingual Write Path
+
+Status: candidate
+Last verified: 2026-05-06
+
+Source object:
+- Joker activity edit page under `/activities/jokerCard/modal?activityId=<ID>&operation=edit`.
+
+Consumer object:
+- Multilingual fill workflows for page save operations.
+
+Dependency or limitation:
+- Top-form text fields such as `活动标题` and `活动分享文案` are backed by `MultiLangInput` component state.
+- Table columns `牌型说明` and `奖池类型` also use `MultiLangInput`, but each instance is scoped to a table cell rather than a top-level form item.
+- Rich-text sections such as `活动内容规则` and `游戏玩法内容` are backed by Vue `Editor` components and Quill instances.
+- Because these three structures persist values differently, a single generic `input`-filling strategy is not reliable for the whole page.
+
+Related playbooks:
+- `operations/joker-activity.md`
+
+Related references:
+- `components.md`
+
+### Joker Gameplay Content Type Controls Translation Strategy
+
+Status: candidate
+Last verified: 2026-05-06
+
+Source object:
+- Joker activity field `游戏玩法内容`.
+
+Consumer object:
+- Multilingual translation and save workflows for Joker activity editing.
+
+Dependency or limitation:
+- When `游戏玩法内容` is primarily iframe or video HTML, the stable path is to synchronize the same HTML across languages rather than generate text translations.
+- Text-rich fields such as `活动内容规则` should still be translated as multilingual prose.
+
+Related playbooks:
+- `operations/joker-activity.md`
+
+Related references:
+- `components.md`
