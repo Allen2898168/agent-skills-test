@@ -138,7 +138,7 @@ If a workflow fails, update the skill failure review docs:
 - `failure-reviews/common.md` for cross-business login, browser, component, script, cache, or environment failures.
 - `failure-reviews/<business-domain>.md` for page or business-specific failures.
 
-When the same failure appears repeatedly, do not only add another review entry. Change the original workflow, reference, helper, or cached script so the known solution is applied before failure, then validate the corrected path.
+When the same failure appears repeatedly, do not only add another review entry. Change the original workflow, reference, helper, or cached script so the known solution is applied before failure, then validate the corrected path. If the same issue appears for a second time and the documented failure-review solution successfully fixes it, replace the original fixed execution path with that successful path; after validating the new fixed path, delete the corresponding failure-review item so resolved historical failures do not remain as active review guidance. If the fixed path cannot be replaced or the review item cannot be removed yet, document the reason, risk, and next step in both the handoff and the review item's follow-up status.
 
 Before adding or updating a workflow, check whether the flow reveals a reusable relationship or component operation:
 

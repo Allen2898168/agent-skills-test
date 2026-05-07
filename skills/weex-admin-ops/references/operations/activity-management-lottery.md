@@ -1,0 +1,163 @@
+# Activity Management - Lottery Activity
+
+Status: candidate
+Last verified: 2026-05-07
+Verified mode: visible browser
+Environment: staging `https://stg-activity.weex.tech`
+
+## Entry
+
+- Parent menu: `活动列表`
+- Child menu: `转盘抽奖`
+- List path: `/activities/lottery`
+- Add path: `/activities/lottery/add`
+
+Before clicking the child menu, check whether parent menu `活动列表` is already expanded. Expand it only when collapsed, then click `转盘抽奖`.
+
+## Search Verification
+
+The list search form supports:
+- `活动id`
+- `活动标题`
+- `活动别名`
+- `活动类型`
+- `活动日期`
+
+Verified behavior:
+- Each field triggers `/prod-api/activity/config/list`.
+- Searching by exact alias and `type=LOTTERY` returned `total=1` for the created draft.
+- Search by activity ID, title, alias, type, and date all filtered the list successfully during the visible-browser run.
+
+## Draft Creation Path
+
+The latest cache-backed strict UI run created draft activity `9015` with title `严格UI转盘抽奖草稿20260507061951` and alias `strict-ui-lottery-20260507061951`.
+
+Use conservative defaults only in staging:
+- `配置类型`: `正式活动`
+- `负责人`: `auto`
+- `类别配置`: `通用`
+- `流程引导配置`: first available `转盘抽奖` guide-flow template
+- `是否为平台活动`: `否`
+- `用户报名模板`: first compatible registration template
+- `是否支持预报名`: `支持`
+- `预报名模版`: first compatible registration template
+- `预报名开始时间`: `2026-06-01 00:00:00`
+- `预报名结束时间`: `2026-06-09 23:59:59`
+- `是否显示活动日历入口`: `是`
+- `活动日历`: `同步`
+- `抽奖样式配置`: `圆形转盘`
+
+Fill required text and rich fields:
+- `活动标题`, `活动副标题`, `分享活动文案`, `代理分享文案`, `活动规则`, and `活动别名配置`.
+- Upload default image files for web/h5 header, web/h5 share images, social preview, and prize share images.
+- Activity start time must be earlier than end time.
+
+## Lottery Prize Configuration
+
+The prize table has eight rows. Keep `奖品池ID` as `1-8`; do not use a generic input loop that overwrites this column.
+
+For each row:
+- Select one prize from the row `奖品名称` dropdown.
+- Fill `奖金金额(USDT)` with `1`.
+- Fill `总库存数量` with `100`.
+- Fill `权重(%)` with `12.5`, so eight rows sum to `100`.
+- Upload the row image.
+- Select `奖品标记`; the fixed options are `大奖`, `中奖`, and `小奖`.
+- Do not fill `有效期（天）`; it is disabled for the current `通用模块奖品` rows.
+- Use the row input placeholder `请选择奖品标记` when locating the mark dropdown. Do not rely on the last `.el-select` in a horizontally scrolled row.
+
+## Weight And Sign Sections
+
+`抽奖权重配置`:
+- The right-side `未配置` button opens the configuration page.
+- The latest weighted draft added one `VIP` identity row.
+- If an incomplete row exists, `隐藏（暂存）` shows validation errors; delete incomplete rows before returning.
+- The cached strict UI path does not open this page when no row is being configured, because it adds no business value and can introduce unnecessary validation pauses.
+- Verified minimal VIP row path:
+  - Click `未配置`.
+  - Select checkbox `VIP`.
+  - Click `添加`.
+  - In the generated row, select both `VIP等级` dropdowns using the first available option.
+  - Fill the row's eight `权重(%)` inputs so the total is `100`; verified values were `[5,8,10,12,13,15,17,20]`.
+  - Click `隐藏(暂存)` to return to the add page.
+  - Details field `prizeWeightConfig` should contain one row with `vipLevelMin=0`, `vipLevelMax=0`, and `prizeWeightList` for award prize IDs `1-8`.
+
+`颜色签配置`:
+- Red sign and white sign are separate tables.
+- Each side requires weights summing to `100`.
+- Use integer or one-decimal values; the verified run used `12.5` across eight rows on each side.
+
+## Share, Limit, Task, And I18n Sections
+
+`配置分享信息`:
+- Configure tabs `奖品(1)` through `奖品(8)`.
+- Upload the corresponding prize image and fill multilingual `分享文案` and `奖品名称`.
+
+`奖品每日限制配置`:
+- Initial row requires `奖励开始后+N（天数）`, `奖品ID`, and `每日最大发送数量`.
+- The `+` button adds another row; the verified draft kept one row.
+
+`累计次数再权重配置`:
+- Fill `累计抽奖次数`, then click `添加`.
+- Eight prize rows appear; set weights so the total is `100`.
+- `用户uid` is row-linked. Changing one row changes the others between `同用户` and `全平台`.
+- The table columns are `累计抽奖次数N` / `奖品ID` / `权重` / `用户UID`; fill the third column's input, not the row's last input.
+
+`活动任务信息`:
+- Select one existing `转盘抽奖` task.
+- Click the module `+` button to create a config row.
+- Fill `排序系数`; higher values sort earlier. The verified run used `1`.
+- The switch adds `新手活动合约任务` as another row; only `排序系数` is required there.
+
+`多语言`:
+- Select display language first. The validated run selected English.
+- Fill the selected language tab's title, subtitle, images, share copy, agent share copy, and rules.
+
+`常见问题`:
+- Select FAQ display language in the FAQ module, not the multilingual activity module.
+- Each selected language creates its own component. The language component `+` button adds a question; each question has `标题`, `内容`, and a delete button.
+
+## Calendar Sync Branch
+
+Default page value is `不同步`. The latest strict UI run selected `同步` and filled:
+- `所属一级筛选标签`: first option is acceptable for current staging validation.
+- `所属二级筛选标签`: first option is acceptable for current staging validation.
+- 配图 and 小图标, with optional multilingual buttons for per-language images.
+- `所属分区`: first option is acceptable for current staging validation.
+- Operation area contains an `新增` button.
+
+The latest strict UI draft saved this sync branch.
+
+## Success Assertions
+
+Accept creation only when at least one durable assertion passes:
+- `POST /prod-api/activity/config` returns HTTP 200 and business `code=200`.
+- Search `/prod-api/activity/config/list` by alias and `type=LOTTERY` returns `total=1`.
+- The created row is visible in the list and remains `DRAFT`.
+
+## Known Failure Avoidance
+
+- Load `.env.local` from `process.cwd()` or the resolved repo root; relative `pathsFrom('./...')` can miss local login variables in inline scripts.
+- Treat DOM nodes as nodes, not strings, when extracting labels or options.
+- Do not fill all prize table inputs by index; the first column is the locked prize-pool ID.
+- Do not fill the disabled `有效期（天）` prize column; current verified rows start editable data at `奖金金额(USDT)`.
+- Activity task rows appear only after clicking the module-level `+`.
+- Scope language checkboxes to the current `多语言` or `常见问题` container to avoid cross-module selection.
+- `预报名模版` uses the character `模版` in the current page label. Looking first for `预报名模板` causes unnecessary timeout.
+- Avoid clicking arbitrary blank page coordinates to close dropdowns; in the admin shell this can hit navigation and leave `/activities/lottery/add`.
+
+## Cache
+
+Action cache entry:
+- `create_lottery_activity_draft`
+- Script: `scripts/create-lottery-activity-draft.mjs`
+- Current status: candidate.
+
+Use:
+
+```bash
+node skills/weex-admin-ops/scripts/run-cached-action.mjs --query "活动列表 转盘抽奖 新增草稿 浏览器模式" --dry-run
+node skills/weex-admin-ops/scripts/run-cached-action.mjs --query "活动列表 转盘抽奖 新增草稿 浏览器模式"
+```
+
+Actual writes require visible browser mode and are delegated to the strict UI workflow verified through action cache with activity ID `9015`. Non-visible writes are intentionally disabled until separately verified.

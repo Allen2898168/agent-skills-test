@@ -15,6 +15,7 @@
 - `failure-reviews/prize-management.md`：奖品管理相关失败。
 - `failure-reviews/activity-task-management.md`：活动任务管理相关失败。
 - `failure-reviews/activity-register-management.md`：活动用户报名管理相关失败。
+- `failure-reviews/activity-management.md`：活动列表与具体活动配置创建相关失败。
 - `failure-reviews/joker-activity.md`：小丑牌活动相关失败。
 - `failure-reviews/activity-common-module.md`：活动通用模块管理相关失败。
 
@@ -24,3 +25,4 @@
 - 登录页普通 `验证码` 可能短暂出现，staging 当前以 `/prod-api/captchaImage` 的 `captchaEnabled=false` 为准，不应把 Google 验证码填到普通验证码字段。
 - 多语言字段必须按具体表单项分别打开和回填，不能用全局第一个 `英语` 输入框。
 - 后管 API 手动调用不能只依赖 cookie；页面请求通常带 `Authorization` 头，缺失时可能返回 HTTP 200 但业务 `code=401`。
+- 转盘抽奖新增页的奖品表格不能用通用数值循环填充；第一列 `奖品池ID` 必须保持 `1`-`8`，否则奖品配置前端校验会失败且不触发创建接口。

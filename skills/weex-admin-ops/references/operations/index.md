@@ -5,6 +5,7 @@ Use this file as the table of contents for operation playbooks. Keep full workfl
 ## Business Domains
 
 - Activity management: `activity-management.md`
+- Activity management lottery: `activity-management-lottery.md`
 - Activity common module: `activity-common-module.md`
 - Activity guide template: `activity-guide-template.md`
 - Activity task management: `activity-task-management.md`
@@ -31,6 +32,7 @@ Use this file as the table of contents for operation playbooks. Keep full workfl
 | Operation | Domain file | Status | Last verified | Notes |
 | --- | --- | --- | --- | --- |
 | Login and open offline user manage | `offline-user-manage.md` | candidate | 2026-05-04 | Opens `/activities/offline/userManage` after login. |
+| Lottery activity search and draft creation | `activity-management-lottery.md` | candidate | 2026-05-07 | Validates `活动列表 / 转盘抽奖` search filters and creates a draft by visible browser workflow; action cache now supports visible UI creation and dry-run planning. |
 | Open prize management | `activity-common-module.md` | candidate | 2026-05-04 | Opens `/activity/prize` from `活动通用模块管理 / 奖品管理`. |
 | Activity guide template discovery and search | `activity-guide-template.md` | candidate | 2026-05-06 | Opens `/activity/guide`, validates search fields, table structure, add-dialog fields, and step add/delete behavior. |
 | Create activity guide template batch | `activity-guide-template.md` | candidate | 2026-05-06 | Creates verified activity-type/frequency/step combinations; visible and invisible modes verified; `暂无特殊配置/NONE` blocked by backend. |

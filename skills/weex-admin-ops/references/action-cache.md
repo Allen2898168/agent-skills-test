@@ -28,6 +28,7 @@ The action cache is the first execution layer for workflows that have already be
 | `delete_register_templates_by_operator` | `scripts/delete-register-templates-by-operator.mjs` | candidate | Dry-run and delete activity registration templates by exact `最近编辑人`; destructive execution requires `--confirm-delete`; invisible deletion and visible/invisible dry-run verified on 2026-05-06. |
 | `create_guide_templates` | `scripts/create-guide-templates.mjs` | candidate | Create activity guide-flow templates for verified activity-type/frequency/step combinations; visible and invisible modes verified on 2026-05-06. |
 | `verify_guide_template_row_actions` | `scripts/guide-template-row-actions.mjs` | candidate | Create a temporary activity guide template, verify `查看` / `修改` / `复制` / `删除`, and delete the temporary records; visible and invisible modes verified on 2026-05-06. |
+| `create_lottery_activity_draft` | `scripts/create-lottery-activity-draft.mjs` | candidate | Create a draft `活动列表 / 转盘抽奖` activity through the verified visible-browser UI workflow, or print the plan in dry-run mode. |
 
 ## Natural-Language Matching
 
@@ -96,6 +97,15 @@ For activity guide-template row actions:
 - `--visible` enables headed browser mode and performs temporary setup plus all row actions through real UI clicks, field fills, uploads, and confirmation buttons;
 - the script creates a temporary `转盘抽奖` guide template, verifies `查看`, modifies `活动类型` to `交易竞速赛`, verifies `复制` creates `复制从 <原模板名称>`, deletes the copied and original rows, and verifies exact-name searches are absent;
 - run `--dry-run` before execution because the script creates, modifies, copies, and deletes guide-template records.
+
+For lottery activity drafts:
+- use `--action create_lottery_activity_draft` for explicit execution;
+- `--dry-run` prints the verified creation plan without writing data;
+- actual creation requires `--visible`; non-visible writes are intentionally rejected because only the UI browser path is verified;
+- the verified write path is `活动列表 / 转盘抽奖`, path `/activities/lottery/add`, and uses real page clicks, dropdowns, uploads, table scrolling, and submit in browser mode;
+- run `node skills/weex-admin-ops/scripts/run-cached-action.mjs --query "活动列表 转盘抽奖 新增草稿 浏览器模式" --dry-run` to inspect the planned defaults and assertions;
+- natural language such as `创建一个带权重配置的 转盘抽奖活动 全配置 浏览器模式` should match this activity-create action, not the roulette task action; when in doubt, use explicit `--action create_lottery_activity_draft`;
+- the latest cache-backed visible path was verified through `run-cached-action` with activity ID `9015`: eight prize rows, color-sign weights, share tabs, accumulated-count rows, task rows, multilingual content, FAQ, and alias list lookup all passed.
 
 ## Cache Graduation Rules
 

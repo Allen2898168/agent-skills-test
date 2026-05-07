@@ -4,7 +4,7 @@
 - 当前目标：建立并维护 WEEX 活动后台管理页面的可接力操作规范、自动化操作 skill、动作缓存和会话交接机制。
 - 目标环境：staging，`https://stg-activity.weex.tech`。
 - 权威 skill：项目内 `skills/weex-admin-ops/`。
-- 最近更新时间：2026-05-06。
+- 最近更新时间：2026-05-07。
 - 历史交接已按业务域归档到 `docs/session-handoffs/`；当前文件只保留接力摘要和入口索引。
 
 ## 必读入口
@@ -17,6 +17,61 @@
 - 历史交接索引：`docs/session-handoffs/README.md`。
 
 ## 最近完成
+- 已按用户确认补充失败复盘闭环硬性规则：
+  - 写入 `AGENTS.md` 和 `skills/weex-admin-ops/SKILL.md`。
+  - 规则：同一问题第二次出现且成功应用复盘解决方式后，必须把解决方式替换为固定执行路径；固定路径验证通过后删除对应复盘条目。若暂时不能替换或删除，必须在交接和复盘后续状态说明原因、风险和下一步。
+- 本轮按用户要求以可见浏览器模式创建带 `抽奖权重配置` 的转盘抽奖全配置草稿，未保存截图：
+  - 创建结果：活动 ID `9022`，标题 `严格UI转盘抽奖草稿20260507193419`，别名 `strict-ui-lottery-20260507193419`，状态 `DRAFT`，最终 URL `/activities/lottery`。
+  - 执行路径：真实 UI 点击/填写/选择/上传/提交，使用 `LOTTERY_VARIANT=varied` 和 `LOTTERY_WEIGHT_CONFIG=vip`，上传接口触发 27 次。
+  - 详情回查：`prizeCount=8`，奖品金额 `[1,2,3,4,5,6,7,8]`，库存 `[80,90,100,110,120,130,140,150]`，奖品权重 `[5,8,10,12,13,15,17,20]`；红签权重 `[4,6,8,10,12,14,18,28]`，白签权重 `[3,7,9,11,13,15,19,23]`；累计次数再权重 8 行且同奖品权重；`prizeWeightConfig` 保存 1 条 VIP 行，`vipLevelMin=0`、`vipLevelMax=0`、权重 `[5,8,10,12,13,15,17,20]`；普通任务 1 条，新手活动合约任务 1 条，任务类型 `TRADING_VOLUME`；每日限制 1 行，多语言 2 条，FAQ 1 条，预报名和活动日历入口已开启。
+  - 失败与修正：自然语言 dry-run 初次误命中转盘抽奖任务缓存，已改用显式 action 执行并修正 `scripts/cache/matcher.mjs`；系统 Node 缺少 Playwright，已切换 Codex bundled runtime 完成创建；两项已补充失败复盘。
+- 本轮按用户要求以可见浏览器模式跑通 `活动列表 / 转盘抽奖` 查询和新增草稿流程，未保存截图：
+  - 已完成启动读取：`AGENTS.md`、当前交接、skill、失败复盘、operation index、`temp/` 暂存索引和转盘抽奖新增暂存流程。
+  - 登录配置：当前 shell 环境变量未直接设置三项登录变量，但仓库未提交的 `.env.local` 中存在 `WEEX_ADMIN_USERNAME`、`WEEX_ADMIN_PASSWORD`、`WEEX_ADMIN_GOOGLE_CODE`，后续脚本通过公共 runtime 读取，未回显密钥。
+  - 菜单流程：从 `/activity/prize` 登录后，检查左侧父菜单 `活动列表`，点击展开后点击子菜单 `转盘抽奖`，最终进入 `/activities/lottery`。
+  - 查询验证：活动ID `8962`、活动标题 `自动化转盘抽奖活动20260504190520`、活动别名 `auto-lottery-20260504190520`、活动类型 `正式活动`、活动日期 `2026-05-01` 到 `2026-07-01` 均通过真实页面填写并点击 `查询`，列表接口 `/prod-api/activity/config/list` 返回 HTTP 200、业务 `code=200`，结果命中预期记录。
+  - 新增页只读探测：点击 `新增` 进入 `/activities/lottery/add`，确认模块包括活动基本信息、抽奖样式配置、抽奖奖品配置、抽奖权重配置、颜色签配置、配置分享信息、奖品每日限制配置、累计次数再权重配置、活动任务信息、多语言、常见问题、活动日历和操作。
+  - 新增页依赖接口：`getAreaInfoList`、`guideTemplate/list?activityType=LOTTERY`、`apply/vipLevel/list`、`getRiskLabelList`、`apply/selectAgencyGroupList`、`prize/all`、`apply/all`、`task/all?activityType=5` 均返回 HTTP 200、业务 `code=200`；当前数据量分别包含流程引导 14 条、奖品 453 条、报名模板 2669 条、任务 511 条。
+  - 新增配置：正式活动、负责人 `auto`、类别 `通用`、平台活动 `否`、不支持预报名、活动日历不同步；流程引导选择页面第一条转盘抽奖模板；报名模板选择页面第一条可用模板；抽奖样式选择 `圆形转盘`。
+  - 奖品配置：选择 8 个不同奖品，奖品池 ID 保持 `1`-`8`，奖金金额 `1`，总库存 `100`，权重均为 `12.5`，奖品标记按 `大奖/中奖/小奖` 轮换；红签和白签各 8 行权重均为 `12.5`。
+  - 其他模块：配置分享信息 8 个奖品页签均上传图片并填写分享文案/奖品名称；奖品每日限制配置 1 行；累计次数再权重配置添加累计抽奖次数 `5` 后生成 8 行并填权重；活动任务信息选择 1 条现有转盘任务并添加排序系数 `1`；多语言选择英语并填写标题、媒体和文案；FAQ 选择英语并添加 1 条问题；抽奖权重配置保持未添加复杂风控行。
+  - 创建结果：页面真实点击最终 `新增` 后触发 `POST /prod-api/activity/config`，HTTP 200、业务 `code=200`、`msg=操作成功`；活动 ID `9004`，标题 `浏览器模式转盘抽奖草稿20260507032017`，别名 `browser-lottery-20260507032017`，状态 `DRAFT`。
+  - 验证依据：提交后自动回到 `/activities/lottery`，列表首行出现 ID `9004`；按别名 `browser-lottery-20260507032017` 查询 `/prod-api/activity/config/list` 返回 `total=1`，命中状态 `DRAFT`。
+  - 已记录失败复盘：inline 脚本未加载 `.env.local`、DOM 提取误把元素对象当字符串、奖品池 ID 被通用数值填充误改、活动任务添加按钮与多语言选择需要按模块精确定位。
+  - 已按用户确认沉淀到 `skills/weex-admin-ops/`：新增 `references/operations/activity-management-lottery.md`、`references/relationships/activity-management.md`、`scripts/create-lottery-activity-draft.mjs`、`scripts/business/activity-management/lottery-draft-plan.mjs`；已更新 operation index、routes、relationships、action-cache 文档和动作缓存 matcher/command。
+  - 动作缓存：新增 `create_lottery_activity_draft`，当前状态为 `candidate_dry_run`，仅输出已验证配置计划和断言，不再次创建活动；实际写入仍需按可见浏览器流程真实点击、填写、上传和提交，等完整 UI helper 抽离并复验后再启用缓存写入。
+- 本轮按用户要求继续以可见浏览器模式跑通 `活动列表 / 转盘抽奖` 最复杂草稿配置，未保存截图：
+  - 创建结果：活动 ID `9006`，标题 `复杂配置转盘抽奖草稿20260507034455`，别名 `complex-lottery-20260507034455`，状态 `DRAFT`，最终 URL `/activities/lottery`。
+  - 验证依据：提交触发 `POST /prod-api/activity/config`，HTTP 200、业务 `code=200`、`msg=操作成功`；按别名查询 `/prod-api/activity/config/list` 返回 `total=1`；详情 `/prod-api/activity/config/9006` 返回 `code=200`。
+  - 复杂分支：预报名开启并绑定报名模板 `2730`；活动日历同步开启，包含一级/二级标签、分区、配图和小图标多语言；抽奖权重配置 1 行，覆盖国家、代理、VIP、指定用户、注册时间、合伙人分组、风控标签、黑灰名单、业务风控、累计/每日合约交易量和气泡开关；颜色签红/白各 8 行；每日限制 2 行；累计次数再权重 8 行；活动任务 1 行并启用新手活动合约任务；活动多语言 2 条；FAQ 2 个语言。
+  - 失败复盘：活动日历图片多语言开启后必须补齐全部语言；复杂多语言行需要区分活动多语言新 code 与 FAQ 旧 code。已记录到 `skills/weex-admin-ops/failure-reviews/activity-management.md`。
+  - 待处理：该“最复杂配置”尚未正式沉淀为 operation 文档或动作缓存写入脚本；如用户确认沉淀，应更新 `activity-management-lottery.md` 并将 dry-run planner 拆出复杂模式。
+- 用户指出 `9006` 的复杂配置没有在前端逐项可见配置；已确认该记录使用页面内部状态批量赋值，不符合“浏览器模式写操作必须真实 UI 点击/填写/选择/上传”的规则，只能作为复杂 payload 参考，不能作为严格 UI 成功证据。
+- 严格 UI 重跑进展：
+  - 第一次重跑未创建活动，卡在已默认选中且禁用的 `活动时间选择 / 活动开始结束时间` 单选，未触发创建接口。
+  - 第二次重跑未创建活动，基础区完成并上传 6 次图片后，卡在奖品表第二行 `奖品名称` 下拉未稳定展开。
+  - 已单独验证奖品表行内 locator 方案：按 `奖品池ID` 表格内可见行定位，再点击该行第二个 `.el-select`，前 4 行可连续展开并选择不同奖品。
+  - 第三次重跑未创建活动，已完成基础配置、8 行奖品选择、颜色签和分享信息，进入 `奖品每日限制配置` 时被人工停止；日志显示上传 13 次，未触发 `POST /prod-api/activity/config`。
+  - 后续按用户反馈修正验证方式：新增成功后仍可能停留在新增页签，必须回 `/activities/lottery` 原列表页，按 `活动别名` 搜索；列表接口参数为 `showUrl`，不是 `alias`。
+  - 已确认严格 UI 创建记录 ID `9009`、`9010`、`9011` 均由页面提交产生，其中 `9009` 通过原列表页 `showUrl=strict-ui-lottery-20260507050503` 回查命中。
+  - 用户指出最后一个奖品下拉展开后未选中、FAQ 内容未填写；详情回查确认 `9010` 的最后奖品 `linkPrizeId/prizeName` 为空，FAQ `title/content` 为空。
+  - 已修正严格 UI 试跑脚本 `skills/weex-admin-ops/scripts/strict-lottery-visible-attempt.mjs`：普通输入使用 `locator.fill()` 避免全页面全选；预报名选择 `支持` 后立即等待派生字段；奖品下拉点击可见选项 locator 并断言第二个 `.el-select input` 非空；FAQ 内容按 Quill 富文本 `.ql-editor` 填写；验证回列表按 `showUrl` 搜索。
+  - 修正版严格 UI 创建成功：活动 ID `9011`，标题 `严格UI转盘抽奖草稿20260507053652`，别名 `strict-ui-lottery-20260507053652`，状态 `DRAFT`，最终 URL `/activities/lottery`。
+  - `9011` 详情回查：`isPreApply=1`，预报名时间 `2026-06-07 00:00:00` 到 `2026-06-09 23:59:59`；`prizeCount=8`；最后奖品 `linkPrizeId=510`、`prizeName=migration_physical_visible_20260506120226`、权重 `12.5`；FAQ 为 `FAQ title` / `<p>FAQ content</p>`；`taskConfigCount=1`、颜色签 2 组、每日限制 1 行、累计次数再权重 8 行、多语言 2 条。
+  - 用户继续指出预报名支持后仍有停顿、奖品行选择后误触上一行金额、以及中间过程存在无意义校验；已二次修正临时脚本：预报名直接使用真实 label `预报名模版` 并快速失败，取消奖品逐行中间断言和抽奖权重配置空探测，奖品表按真实列序填写金额/库存/权重，奖品标记按 placeholder 定位，累计次数权重明确填第 2 列。
+  - 二次修正版严格 UI 创建成功：活动 ID `9013`，标题 `严格UI转盘抽奖草稿20260507060925`，别名 `strict-ui-lottery-20260507060925`，状态 `DRAFT`，最终 URL `/activities/lottery`。
+  - `9013` 详情回查：列表 `showUrl` 查询 `total=1`；`isPreApply=1`；`prizeCount=8`，最后奖品 `linkPrizeId=510`、`rewardAmount=1`、`inventoryQuantity=100`、`weight=12.5`；颜色签 2 组且每组 8 个权重 `12.5`；每日限制 1 行；累计次数再权重 8 行且权重均为 `12.5`；`taskConfig=1`、`activityConfigI18n=2`；FAQ 为 `FAQ title` / `<p>FAQ content</p>`。
+  - 用户确认沉淀后，已将 `create_lottery_activity_draft` 从 `candidate_dry_run` 提升为 `candidate`：`scripts/create-lottery-activity-draft.mjs` 保留 `--dry-run` 计划预览，实际创建必须传 `--visible`，并委托已验证的严格 UI 脚本；不可见写入会拒绝执行。
+  - 已通过 `run-cached-action` 真实执行缓存入口创建活动 ID `9015`，别名 `strict-ui-lottery-20260507061951`，状态 `DRAFT`；详情回查 `prizeCount=8`、最后奖品 `linkPrizeId=510`、累计次数权重 8 个均为 `12.5`、颜色签 2 组、每日限制 1 行、任务 1 条、多语言 2 条、FAQ 内容已保存。
+  - 用户要求再次尝试创建复杂转盘抽奖活动浏览器模式；已通过 action cache 可见浏览器入口创建活动 ID `9019`，标题 `严格UI转盘抽奖草稿20260507155144`，别名 `strict-ui-lottery-20260507155144`，状态 `DRAFT`，最终 URL `/activities/lottery`。
+  - 本次提交阶段捕获到一次 `别名重复` 响应/提示，但列表按 `showUrl` 查询 `total=1` 且详情回查完整，判定记录已落库；详情验证 `isPreApply=1`、`prizeCount=8`、最后奖品 `linkPrizeId=517`、累计次数权重 8 个均为 `12.5`、颜色签 2 组、每日限制 1 行、任务 1 条、多语言 2 条、FAQ 内容已保存。该响应不一致已补充失败复盘。
+  - 用户要求奖品奖金金额、权重、总库存和红白签都不同，并启用新手活动合约任务；已通过 `LOTTERY_VARIANT=varied` 可见浏览器模式创建活动 ID `9020`，标题 `严格UI转盘抽奖草稿20260507160627`，别名 `strict-ui-lottery-20260507160627`，状态 `DRAFT`。
+  - `9020` 详情回查：奖品金额 `[1,2,3,4,5,6,7,8]`、库存 `[80,90,100,110,120,130,140,150]`、奖品权重 `[5,8,10,12,13,15,17,20]`；红签权重 `[4,6,8,10,12,14,18,28]`，白签权重 `[3,7,9,11,13,15,19,23]`；累计次数再权重同奖品权重；`showBeginnerTaskConfig` 包含 1 条 `TRADING_VOLUME`，排序 `2`；FAQ 和多语言保存正常。
+  - 本次首次尝试未提交，因新手活动合约任务开关定位失败；已改为按 `.el-switch` 文本 `启用新手活动合约任务` 定位并补充失败复盘。差异化模式当前通过环境变量触发，尚未正式接入 action cache 参数。
+  - 用户要求设置 `抽奖权重配置` 的转盘抽奖活动浏览器模式；已通过 `LOTTERY_WEIGHT_CONFIG=vip` 可见浏览器模式创建活动 ID `9021`，标题 `严格UI转盘抽奖草稿20260507161414`，别名 `strict-ui-lottery-20260507161414`，状态 `DRAFT`。
+  - `9021` 详情回查：`prizeWeightConfig` 保存 1 条 VIP 配置行，`vipLevelMin=0`、`vipLevelMax=0`，8 个奖品权重 `[5,8,10,12,13,15,17,20]`；`prizeCount=8`、颜色签 2 组、累计次数再权重 8 行、任务 1 条、多语言 2 条、FAQ 保存正常。已补充 `activity-management-lottery.md` 的 VIP 抽奖权重配置步骤。
+  - 已更新 `references/operations/activity-management-lottery.md`、`references/action-cache.md`、`references/operations/index.md`、`scripts/action-cache.json` 和 `scripts/business/activity-management/lottery-draft-plan.mjs`；已验证语法、显式 action dry-run、自然语言 dry-run、不可见写入拒绝、缓存入口真实执行和知识结构校验。
+  - 后续可继续把 `strict-lottery-visible-attempt.mjs` 的大段表格、上传、下拉逻辑拆到公共 Element UI helper；当前为了复用已验证路径，先通过 action 入口委托该严格 UI 脚本。
 - 本轮按用户要求在可见浏览器模式完成复杂报名模板和活动流程引导配置验证，未保存截图：
   - 报名模板：通过真实 UI 创建并清理 4 条复杂参与范围记录，ID `2776`-`2779`，覆盖 `指定参赛代理或用户+VIP等级+团体报名`、`指定参赛代理或用户+风控标签+团体报名`、`混合条件+注册+手动点击`、`非活跃用户+注册时间范围+注册+手动点击`。
   - 报名模板验证：每条均完成列表回查、`查看` 弹窗详情接口 `code=200`、修改名称后 `PUT /prod-api/activity/apply` `code=200`、删除确认后 `DELETE /prod-api/activity/apply/{id}` `code=200`，并按修改后名称回查不存在。
@@ -153,7 +208,7 @@
 - 当前分支：`dev`。
 - 最近远端同步提交：`9c493e0 feat: 完善后管自动化流程沉淀与复盘规范`。
 - 最近一次推送后，本地 `dev` 与 `origin/dev` 已确认一致。
-- 本轮活动流程引导配置操作列验证、活动用户报名管理操作列验证、skill/cache 沉淀、批量删除报名模板、skill 资产/证据目录迁移、失败复盘和交接摘要更新尚未提交。
+- 本轮活动流程引导配置操作列验证、活动用户报名管理操作列验证、转盘抽奖基础和最复杂草稿流程、skill/cache 沉淀、批量删除报名模板、skill 资产/证据目录迁移、失败复盘和交接摘要更新尚未提交。
 
 ## 后续接力建议
 - 继续探索“新手活动”创建流程时，先读取相关 operation index、defaults、components 和 relationships。

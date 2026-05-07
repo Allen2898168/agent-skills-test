@@ -1,5 +1,35 @@
 # 通用失败复盘
 
+## 2026-05-07 一次性脚本未加载仓库 `.env.local`
+- 业务线：通用脚本运行。
+- 场景：可见浏览器模式探测 `活动列表 / 转盘抽奖` 时，在 inline Node 脚本中调用 `pathsFrom('./skills/weex-admin-ops/scripts/lib/runtime.mjs')` 后再执行登录配置检查。
+- 失败表现：脚本未进入浏览器，抛出 `WEEX_ADMIN_PASSWORD is required`。
+- 失败原因：inline 脚本传入相对路径时，`pathsFrom()` 以当前执行上下文推导出的根目录不等于仓库根目录，导致 `loadLocalEnv()` 没有读取到仓库 `.env.local`。
+- 解决方式：一次性脚本中改用 `process.cwd()` 作为仓库根目录显式调用 `loadLocalEnv(repoRoot)` 和 `adminConfig(repoRoot)`。
+- 验证结果：重跑后成功登录 staging，进入 `/activity/prize`，再通过左侧菜单进入 `/activities/lottery`。
+- 关联文件：`scripts/lib/runtime.mjs`。
+- 后续处理：inline 探测脚本优先使用当前工作目录加载本机环境；可复用脚本仍使用 `import.meta.url` 推导根目录。
+
+## 2026-05-07 DOM 提取脚本把元素对象当字符串处理
+- 业务线：通用浏览器探测。
+- 场景：可见浏览器模式打开 `活动列表 / 转盘抽奖 / 新增` 后，提取页面模块、label、按钮和表格头。
+- 失败表现：页面已打开到 `/activities/lottery/add`，但 `page.evaluate()` 中执行 `clean(element)` 抛出 `(s || "").trim is not a function`，浏览器会话中断。
+- 失败原因：提取脚本把 DOM 元素对象直接传给字符串清洗函数，没有先读取 `innerText`、`textContent` 或 `placeholder`。
+- 解决方式：补充 `txt(element)` 包装函数，先取元素文本再调用 `clean()`。
+- 验证结果：重跑后成功提取新增页模块、可见字段、按钮、表格列，并确认依赖接口均返回 HTTP 200、业务 `code=200`。
+- 关联流程：活动列表转盘抽奖新增页只读探测。
+- 后续处理：后续 inline DOM 探测统一区分元素对象和字符串，避免只读探测阶段中断。
+
+## 2026-05-07 维护脚本执行目录和路径前缀重复
+- 业务线：通用维护验证。
+- 场景：更新交接记录和失败复盘后运行知识结构校验。
+- 失败表现：在 `skills/weex-admin-ops` 目录下执行 `node skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs`，路径被解析为 `skills/weex-admin-ops/skills/weex-admin-ops/...`，提示找不到模块。
+- 失败原因：命令同时使用了 skill 目录作为工作目录和仓库相对路径前缀。
+- 解决方式：从仓库根目录执行 `node skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs`，或在 skill 目录下执行 `node scripts/maintenance/validate-knowledge-structure.mjs`。
+- 验证结果：从仓库根目录重跑后输出 `WEEX admin skill knowledge structure is valid.`。
+- 关联文件：`scripts/maintenance/validate-knowledge-structure.mjs`。
+- 后续处理：后续维护校验先确认当前工作目录，再选择对应路径。
+
 ## 2026-05-06 可见浏览器模式误用接口写入
 - 业务线：通用浏览器模式。
 - 场景：用户要求“浏览器模式”创建活动流程引导配置。
@@ -86,7 +116,7 @@
 - 失败表现：脚本启动失败，提示找不到 `playwright` 模块，未打开浏览器，未创建后台数据。
 - 失败原因：当前 shell 的系统 Node 没有安装 Playwright；Codex 桌面线程提供了 bundled runtime。
 - 解决方式：使用 `load_workspace_dependencies` 返回的 Node 和 `NODE_PATH`，例如设置为当前机器 Codex bundled runtime 返回的 `node_modules` 路径。
-- 验证结果：使用 bundled runtime 后成功创建临时报名模板 ID `2773`；本轮 one-off 可见浏览器脚本首次用系统 Node 复现同类错误，切换到 bundled runtime 后完成复杂报名模板 ID `2776`-`2779` 的创建、查看、修改和删除。
+- 验证结果：使用 bundled runtime 后成功创建临时报名模板 ID `2773`；本轮 one-off 可见浏览器脚本首次用系统 Node 复现同类错误，切换到 bundled runtime 后完成复杂报名模板 ID `2776`-`2779` 的创建、查看、修改和删除；2026-05-07 创建转盘抽奖活动 ID `9022` 前再次复现，切换 bundled runtime 后通过。
 - 关联文件：`scripts/lib/runtime.mjs`。
 - 后续处理：后续本地直接运行浏览器脚本前，优先确认 Node runtime 是否包含 Playwright；当前可用方案是使用 Codex bundled runtime 的 Node 和 `NODE_PATH`。
 

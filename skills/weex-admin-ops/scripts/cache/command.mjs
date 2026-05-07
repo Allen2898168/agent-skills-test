@@ -8,6 +8,7 @@ export function commandFor(match, args, skillRoot) {
   if (match.action.id === "delete_register_templates_by_operator") return deleteRegisterTemplatesByOperatorCommand(match, args, skillRoot);
   if (match.action.id === "create_guide_templates") return createGuideTemplatesCommand(match, args, skillRoot);
   if (match.action.id === "verify_guide_template_row_actions") return guideTemplateRowActionsCommand(match, args, skillRoot);
+  if (match.action.id === "create_lottery_activity_draft") return createLotteryActivityDraftCommand(match, args, skillRoot);
   if (match.action.id !== "create_prizes") throw new Error(`No runner implemented for action: ${match.action.id}`);
   const params = { ...match.inferred, ...args.passthrough };
   if (!params.category || !params.subtype) {
@@ -19,6 +20,19 @@ export function commandFor(match, args, skillRoot) {
   if (params.aliasPrefix) commandArgs.push("--alias-prefix", params.aliasPrefix);
   if (args.visible || params.visible) commandArgs.push("--visible");
   if (args.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function createLotteryActivityDraftCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.start) commandArgs.push("--start", String(params.start));
+  if (params.end) commandArgs.push("--end", String(params.end));
+  if (args.visible || params.visible) commandArgs.push("--visible");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
   return { script, commandArgs };
 }
 

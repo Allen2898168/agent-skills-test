@@ -46,6 +46,10 @@ Options:
   --steps <csv>      Step counts for create_guide_templates, 1-3
   --operator <name>   Recent editor/operator for delete_register_templates_by_operator
   --confirm-delete    Required by delete_register_templates_by_operator for actual deletion
+  --title-prefix <x>  Title prefix for create_lottery_activity_draft dry-run plan
+  --alias-prefix <x>  Alias prefix for create_lottery_activity_draft dry-run plan
+  --start <text>      Planned start time for create_lottery_activity_draft
+  --end <text>        Planned end time for create_lottery_activity_draft
 `;
 }
 
