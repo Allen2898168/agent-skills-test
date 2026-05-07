@@ -70,6 +70,20 @@
   - 本次首次尝试未提交，因新手活动合约任务开关定位失败；已改为按 `.el-switch` 文本 `启用新手活动合约任务` 定位并补充失败复盘。差异化模式当前通过环境变量触发，尚未正式接入 action cache 参数。
   - 用户要求设置 `抽奖权重配置` 的转盘抽奖活动浏览器模式；已通过 `LOTTERY_WEIGHT_CONFIG=vip` 可见浏览器模式创建活动 ID `9021`，标题 `严格UI转盘抽奖草稿20260507161414`，别名 `strict-ui-lottery-20260507161414`，状态 `DRAFT`。
   - `9021` 详情回查：`prizeWeightConfig` 保存 1 条 VIP 配置行，`vipLevelMin=0`、`vipLevelMax=0`，8 个奖品权重 `[5,8,10,12,13,15,17,20]`；`prizeCount=8`、颜色签 2 组、累计次数再权重 8 行、任务 1 条、多语言 2 条、FAQ 保存正常。已补充 `activity-management-lottery.md` 的 VIP 抽奖权重配置步骤。
+  - 用户要求走无浏览器模式复杂链路创建；已通过 `LOTTERY_HEADLESS=1` headless 模式创建活动 ID `9023`，标题 `严格UI转盘抽奖草稿20260507200430`，别名 `strict-ui-lottery-20260507200430`，状态 `DRAFT`，最终 URL `/activities/lottery`。详情回查 `prizeCount=8`、奖品权重 8 个均为 `12.5`、颜色签 2 组、每日限制 1 行、累计次数再权重 8 行、任务 1 条、多语言 2 条、FAQ 保存正常。
+  - 用户要求测试上线流程；已在转盘抽奖列表按别名定位活动 ID `9023`，点击操作列 `上线`，在确认弹窗输入用户提供的固定验证码并确认；接口 `POST /prod-api/activity/lottery/online` 返回 HTTP 200、业务 `code=200`、`msg=操作成功`，列表状态变为 `上线`，只读接口回查 `status=ONLINE`。
+  - 用户继续要求可见浏览器模式测试转盘抽奖 `查看 / 修改 / 复制 / 删除`：
+    - 上线活动 `9023` 行按钮为 `查看 / 修改 / 下线 / 复制`，无 `删除`，符合已上线活动不可删除；`查看` 打开 `/activities/lottery/view?activityId=9023` 并触发详情接口 `code=200`；`修改` 可打开 `/activities/lottery/edit?activityId=9023`，未保存上线原活动。
+    - `复制` 在上线 `9023` 和草稿 `9022` 上均触发 `POST /prod-api/activity/config/copy`，但业务返回 `code=500 system busy, please retry later`，未创建复制件，已记入失败复盘。
+    - 为继续验证修改/删除，严格 UI 新建临时草稿 `9024`，别名 `strict-ui-lottery-20260507204920`；创建时 FAQ 定位漂移已修复。
+    - 草稿 `9024` 的 `修改` 已通过：编辑页底部真实按钮是 `保存`，修改活动副标题后触发 `PUT /prod-api/activity/config`，业务 `code=200`，页面提示 `编辑成功`。
+    - 草稿 `9024` 的 `删除` 已通过用户补充方式验证：确认弹窗 `确认删除该活动吗` 打开后验证码输入框自动聚焦，填入固定验证码后点击右下角 `确定`，触发 `POST /prod-api/activity/lottery/delete`，业务 `code=200`；按别名回查 `total=0`，记录已删除。
+    - 已修正删除/上线确认规则：有 `下线` 按钮的上线活动不展示删除；有 `上线` 按钮的草稿活动可以删除，删除和上线均需在确认弹窗输入验证码后点确认。
+  - 用户要求继续验证非浏览器模式；已用 headless 模式创建临时草稿 `9025`，别名 `strict-ui-lottery-20260507212249`，并完成同组操作验证：
+    - `查看`：进入 `/activities/lottery/view?activityId=9025`，详情接口 `code=200`。
+    - `修改`：编辑活动副标题，点击 `保存` 后 `PUT /prod-api/activity/config` 返回 `code=200`，详情回查命中修改值。
+    - `复制`：仍触发 `POST /prod-api/activity/config/copy`，返回 `code=500 system busy, please retry later`。
+    - `删除`：确认弹窗填验证码后点击 `确定`，`POST /prod-api/activity/lottery/delete` 返回 `code=200`，按别名回查 `total=0`，临时草稿已删除。
   - 已更新 `references/operations/activity-management-lottery.md`、`references/action-cache.md`、`references/operations/index.md`、`scripts/action-cache.json` 和 `scripts/business/activity-management/lottery-draft-plan.mjs`；已验证语法、显式 action dry-run、自然语言 dry-run、不可见写入拒绝、缓存入口真实执行和知识结构校验。
   - 后续可继续把 `strict-lottery-visible-attempt.mjs` 的大段表格、上传、下拉逻辑拆到公共 Element UI helper；当前为了复用已验证路径，先通过 action 入口委托该严格 UI 脚本。
 - 本轮按用户要求在可见浏览器模式完成复杂报名模板和活动流程引导配置验证，未保存截图：

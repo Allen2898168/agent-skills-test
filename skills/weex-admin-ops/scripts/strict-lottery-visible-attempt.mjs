@@ -24,9 +24,10 @@ const prizeWeights = variedMode ? ["5", "8", "10", "12", "13", "15", "17", "20"]
 const redSignWeights = variedMode ? ["4", "6", "8", "10", "12", "14", "18", "28"] : Array(8).fill("12.5");
 const whiteSignWeights = variedMode ? ["3", "7", "9", "11", "13", "15", "19", "23"] : Array(8).fill("12.5");
 const lotteryWeightConfigWeights = ["5", "8", "10", "12", "13", "15", "17", "20"];
+const headlessMode = process.env.LOTTERY_HEADLESS === "1";
 
 const browser = await chromium.launch({
-  headless: false,
+  headless: headlessMode,
   executablePath: config.chromePath,
   slowMo: 120,
   args: ["--window-size=1440,1000"],
@@ -550,9 +551,15 @@ async function fillFaq() {
   await scrollText("常见问题");
   await page.locator("xpath=(//*[contains(normalize-space(.),'常见问题')]/following::label[contains(@class,'el-checkbox')][contains(.,'英语')])[1]").click({ force: true }).catch(() => {});
   await wait(650);
-  const faqCard = page.locator(".el-card").filter({ hasText: "常见问题" }).first();
-  await fillControl(faqCard.locator('input[placeholder="请输入标题"]').first(), "FAQ title");
-  await fillControl(faqCard.locator(".ql-editor").first(), "FAQ content");
+  let titleInput = page.locator("xpath=(//*[contains(normalize-space(.),'常见问题')]/following::input[contains(@placeholder,'标题')])[1]");
+  if (!(await titleInput.isVisible({ timeout: 2500 }).catch(() => false))) {
+    await page.locator("xpath=(//*[contains(normalize-space(.),'常见问题')]/following::*[contains(@class,'el-icon-plus')])[1]").click({ force: true }).catch(() => {});
+    await wait(500);
+    titleInput = page.locator("xpath=(//*[contains(normalize-space(.),'常见问题')]/following::input[contains(@placeholder,'标题')])[1]");
+  }
+  await fillControl(titleInput, "FAQ title");
+  const editor = page.locator("xpath=(//*[contains(normalize-space(.),'常见问题')]/following::*[contains(@class,'ql-editor')])[1]");
+  await fillControl(editor, "FAQ content");
 }
 
 async function fillCalendar() {
