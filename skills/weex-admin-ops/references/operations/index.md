@@ -9,6 +9,7 @@ Use this file as the table of contents for operation playbooks. Keep full workfl
 - Activity common module: `activity-common-module.md`
 - Activity guide template: `activity-guide-template.md`
 - Activity task management: `activity-task-management.md`
+- Activity task create common: `activity-task-create-common.md`
 - Activity task search: `activity-task-search.md`
 - Activity task roulette reward modes: `activity-task-roulette-reward-modes.md`
 - Activity task roulette conditions: `activity-task-roulette-conditions.md`
@@ -39,6 +40,7 @@ Use this file as the table of contents for operation playbooks. Keep full workfl
 | Verify activity guide template row actions | `activity-guide-template.md` | candidate | 2026-05-06 | Creates a temporary guide template, verifies `查看` / `修改` / `复制` / `删除`, and deletes temporary records; visible and invisible modes verified. |
 | Prize management search | `prize-management-search.md` | candidate | 2026-05-04 | Validates prize ID, category, name, and alias search. |
 | Open activity task management | `activity-task-management.md` | candidate | 2026-05-04 | Opens `/activity/task` by clicking `活动通用模块管理` then `活动任务管理`. |
+| Activity task add dialog common flow | `activity-task-create-common.md` | candidate | 2026-05-05 | Captures shared add-dialog defaults, confirmation rules, multilingual handling, and submit assertions for validated `转盘抽奖` create flows. |
 | Activity task management search | `activity-task-search.md` | candidate | 2026-05-04 | Validates task ID, alias, label, remark, time, score, and manual-award multi-select filters. |
 | Create roulette task | `activity-task-roulette-reward-modes.md` | candidate | 2026-05-04 | Creates `转盘抽奖` task variants; single reward, limited reward, and normal+rights passed. Mixed reward is blocked pending development fix. |
 | Create bonus prize | `prize-management-basic-create.md` | candidate | 2026-05-04 | Creates `赠金 / 赠金` prize with default and English names, validity fields, unit, precision, discount ratio, and image. |
