@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "actions": [
+    {
+      "id": "frontend_login_cookie",
+      "operation": "auth.login.cookie",
+      "description": "Use runtime WEEX frontend credentials, loginTool token generation, and WEEX token cookie injection to open a STG frontend login-state page.",
+      "keywords": [
+        "登录前端",
+        "前端登录",
+        "打开前端登录态",
+        "cookie 注入登录",
+        "前端浏览器模式登录"
+      ],
+      "script": "scripts/frontend-login-cookie.mjs",
+      "defaultParameters": {
+        "environment": "stg",
+        "targetUrl": "https://stg-www.weex.tech/zh-CN/login",
+        "credentialSource": "skills/weex-frontend-ops/.env.local or WEEX_FRONTEND_* runtime environment variables",
+        "passwordPriority": "account-specific password first, otherwise WEEX_FRONTEND_COMMON_PASSWORD",
+        "loginToolSource": "WEEX_FRONTEND_LOGIN_TOOL_DIR, P2P_LOGIN_TOOL_DIR, or /Users/gabriel/Downloads/weexpr/loginTool",
+        "visible": false,
+        "screenshot": "only when --screenshot or WEEX_FRONTEND_SAVE_SCREENSHOT=true is set"
+      },
+      "requiresConfirmation": false,
+      "successAssertions": [
+        "WEEX_TOKEN_COOKIE_STAGING cookie is present",
+        "login form text is absent",
+        "account overview, account security text, or /account URL is visible"
+      ],
+      "status": "candidate",
+      "lastVerifiedAt": "2026-05-08"
+    },
+    {
+      "id": "frontend_register_api",
+      "operation": "auth.register.email.api",
+      "description": "Create a STG WEEX frontend email account through the validated test API path, inject the returned token cookie, and verify the account overview page.",
+      "keywords": [
+        "注册前端账号",
+        "前端注册",
+        "快速注册",
+        "注册账号链路",
+        "stg 前端注册"
+      ],
+      "script": "scripts/frontend-register-api.mjs",
+      "defaultParameters": {
+        "environment": "stg",
+        "registerUrl": "https://stg-www.weex.tech/zh-CN/register",
+        "accountUrl": "https://stg-www.weex.tech/zh-CN/account",
+        "credentialSource": "WEEX_FRONTEND_COMMON_PASSWORD from skills/weex-frontend-ops/.env.local or runtime environment variables",
+        "email": "generated codexapi<timestamp>@weex.com unless --email is provided",
+        "inviteCode": "optional --invite-code",
+        "visible": false,
+        "confirmFlag": "--confirm-register is required for account creation",
+        "screenshot": "only when --screenshot or WEEX_FRONTEND_SAVE_SCREENSHOT=true is set"
+      },
+      "requiresConfirmation": true,
+      "successAssertions": [
+        "register/submit returns code 00000",
+        "WEEX_TOKEN_COOKIE_STAGING cookie is present",
+        "account overview, account security text, or /account URL is visible"
+      ],
+      "status": "candidate",
+      "lastVerifiedAt": "2026-05-08"
+    }
+  ]
+}

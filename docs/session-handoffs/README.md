@@ -12,3 +12,4 @@
 - `activity-register-platform-a.md` / `activity-register-platform-b.md`：报名模板平台范围流程。
 - `activity-register-recent.md`：最近报名模板创建记录、注册时间范围、下一步和安全说明。
 - `joker-activity.md`：小丑牌活动多语言回填链路。
+- `frontend-ops-register.md`：前端页面操作 skill、STG 登录和邮箱注册链路探测。

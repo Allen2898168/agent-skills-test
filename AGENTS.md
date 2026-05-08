@@ -6,18 +6,20 @@
 - 不回显密码、验证码、token、cookie、API key 等敏感信息。
 
 ## Project Context
-- 本项目用于 WEEX 活动后台管理页面的操作自动化、测试验证和流程沉淀。
+- 本项目用于 WEEX 活动后台管理页面和 WEEX 前端页面的操作自动化、测试验证和流程沉淀。
 - 默认目标环境是 staging 后台：`https://stg-activity.weex.tech`。
 - 后台业务复杂，所有操作必须以“可复现流程、明确前置条件、明确结果验证”为核心。
+- 前端页面目标 URL 不默认猜测；优先查 `skills/weex-frontend-ops/references/routes.md`，没有命中时向用户询问目标 URL、环境、viewport 和预期结果。
 
 ## Required Startup Reads
 - 新会话开始处理本项目任务时，必须先读取：
   - `AGENTS.md`
   - `docs/session-handoff.md`
-  - `skills/weex-admin-ops/FAILURES.md`
-  - `skills/weex-admin-ops/SKILL.md`
-  - 与当前任务相关的 `skills/weex-admin-ops/references/`
-- 如果当前任务涉及已知失败高发场景，必须先读取 `skills/weex-admin-ops/FAILURES.md` 和对应 `skills/weex-admin-ops/failure-reviews/` 业务线复盘。
+  - 当前任务对应的项目内 skill：
+    - 后台任务：`skills/weex-admin-ops/FAILURES.md`、`skills/weex-admin-ops/SKILL.md`、与当前任务相关的 `skills/weex-admin-ops/references/`
+    - 前端页面操作或检查任务：`skills/weex-frontend-ops/FAILURES.md`、`skills/weex-frontend-ops/SKILL.md`、`skills/weex-frontend-ops/references/operations/index.md`、与当前页面或检查相关的 `skills/weex-frontend-ops/references/`
+- 如果当前后台任务涉及已知失败高发场景，必须先读取 `skills/weex-admin-ops/FAILURES.md` 和对应 `skills/weex-admin-ops/failure-reviews/` 业务线复盘。
+- 如果当前前端任务涉及已知失败高发场景，必须先读取 `skills/weex-frontend-ops/FAILURES.md` 和对应 `skills/weex-frontend-ops/failure-reviews/` 页面或业务线复盘。
 - 如果 `temp/` 存在暂存流程，新会话只需读取暂存索引摘要；只有当前任务与暂存流程相关，或用户明确要求继续、迁移暂存流程时，才汇总暂存内容并询问用户。
 - 用户未确认前，不要自动把 `temp/` 内容迁入 skill。
 - 首次对话中如果当前任务可能需要登录或后台页面操作，必须先检查环境变量是否设置：
@@ -29,11 +31,16 @@
 
 ## Skill Authority
 - 后台相关操作优先使用项目内 `skills/weex-admin-ops/`，它是团队协作的权威版本。
+- 前端页面打开、点击、表单操作、页面检查、响应式检查、截图证据、console/network 验证和前端流程沉淀，优先使用项目内 `skills/weex-frontend-ops/`，它是前端页面操作与检查的权威版本。
 - 本机 `$CODEX_HOME/skills/weex-admin-ops` 只是可选安装副本；如果缺失，先读取项目内 skill。
+- 本机 `$CODEX_HOME/skills/weex-frontend-ops` 只是可选安装副本；如果缺失，先读取项目内 skill。
 - 自然语言后台操作必须先查 `skills/weex-admin-ops/references/operations/index.md` 和 `skills/weex-admin-ops/scripts/action-cache.json`。
-- 如果命中动作缓存，先用 `skills/weex-admin-ops/scripts/run-cached-action.mjs --dry-run` 检查，再决定是否执行。
+- 自然语言前端操作或检查必须先查 `skills/weex-frontend-ops/references/operations/index.md` 和 `skills/weex-frontend-ops/scripts/action-cache.json`。
+- 如果后台任务命中动作缓存，先用 `skills/weex-admin-ops/scripts/run-cached-action.mjs --dry-run` 检查，再决定是否执行。
+- 如果前端任务命中动作缓存，先用 `skills/weex-frontend-ops/scripts/run-cached-action.mjs --dry-run` 检查，再决定是否执行。
 - 缓存脚本失败、缺少参数或风险不明确时，回退到项目内 Playwright 浏览器自动化流程；只有需要复用用户 Chrome 登录态或 CDP 探索时，才使用可选的 `web-access`。
 - 后管业务动作脚本、动作缓存脚本和 skill 维护脚本必须放在 `skills/weex-admin-ops/scripts/`；根目录 `scripts/` 不作为 skill 复用的必需目录。
+- 前端页面动作脚本、动作缓存脚本和 skill 维护脚本必须放在 `skills/weex-frontend-ops/scripts/`；根目录 `scripts/` 不作为 skill 复用的必需目录。
 
 ## Safety
 - 登录、创建、编辑、启用、停用、删除、导入、导出、批量更新、发奖、风控配置等会改变后台状态的操作，执行前必须说明即将执行的动作。
@@ -54,12 +61,14 @@
 - 页面操作优先使用真实浏览器自动化。
 - 自动化操作默认不可见/后台运行；只有用户明确要求“可见操作”“打开浏览器操作”“让我看着操作”等表达时，才打开有界面的真实浏览器。
 - 用户明确要求“浏览器模式”“可见操作”“打开浏览器操作”“让我看着操作”等表达时，所有会改变后台状态的写操作必须模拟用户真实页面行为：点击按钮、填写表单、选择下拉/单选/多选、上传文件、点击确认/提交；不得用纯接口调用代替页面写操作。接口调用只允许作为只读验证或页面行为触发后的证据采集。
+- 前端登录和注册认证链路是浏览器模式真实点击规则的例外；除非用户明确要求测试登录/注册表单 UI，否则可以使用已沉淀的 cookie/API 路径完成认证或注册，并在浏览器中展示或验证最终登录后的页面。
 - 默认不可见/后台模式不强制模拟用户点击；在已沉淀且风险明确的链路中，可以使用脚本化接口或页面上下文加速执行，但仍必须验证业务响应和结果回查。
 - 同一业务链路在可见浏览器模式和默认不可见模式下可能存在不同执行路径；沉淀时必须记录已验证的模式，未验证的模式不得写成已跑通。
 - 操作成功不能只看点击完成，必须验证至少一种结果：URL、页面关键文案、表格或表单状态、toast/message、关键接口响应或用户要求的截图证据。
 - 默认不保存截图；只有用户明确要求“截图”“保存截图”“留证据图”等指令时才保存截图。
-- 截图统一保存到 `skills/weex-admin-ops/artifacts/screenshots/<中文业务域>/<中文页面或操作>/`。
-- 最终回复必须说明最终 URL、操作结果、验证依据；如果用户要求截图，说明截图路径；如果更新了 skill 或动作缓存，也要说明。
+- 后台截图统一保存到 `skills/weex-admin-ops/artifacts/screenshots/<中文业务域>/<中文页面或操作>/`。
+- 前端截图统一保存到 `skills/weex-frontend-ops/artifacts/screenshots/<中文业务域>/<中文页面或操作>/`。
+- 最终回复必须说明最终 URL、操作结果、验证依据；前端任务还必须说明 viewport/device；如果用户要求截图，说明截图路径；如果更新了 skill 或动作缓存，也要说明。
 
 ## Missing Information
 - 如果操作缺少必要参数，必须先列出缺失项。
@@ -69,13 +78,17 @@
 
 ## Skill Update Discipline
 - 当后台操作链路被实际跑通后，必须询问是否沉淀到项目内 `skills/weex-admin-ops/`；如果用户已提前授权自动沉淀，则直接更新。
+- 当前端页面操作或检查链路被实际跑通后，必须询问是否沉淀到项目内 `skills/weex-frontend-ops/`；如果用户已提前授权自动沉淀，则直接更新。
 - 新跑通链路沉淀时必须同时评估 skill 文档和动作缓存；当前 skill 未覆盖的新链路写入对应 reference，可复用且参数化成本合理的链路还必须沉淀成脚本并登记到 `skills/weex-admin-ops/scripts/action-cache.json`。
+- 前端新跑通链路沉淀时必须同时评估 skill 文档和动作缓存；当前 `weex-frontend-ops` 未覆盖的新链路写入对应 reference，可复用且参数化成本合理的链路还必须沉淀成脚本并登记到 `skills/weex-frontend-ops/scripts/action-cache.json`。
 - 稳定、重复出现或多次跑通的链路，应优先沉淀成可复用脚本，并登记到 `skills/weex-admin-ops/scripts/action-cache.json`；如果暂不缓存，必须在交接记录和最终回复中说明原因。
+- 前端稳定、重复出现或多次跑通的链路，应优先沉淀成可复用脚本，并登记到 `skills/weex-frontend-ops/scripts/action-cache.json`；如果暂不缓存，必须在交接记录和最终回复中说明原因。
 - 第一次失败但重试后出现稳定路径时，必须把稳定路径补充到对应 skill，并同步更新 `docs/session-handoff.md`。
 - skill 更新必须按业务域拆分，不把所有流程追加到单个大文件。
 - `SKILL.md` 只保留核心工作流和 reference 导航；页面细节、默认配置、选择器、断言、关联关系、组件操作分别写入对应 references。
 - 单个 markdown 文件接近 250 行时，必须先拆分再继续追加。
 - 脚本分层、缓存、组件复用、浏览器模式和文件长度规则以 `skills/weex-admin-ops/SKILL.md`、`references/action-cache.md`、`references/components.md` 为准。
+- 前端脚本分层、缓存、组件复用、浏览器模式和文件长度规则以 `skills/weex-frontend-ops/SKILL.md`、`references/action-cache.md`、`references/components.md` 为准。
 
 ## Relationships And Reuse
 - 每次沉淀流程时，必须检查是否产生新的业务关联关系或可复用组件操作。
@@ -83,18 +96,23 @@
 - 下拉、单选、多选、开关、日期、上传、表格、弹窗、搜索表单、按钮点击、表单 label 定位等组件级行为，必须优先复用或扩展公共 helper；业务脚本只保留业务编排。
 - 如果确实不能复用现有 helper，必须在交接记录或最终回复说明原因，并在跑通后评估是否抽到公共 helper。
 - 业务关联关系写入 `skills/weex-admin-ops/references/relationships.md`，例如列表、配置项、下拉数据源、接口、奖品、任务、报名模板、活动类型和后端校验之间的依赖。
+- 前端关联关系写入 `skills/weex-frontend-ops/references/relationships.md`，例如前端路由、接口数据、活动配置、feature flag、语言、地区、登录态和页面展示之间的依赖。
 - 可复用组件操作写入 `skills/weex-admin-ops/references/components.md`，并优先抽离到 `skills/weex-admin-ops/scripts/lib/`。
+- 前端可复用组件操作写入 `skills/weex-frontend-ops/references/components.md`，并优先抽离到 `skills/weex-frontend-ops/scripts/lib/`。
 - 业务脚本只描述业务编排；组件级点击、输入、上传、选择、等待和断言逻辑应放到通用 helper。
 
 ## Failure Review Discipline
 - 每次后台操作、脚本执行、页面探测、缓存命中或验证过程中出现失败、阻塞、误判、重试成功、环境问题或后端校验问题，都必须主动更新失败复盘。
+- 每次前端页面操作、脚本执行、页面探测、缓存命中、截图检查、console/network 验证或断言过程中出现失败、阻塞、误判、重试成功、环境问题或渲染问题，都必须主动更新失败复盘。
 - 失败复盘入口为 skill 内 `skills/weex-admin-ops/FAILURES.md`；具体复盘按业务线写入 `skills/weex-admin-ops/failure-reviews/`，通用问题写入 `skills/weex-admin-ops/failure-reviews/common.md`。
+- 前端失败复盘入口为 skill 内 `skills/weex-frontend-ops/FAILURES.md`；具体复盘按页面或业务线写入 `skills/weex-frontend-ops/failure-reviews/`，通用问题写入 `skills/weex-frontend-ops/failure-reviews/common.md`。
 - 执行新流程或重试失败流程前，必须先查看 `skills/weex-admin-ops/FAILURES.md` 和相关业务线复盘，确认是否已有解决方式。
+- 执行新的前端流程或重试失败前端流程前，必须先查看 `skills/weex-frontend-ops/FAILURES.md` 和相关页面或业务线复盘，确认是否已有解决方式。
 - 复盘必须写明场景、失败表现、失败原因、解决方式、验证结果、关联流程或脚本、后续处理状态，不得写入真实密码、验证码、token、cookie、API key 或完整账号凭证。
 - 多次遇到同类失败时，不能只追加复盘；必须评估并修改原流程、skill reference、组件 helper 或缓存脚本，把解决方式前置到正常流程中，并验证是否已经走通。
 - 如果同一问题第二次出现，且本次成功应用复盘文档中的解决方式解决问题，必须把该解决方式替换为对应流程、脚本、helper 或动作缓存的固定执行路径；固定路径验证通过后，删除失败复盘中该问题对应条目，避免保留已被流程吸收的旧问题。
 - 如果暂时不能替换固定执行路径或不能删除对应复盘条目，必须在交接记录和该复盘条目的后续处理状态中说明原因、风险和下一步。
-- 失败复盘也遵守增长管理：任意 `skills/weex-admin-ops/failure-reviews/**/*.md` 接近 250 行时，必须按业务线、场景或时间拆分，并更新 `skills/weex-admin-ops/FAILURES.md` 索引。
+- 失败复盘也遵守增长管理：任意 `skills/weex-admin-ops/failure-reviews/**/*.md` 或 `skills/weex-frontend-ops/failure-reviews/**/*.md` 接近 250 行时，必须按业务线、页面、场景或时间拆分，并更新对应 `FAILURES.md` 索引。
 
 ## Temp Workflow Staging
 - `temp/` 只用于保存“已经跑通，但用户明确要求暂时不写入 skill、也不写交接文档”的后台操作流程。
@@ -107,17 +125,21 @@
 - 每次完成关键操作、发现新页面链路、更新 skill、遇到阻塞或做出重要决策后，必须更新交接记录。
 - 交接记录必须使用中文摘要，不得写入真实密码、验证码、token、cookie、API key、个人隐私数据或完整账号凭证。
 - 如果某条链路已经沉淀到 `weex-admin-ops` skill，交接记录只保留摘要和 skill 文件路径，不重复粘贴完整流程。
+- 如果某条链路已经沉淀到 `weex-frontend-ops` skill，交接记录只保留摘要和 skill 文件路径，不重复粘贴完整流程。
 
 ## Docs Growth Management
 - `docs/session-handoff.md` 只保留当前接力摘要、最近完成、阻塞、下一步和历史索引，不保存全量流水记录。
 - 历史交接内容必须按业务域或时间归档到 `docs/session-handoffs/`，并在 `docs/session-handoffs/README.md` 维护索引。
 - 任意 `docs/**/*.md` 接近 250 行时，必须先拆分或归档，再继续追加内容；`docs/session-handoff.md` 超过 250 行视为违规。
 - 已沉淀到 skill 的完整流程不在 docs 中重复粘贴，只保留中文摘要和对应 skill/cache 文件路径。
-- 更新 docs 或失败复盘后应运行 `node skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs` 检查文档长度和索引。
+- 更新 docs 或后管失败复盘后应运行 `node skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs` 检查文档长度和索引。
+- 更新前端 skill、前端失败复盘或前端流程文档后应运行 `node skills/weex-frontend-ops/scripts/maintenance/validate-knowledge-structure.mjs` 检查文档长度和索引。
 
 ## Change Discipline
-- 修改 `AGENTS.md` 前，先说明将写入什么；用户说 `ok`、`确认` 或明确同意后再写入讨论中的规范正文。
+- 如果认为 `AGENTS.md` 需要更新，必须先提示用户，并说明建议更新的具体内容和原因；等待用户说 `ok`、`确认` 或明确同意后再写入规范正文。
+- 每次更新 `AGENTS.md` 后，必须整体检查 `AGENTS.md` 的规范是否存在过期、冲突、重复或歧义；如果发现需要修正，必须在同轮完成修正并重新检查。
 - 只要有新跑通的、当前 skill 尚未覆盖的、且不是仅调整参数就能复用既有链路实现的新链路，必须在跑通后立即询问用户是否沉淀到项目内 `skills/weex-admin-ops/`，并同步说明是否适合登记动作缓存。
+- 前端新跑通链路如果当前 `weex-frontend-ops` 尚未覆盖，且不是仅调整参数就能复用既有链路实现，必须在跑通后立即询问用户是否沉淀到项目内 `skills/weex-frontend-ops/`，并同步说明是否适合登记动作缓存。
 - 用户确认沉淀后，再更新 skill 和适用的动作缓存；未确认前不得写入 skill 或缓存。
 - `temp/` 迁移仍需用户单独确认。
 - 不改无关文件。
