@@ -12,6 +12,7 @@ Always ask before using or changing:
 - Risk-control rules.
 - Production environment.
 - Delete, batch delete, import, export, reward issuance, or irreversible update.
+- Any state change that is protected by a fresh Google verification step, such as activity `上线`.
 
 ## Safe Defaults
 
@@ -76,6 +77,10 @@ These can be suggested, but still mention them before execution when creating or
 - Read the Google code from `WEEX_ADMIN_GOOGLE_CODE`; it is required before login.
 - If either `WEEX_ADMIN_PASSWORD` or `WEEX_ADMIN_GOOGLE_CODE` is unavailable, stop before login or state-changing admin operation and ask the user to set the missing environment variable.
 - Do not read activity admin credentials from root `.env.local`, other skill directories, `WEEX_FIN_*`, `WEEX_FRONTEND_*`, or legacy fallback variables.
+- If an already logged-in page later asks for a Google verification code again during a protected action, such as `上线`, treat that as a fresh required runtime secret:
+  - use the current user-provided code for that run, or
+  - use `WEEX_ADMIN_GOOGLE_CODE`,
+  - but never persist the real code to the repository.
 
 ## Activity Defaults
 
