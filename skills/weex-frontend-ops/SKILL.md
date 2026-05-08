@@ -59,7 +59,7 @@ This skill is for user-facing frontend pages, not activity-admin backend operati
 
 ## Safety Rules
 
-- Never store or print real passwords, tokens, cookies, API keys, session IDs, wallet/account identifiers, or private user data.
+- Never store or print real passwords, tokens, cookies, API keys, session IDs, or private user data. Staging/test account emails and UIDs can be printed and recorded in full; production or unspecified-environment identifiers must still be redacted or avoided.
 - Do not use production for write or destructive frontend flows unless the user explicitly names production and confirms the action.
 - Do not guess high-risk test data. Ask for it.
 - Prefer staging or test URLs. If the user provides only a page name, ask for or derive the URL from `references/routes.md`; if not present, ask for the target URL.

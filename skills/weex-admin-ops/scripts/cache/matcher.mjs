@@ -5,6 +5,9 @@ export function matchAction(manifest, args) {
     return { action, inferred: {} };
   }
   if (!args.query) throw new Error("Provide --query or --action");
+  if (isFinAdminQuery(args.query)) {
+    throw new Error("FIN Admin request belongs to skills/weex-fin-admin-ops; use that skill's run-cached-action.mjs.");
+  }
   const candidates = manifest.actions
     .map(action => ({ action, score: scoreAction(action, args.query) }))
     .filter(item => item.score > 0)
@@ -15,6 +18,10 @@ export function matchAction(manifest, args) {
     inferred: inferParams(args.query),
     score: candidates[0].score,
   };
+}
+
+function isFinAdminQuery(query) {
+  return /FIN|财务|空投奖励|产品化活动|stg-admin-web-fin|airdropRewardProd/i.test(query);
 }
 
 function scoreAction(action, query) {

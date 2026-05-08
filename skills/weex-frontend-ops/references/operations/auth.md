@@ -24,7 +24,7 @@ Use when the user asks to log in to the WEEX frontend, open a frontend login sta
 ### Required Inputs
 
 - Environment: default `stg`.
-- Credential source: `skills/weex-frontend-ops/.env.local` or runtime `WEEX_FRONTEND_*` variables.
+- Credential source: `skills/weex-frontend-ops/.env.local` or same-skill runtime `WEEX_FRONTEND_*` variables.
 - Account alias when multiple accounts are configured.
 - Local loginTool path when the default is unavailable.
 
@@ -77,7 +77,7 @@ Use when the user asks to create a new STG frontend account quickly and explicit
 ### Required Inputs
 
 - Environment: default `stg`.
-- Password source: `WEEX_FRONTEND_COMMON_PASSWORD` or `WEEX_FRONTEND_PASSWORD` from `skills/weex-frontend-ops/.env.local` or runtime environment.
+- Password source: `WEEX_FRONTEND_COMMON_PASSWORD` or `WEEX_FRONTEND_PASSWORD` from `skills/weex-frontend-ops/.env.local` or same-skill `WEEX_FRONTEND_*` runtime environment variables.
 - Email: generated as `codexapi<timestamp>@weex.com` unless `--email` is provided.
 - Optional invite code: `--invite-code`.
 - Explicit creation confirmation: `--confirm-register`.
@@ -133,3 +133,106 @@ Use when the user asks to create a new STG frontend account quickly and explicit
 - Email registration is verified; phone registration and country-code selector are page behavior only and are not yet scripted.
 - Browser page registration may show image-selection captcha while hidden Aliyun slider DOM exists; do not rely on slider selectors for this flow unless the task is specifically captcha/form UI testing.
 - Actual account creation is blocked unless `--confirm-register` is passed.
+
+## STG Frontend Batch Email Registration Through Test API
+
+Status: candidate
+Last verified: 2026-05-08
+
+Use when the user asks to create multiple STG frontend accounts, optionally with an invite code. This uses the same validated registration API path as single-account registration, but skips browser account-page verification for each account to avoid opening many browser contexts. Success is verified by `register/submit` business code `00000` and returned UID per account.
+
+### Required Inputs
+
+- Environment: default `stg`.
+- Count: `--count <N>`.
+- Password source: `WEEX_FRONTEND_COMMON_PASSWORD` or `WEEX_FRONTEND_PASSWORD` from `skills/weex-frontend-ops/.env.local` or same-skill `WEEX_FRONTEND_*` runtime environment variables.
+- Optional invite code: `--invite-code`.
+- Explicit creation confirmation: `--confirm-register`.
+
+### Script
+
+- Batch registration flow: `scripts/frontend-register-batch-api.mjs`.
+- Cached action: `frontend_register_batch_api`.
+
+### Steps
+
+1. Dry-run:
+   `node scripts/run-cached-action.mjs --action frontend_register_batch_api -- --dry-run --count <N> --invite-code <code>`
+2. Execute after the user has approved account creation:
+   `node scripts/run-cached-action.mjs --action frontend_register_batch_api -- --count <N> --invite-code <code> --confirm-register --output-csv <path>`
+3. Default concurrency equals count, capped at `100`. Use `--concurrency <N>` only when overriding.
+4. If an account fails before UID is returned, the script creates a replacement with a new email. It does not retry the same email.
+
+### Success Assertions
+
+- Exactly requested count of accounts return UID.
+- Each success has an email and UID.
+- Optional CSV contains only `email,uid`.
+
+### Known Limits
+
+- API-only, no browser viewport.
+- The script does not save login token cookies for all accounts.
+- High-concurrency registration can return `20105`; the fixed path is automatic backfill with new emails up to `--max-attempts`.
+
+## STG Frontend Authenticated Asset Transfer API
+
+Status: candidate
+Last verified: 2026-05-08
+
+Use when the user asks to move funds from the spot account to the contract account through the frontend login state. This is an API-only frontend-auth capability, not a page-click workflow. It is state-changing and financial, so the script refuses to execute unless the user has confirmed the target environment, account, amount, coin id, direction, and the command includes `--confirm-transfer`.
+
+### Required Inputs
+
+- Environment: default `stg`.
+- Credential source: `skills/weex-frontend-ops/.env.local` or same-skill `WEEX_FRONTEND_*` variables.
+- Account alias when multiple accounts are configured.
+- Amount: default follows the provided STG example `1000`, override with `--amount`.
+- From account type: default `10` for the provided spot source example, override with `--from-account-type`.
+- To account type: default `8` for the provided contract target example, override with `--to-account-type`.
+- Transfer coin id: default `2`, override with `--transfer-coin-id`.
+- Explicit transfer confirmation: `--confirm-transfer`.
+
+### Scripts
+
+- Auth config check: `scripts/check-auth-config.mjs`.
+- Transfer flow: `scripts/frontend-assets-transfer.mjs`.
+- Cached action: `frontend_assets_transfer`.
+
+### Steps
+
+1. Run `node scripts/check-auth-config.mjs` from the skill root.
+2. Dry-run the cached action:
+   `node scripts/run-cached-action.mjs --action frontend_assets_transfer --dry-run`
+3. If the user confirms the financial transfer, execute with explicit parameters:
+   `node scripts/run-cached-action.mjs --action frontend_assets_transfer -- --confirm-transfer --amount 1000 --from-account-type 10 --to-account-type 8 --transfer-coin-id 2`
+4. For non-default amount, account type, or coin id, pass explicit values instead of relying on defaults.
+
+### API Path
+
+- Login API base: `WEEX_FRONTEND_LOGIN_GATEWAY_BASE_URL`, default `https://stg-gateway.weex.tech`.
+- Transfer API base: `WEEX_FRONTEND_ASSET_GATEWAY_BASE_URL`, default `https://stg-gateway2.weex.tech`.
+- Endpoint: `POST /v1/assets/transfer`.
+- Payload shape:
+  `{ "amount": 1000, "fromAccountType": 10, "toAccountType": 8, "transferCoinId": "2" }`
+- Auth header: `U-Token`, generated by loginTool and kept in memory only.
+
+### Success Assertions
+
+- loginTool returns a valid access token without printing it.
+- Transfer HTTP status is 2xx.
+- Transfer response business code is `00000`.
+
+### Evidence
+
+- Endpoint URL.
+- Account alias, username, and staging/test UID can be reported in full.
+- Payload values.
+- Response HTTP status, business code, and message.
+- Never print token, cookie, password, signature, or session data.
+
+### Known Limits
+
+- The source account must already have enough transferable balance. A newly registered account can authenticate but may return business code `70008` with message `超出可划转的最大金额`.
+- If the user's target is a new account with funds in contract, do not use this transfer-only script by itself. Route the request through FIN `register_recharge_transfer_contract`, which registers the account, recharges spot through FIN, then calls this transfer API and reports the per-account business response.
+- It does not verify resulting balances yet. Add a balance query assertion before marking the flow verified.

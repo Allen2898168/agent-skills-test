@@ -48,10 +48,18 @@ function maskEmail(email) {
   return `${visiblePrefix}***@${domain}`;
 }
 
+function canPrintAccountIdentifiers() {
+  return (process.env.WEEX_FRONTEND_ENV || 'stg') !== 'prod';
+}
+
+function printableEmail(email) {
+  return canPrintAccountIdentifiers() ? email : maskEmail(email);
+}
+
 function requirePassword() {
   const password = process.env.WEEX_FRONTEND_COMMON_PASSWORD || process.env.WEEX_FRONTEND_PASSWORD || '';
   if (!password || /^<.*>$/.test(password.trim())) {
-    throw new Error('Missing frontend common password. Set WEEX_FRONTEND_COMMON_PASSWORD in .env.local or runtime environment.');
+    throw new Error('Missing frontend common password. Set WEEX_FRONTEND_COMMON_PASSWORD in skills/weex-frontend-ops/.env.local or WEEX_FRONTEND_* runtime environment.');
   }
   return password;
 }
@@ -61,7 +69,7 @@ function generatedEmail() {
 }
 
 function gatewayBaseUrl() {
-  return process.env.WEEX_FRONTEND_GATEWAY_BASE_URL || process.env.WEEX_GATEWAY_BASE_URL || 'https://stg-gateway.weex.tech';
+  return process.env.WEEX_FRONTEND_GATEWAY_BASE_URL || 'https://stg-gateway.weex.tech';
 }
 
 function registerHeaders() {
@@ -107,8 +115,8 @@ async function postJson(pathname, data, extraHeaders = {}) {
 function redactResponse(response) {
   return JSON.parse(JSON.stringify(response, (key, value) => {
     if (/token|pwd|password|verifyKey|serialNO|rtoken|refresh/i.test(key) && typeof value === 'string') return '<redacted>';
-    if (/userId/i.test(key) && typeof value === 'string') return '<redacted>';
-    if (/email|loginName/i.test(key) && typeof value === 'string' && value.includes('@')) return maskEmail(value);
+    if (/userId/i.test(key) && typeof value === 'string') return canPrintAccountIdentifiers() ? value : '<redacted>';
+    if (/email|loginName/i.test(key) && typeof value === 'string' && value.includes('@')) return printableEmail(value);
     return value;
   }));
 }
@@ -169,7 +177,7 @@ if (args.dryRun) {
     environment: process.env.WEEX_FRONTEND_ENV || 'stg',
     accountType: 'email',
     generatedEmail: !args.email,
-    emailMasked: maskEmail(email),
+    email: printableEmail(email),
     gatewayBaseUrl: gatewayBaseUrl(),
     endpoints: [
       '/v1/user/public/validate/config',
@@ -201,7 +209,7 @@ const validate = await postJson('/v1/user/public/validate/config', {
   mobile: ''
 });
 if (validate.code !== '00000') {
-  console.log(JSON.stringify({ ok: false, stage: 'validate/config', emailMasked: maskEmail(email), response: redactResponse(validate) }, null, 2));
+  console.log(JSON.stringify({ ok: false, stage: 'validate/config', email: printableEmail(email), response: redactResponse(validate) }, null, 2));
   process.exit(1);
 }
 
@@ -215,7 +223,7 @@ const check = await postJson('/v1/user/register/check', {
   authResult: { result: true }
 });
 if (check.code !== '00000') {
-  console.log(JSON.stringify({ ok: false, stage: 'register/check', emailMasked: maskEmail(email), response: redactResponse(check) }, null, 2));
+  console.log(JSON.stringify({ ok: false, stage: 'register/check', email: printableEmail(email), response: redactResponse(check) }, null, 2));
   process.exit(1);
 }
 
@@ -233,7 +241,7 @@ if (args.inviteCode) submitPayload.registerVipNo = args.inviteCode;
 
 const submit = await postJson('/v1/user/register/submit', submitPayload);
 if (submit.code !== '00000') {
-  console.log(JSON.stringify({ ok: false, stage: 'register/submit', emailMasked: maskEmail(email), response: redactResponse(submit) }, null, 2));
+  console.log(JSON.stringify({ ok: false, stage: 'register/submit', email: printableEmail(email), response: redactResponse(submit) }, null, 2));
   process.exit(1);
 }
 
@@ -259,7 +267,8 @@ try {
     ok: passed,
     operation: 'frontend_register_api',
     environment: process.env.WEEX_FRONTEND_ENV || 'stg',
-    emailMasked: maskEmail(email),
+    email: printableEmail(email),
+    userId: tokens.userId,
     channelName,
     evidence
   }, null, 2));

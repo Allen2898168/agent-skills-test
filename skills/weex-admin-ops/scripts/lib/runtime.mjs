@@ -37,7 +37,10 @@ export function adminConfig(repoRoot) {
 }
 
 export function loadLocalEnv(repoRoot) {
-  const envPath = path.join(repoRoot, ".env.local");
+  const skillRoot = fs.existsSync(path.join(repoRoot, "SKILL.md"))
+    ? repoRoot
+    : path.join(repoRoot, "skills/weex-admin-ops");
+  const envPath = path.join(skillRoot, ".env.local");
   if (!fs.existsSync(envPath)) return false;
   const lines = fs.readFileSync(envPath, "utf8").split(/\r?\n/);
   for (const line of lines) {
@@ -46,11 +49,16 @@ export function loadLocalEnv(repoRoot) {
     const index = line.indexOf("=");
     if (index < 0) continue;
     const key = line.slice(0, index).trim();
+    if (!isAllowedAdminEnvKey(key)) continue;
     let value = line.slice(index + 1).trim();
     if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) value = value.slice(1, -1);
     if (!(key in process.env)) process.env[key] = value;
   }
   return true;
+}
+
+function isAllowedAdminEnvKey(key) {
+  return key.startsWith("WEEX_ADMIN_") || key.startsWith("WEEX_PRIZE_") || key === "CHROME_EXECUTABLE_PATH";
 }
 
 export function assertAdminConfig(config) {

@@ -16,9 +16,9 @@
       "defaultParameters": {
         "environment": "stg",
         "targetUrl": "https://stg-www.weex.tech/zh-CN/login",
-        "credentialSource": "skills/weex-frontend-ops/.env.local or WEEX_FRONTEND_* runtime environment variables",
+        "credentialSource": "skills/weex-frontend-ops/.env.local or same-skill WEEX_FRONTEND_* runtime environment variables",
         "passwordPriority": "account-specific password first, otherwise WEEX_FRONTEND_COMMON_PASSWORD",
-        "loginToolSource": "WEEX_FRONTEND_LOGIN_TOOL_DIR, P2P_LOGIN_TOOL_DIR, or /Users/gabriel/Downloads/weexpr/loginTool",
+        "loginToolSource": "WEEX_FRONTEND_LOGIN_TOOL_DIR from skills/weex-frontend-ops/.env.local or /Users/gabriel/Downloads/weexpr/loginTool fallback",
         "visible": false,
         "screenshot": "only when --screenshot or WEEX_FRONTEND_SAVE_SCREENSHOT=true is set"
       },
@@ -47,7 +47,7 @@
         "environment": "stg",
         "registerUrl": "https://stg-www.weex.tech/zh-CN/register",
         "accountUrl": "https://stg-www.weex.tech/zh-CN/account",
-        "credentialSource": "WEEX_FRONTEND_COMMON_PASSWORD from skills/weex-frontend-ops/.env.local or runtime environment variables",
+        "credentialSource": "WEEX_FRONTEND_COMMON_PASSWORD from skills/weex-frontend-ops/.env.local or same-skill WEEX_FRONTEND_* runtime environment variables",
         "email": "generated codexapi<timestamp>@weex.com unless --email is provided",
         "inviteCode": "optional --invite-code",
         "visible": false,
@@ -59,6 +59,71 @@
         "register/submit returns code 00000",
         "WEEX_TOKEN_COOKIE_STAGING cookie is present",
         "account overview, account security text, or /account URL is visible"
+      ],
+      "status": "candidate",
+      "lastVerifiedAt": "2026-05-08"
+    },
+    {
+      "id": "frontend_register_batch_api",
+      "operation": "auth.register.email.batch.api",
+      "description": "Create multiple STG WEEX frontend email accounts through the validated test API path, with optional invite code, account-count concurrency capped at 100, and automatic backfill for failed submissions.",
+      "keywords": [
+        "批量注册前端账号",
+        "创建多个账号",
+        "给我账号",
+        "邀请码",
+        "批量账号"
+      ],
+      "script": "scripts/frontend-register-batch-api.mjs",
+      "defaultParameters": {
+        "environment": "stg",
+        "credentialSource": "WEEX_FRONTEND_COMMON_PASSWORD from skills/weex-frontend-ops/.env.local or same-skill WEEX_FRONTEND_* runtime environment variables",
+        "count": "required --count",
+        "inviteCode": "optional --invite-code",
+        "concurrency": "defaults to count, capped at 100",
+        "confirmFlag": "--confirm-register is required for account creation",
+        "outputCsv": "optional --output-csv"
+      },
+      "requiresConfirmation": true,
+      "successAssertions": [
+        "each account returns register/submit code 00000",
+        "each successful account has a UID",
+        "failed submissions are backfilled with new emails until requested count is reached or max attempts is exceeded"
+      ],
+      "status": "candidate",
+      "lastVerifiedAt": "2026-05-08"
+    },
+    {
+      "id": "frontend_assets_transfer",
+      "operation": "auth.assets.transfer.api",
+      "description": "Use runtime WEEX frontend credentials and loginTool access token to call the STG authenticated asset transfer API from spot to contract.",
+      "keywords": [
+        "前端划转",
+        "现货划转合约",
+        "资金从现货划转到合约",
+        "assets transfer",
+        "frontend assets transfer"
+      ],
+      "script": "scripts/frontend-assets-transfer.mjs",
+      "defaultParameters": {
+        "environment": "stg",
+        "loginGatewayBaseUrl": "https://stg-gateway.weex.tech",
+        "gatewayBaseUrl": "https://stg-gateway2.weex.tech",
+        "endpoint": "/v1/assets/transfer",
+        "credentialSource": "skills/weex-frontend-ops/.env.local or same-skill WEEX_FRONTEND_* runtime environment variables",
+        "payload": {
+          "amount": 1000,
+          "fromAccountType": 10,
+          "toAccountType": 8,
+          "transferCoinId": "2"
+        },
+        "confirmFlag": "--confirm-transfer is required for real transfer"
+      },
+      "requiresConfirmation": true,
+      "successAssertions": [
+        "loginTool login returns an accessToken without printing it",
+        "transfer response HTTP status is 2xx",
+        "transfer response business code is 00000"
       ],
       "status": "candidate",
       "lastVerifiedAt": "2026-05-08"

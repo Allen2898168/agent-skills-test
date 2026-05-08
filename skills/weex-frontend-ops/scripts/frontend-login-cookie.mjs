@@ -23,7 +23,7 @@ function printHelp() {
   console.log(`Usage: node scripts/frontend-login-cookie.mjs [--dry-run] [--visible] [--screenshot]
        node scripts/frontend-login-cookie.mjs --account DEFAULT --target-url https://stg-www.weex.tech/zh-CN/login
 
-Reads runtime config from skills/weex-frontend-ops/.env.local or WEEX_FRONTEND_* environment variables.`);
+Reads runtime config from skills/weex-frontend-ops/.env.local or same-skill WEEX_FRONTEND_* environment variables.`);
 }
 
 loadFrontendEnv();

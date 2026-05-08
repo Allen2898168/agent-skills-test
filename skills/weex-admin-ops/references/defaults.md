@@ -47,7 +47,7 @@ These can be suggested, but still mention them before execution when creating or
 - Use optional `web-access` CDP only when Chrome remote debugging is available and the operation benefits from reusing the user's existing Chrome login state or live browser context.
 - If CDP is unavailable, continue with bundled Playwright scripts; `web-access` is not a hard dependency for this skill.
 - Bundled prize creation script: `scripts/create-prizes.mjs`.
-- Do not pass secrets as command-line arguments. Use `WEEX_ADMIN_PASSWORD` and `WEEX_ADMIN_GOOGLE_CODE`.
+- Do not pass secrets as command-line arguments. Use `WEEX_ADMIN_PASSWORD` and `WEEX_ADMIN_GOOGLE_CODE` from `skills/weex-admin-ops/.env.local` or same-skill current process environment variables.
 
 ## Cached Action Defaults
 
@@ -69,12 +69,13 @@ These can be suggested, but still mention them before execution when creating or
 
 ## Credential Defaults
 
-- At the start of a new project task that may require login or admin page operation, check whether `WEEX_ADMIN_USERNAME`, `WEEX_ADMIN_PASSWORD`, and `WEEX_ADMIN_GOOGLE_CODE` are present without printing their values.
+- At the start of a new project task that may require login or admin page operation, check whether `WEEX_ADMIN_USERNAME`, `WEEX_ADMIN_PASSWORD`, and `WEEX_ADMIN_GOOGLE_CODE` are present in `skills/weex-admin-ops/.env.local` or same-skill current process environment variables without printing their values.
 - If `WEEX_ADMIN_USERNAME` is unavailable and the target is staging, use the staging default username `auto` and state that default explicitly.
 - Do not store the default password or Google code in the skill.
 - Read the password from `WEEX_ADMIN_PASSWORD`; it is required before login.
 - Read the Google code from `WEEX_ADMIN_GOOGLE_CODE`; it is required before login.
 - If either `WEEX_ADMIN_PASSWORD` or `WEEX_ADMIN_GOOGLE_CODE` is unavailable, stop before login or state-changing admin operation and ask the user to set the missing environment variable.
+- Do not read activity admin credentials from root `.env.local`, other skill directories, `WEEX_FIN_*`, `WEEX_FRONTEND_*`, or legacy fallback variables.
 
 ## Activity Defaults
 

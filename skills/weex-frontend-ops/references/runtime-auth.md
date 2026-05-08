@@ -7,7 +7,8 @@ This file defines how WEEX frontend credentials are supplied at runtime.
 - For frontend login or login-required operations, run `scripts/check-auth-config.mjs` first.
 - Local runtime config should live in `skills/weex-frontend-ops/.env.local`.
 - The committed `skills/weex-frontend-ops/.env.example` is only a placeholder template.
-- Do not write real passwords, tokens, cookies, TOTP secrets, sessions, or private user data to references, docs, cache files, screenshots summaries, or handoff records.
+- Do not read frontend credentials or runtime config from root `.env.local`, other skill directories, `P2P_*`, generic `WEEX_*`, `WEEX_ADMIN_*`, or `WEEX_FIN_*` fallback variables.
+- Do not write real passwords, tokens, cookies, TOTP secrets, sessions, or private user data to references, docs, cache files, screenshots summaries, or handoff records. Staging/test account emails and UIDs can be printed and recorded in full; production or unspecified-environment identifiers must still be redacted or avoided.
 - If multiple frontend accounts are configured and the operation needs login, ask the tester which account alias to use before operating.
 
 ## Environment Variables
@@ -16,6 +17,8 @@ This file defines how WEEX frontend credentials are supplied at runtime.
 - `WEEX_FRONTEND_URL`: frontend login entry URL.
 - `WEEX_FRONTEND_ACCOUNT_URL`: account overview URL used to verify login state.
 - `WEEX_FRONTEND_LOGIN_TOOL_DIR`: local checkout of loginTool containing `lib/weex-login.mjs` and `lib/weex-auth-cookie.mjs`.
+- `WEEX_FRONTEND_LOGIN_GATEWAY_BASE_URL`: optional login API base, defaults to `https://stg-gateway.weex.tech`.
+- `WEEX_FRONTEND_ASSET_GATEWAY_BASE_URL`: optional asset API base, defaults to `https://stg-gateway2.weex.tech`.
 - `WEEX_FRONTEND_COMMON_PASSWORD`: common password used when an account has no dedicated password.
 - `WEEX_FRONTEND_DEFAULT_ACCOUNT`: default account alias, for example `DEFAULT`.
 - `WEEX_FRONTEND_ACCOUNTS`: comma-separated account aliases, for example `DEFAULT,BUYER,SELLER`.
@@ -47,3 +50,15 @@ Last verified: 2026-05-08
 - Login form text is absent.
 - `账号总览`, `账户安全`, or `/account` URL is visible after cookie injection.
 - Failed network responses are summarized without tokens or private data.
+
+## Login-Required API Calls
+
+Status: candidate
+Last verified: 2026-05-08
+
+- Script: `scripts/frontend-assets-transfer.mjs`.
+- Cache action: `frontend_assets_transfer`.
+- Use the same frontend account resolution rules as cookie login.
+- The script logs in through loginTool, keeps the access token in memory, and sends authenticated JSON with `U-Token`.
+- Do not print access tokens, cookies, password values, signatures, or session data.
+- Asset transfer is a state-changing financial operation. Always run dry-run first and require `--confirm-transfer` for the real request.

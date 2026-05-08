@@ -6,6 +6,18 @@
 
 - 暂无待补充失败。
 
+## 新注册账号直接划转合约余额不足
+
+- 日期：2026-05-08
+- 页面/流程：前端登录态接口 `POST https://stg-gateway2.weex.tech/v1/assets/transfer`
+- 环境/viewport：STG，API-only，无页面 viewport
+- 失败表现：新注册 STG 前端账号登录后执行 `amount=1000`、`fromAccountType=10`、`toAccountType=8`、`transferCoinId=2` 的划转，HTTP 200 但业务返回 `code=70008`、`msg=超出可划转的最大金额`。
+- 失败原因：新注册账号现货账户没有足够可划转 USDT；前端划转接口只负责账户间划转，不会自动充值或发放资产。
+- 解决方式：执行划转前必须先确保源账户类型 `10` 有足够余额；如需给 STG 测试账号充值，必须按 FIN Admin 流程另行确认并执行充值/发放，再回到前端划转接口重试。
+- 验证结果：注册成功且账号页登录态验证通过；划转接口鉴权成功但因余额不足被业务拒绝。
+- 关联流程或脚本：`scripts/frontend-register-api.mjs`、`scripts/frontend-assets-transfer.mjs`、缓存动作 `frontend_register_api`、`frontend_assets_transfer`
+- 后续处理状态：已补充到前端认证/资产划转流程限制；后续“注册新账号并转进合约”的目标态请求由 FIN 侧 `register_recharge_transfer_contract` 复合链路处理：先注册、再 FIN 现货充值、最后调用前端划转，并以前端划转业务响应验证最终结果。
+
 ## 注册页浏览器验证码不适合自动滑块处理
 
 - 日期：2026-05-08
@@ -41,3 +53,63 @@
 - 验证结果：缺少账号配置时 dry-run 正常输出 `missingConfig`；提供一次性占位账号密码时 dry-run 输出计划且不加载浏览器。
 - 关联流程或脚本：`scripts/frontend-login-cookie.mjs`、`scripts/run-cached-action.mjs`
 - 后续处理状态：已吸收到登录脚本固定路径；后续新增脚本应避免在 dry-run 顶层加载 Playwright 或其他重依赖。
+
+## FIN 发放后前端划转合约仍无可划转余额
+
+- 日期：2026-05-08
+- 页面/流程：组合动作 `register_recharge_transfer_contract` 的前端划转阶段。
+- 环境/viewport：STG，API-only，无页面 viewport。
+- 失败表现：首个新账号 `codexapi17782672126781@weex.com` / UID `4845048042` 完成 FIN 500 USDT 发放订单后，前端划转 `fromAccountType=10 -> toAccountType=8` 先返回 `20105 Operation failed. Try again.`，稍后重试返回 `70008 超出可划转的最大金额`；改用 `fromAccountType=11` 仍返回 `70008`。
+- 失败原因：FIN `空投奖励(产品化活动)` 成功订单不等价于前端资产划转接口可用的现货/资金可划转余额；该组合脚本把“FIN 发放到现货 -> 前端划转到合约”当作固定路径是不完整假设。
+- 解决方式：不要把 FIN 发放成功单独视为合约到账；后续合约账户到账请求必须进入 `register_recharge_transfer_contract` 复合链路，并逐账号检查前端划转业务响应。
+- 验证结果：FIN 资产总览显示首个 UID 有 `showBAssets=500.00000000`，但前端划转源账户类型 `10`、`11` 均不可划转到合约。
+- 关联流程或脚本：`skills/weex-fin-admin-ops/scripts/register-recharge-transfer-contract.mjs`、`scripts/frontend-assets-transfer.mjs`。
+- 后续处理状态：已修正组合 playbook、FIN action cache 和前端划转说明；复合链路可执行但仍为 candidate，真实跑通前不得标记为 verified。
+
+## 合约充值复合链路前端划转返回 20105
+
+- 日期：2026-05-08
+- 页面/流程：组合动作 `register_recharge_transfer_contract` 的前端划转阶段。
+- 环境/viewport：STG，API-only，无页面 viewport。
+- 失败表现：账号 `codexapi17782688267245@weex.com` / UID `9010673441` 在 FIN 110 USDT 发放成功后调用 `POST https://stg-gateway2.weex.tech/v1/assets/transfer`，payload `{amount:110, fromAccountType:10, toAccountType:8, transferCoinId:"2"}`，HTTP 200 但业务返回 `code=20105`、`msg=Operation failed. Try again.`。
+- 失败原因：前端划转接口业务侧拒绝；仅从该响应无法确认是余额延迟、源账户不可划转、风控或账户状态问题。
+- 解决方式：组合脚本已改为保留每个账号的划转响应；后续应优先对失败账号做余额/账户类型回查或稍后重试划转，不要重复创建新批次。
+- 验证结果：本次未完成合约到账验证；FIN 登录态读取误判已在 FIN skill 中修复。
+- 关联流程或脚本：`skills/weex-fin-admin-ops/scripts/register-recharge-transfer-contract.mjs`、`scripts/frontend-assets-transfer.mjs`。
+- 后续处理状态：待补充余额回查断言和 `20105` 的稳定处理方式。
+
+## 批量合约充值部分账号划转成功、部分账号余额不足
+
+- 日期：2026-05-08
+- 页面/流程：组合动作 `register_recharge_transfer_contract` 的前端划转阶段。
+- 环境/viewport：STG，API-only，无页面 viewport。
+- 失败表现：执行“创建10个账号 合约账户充110u”时，10 个账号均注册成功且 FIN 110 USDT 发放审核通过；前端划转阶段 8 个账号返回 `code=00000`，2 个账号先返回 `20105 Operation failed. Try again.`，重试后返回 `70008 超出可划转的最大金额`。失败账号为 `codexapi17782696618992@weex.com` / UID `4714521632`、`codexapi17782697455438@weex.com` / UID `2329983569`。
+- 失败原因：同一批 FIN 发放审核成功后，部分账号前端可划转余额未立即可用或业务侧未开放该源账户余额；单看 FIN 订单成功不能证明合约到账。
+- 解决方式：组合链路保持逐账号输出 transfer 响应；失败账号只重试划转，不重复创建账号或重复充值。最终成功标准仍是前端划转业务码 `00000`。
+- 验证结果：8/10 个账号划转合约成功；2/10 个账号未完成合约到账验证。
+- 关联流程或脚本：`skills/weex-fin-admin-ops/scripts/register-recharge-transfer-contract.mjs`、`scripts/frontend-assets-transfer.mjs`。
+- 后续处理状态：需补充前端余额/可划转余额回查接口；在回查能力可用前，批量合约充值结果必须逐账号报告，不能只按 FIN 订单判断成功。
+
+## 批量合约充值重试后仍有账号余额不足
+
+- 日期：2026-05-08
+- 页面/流程：组合动作 `register_recharge_transfer_contract` 的前端划转阶段。
+- 环境/viewport：STG，API-only，无页面 viewport。
+- 失败表现：执行“创建20个账号 合约划进去213u”时，20 个账号均注册成功且 FIN 213 USDT 发放审核通过；前端划转初次 17 个账号返回 `00000 success`，3 个账号失败。单独重试后 `codexapi17782702259001@weex.com` / UID `1760722353` 成功，`codexapi17782702560173@weex.com` / UID `8809513388`、`codexapi17782703026366@weex.com` / UID `9372870551` 返回 `70008 超出可划转的最大金额`。
+- 失败原因：FIN 发放审核成功后，部分账号前端源账户类型 `10` 的可划转余额仍不足或未及时可用；初次失败中也可能出现登录校验短暂 `20105`。
+- 解决方式：保持只重试失败账号的前端划转，不重复创建账号或重复 FIN 发放；最终成功仍以前端划转业务码 `00000` 为准。
+- 验证结果：最终 18/20 个账号划转合约成功；2/20 个账号未完成合约到账验证。
+- 关联流程或脚本：`skills/weex-fin-admin-ops/scripts/register-recharge-transfer-contract.mjs`、`scripts/frontend-assets-transfer.mjs`。
+- 后续处理状态：仍需补充余额或可划转余额回查接口；补充前继续逐账号报告成功/失败，不按 FIN 订单成功推断合约到账。
+
+## 批量前端注册高并发部分 20105
+
+- 日期：2026-05-08
+- 页面/流程：STG 前端注册 API 批量创建账号，邀请码 `8mja`。
+- 环境/viewport：STG，API-only，无页面 viewport。
+- 失败表现：一次并发 100 个账号注册时，65 个成功，35 个在 `/v1/user/register/submit` 返回 `code=20105`、`msg=Operation failed. Try again.`。
+- 失败原因：高并发注册提交存在后端短暂业务失败；失败账号未返回 UID，视为未创建成功。
+- 解决方式：不重试同一邮箱，重新生成 35 个新邮箱并发补建；补建 35 个全部成功。
+- 验证结果：最终累计创建 100 个 STG 测试账号成功；邀请码均使用 `8mja`。密码、token、cookie 未输出或记录。
+- 关联流程或脚本：`scripts/frontend-register-api.mjs`，本次使用同注册 API 链路的临时批量 runner。
+- 后续处理状态：适合沉淀批量注册脚本和动作缓存；沉淀时应支持默认并发等于账号数、最大 100，并在 `20105` 时自动补建缺口账号。

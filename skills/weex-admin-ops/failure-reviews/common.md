@@ -1,11 +1,11 @@
 # 通用失败复盘
 
-## 2026-05-07 一次性脚本未加载仓库 `.env.local`
+## 2026-05-07 一次性脚本未加载 skill-local `.env.local`
 - 业务线：通用脚本运行。
 - 场景：可见浏览器模式探测 `活动列表 / 转盘抽奖` 时，在 inline Node 脚本中调用 `pathsFrom('./skills/weex-admin-ops/scripts/lib/runtime.mjs')` 后再执行登录配置检查。
 - 失败表现：脚本未进入浏览器，抛出 `WEEX_ADMIN_PASSWORD is required`。
-- 失败原因：inline 脚本传入相对路径时，`pathsFrom()` 以当前执行上下文推导出的根目录不等于仓库根目录，导致 `loadLocalEnv()` 没有读取到仓库 `.env.local`。
-- 解决方式：一次性脚本中改用 `process.cwd()` 作为仓库根目录显式调用 `loadLocalEnv(repoRoot)` 和 `adminConfig(repoRoot)`。
+- 失败原因：inline 脚本传入相对路径时，`pathsFrom()` 以当前执行上下文推导出的根目录不等于项目根或 skill 根，导致 `loadLocalEnv()` 没有读取到 `skills/weex-admin-ops/.env.local`。
+- 解决方式：一次性脚本中改用 `process.cwd()` 作为项目根显式调用 `loadLocalEnv(repoRoot)` 和 `adminConfig(repoRoot)`；当前规范要求活动后台本机密钥只放在 `skills/weex-admin-ops/.env.local`。
 - 验证结果：重跑后成功登录 staging，进入 `/activity/prize`，再通过左侧菜单进入 `/activities/lottery`。
 - 关联文件：`scripts/lib/runtime.mjs`。
 - 后续处理：inline 探测脚本优先使用当前工作目录加载本机环境；可复用脚本仍使用 `import.meta.url` 推导根目录。

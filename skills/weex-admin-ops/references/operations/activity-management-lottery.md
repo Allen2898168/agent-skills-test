@@ -156,7 +156,7 @@ Non-visible/headless checks on 2026-05-07:
 
 ## Known Failure Avoidance
 
-- Load `.env.local` from `process.cwd()` or the resolved repo root; relative `pathsFrom('./...')` can miss local login variables in inline scripts.
+- Load `skills/weex-admin-ops/.env.local` through `loadLocalEnv(process.cwd())` or a resolved skill root; relative `pathsFrom('./...')` can miss local login variables in inline scripts.
 - Treat DOM nodes as nodes, not strings, when extracting labels or options.
 - Do not fill all prize table inputs by index; the first column is the locked prize-pool ID.
 - Do not fill the disabled `有效期（天）` prize column; current verified rows start editable data at `奖金金额(USDT)`.

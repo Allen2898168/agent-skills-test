@@ -1,0 +1,4 @@
+interface:
+  display_name: "WEEX FIN Admin Ops"
+  short_description: "Operate WEEX FIN Admin finance workflows."
+  default_prompt: "Use this skill for WEEX FIN Admin finance backend operations, including CDP login-state reuse, dry-run planning, reward grant creation, and approval verification."
