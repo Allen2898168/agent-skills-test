@@ -99,3 +99,15 @@
 - 验证结果：注册成功 20 个账号，FIN 审核通过 20 笔订单，合约划转成功 18 个账号，失败 2 个账号。
 - 关联流程或脚本：`scripts/register-recharge-transfer-contract.mjs`、`scripts/batch-register-recharge.mjs`、前端 `frontend-assets-transfer.mjs`。
 - 后续处理：需要补充余额或可划转余额回查接口，作为 `register_recharge_transfer_contract` 的失败账号诊断步骤；补充前不得将该复合链路标记为 verified。
+
+## 2026-05-11 FIN 登录恢复后基础接口仍提示非法 Token
+- 业务线：FIN Admin 基础登录态验证。
+- 场景：执行“创建20个账号 合约划进去213u”前，先运行 `fin-auth-check.mjs` 检查持久 CDP/profile 登录态。
+- 失败表现：首次基础检查返回 `loginRequired=true`，基础接口提示 `非法Token,请登录`；随后执行 `fin-auth-check.mjs --wait-for-close` 进入登录恢复，但复验返回 `fetch failed`，再次基础检查仍提示 `非法Token,请登录`。未执行 dry-run、未创建账号、未创建或审核 FIN 订单、未发起前端划转。
+- 失败原因：当前 FIN 持久登录态不可用，登录恢复未成功写回可通过基础只读接口验证的有效 token；`fetch failed` 可能来自登录恢复期间 CDP/网络短暂不可用。
+- 解决方式：按固定流程要求用户重新打开登录恢复页，完成 FIN 登录后关闭 FIN 页面，再重新运行基础检查；基础检查通过前不得执行缓存 dry-run 或真实写操作。
+- 验证结果：本次未通过基础验证，任务阻塞在 FIN 登录态准备阶段。
+- 关联流程或脚本：`scripts/fin-auth-check.mjs`、`scripts/register-recharge-transfer-contract.mjs`。
+- 后续处理：用户确认重新尝试后，先运行 `fin-auth-check.mjs --wait-for-close`，由该流程主动打开持久 CDP Chrome 并等待用户登录后关闭 FIN 页面；不得改为手动打开普通 Chrome。若复验通过，再执行 `register_recharge_transfer_contract` dry-run 和真实复合链路。
+- 追加记录：同日多次执行“创建20个账号 合约划进去213u”时，前端配置和 FIN/前端 `.env.local` 必需项存在；FIN 基础检查仍返回 `非法Token,请登录`，登录恢复后仍返回 `fetch failed`，二次基础检查仍为非法 Token。未执行 dry-run、未创建账号、未发放或划转。
+- 追加修复：确认根因之一是 `fin-auth-check.mjs --wait-for-close` 进入登录恢复后没有显式校验 FIN 页面是否真的打开；若 `readFinAuth` 先读到 profile 中的旧 token，可能直接复验失败而没有产生可见 FIN 页面。已新增 `openVisibleFinLoginPage`，恢复流程现在会强制打开可见 FIN 页面并验证 CDP target 包含 `stg-admin-web-fin.weex.tech`，否则直接报错，不再进入假等待。

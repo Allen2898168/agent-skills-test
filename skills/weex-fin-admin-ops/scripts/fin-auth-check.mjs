@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { defaultCdpUrl, readFinAuth, postFin, assertBusinessOk, DEFAULT_BIZ_TYPE, closeCdpBrowser } from "./business/finance-airdrop-reward/api.mjs";
+import { defaultCdpUrl, readFinAuth, postFin, assertBusinessOk, DEFAULT_BIZ_TYPE, closeCdpBrowser, openVisibleFinLoginPage } from "./business/finance-airdrop-reward/api.mjs";
 import { loadFinEnv } from "./lib/env.mjs";
 
 const FIN_HOST_MARKER = "stg-admin-web-fin.weex.tech";
@@ -68,11 +68,15 @@ async function main() {
     await closeCdpBrowser(cdpUrl).catch(() => false);
     process.env.WEEX_FIN_CDP_HEADLESS = "false";
     process.env.WEEX_FIN_ALLOW_OPEN_TARGET = "true";
-    try {
-      await checkFinBase(cdpUrl, process.env);
-    } catch {
-      // The visible FIN page is open now. The user closes it when login handling is done.
-    }
+    const loginPage = await openVisibleFinLoginPage(cdpUrl, process.env);
+    console.log(JSON.stringify({
+      ok: false,
+      loginRequired: true,
+      recoveryPageOpened: true,
+      cdpUrl,
+      pageUrl: loginPage.url,
+      message: "FIN Admin CDP Chrome page is open. Log in, then close the FIN page to continue.",
+    }, null, 2));
   }
 
   await waitForFinPageClose(cdpUrl, args.timeoutMs);

@@ -36,9 +36,11 @@
 - After the user logs in once in the persistent CDP Chrome, later scripts must not reopen the FIN page just to read localStorage; they should read the persistent profile files directly.
 - If FIN session storage expires or the user logs out, the script opens the FIN page but stops with a login-required error.
 - If the base check fails, open the FIN page and ask the user to log in. Keep waiting until the user closes the FIN page; do not stop on a default timeout. Closing the FIN page means user-side handling is complete; re-run the base check after close.
+- The login recovery script must verify that a FIN Admin CDP page target was actually opened before waiting for the user. If no target for `stg-admin-web-fin.weex.tech` appears, stop with an explicit recovery-open failure instead of silently waiting.
 - The visible FIN page is only for invalid or missing login state. After the user closes that login page, all re-checks and business operations must switch back to headless CDP/API mode; do not open another visible FIN tab for normal verification or writes.
 - If the re-check still fails, ask whether the user wants to retry. If not, ask whether to continue with any non-FIN work in the current task.
 - If the re-check succeeds after close, continue silently in non-visible/headless CDP/API-assisted mode.
+- Operator recovery rule: when FIN token/session is invalid, proactively run the CDP recovery flow and let it open the persistent CDP Chrome, confirm the FIN target opened, then wait for the user to log in and close the FIN page. Do not manually open a normal Chrome window or bypass the CDP profile; the login must land in the persistent CDP profile used by FIN scripts.
 
 ## Base Check Commands
 

@@ -19,7 +19,7 @@ This flow is financial/reward-affecting. Actual creation and approval require co
 - Cache action: `finance_airdrop_reward_grant`
 - Batch cache action: `batch_register_recharge`
 - Contract funding cache action: `register_recharge_transfer_contract` (compound chain: frontend registration -> FIN spot recharge -> frontend spot-to-contract transfer)
-- Auth source: persistent Chrome profile Local Storage and optional existing CDP FIN tab. After the user logs in and closes the FIN tab, scripts must not reopen a FIN tab/target when profile auth is readable and the FIN API check passes. If the session is invalid or token is missing, the login recovery script opens the visible FIN page, waits until the user closes it, then continues API-assisted execution through profile auth. Visible FIN pages are only for login recovery.
+- Auth source: persistent Chrome profile Local Storage and optional existing CDP FIN tab. After the user logs in and closes the FIN tab, scripts must not reopen a FIN tab/target when profile auth is readable and the FIN API check passes. If the session is invalid or token is missing, the login recovery script opens the visible FIN page, verifies a FIN CDP target actually exists, waits until the user closes it, then continues API-assisted execution through profile auth. Visible FIN pages are only for login recovery.
 - Google code source: `WEEX_FIN_GOOGLE_CODE` from `skills/weex-fin-admin-ops/.env.local` or same-skill current process environment variables; do not pass it as a CLI argument or fallback to other skill variables.
 
 ## Defaults From The Verified Page

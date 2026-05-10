@@ -6,14 +6,15 @@ The FIN Admin action cache is the first execution layer for FIN workflows that h
 
 1. Before any cached FIN action, run `scripts/fin-auth-check.mjs` to verify persistent CDP login state and the basic FIN interface.
 2. If no FIN tab exists but the persistent profile has a valid login state, scripts must read auth from the Chrome profile Local Storage files and must not open a new FIN tab/target.
-3. If the base check fails, open the persistent CDP FIN page visibly only in the explicit login recovery flow, wait indefinitely for the user to log in and close the page, then re-run the base check through profile auth.
+3. If the base check fails, open the persistent CDP FIN page visibly only in the explicit login recovery flow, verify that a FIN page target actually exists in CDP, wait indefinitely for the user to log in and close the page, then re-run the base check through profile auth.
 4. If the re-check succeeds, continue silently with non-visible/API execution. Do not open visible or headless FIN tabs unless login state is invalid and the recovery flow explicitly allows it.
-5. Before manual FIN browser exploration, check `scripts/action-cache.json`.
-6. If the user request matches a cached FIN action and required parameters are available, run `scripts/run-cached-action.mjs --dry-run`.
-7. For financial writes, require explicit confirmation flags in the target script. If the user already clearly requested recharge/grant execution and all high-risk values are available, pass those flags without asking for a second confirmation.
-8. Approval requires runtime Google code from environment variables only.
-9. Verify business response and result lookup; do not treat HTTP 200 alone as success.
-10. If the cached script fails, preserve the failure output, inspect via CDP or browser as needed, update failure reviews, and update the cache if the fix is reusable.
+5. Operators must not replace this with a manual normal Chrome launch. Token recovery must use the persistent CDP Chrome/profile so the refreshed token is readable by FIN scripts. If the recovery flow reports that no FIN target opened, fix the CDP launch/open path before continuing.
+6. Before manual FIN browser exploration, check `scripts/action-cache.json`.
+7. If the user request matches a cached FIN action and required parameters are available, run `scripts/run-cached-action.mjs --dry-run`.
+8. For financial writes, require explicit confirmation flags in the target script. If the user already clearly requested recharge/grant execution and all high-risk values are available, pass those flags without asking for a second confirmation.
+9. Approval requires runtime Google code from environment variables only.
+10. Verify business response and result lookup; do not treat HTTP 200 alone as success.
+11. If the cached script fails, preserve the failure output, inspect via CDP or browser as needed, update failure reviews, and update the cache if the fix is reusable.
 
 ## Cached Actions
 

@@ -32,6 +32,33 @@ function defaultUserDataDir(env) {
   return env.WEEX_FIN_CDP_USER_DATA_DIR || path.join(os.homedir(), ".codex", "browser-profiles", "weex-fin-admin");
 }
 
+function processExists(pid) {
+  if (!Number.isInteger(pid) || pid <= 0) return false;
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function removeStaleChromeSingletons(userDataDir) {
+  const lockPath = path.join(userDataDir, "SingletonLock");
+  let lockTarget = "";
+  try {
+    lockTarget = fs.readlinkSync(lockPath);
+  } catch {
+    return;
+  }
+  const pid = Number(String(lockTarget).match(/-(\d+)$/)?.[1] || "");
+  if (processExists(pid)) return;
+  for (const name of ["SingletonLock", "SingletonSocket", "SingletonCookie"]) {
+    try {
+      fs.rmSync(path.join(userDataDir, name), { force: true });
+    } catch {}
+  }
+}
+
 function cdpPort(cdpUrl) {
   const parsed = new URL(cdpUrl);
   return parsed.port || (parsed.protocol === "https:" ? "443" : "80");
@@ -92,19 +119,26 @@ async function isCdpAvailable(cdpUrl) {
 function launchChromeForCdp(cdpUrl, env) {
   const executable = env.WEEX_FIN_CHROME_EXECUTABLE || DEFAULT_CHROME_EXECUTABLE;
   const userDataDir = defaultUserDataDir(env);
-  const args = [
+  removeStaleChromeSingletons(userDataDir);
+  const chromeArgs = [
     `--remote-debugging-port=${cdpPort(cdpUrl)}`,
     `--user-data-dir=${userDataDir}`,
     "--no-first-run",
     "--no-default-browser-check",
   ];
   if (env.WEEX_FIN_CDP_HEADLESS !== "false") {
-    args.push("--headless=new", "--disable-gpu");
+    chromeArgs.push("--headless=new", "--disable-gpu");
   } else {
-    args.push("--new-window");
+    chromeArgs.push("--new-window");
   }
-  args.push(defaultFinPageUrl(env));
-  const child = spawn(executable, args, {
+  chromeArgs.push(defaultFinPageUrl(env));
+  const command = process.platform === "darwin" && env.WEEX_FIN_CDP_HEADLESS === "false"
+    ? "open"
+    : executable;
+  const args = process.platform === "darwin" && env.WEEX_FIN_CDP_HEADLESS === "false"
+    ? ["-na", "Google Chrome", "--args", ...chromeArgs]
+    : chromeArgs;
+  const child = spawn(command, args, {
     detached: true,
     stdio: "ignore",
   });
@@ -159,6 +193,49 @@ export async function closeCdpBrowser(cdpUrl) {
 async function openFinTarget(cdpUrl, env) {
   const url = encodeURIComponent(defaultFinPageUrl(env));
   return jsonPut(`${cdpBase(cdpUrl)}/json/new?${url}`);
+}
+
+export async function openVisibleFinLoginPage(cdpUrl, env = process.env, timeoutMs = 20000) {
+  env.WEEX_FIN_CDP_HEADLESS = "false";
+  env.WEEX_FIN_ALLOW_OPEN_TARGET = "true";
+  if (await isCdpAvailable(cdpUrl)) {
+    const version = await jsonGet(`${cdpBase(cdpUrl)}/json/version`).catch(() => null);
+    if (String(version?.["User-Agent"] || "").includes("HeadlessChrome")) {
+      await closeCdpBrowser(cdpUrl).catch(() => false);
+    }
+  }
+
+  const launched = await ensureCdpAvailable(cdpUrl, env);
+  let openedTarget = null;
+  if (!launched) {
+    openedTarget = await openFinTarget(cdpUrl, env);
+  }
+
+  const deadline = Date.now() + timeoutMs;
+  let targets = [];
+  while (Date.now() < deadline) {
+    targets = await jsonGet(`${cdpBase(cdpUrl)}/json/list`);
+    const target = targets.find(item =>
+      item.type === "page"
+      && item.url?.includes(FIN_HOST_MARKER)
+      && (!openedTarget?.id || item.id === openedTarget.id)
+    ) || targets.find(item => item.type === "page" && item.url?.includes(FIN_HOST_MARKER));
+    if (target?.webSocketDebuggerUrl) {
+      return {
+        targetId: target.id,
+        url: target.url,
+        title: target.title,
+        cdpUrl,
+      };
+    }
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
+
+  const pageUrls = targets
+    .filter(item => item.type === "page")
+    .map(item => item.url || "about:blank")
+    .slice(0, 5);
+  throw new Error(`FIN login recovery did not open a FIN Admin CDP page target. Observed page targets: ${pageUrls.join(", ") || "<none>"}`);
 }
 
 async function listPageTargets(cdpUrl, env) {

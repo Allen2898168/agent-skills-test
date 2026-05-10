@@ -6,7 +6,7 @@
 - 活动后台权威 skill：`skills/weex-admin-ops/`，目标环境默认 `https://stg-activity.weex.tech`。
 - FIN Admin 权威 skill：`skills/weex-fin-admin-ops/`，目标环境默认 `https://stg-admin-web-fin.weex.tech`。
 - 前端权威 skill：`skills/weex-frontend-ops/`，目标 URL 按用户输入或 `references/routes.md`。
-- 最近更新时间：2026-05-08。
+- 最近更新时间：2026-05-11。
 - 历史交接索引：`docs/session-handoffs/README.md`。
 
 ## 必读入口
@@ -84,6 +84,11 @@
 - 已按用户要求收紧 FIN 登录态与打开页面规则：用户登录并关闭 FIN tab 后，后续默认禁止自动打开任何 FIN tab/target；脚本先读已有 FIN tab，若没有 tab 则直接读 Chrome profile Local Storage 文件认证。只有显式登录恢复流程 `fin-auth-check.mjs --wait-for-close` 才允许临时打开可见 FIN 页面，用户关闭后继续回到无 tab/profile-auth 模式。
 - 本轮执行“给我100个账号 邀请码8mja”：使用 STG 前端注册 API 并发创建账号，邀请码 `8mja`。首轮并发 100 成功 65 个，35 个在 `register/submit` 返回 `20105 Operation failed. Try again.`；随后补建 35 个账号并发 35 全部成功，最终累计 100 个账号创建成功。未保存截图，未输出或记录密码、token、cookie。
 - 已按用户确认沉淀批量前端注册链路：新增 `skills/weex-frontend-ops/scripts/frontend-register-batch-api.mjs` 和缓存动作 `frontend_register_batch_api`，支持 `--count`、`--invite-code`、默认并发等于数量且最大 100、`20105` 等失败自动换新邮箱补建、可选 `--output-csv` 只写 `email,uid`。dry-run 和缓存入口验证通过。
+- 本轮处理“创建20个账号 合约划进去213u”：前端配置检查通过，但 FIN 基础认证失败，`fin-auth-check.mjs` 返回 `非法Token,请登录`；执行 `fin-auth-check.mjs --wait-for-close` 登录恢复后复验返回 `fetch failed`，再次检查仍为非法 token。未执行 dry-run、未创建账号、未发放或划转。已记录到 `skills/weex-fin-admin-ops/failure-reviews/common.md`；下一步需用户重新完成 FIN 登录恢复并关闭 FIN 页面。
+- 最近一次处理“创建20个账号 合约划进去213u”：已读取 FIN/前端 skill、动作缓存和失败复盘；前端配置存在，FIN `WEEX_FIN_GOOGLE_CODE` 存在，但 FIN 基础认证仍返回 `非法Token,请登录`。已按固定流程运行 `fin-auth-check.mjs --wait-for-close`，登录恢复后复验返回 `fetch failed`，再次基础检查仍为非法 token。未执行 dry-run、未创建账号、未发放或划转；需用户确认重新走 CDP 登录恢复。
+- 用户纠正：FIN token 失效时应主动走 CDP 登录恢复流程，由流程打开持久 CDP Chrome 并等待用户登录后关闭 FIN 页面；不得手动打开普通 Chrome 代替。已同步到 FIN environments/action-cache/failure 规则。
+- 已修复 FIN 登录恢复未确认页面真实打开的问题：`fin-auth-check.mjs --wait-for-close` 现在调用 `openVisibleFinLoginPage` 强制打开可见 FIN 页面，并确认 CDP target 中存在 `stg-admin-web-fin.weex.tech` 后才等待用户关闭；如果未打开，会明确报错。已沉淀到 FIN environments、action-cache、operation 和失败复盘，待新会话验证。
+- 本轮执行“创建20个账号 合约划进去213u”：先按固定流程运行 `fin-auth-check.mjs`，发现 FIN token 失效后通过 `fin-auth-check.mjs --wait-for-close` 打开持久 CDP FIN 页面，用户登录并关闭页面后复验通过；随后 `register_recharge_transfer_contract` dry-run 命中并真实执行。结果：创建 20 个 STG 前端账号，完成 20 笔 FIN 213 USDT 发放审核，并且 20 个账号前端现货到合约划转全部返回 `code=00000`。账号/UID：`codexapi17784529343741@weex.com/2274364336`、`codexapi17784529343742@weex.com/3034349930`、`codexapi17784529343743@weex.com/8481535451`、`codexapi17784529343744@weex.com/1356103661`、`codexapi17784529343745@weex.com/3226450694`、`codexapi17784529343746@weex.com/5751772418`、`codexapi17784529343747@weex.com/2212230060`、`codexapi17784529343748@weex.com/2916596261`、`codexapi17784529343749@weex.com/2862910151`、`codexapi177845293437410@weex.com/8185562207`、`codexapi177845293437411@weex.com/4390693143`、`codexapi177845293437412@weex.com/7395222735`、`codexapi177845293437413@weex.com/8748089581`、`codexapi177845293437414@weex.com/1896274634`、`codexapi177845293437415@weex.com/3068075682`、`codexapi177845293437416@weex.com/2930216037`、`codexapi177845293437417@weex.com/7334506313`、`codexapi177845293437418@weex.com/5832744337`、`codexapi177845293437419@weex.com/6700461939`、`codexapi177845293437420@weex.com/1656813076`。未保存截图；验证码、token、cookie 和密码不记录。
 - 近期后管转盘抽奖、报名模板、奖品管理、资产迁移和失败复盘历史已归档到 `docs/session-handoffs/`。
 
 ## 当前 Git 状态
