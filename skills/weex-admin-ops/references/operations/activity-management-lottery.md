@@ -1,7 +1,7 @@
 # Activity Management - Lottery Activity
 
 Status: candidate
-Last verified: 2026-05-07
+Last verified: 2026-05-11
 Verified mode: visible browser
 Environment: staging `https://stg-activity.weex.tech`
 
@@ -51,6 +51,20 @@ Fill required text and rich fields:
 - `活动标题`, `活动副标题`, `分享活动文案`, `代理分享文案`, `活动规则`, and `活动别名配置`.
 - Upload default image files for web/h5 header, web/h5 share images, social preview, and prize share images.
 - Activity start time must be earlier than end time.
+
+## Lottery Styles
+
+The `抽奖样式` config currently has five verified labels:
+
+- `圆形转盘`
+- `飞镖转盘`
+- `彩蛋`
+- `环形跑马灯`
+- `足球射门`
+
+The frontend style values observed from the STG frontend bundle are `CIRCLE`, `DART`, `EASTER_EGG`, `CIRCULAR_RECORD`, and `WORLD_CUP_KICK_BALL`.
+
+`彩蛋` adds an extra required prize-table dropdown `彩蛋类型`. Fill it for every prize row, for example cycling through `金蛋` / `银蛋` / `铜蛋`. If this field is left empty, `prizeConfigForm.submit()` returns `false` and the create request is not sent.
 
 ## Lottery Prize Configuration
 
@@ -135,6 +149,19 @@ Accept creation only when at least one durable assertion passes:
 - Search `/prod-api/activity/config/list` by alias and `type=LOTTERY` returns `total=1`.
 - The created row is visible in the list and remains `DRAFT`.
 
+For frontend display validation, draft creation is not enough. The activity must be online before opening `https://stg-www.weex.tech/zh-CN/events/draw/<alias>`.
+
+Recommended sequence for multiple frontend-display activities:
+
+1. Compute each activity's start/end time immediately before creation. Do not reuse one start time across a long batch when the activity will also be put online.
+2. Create one activity.
+3. If the created start time is already in the past, update it with `PUT /prod-api/activity/config` before going online.
+4. Use the list row action `上线`, fill the confirmation verification input, and require `POST /prod-api/activity/lottery/online` business `code=200`.
+5. Re-query the row and require status `ONLINE`. For a future start time, `stage=NOT_START` is acceptable.
+6. Only then open the frontend draw URL with an authenticated frontend account.
+
+Do not treat a reachable draft URL as frontend display success.
+
 ## Row Actions
 
 Visible-browser checks on 2026-05-07:
@@ -167,6 +194,8 @@ Non-visible/headless checks on 2026-05-07:
 - Edit pages use bottom button text `保存`, not `修改`; row-action scripts must click the real bottom `保存` button and require a `PUT /prod-api/activity/config` business `code=200`.
 - For `删除` and `上线`, the confirmation dialog requires filling the verification input before clicking `确定`; opening the dialog or clicking confirm without the code is not sufficient.
 - Do not mark lottery delete as passed unless `POST /prod-api/activity/lottery/delete` returns business `code=200` and alias search returns `total=0`.
+- Direct API calls to `/prod-api/activity/lottery/online` with guessed fields such as `googleCode` or `code` returned `google验证码不得为空` on 2026-05-11. Until the real payload key is proven, use the UI confirmation dialog for online operations.
+- When the user asks to create several frontend-display lottery activities, prefer create -> online -> frontend verify per activity. If batching is still used, refresh every activity's time immediately before online.
 
 ## Cache
 
@@ -180,6 +209,7 @@ Use:
 ```bash
 node skills/weex-admin-ops/scripts/run-cached-action.mjs --query "活动列表 转盘抽奖 新增草稿 浏览器模式" --dry-run
 node skills/weex-admin-ops/scripts/run-cached-action.mjs --query "活动列表 转盘抽奖 新增草稿 浏览器模式"
+node skills/weex-admin-ops/scripts/run-cached-action.mjs --action create_lottery_activity_draft --visible --style 彩蛋 --title-prefix 前端展示彩蛋 --alias-prefix frontend-draw-egg --start "2026-05-11 17:52:01" --end "2026-05-18 17:52:01"
 ```
 
-Actual writes require visible browser mode and are delegated to the strict UI workflow verified through action cache with activity ID `9015`. Non-visible writes are intentionally disabled until separately verified.
+Actual writes require visible browser mode and are delegated to the strict UI workflow. Non-visible writes are intentionally disabled until separately verified. The cache entry creates a draft only; online and frontend-display verification remain separate steps.

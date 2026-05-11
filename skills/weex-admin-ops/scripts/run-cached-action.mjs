@@ -50,11 +50,13 @@ Options:
   --alias-prefix <x>  Alias prefix for create_lottery_activity_draft dry-run plan
   --start <text>      Planned start time for create_lottery_activity_draft
   --end <text>        Planned end time for create_lottery_activity_draft
+  --style <text>      Lottery style for create_lottery_activity_draft
+  --no-preapply       Disable pre-apply for create_lottery_activity_draft
 `;
 }
 
 function parseCacheArgs() {
-  const parsed = parseFlags(process.argv.slice(2), { booleans: ["--list", "--visible", "--dry-run", "--country-first", "--confirm-delete"] });
+  const parsed = parseFlags(process.argv.slice(2), { booleans: ["--list", "--visible", "--dry-run", "--country-first", "--confirm-delete", "--no-preapply"] });
   const passthrough = {};
   for (const [key, value] of Object.entries(parsed)) {
     if (!["help", "list", "visible", "dryRun", "query", "action"].includes(key)) passthrough[key] = value;

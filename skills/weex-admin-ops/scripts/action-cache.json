@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-05-07",
+  "updatedAt": "2026-05-11",
   "actions": [
     {
       "id": "create_prizes",
@@ -133,13 +133,14 @@
       "id": "create_lottery_activity_draft",
       "status": "candidate",
       "script": "scripts/create-lottery-activity-draft.mjs",
-      "description": "Create a draft 活动列表 / 转盘抽奖 activity through the verified visible-browser UI workflow, or print the plan in dry-run mode.",
+      "description": "Create a draft 活动列表 / 转盘抽奖 activity through the verified visible-browser UI workflow, with configurable title prefix, alias prefix, activity time, pre-apply toggle, and lottery style.",
       "domains": ["活动列表", "转盘抽奖"],
       "intentKeywords": ["创建", "新增", "生成", "尝试", "走一下", "配置"],
       "objectKeywords": ["转盘抽奖", "活动列表", "草稿", "活动"],
+      "supportedStyles": ["圆形转盘", "飞镖转盘", "彩蛋", "环形跑马灯", "足球射门"],
       "defaultMode": "visible",
       "verifiedModes": ["visible_browser"],
-      "lastVerifiedAt": "2026-05-07",
+      "lastVerifiedAt": "2026-05-11",
       "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
       "fallback": "Use the documented visible browser workflow in references/operations/activity-management-lottery.md. Actual writes require --visible because only the UI browser path is verified."
     }

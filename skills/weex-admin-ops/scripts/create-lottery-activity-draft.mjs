@@ -19,6 +19,10 @@ Options:
   --alias-prefix <text>     activity alias prefix
   --start <text>            planned activity start time
   --end <text>              planned activity end time
+  --preapply-start <text>   planned pre-apply start time
+  --preapply-end <text>     planned pre-apply end time
+  --style <text>            lottery style label, e.g. 圆形转盘, 彩蛋
+  --no-preapply             select 不支持 for 是否支持预报名
   --dry-run                 print the verified creation plan without writing data
   --help                    show this message
 
@@ -30,7 +34,7 @@ Safety:
 }
 
 function parseArgs() {
-  const args = parseFlags(process.argv.slice(2), { booleans: ["--visible", "--dry-run"] });
+  const args = parseFlags(process.argv.slice(2), { booleans: ["--visible", "--dry-run", "--no-preapply"] });
   args.visible = Boolean(args.visible);
   args.dryRun = Boolean(args.dryRun);
   return args;
@@ -65,26 +69,30 @@ async function run() {
     }, process.stderr);
     return 1;
   }
-  if (args.titlePrefix || args.aliasPrefix || args.start || args.end) {
-    printJson({
-      ok: false,
-      dryRun: false,
-      error: "Custom title-prefix, alias-prefix, start, and end are currently supported only in --dry-run for create_lottery_activity_draft. The verified visible UI write path uses fixed staging-safe defaults.",
-      operationReference: "references/operations/activity-management-lottery.md",
-      plan,
-    }, process.stderr);
-    return 1;
-  }
   const strictUiScript = path.join(repoRoot, "skills/weex-admin-ops/scripts/strict-lottery-visible-attempt.mjs");
-  return runNodeScript(strictUiScript);
+  return runNodeScript(strictUiScript, buildStrictUiEnv(args));
 }
 
-function runNodeScript(script) {
+function buildStrictUiEnv(args) {
+  return {
+    ...process.env,
+    ...(args.titlePrefix ? { LOTTERY_TITLE_PREFIX: String(args.titlePrefix) } : {}),
+    ...(args.aliasPrefix ? { LOTTERY_ALIAS_PREFIX: String(args.aliasPrefix) } : {}),
+    ...(args.start ? { LOTTERY_START: String(args.start) } : {}),
+    ...(args.end ? { LOTTERY_END: String(args.end) } : {}),
+    ...(args.preapplyStart ? { LOTTERY_PREAPPLY_START: String(args.preapplyStart) } : {}),
+    ...(args.preapplyEnd ? { LOTTERY_PREAPPLY_END: String(args.preapplyEnd) } : {}),
+    ...(args.style ? { LOTTERY_STYLE: String(args.style) } : {}),
+    ...(args.noPreapply ? { LOTTERY_PREAPPLY: "0" } : {}),
+  };
+}
+
+function runNodeScript(script, env = process.env) {
   return new Promise(resolve => {
     const child = spawn(process.execPath, [script], {
       stdio: "inherit",
       cwd: repoRoot,
-      env: process.env,
+      env,
     });
     child.on("error", error => {
       printJson({ ok: false, error: error.message, script }, process.stderr);

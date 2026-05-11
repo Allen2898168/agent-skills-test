@@ -45,6 +45,7 @@ Last verified: 2026-05-08
 - The script uses the bundled loginTool API login capability, then injects `WEEX_TOKEN_COOKIE_STAGING` into the `stg-www.weex.tech` browser context.
 - The flow opens the login page first; if it still renders login form text, it navigates to `/zh-CN/account` to verify login state.
 - Do not write plaintext password, encrypted password, token response, cookie value, or session details to files or logs.
+- For login-required activity pages such as `/zh-CN/events/draw/<activity-alias>`, inject the cookie before navigation. Opening the page first and then logging in can leave the page in a guest or login-redirect state and is not a valid authenticated display check.
 
 ## Success Assertions
 

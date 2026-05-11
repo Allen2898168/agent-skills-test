@@ -6,6 +6,18 @@
 
 - 暂无待补充失败。
 
+## 活动页先访问后注入登录态导致验证不可靠
+
+- 日期：2026-05-11
+- 页面/流程：前端转盘抽奖活动页 `https://stg-www.weex.tech/zh-CN/events/draw/<活动别名>`
+- 环境/viewport：STG，desktop `1440x1000`
+- 失败表现：如果直接访问活动 URL 再处理登录态，页面可能停留在游客态、登录跳转态或非预期缓存状态；同时草稿活动 URL 即使可打开，也不能证明真实前端展示链路可用。
+- 失败原因：转盘抽奖前端页是登录相关活动页，验证目标是已登录用户看到已上线活动；认证 cookie 必须在首个页面请求前进入浏览器上下文。后台草稿状态不是前端可参与/展示目标态。
+- 解决方式：先通过前端 `loginTool` 生成并注入 `WEEX_TOKEN_COOKIE_STAGING`，再打开 draw URL；后台侧必须先把活动上线并回查状态 `ONLINE`。
+- 验证结果：账号 `codexapi1778492089526@weex.com` / UID `7901867346` 注入登录态后，5 个已上线转盘抽奖活动页面均命中活动标题，无登录表单，token cookie 存在，无失败响应。
+- 关联流程或脚本：`references/operations/draw.md`、`references/runtime-auth.md`、后台 `references/operations/activity-management-lottery.md`。
+- 后续处理状态：已吸收到前端 draw 页面 playbook；后续同类验证必须先注入登录态再导航。
+
 ## 新注册账号直接划转合约余额不足
 
 - 日期：2026-05-08

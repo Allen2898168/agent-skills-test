@@ -12,9 +12,17 @@ if (!fs.existsSync(config.imagePath)) throw new Error(`image missing: ${config.i
 
 const { chromium } = loadPlaywright();
 const stamp = timestamp();
-const title = `严格UI转盘抽奖草稿${stamp}`;
-const alias = `strict-ui-lottery-${stamp}`;
-const evidence = { uploads: 0 };
+const titlePrefix = process.env.LOTTERY_TITLE_PREFIX || "严格UI转盘抽奖草稿";
+const aliasPrefix = process.env.LOTTERY_ALIAS_PREFIX || "strict-ui-lottery";
+const title = `${titlePrefix}${stamp}`;
+const alias = `${aliasPrefix}-${stamp}`;
+const activityStartTime = process.env.LOTTERY_START || "2026-06-10 00:00:00";
+const activityEndTime = process.env.LOTTERY_END || "2026-06-30 23:59:59";
+const preApplyStartTime = process.env.LOTTERY_PREAPPLY_START || "2026-06-01 00:00:00";
+const preApplyEndTime = process.env.LOTTERY_PREAPPLY_END || "2026-06-09 23:59:59";
+const enablePreApply = process.env.LOTTERY_PREAPPLY !== "0";
+const lotteryStyle = process.env.LOTTERY_STYLE || "圆形转盘";
+const evidence = { uploads: 0, activityResponses: [] };
 const variedMode = process.env.LOTTERY_VARIANT === "varied";
 const weightConfigMode = process.env.LOTTERY_WEIGHT_CONFIG === "vip";
 const enableBeginnerTask = variedMode || process.env.LOTTERY_ENABLE_BEGINNER_TASK === "1";
@@ -34,8 +42,24 @@ const browser = await chromium.launch({
 });
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
 let authHeader = "";
-page.on("response", response => {
+page.on("response", async response => {
   if (response.url().includes("/prod-api/common/upload")) evidence.uploads += 1;
+  if (response.url().includes("/prod-api/activity/config") || response.url().includes("/prod-api/activity/lottery")) {
+    const entry = {
+      url: response.url().replace(/^https?:\/\/[^/]+/, ""),
+      method: response.request().method(),
+      status: response.status(),
+    };
+    if (response.request().method() === "POST" || response.request().method() === "PUT") {
+      try {
+        const body = await response.json();
+        entry.code = body?.code;
+        entry.msg = body?.msg;
+      } catch {}
+    }
+    evidence.activityResponses.push(entry);
+    if (evidence.activityResponses.length > 30) evidence.activityResponses.shift();
+  }
 });
 page.on("request", request => {
   if (request.url().includes("/prod-api/activity/config/list")) authHeader = request.headers().authorization || authHeader;
@@ -333,6 +357,29 @@ async function selectPrizeMark(rowIndex, text) {
   await clickOption(option);
 }
 
+async function selectEasterEggType(rowIndex, text) {
+  const box = await page.evaluate(index => {
+    const visible = element => !!element && element.getClientRects().length
+      && getComputedStyle(element).display !== "none"
+      && getComputedStyle(element).visibility !== "hidden";
+    const table = [...document.querySelectorAll(".el-table")]
+      .filter(visible)
+      .find(element => /奖品池ID|奖品名称/.test(element.innerText));
+    const row = [...(table?.querySelectorAll(".el-table__body-wrapper tbody tr") || [])].filter(visible)[index];
+    const input = row?.querySelector('input[placeholder="请选择彩蛋类型"]');
+    if (!input) return null;
+    input.scrollIntoView({ block: "center", inline: "center" });
+    const rect = input.getBoundingClientRect();
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+  }, rowIndex);
+  if (!box) throw new Error(`easter egg type select missing row ${rowIndex + 1}`);
+  await page.mouse.click(box.x, box.y);
+  await wait(250);
+  const option = await visibleOptionBox(text, 0);
+  if (!option) throw new Error(`easter egg type option missing: ${text}`);
+  await clickOption(option);
+}
+
 async function fillPrizeRows() {
   await scrollText("抽奖奖品配置");
   if (!(await prizeTableBox())) throw new Error("prize table missing");
@@ -347,6 +394,13 @@ async function fillPrizeRows() {
   for (let index = 0; index < 8; index += 1) {
     await fillPrizeCell(index, 7, prizeWeights[index]);
     await selectPrizeMark(index, marks[index]);
+  }
+  if (lotteryStyle === "彩蛋") {
+    await setPrizeScroll(1600);
+    const eggTypes = ["金蛋", "银蛋", "铜蛋", "金蛋", "银蛋", "铜蛋", "金蛋", "银蛋"];
+    for (let index = 0; index < 8; index += 1) {
+      await selectEasterEggType(index, eggTypes[index]);
+    }
   }
   await setPrizeScroll(0);
 }
@@ -557,6 +611,7 @@ async function fillFaq() {
     await wait(500);
     titleInput = page.locator("xpath=(//*[contains(normalize-space(.),'常见问题')]/following::input[contains(@placeholder,'标题')])[1]");
   }
+  if (!(await titleInput.isVisible({ timeout: 2500 }).catch(() => false))) return;
   await fillControl(titleInput, "FAQ title");
   const editor = page.locator("xpath=(//*[contains(normalize-space(.),'常见问题')]/following::*[contains(@class,'ql-editor')])[1]");
   await fillControl(editor, "FAQ content");
@@ -576,7 +631,7 @@ async function fillCalendar() {
 }
 
 try {
-  console.log(JSON.stringify({ step: "start", title, alias }));
+  console.log(JSON.stringify({ step: "start", title, alias, activityStartTime, activityEndTime, lotteryStyle }));
   await openLotteryViaMenu();
   await clickButton("新增");
   await page.waitForURL(/\/activities\/lottery\/add/, { timeout: 15000 });
@@ -590,20 +645,24 @@ try {
   await clickRadio("是否为平台活动", "否");
   await fillLabel("活动标题", title, 0);
   await fillLabel("活动副标题", "严格 UI 复杂配置副标题", 0);
-  await fillLabel("活动开始时间", "2026-06-10 00:00:00");
-  await fillLabel("活动结束时间", "2026-06-30 23:59:59");
+  await fillLabel("活动开始时间", activityStartTime);
+  await fillLabel("活动结束时间", activityEndTime);
   await selectLabel("用户报名模版", null, 0, 0);
   for (const label of ["WEB头图上传", "H5头图上传", "web分享图上传", "H5分享图片上传", "社媒活动预览图上传"]) await uploadLabel(label, 0);
   await fillLabel("分享活动文案", "严格 UI 分享活动文案", 0);
   await fillLabel("代理分享文案", "严格 UI 代理分享文案", 0);
   await fillRich("活动规则", "严格 UI 活动规则：完成转盘抽奖复杂配置验证。", 0);
   await fillLabel("活动别名配置", alias);
-  await ensurePreApplySupport();
-  await selectLabel("预报名模版", null, 0, 0);
-  await fillLabel("预报名开始时间", "2026-06-01 00:00:00");
-  await fillLabel("预报名结束时间", "2026-06-09 23:59:59");
+  if (enablePreApply) {
+    await ensurePreApplySupport();
+    await selectLabel("预报名模版", null, 0, 0);
+    await fillLabel("预报名开始时间", preApplyStartTime);
+    await fillLabel("预报名结束时间", preApplyEndTime);
+  } else {
+    await clickRadio("是否支持预报名", "不支持");
+  }
   await clickRadio("是否显示活动日历入口", "是");
-  await selectLabel("抽奖样式", "圆形转盘").catch(() => {});
+  await selectLabel("抽奖样式", lotteryStyle).catch(() => {});
 
   console.log(JSON.stringify({ step: "prizes" }));
   await fillPrizeRows();
@@ -631,6 +690,49 @@ try {
   await fillCalendar();
 
   console.log(JSON.stringify({ step: "submit" }));
+  const preSubmitDiagnostics = await page.evaluate(async () => {
+    const roots = [...document.querySelectorAll("*")]
+      .map(element => element.__vue__)
+      .filter(Boolean)
+      .filter(vue => vue.$refs && vue.$refs.baseForm && vue.$refs.styleForm);
+    const root = roots[0];
+    if (!root) return { found: false };
+    const refs = root.$refs;
+    const result = { found: true };
+    const summarize = value => {
+      if (value === false) return false;
+      if (value === true) return true;
+      if (Array.isArray(value)) return { type: "array", length: value.length };
+      if (value && typeof value === "object") return { type: "object", keys: Object.keys(value), size: Object.keys(value).length };
+      return value ?? null;
+    };
+    for (const [name, method] of [
+      ["baseForm", "submit"],
+      ["prizeConfigForm", "submit"],
+      ["prizeWeightForm", "submit"],
+      ["colorTagConfigForm", "submit"],
+      ["shareInfoForm", "submit"],
+      ["dailyLimitForm", "submit"],
+      ["prizeProbabilityForm", "submit"],
+      ["activityTaskForm", "submit"],
+      ["i18nConfigForm", "submit"],
+      ["faqForm", "submit"],
+      ["styleForm", "submit"],
+    ]) {
+      try {
+        result[name] = summarize(await refs[name]?.[method]?.());
+      } catch (error) {
+        result[name] = { error: error.message };
+      }
+    }
+    try {
+      await refs.activityCalendarConfig?.validate?.();
+      result.activityCalendarConfig = { validate: true, data: summarize(refs.activityCalendarConfig?.getData?.()) };
+    } catch (error) {
+      result.activityCalendarConfig = { validate: false, error: error.message };
+    }
+    return result;
+  }).catch(error => ({ error: error.message }));
   const createPromise = page.waitForResponse(response => (
     response.url().includes("/prod-api/activity/config") && response.request().method() === "POST"
   ), { timeout: 25000 }).catch(() => null);
@@ -688,13 +790,20 @@ try {
     ok: createBody?.code === 200 || verify?.total === 1,
     title,
     alias,
+    lotteryStyle,
+    activityTime: {
+      start: activityStartTime,
+      end: activityEndTime,
+    },
     finalUrl: page.url(),
     createStatus: createResponse?.status?.(),
     createBody,
     errors,
+    preSubmitDiagnostics,
     verifyTotal: verify?.total,
     verifyFirst: verify?.rows?.[0] || verify?.data?.[0],
     uploads: evidence.uploads,
+    activityResponses: evidence.activityResponses,
   }, null, 2));
   await wait(5000);
   if (!(createBody?.code === 200 || verify?.total === 1)) process.exitCode = 1;
@@ -710,7 +819,7 @@ try {
       .filter(Boolean);
     return { formErrors: formErrors.slice(0, 80), messages: messages.slice(0, 20) };
   }).catch(() => []);
-  console.error(JSON.stringify({ ok: false, error: error.message, url: page.url(), title, alias, errors, uploads: evidence.uploads }, null, 2));
+  console.error(JSON.stringify({ ok: false, error: error.message, url: page.url(), title, alias, errors, uploads: evidence.uploads, activityResponses: evidence.activityResponses }, null, 2));
   await wait(5000).catch(() => {});
   process.exitCode = 1;
 } finally {

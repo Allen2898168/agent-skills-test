@@ -31,6 +31,10 @@ function createLotteryActivityDraftCommand(match, args, skillRoot) {
   if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
   if (params.start) commandArgs.push("--start", String(params.start));
   if (params.end) commandArgs.push("--end", String(params.end));
+  if (params.preapplyStart) commandArgs.push("--preapply-start", String(params.preapplyStart));
+  if (params.preapplyEnd) commandArgs.push("--preapply-end", String(params.preapplyEnd));
+  if (params.style) commandArgs.push("--style", String(params.style));
+  if (params.noPreapply) commandArgs.push("--no-preapply");
   if (args.visible || params.visible) commandArgs.push("--visible");
   if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
   return { script, commandArgs };
