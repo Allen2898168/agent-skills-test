@@ -111,3 +111,4 @@
 - 后续处理：用户确认重新尝试后，先运行 `fin-auth-check.mjs --wait-for-close`，由该流程主动打开持久 CDP Chrome 并等待用户登录后关闭 FIN 页面；不得改为手动打开普通 Chrome。若复验通过，再执行 `register_recharge_transfer_contract` dry-run 和真实复合链路。
 - 追加记录：同日多次执行“创建20个账号 合约划进去213u”时，前端配置和 FIN/前端 `.env.local` 必需项存在；FIN 基础检查仍返回 `非法Token,请登录`，登录恢复后仍返回 `fetch failed`，二次基础检查仍为非法 Token。未执行 dry-run、未创建账号、未发放或划转。
 - 追加修复：确认根因之一是 `fin-auth-check.mjs --wait-for-close` 进入登录恢复后没有显式校验 FIN 页面是否真的打开；若 `readFinAuth` 先读到 profile 中的旧 token，可能直接复验失败而没有产生可见 FIN 页面。已新增 `openVisibleFinLoginPage`，恢复流程现在会强制打开可见 FIN 页面并验证 CDP target 包含 `stg-admin-web-fin.weex.tech`，否则直接报错，不再进入假等待。
+- 追加修复：FIN 发放、批量充值和合约充值脚本已接入 `ensureFinAuthReady`，当登录态缺失时会自动打开持久 CDP FIN 登录页并等待用户关闭后复验；基础验证通过后继续原写操作，不再要求操作员手动把 `loginRequired=true` 转成恢复命令。

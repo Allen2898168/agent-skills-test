@@ -4,7 +4,7 @@ Use this file for recurring frontend operation issues that should be checked bef
 
 ## Current Known Issues
 
-- STG cookie login depends on a local loginTool checkout. Configure `WEEX_FRONTEND_LOGIN_TOOL_DIR` in `skills/weex-frontend-ops/.env.local`; if it is unset and `/Users/gabriel/Downloads/weexpr/loginTool` is unavailable, `scripts/check-auth-config.mjs` reports `loginToolFound=false`.
+- STG cookie login uses the bundled loginTool runtime at `skills/weex-frontend-ops/vendor/loginTool`. `WEEX_FRONTEND_LOGIN_TOOL_DIR` is only an optional override; if an override is invalid, scripts fall back to the bundled copy.
 
 ## Recording Format
 

@@ -1,12 +1,15 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { encryptFrontendPassword } from './weex-password.mjs';
+
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
+const bundledLoginToolDir = path.resolve(currentDir, '..', '..', 'vendor', 'loginTool');
 
 function candidateLoginToolDirs() {
   return [
     process.env.WEEX_FRONTEND_LOGIN_TOOL_DIR,
-    '/Users/gabriel/Downloads/weexpr/loginTool'
+    bundledLoginToolDir
   ].filter(Boolean);
 }
 
@@ -18,7 +21,7 @@ export function resolveLoginToolDir() {
       return { dir, loginModule, cookieModule };
     }
   }
-  throw new Error('loginTool not found. Set WEEX_FRONTEND_LOGIN_TOOL_DIR to a local loginTool checkout containing lib/weex-login.mjs and lib/weex-auth-cookie.mjs.');
+  throw new Error(`loginTool not found. Expected bundled copy at ${bundledLoginToolDir}, or set WEEX_FRONTEND_LOGIN_TOOL_DIR to a checkout containing lib/weex-login.mjs and lib/weex-auth-cookie.mjs.`);
 }
 
 export async function buildFrontendAuthCookie({ username, password, targetUrl, timeoutMs = 60000 }) {

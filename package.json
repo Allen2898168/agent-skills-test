@@ -1,0 +1,15 @@
+{
+  "name": "agent-skills-test",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Self-contained WEEX admin, FIN Admin, and frontend operation skills.",
+  "scripts": {
+    "install:deps": "npm install --no-audit --no-fund",
+    "check:frontend": "node skills/weex-frontend-ops/scripts/maintenance/validate-knowledge-structure.mjs",
+    "check:fin": "node skills/weex-fin-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs",
+    "check:admin": "node skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.59.1"
+  }
+}

@@ -1,25 +1,6 @@
-import { createRequire } from 'node:module';
-import fs from 'node:fs';
-import path from 'node:path';
+import { requireProjectDependency } from './dependencies.mjs';
 
-const require = createRequire(import.meta.url);
-
-function requirePlaywright() {
-  try {
-    return require('playwright');
-  } catch (firstError) {
-    const fallback = '/Users/gabriel/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright';
-    if (fs.existsSync(fallback)) return require(fallback);
-    const nodePath = process.env.NODE_PATH || '';
-    for (const root of nodePath.split(path.delimiter).filter(Boolean)) {
-      const candidate = path.join(root, 'playwright');
-      if (fs.existsSync(candidate)) return require(candidate);
-    }
-    throw firstError;
-  }
-}
-
-const { chromium } = requirePlaywright();
+const { chromium } = requireProjectDependency('playwright');
 
 export async function launchBrowser({ visible = false, args = [], executablePath, disableWebSecurity = false } = {}) {
   const launchArgs = [...args];

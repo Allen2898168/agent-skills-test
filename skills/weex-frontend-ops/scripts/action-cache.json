@@ -18,7 +18,7 @@
         "targetUrl": "https://stg-www.weex.tech/zh-CN/login",
         "credentialSource": "skills/weex-frontend-ops/.env.local or same-skill WEEX_FRONTEND_* runtime environment variables",
         "passwordPriority": "account-specific password first, otherwise WEEX_FRONTEND_COMMON_PASSWORD",
-        "loginToolSource": "WEEX_FRONTEND_LOGIN_TOOL_DIR from skills/weex-frontend-ops/.env.local or /Users/gabriel/Downloads/weexpr/loginTool fallback",
+        "loginToolSource": "bundled skills/weex-frontend-ops/vendor/loginTool, with optional WEEX_FRONTEND_LOGIN_TOOL_DIR override",
         "visible": false,
         "screenshot": "only when --screenshot or WEEX_FRONTEND_SAVE_SCREENSHOT=true is set"
       },

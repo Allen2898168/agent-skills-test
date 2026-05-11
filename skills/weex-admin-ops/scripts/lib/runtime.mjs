@@ -1,9 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
-
-const require = createRequire(import.meta.url);
+import { requireProjectDependency } from "./dependencies.mjs";
 
 export function pathsFrom(importMetaUrl) {
   const file = String(importMetaUrl).startsWith("file:")
@@ -73,9 +71,5 @@ export function assertAdminLoginConfig(config) {
 }
 
 export function loadPlaywright() {
-  try {
-    return require("playwright");
-  } catch (error) {
-    throw new Error(`Playwright is not available. Install playwright or set NODE_PATH to a runtime containing playwright. ${error.message}`);
-  }
+  return requireProjectDependency("playwright");
 }

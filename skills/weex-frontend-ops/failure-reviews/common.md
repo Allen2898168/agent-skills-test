@@ -113,3 +113,27 @@
 - 验证结果：最终累计创建 100 个 STG 测试账号成功；邀请码均使用 `8mja`。密码、token、cookie 未输出或记录。
 - 关联流程或脚本：`scripts/frontend-register-api.mjs`，本次使用同注册 API 链路的临时批量 runner。
 - 后续处理状态：适合沉淀批量注册脚本和动作缓存；沉淀时应支持默认并发等于账号数、最大 100，并在 `20105` 时自动补建缺口账号。
+
+## loginTool 依赖外部本机路径导致同事不可复现
+
+- 日期：2026-05-11
+- 页面/流程：前端登录态、注册后 cookie 注入、前端资产划转。
+- 环境/viewport：本地脚本配置检查，API-only。
+- 失败表现：同事拉取项目后执行前端相关脚本提示 `loginTool not found`。
+- 失败原因：`login-tool-adapter.mjs` 默认 fallback 到 `/Users/gabriel/Downloads/weexpr/loginTool`，这是个人机器路径，未随项目提交。
+- 解决方式：已将最小 `loginTool` 运行时复制到 `skills/weex-frontend-ops/vendor/loginTool`，默认优先使用 skill 内置副本；`WEEX_FRONTEND_LOGIN_TOOL_DIR` 仅保留为可选覆盖。内置 `http.mjs` 改用 Node 原生 `fetch`，不再依赖外部 `node_modules`。
+- 验证结果：`check-auth-config.mjs` 在无外部路径覆盖时可发现内置 `loginTool`；相关脚本语法检查通过。
+- 关联流程或脚本：`scripts/lib/login-tool-adapter.mjs`、`vendor/loginTool/lib/weex-login.mjs`、`vendor/loginTool/lib/weex-auth-cookie.mjs`、`vendor/loginTool/lib/http.mjs`。
+- 后续处理状态：固定路径已生效；后续新增外部工具必须放入对应 skill 或明确改为可选依赖。
+
+## Playwright 依赖缺失导致前端/后管浏览器脚本不可运行
+
+- 日期：2026-05-11
+- 页面/流程：前端浏览器验证、活动后台浏览器自动化。
+- 环境/viewport：本地 Node 运行环境。
+- 失败表现：同事拉取项目后如果本机没有 Codex runtime 或全局 Playwright，浏览器脚本可能提示找不到 `playwright`。
+- 失败原因：旧逻辑依赖本机外部 runtime 或人工安装，没有项目级 `package.json` 和自动安装路径。
+- 解决方式：新增仓库根 `package.json`/`package-lock.json`，并在前端和后管 browser runtime 中加入自动依赖安装 helper；缺少 `playwright` 时默认执行 `npm install --no-audit --no-fund` 安装到项目内。
+- 验证结果：语法检查通过；依赖解析走项目根 `package.json`，可用 `WEEX_AUTO_INSTALL_DEPS=false` 禁用自动安装。
+- 关联流程或脚本：`package.json`、`skills/weex-frontend-ops/scripts/lib/dependencies.mjs`、`skills/weex-admin-ops/scripts/lib/dependencies.mjs`。
+- 后续处理状态：固定路径已生效；新增 Node 依赖必须登记到根 `package.json`。

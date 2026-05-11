@@ -1,8 +1,6 @@
 #!/usr/bin/env node
-import { defaultCdpUrl, readFinAuth, postFin, assertBusinessOk, DEFAULT_BIZ_TYPE, closeCdpBrowser, openVisibleFinLoginPage } from "./business/finance-airdrop-reward/api.mjs";
+import { defaultCdpUrl, readFinAuth, postFin, assertBusinessOk, DEFAULT_BIZ_TYPE, closeCdpBrowser, openVisibleFinLoginPage, waitForFinPageClose } from "./business/finance-airdrop-reward/api.mjs";
 import { loadFinEnv } from "./lib/env.mjs";
-
-const FIN_HOST_MARKER = "stg-admin-web-fin.weex.tech";
 
 function parseArgs(argv) {
   const timeoutIndex = argv.indexOf("--timeout-ms");
@@ -10,27 +8,6 @@ function parseArgs(argv) {
     waitForClose: argv.includes("--wait-for-close"),
     timeoutMs: timeoutIndex >= 0 ? Number(argv[timeoutIndex + 1]) : null,
   };
-}
-
-function cdpBase(cdpUrl) {
-  return cdpUrl.replace(/\/$/, "");
-}
-
-async function listTargets(cdpUrl) {
-  const response = await fetch(`${cdpBase(cdpUrl)}/json/list`);
-  if (!response.ok) throw new Error(`CDP target list failed with HTTP ${response.status}`);
-  return response.json();
-}
-
-async function waitForFinPageClose(cdpUrl, timeoutMs) {
-  const deadline = Number.isFinite(timeoutMs) && timeoutMs > 0 ? Date.now() + timeoutMs : null;
-  while (!deadline || Date.now() < deadline) {
-    const targets = await listTargets(cdpUrl);
-    const hasFinPage = targets.some(item => item.type === "page" && item.url?.includes(FIN_HOST_MARKER));
-    if (!hasFinPage) return true;
-    await new Promise(resolve => setTimeout(resolve, 1000));
-  }
-  throw new Error("Timed out waiting for FIN Admin page to close");
 }
 
 async function checkFinBase(cdpUrl, env) {

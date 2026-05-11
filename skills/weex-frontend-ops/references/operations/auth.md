@@ -26,7 +26,7 @@ Use when the user asks to log in to the WEEX frontend, open a frontend login sta
 - Environment: default `stg`.
 - Credential source: `skills/weex-frontend-ops/.env.local` or same-skill runtime `WEEX_FRONTEND_*` variables.
 - Account alias when multiple accounts are configured.
-- Local loginTool path when the default is unavailable.
+- Optional local loginTool override only when the bundled skill copy is unavailable.
 
 ### Scripts
 
@@ -63,7 +63,7 @@ Use when the user asks to log in to the WEEX frontend, open a frontend login sta
 
 ### Known Limits
 
-- The script depends on a local loginTool checkout containing `lib/weex-login.mjs` and `lib/weex-auth-cookie.mjs`.
+- The script uses the bundled `skills/weex-frontend-ops/vendor/loginTool` runtime and does not depend on `/Users/gabriel/Downloads/weexpr/loginTool`.
 - This is a cookie-injection login-state validation path, not a manual form-fill login path.
 - Current status is `candidate`; visible browser mode was verified in this project on 2026-05-08 without screenshot capture.
 

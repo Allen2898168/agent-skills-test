@@ -238,6 +238,45 @@ export async function openVisibleFinLoginPage(cdpUrl, env = process.env, timeout
   throw new Error(`FIN login recovery did not open a FIN Admin CDP page target. Observed page targets: ${pageUrls.join(", ") || "<none>"}`);
 }
 
+export async function waitForFinPageClose(cdpUrl, timeoutMs = 0) {
+  const started = Date.now();
+  while (true) {
+    const targets = await jsonGet(`${cdpBase(cdpUrl)}/json/list`).catch(() => []);
+    const openFinTargets = targets.filter(item => item.type === "page" && item.url?.includes(FIN_HOST_MARKER));
+    if (openFinTargets.length === 0) return true;
+    if (timeoutMs && Date.now() - started > timeoutMs) {
+      throw new Error("Timed out waiting for FIN Admin page to close");
+    }
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+}
+
+async function checkFinBase(auth) {
+  const response = await postFin(auth, `/admin/fin/asset/adjust/listSystemType/${DEFAULT_BIZ_TYPE}`);
+  assertBusinessOk(response, "FIN base listSystemType");
+}
+
+export async function ensureFinAuthReady(cdpUrl, env = process.env, options = {}) {
+  try {
+    const auth = await readFinAuth(cdpUrl, env);
+    await checkFinBase(auth);
+    return { auth, recovered: false, loginPage: null };
+  } catch (firstError) {
+    if (options.recover === false) throw firstError;
+    await closeCdpBrowser(cdpUrl).catch(() => false);
+    env.WEEX_FIN_CDP_HEADLESS = "false";
+    env.WEEX_FIN_ALLOW_OPEN_TARGET = "true";
+    const loginPage = await openVisibleFinLoginPage(cdpUrl, env, options.openTimeoutMs || 20000);
+    if (typeof options.onRecoveryPage === "function") options.onRecoveryPage(loginPage);
+    await waitForFinPageClose(cdpUrl, options.closeTimeoutMs || 0);
+    env.WEEX_FIN_CDP_HEADLESS = "true";
+    delete env.WEEX_FIN_ALLOW_OPEN_TARGET;
+    const auth = await readFinAuth(cdpUrl, env);
+    await checkFinBase(auth);
+    return { auth, recovered: true, loginPage };
+  }
+}
+
 async function listPageTargets(cdpUrl, env) {
   await ensureCdpAvailable(cdpUrl, env);
   return jsonGet(`${cdpBase(cdpUrl)}/json/list`);

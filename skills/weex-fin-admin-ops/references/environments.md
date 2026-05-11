@@ -41,6 +41,7 @@
 - If the re-check still fails, ask whether the user wants to retry. If not, ask whether to continue with any non-FIN work in the current task.
 - If the re-check succeeds after close, continue silently in non-visible/headless CDP/API-assisted mode.
 - Operator recovery rule: when FIN token/session is invalid, proactively run the CDP recovery flow and let it open the persistent CDP Chrome, confirm the FIN target opened, then wait for the user to log in and close the FIN page. Do not manually open a normal Chrome window or bypass the CDP profile; the login must land in the persistent CDP profile used by FIN scripts.
+- FIN grant and batch/contract-funding scripts now call the recovery path themselves when the base FIN login state is missing; an operator should not stop at `loginRequired=true` if a script can open the CDP login page and wait for the user to close it.
 
 ## Base Check Commands
 

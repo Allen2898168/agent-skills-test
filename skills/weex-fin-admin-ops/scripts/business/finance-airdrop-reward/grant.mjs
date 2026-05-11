@@ -2,8 +2,8 @@ import {
   DEFAULT_BIZ_TYPE,
   assertBusinessOk,
   discoverFinGrantConfig,
+  ensureFinAuthReady,
   postFin,
-  readFinAuth,
 } from "./api.mjs";
 import { grantHelp, parseGrantArgs, validateGrantArgs } from "./cli.mjs";
 
@@ -139,7 +139,7 @@ export async function runFinanceAirdropRewardGrant(argv, env = process.env) {
   }
   validateGrantArgs(args, env);
 
-  const auth = await readFinAuth(args.cdpUrl, env);
+  const { auth } = await ensureFinAuthReady(args.cdpUrl, env);
   const discovered = await discoverFinGrantConfig(auth, args);
   const payload = args.approveOnlyOrderId ? null : createPayload(args, discovered);
   const plan = buildPlan(args, auth, discovered, payload, env);

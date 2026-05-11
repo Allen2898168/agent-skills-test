@@ -26,6 +26,18 @@
 - `temp/`：用户明确要求暂不沉淀到 skill 的已跑通流程。
 
 ## 常用命令
+安装项目运行依赖：
+
+```bash
+npm install
+```
+
+脚本会在发现缺少 `playwright` 等项目依赖时自动执行 `npm install --no-audit --no-fund`。如需禁用自动安装，设置：
+
+```bash
+WEEX_AUTO_INSTALL_DEPS=false
+```
+
 动作缓存 dry-run：
 
 ```bash
@@ -79,4 +91,4 @@ git diff --check
 - 不提交真实密码、Google 验证码、token、cookie、API key 或完整账号凭证。
 - staging 默认用户名可以记录为 `auto`。
 - 密码和 Google 验证码必须来自本机环境变量或未提交的 `.env.local`。
-- 仓库只保留 `.env.example` 模板。
+- 仓库保留 `.env.example` 模板；`.env.local` 可以在本机保存运行值，但真实密码、Google 验证码、token、cookie、API key 不进入提交。

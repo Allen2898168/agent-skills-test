@@ -4,12 +4,8 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { loadFinEnv } from "./lib/env.mjs";
 import {
-  DEFAULT_BIZ_TYPE,
-  closeCdpBrowser,
   defaultCdpUrl,
-  postFin,
-  readFinAuth,
-  assertBusinessOk,
+  ensureFinAuthReady,
 } from "./business/finance-airdrop-reward/api.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -85,36 +81,14 @@ function runNode(commandArgs, env = process.env) {
   }
 }
 
-async function checkFinBase(auth) {
-  const response = await postFin(auth, `/admin/fin/asset/adjust/listSystemType/${DEFAULT_BIZ_TYPE}`);
-  assertBusinessOk(response, "FIN base listSystemType");
-}
-
 async function ensureFinAuthForWrites() {
   const cdpUrl = defaultCdpUrl(process.env);
   process.env.WEEX_FIN_CDP_HEADLESS ??= "true";
-  try {
-    const auth = await readFinAuth(cdpUrl, process.env);
-    await checkFinBase(auth);
-    return { authMode: "headless", finalUrl: auth.url };
-  } catch (silentError) {
-    await closeCdpBrowser(cdpUrl).catch(() => false);
-    const visibleEnv = { ...process.env, WEEX_FIN_CDP_HEADLESS: "false" };
-    const result = spawnSync(process.execPath, [
-      path.join(skillRoot, "scripts/fin-auth-check.mjs"),
-      "--wait-for-close",
-    ], {
-      cwd: repoRoot,
-      env: visibleEnv,
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-    if (result.status !== 0) {
-      throw new Error(result.stderr.trim() || result.stdout.trim() || silentError.message);
-    }
-    const parsed = JSON.parse(result.stdout.trim());
-    return { authMode: "visible-login-fallback", finalUrl: parsed.finalUrl };
-  }
+  const result = await ensureFinAuthReady(cdpUrl, process.env);
+  return {
+    authMode: result.recovered ? "visible-login-fallback" : "headless",
+    finalUrl: result.auth.url,
+  };
 }
 
 function emailFor(args, index) {
