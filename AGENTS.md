@@ -33,8 +33,14 @@
 - 根目录 `.env.local` 和其他 skill 目录的 `.env.local` 不作为当前 skill 的配置来源；发现根目录或其他 skill 目录中保存了当前 skill 所需变量时，必须迁移到当前 skill 目录并删除错误位置的本机密钥文件。
 - skill 之间不得交叉读取、fallback 或复用其他 skill 的环境变量；例如 FIN Admin 只能读取 `WEEX_FIN_*`，不能 fallback 到 `WEEX_ADMIN_*`，前端只能读取 `WEEX_FRONTEND_*`，不能 fallback 到历史 `P2P_*` 或通用 `WEEX_*`。
 - 首次对话处理项目任务时，读取对应 skill 后必须先检查该 skill 的运行依赖是否准备完成，包括对应目录 `.env.local` 或当前进程内同前缀必需变量、必要的登录态、CDP profile、cookie/API auth 或其他已沉淀认证来源。
+- 首次对话处理项目任务时，必须优先运行或等价执行项目级检查：`node tools/first-run-check.mjs --skill <admin|fin|frontend|all>`；如果任务涉及多个 skill，使用 `--skill all` 或分别检查。该检查必须覆盖项目 Node 依赖、对应 skill-local `.env.local`、必要运行变量、内置工具依赖和 FIN 登录态。
+- 如果项目 Node 依赖缺失，默认允许自动安装到项目根 `node_modules`：`npm install --no-audit --no-fund`；除非用户明确禁止联网或设置 `WEEX_AUTO_INSTALL_DEPS=false`，不要把缺少依赖作为最终阻塞。
 - 如果当前任务涉及多个 skill，必须分别检查各自依赖；不得用其他 skill、根目录或通用变量作为 fallback。
-- 只要必需环境变量、配置文件、登录态或认证来源未准备完成，就不要回答或处理用户的业务提示词，不执行 dry-run、缓存动作、页面操作或写操作；必须先明确告诉用户缺少哪些配置、应放到哪个 skill 目录、需要完成哪种登录态准备。
+- 只要必需环境变量、配置文件、登录态或认证来源未准备完成，就不要回答或处理用户的业务提示词，不执行 dry-run、缓存动作、页面操作或写操作；必须先明确告诉用户缺少哪些配置、应放到哪个 skill 目录、需要完成哪种登录态准备，并给出可执行配置方式。
+- 配置提示必须同时支持文件方式和对话方式：
+  - 文件方式：提示用户复制对应 `.env.example` 到该 skill 的 `.env.local`，并列出缺失变量名。
+  - 对话方式：提示用户可以直接在对话中提供缺失值；收到后只写入对应 skill 目录的 `.env.local`，不回显真实值，不写入 docs、references、AGENTS、temp 或会提交的文件。
+  - 脚本方式：可使用 `node tools/configure-skill-env.mjs --skill <admin|fin|frontend> --from-stdin` 写入本机 `.env.local`；不得通过 CLI 参数传递密码、验证码、token、cookie、API key 等敏感值，避免进入 shell history。
 - 只有所有必需配置和登录态检查通过后，才继续回答和处理用户原始任务。
 - 首次对话中如果当前任务可能需要活动管理后台登录或页面操作，必须先检查 `skills/weex-admin-ops/.env.local` 或当前进程内是否设置：
   - `WEEX_ADMIN_USERNAME`
@@ -43,6 +49,7 @@
 - `WEEX_ADMIN_USERNAME` 未设置时可使用 staging 默认用户名 `auto`，但必须说明正在使用默认用户名。
 - `WEEX_ADMIN_PASSWORD` 和 `WEEX_ADMIN_GOOGLE_CODE` 必须设置；缺失时，在登录或后台操作前提示用户设置，不能继续猜测或把真实值写入文档。
 - FIN Admin 当前优先复用用户已登录的 CDP Chrome 页面；用户登录并关闭 FIN tab 后，后续默认禁止自动打开任何 FIN tab/target，必须优先从持久 Chrome profile 的 Local Storage 文件读取认证并验证基础只读接口。如需审核，必须从 `skills/weex-fin-admin-ops/.env.local` 或当前进程内的 `WEEX_FIN_GOOGLE_CODE` 读取验证码。
+- FIN 登录态无法通过仓库预置；首次检查或 FIN 脚本发现登录态未就绪时，必须自动走持久 CDP Chrome 登录恢复流程，打开 FIN 页面让用户登录并等待用户关闭页面，然后复验基础只读接口。
 
 ## Skill Authority
 - 活动管理后台相关操作优先使用项目内 `skills/weex-admin-ops/`，它是活动后台团队协作的权威版本。

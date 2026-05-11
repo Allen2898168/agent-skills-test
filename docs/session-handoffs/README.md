@@ -13,3 +13,4 @@
 - `activity-register-recent.md`：最近报名模板创建记录、注册时间范围、下一步和安全说明。
 - `joker-activity.md`：小丑牌活动多语言回填链路。
 - `frontend-ops-register.md`：前端页面操作 skill、STG 登录和邮箱注册链路探测。
+- `2026-05-11-runtime-self-contained.md`：项目运行时自包含、首次配置检查、对话式配置和 FIN 登录恢复规则。

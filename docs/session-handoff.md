@@ -2,9 +2,9 @@
 
 ## 当前状态
 
-- 当前目标：维护 WEEX 活动后台、FIN Admin 财务后台与前端页面操作自动化 skill、动作缓存、失败复盘和交接机制。
-- 活动后台权威 skill：`skills/weex-admin-ops/`，目标环境默认 `https://stg-activity.weex.tech`。
-- FIN Admin 权威 skill：`skills/weex-fin-admin-ops/`，目标环境默认 `https://stg-admin-web-fin.weex.tech`。
+- 当前目标：维护 WEEX 活动后台、FIN Admin 财务后台与前端页面操作自动化 skill、动作缓存、失败复盘、运行时依赖和首次配置检查。
+- 活动后台权威 skill：`skills/weex-admin-ops/`，默认 staging：`https://stg-activity.weex.tech`。
+- FIN Admin 权威 skill：`skills/weex-fin-admin-ops/`，默认 staging：`https://stg-admin-web-fin.weex.tech`。
 - 前端权威 skill：`skills/weex-frontend-ops/`，目标 URL 按用户输入或 `references/routes.md`。
 - 最近更新时间：2026-05-11。
 - 历史交接索引：`docs/session-handoffs/README.md`。
@@ -12,313 +12,41 @@
 ## 必读入口
 
 - 项目规范：`AGENTS.md`。
+- 当前首次检查：`node tools/first-run-check.mjs --skill <admin|fin|frontend|all>`。
+- 对话配置写入：`node tools/configure-skill-env.mjs --skill <admin|fin|frontend> --from-stdin`。
 - 后管 skill：`skills/weex-admin-ops/SKILL.md`。
 - FIN Admin skill：`skills/weex-fin-admin-ops/SKILL.md`。
 - 前端 skill：`skills/weex-frontend-ops/SKILL.md`。
-- 后管失败复盘：`skills/weex-admin-ops/FAILURES.md`。
-- FIN Admin 失败复盘：`skills/weex-fin-admin-ops/FAILURES.md`。
-- 前端失败复盘：`skills/weex-frontend-ops/FAILURES.md`。
-- 后管 operation index：`skills/weex-admin-ops/references/operations/index.md`。
-- FIN Admin operation index：`skills/weex-fin-admin-ops/references/operations/index.md`。
-- 前端 operation index：`skills/weex-frontend-ops/references/operations/index.md`。
+- 三个失败复盘入口：`skills/weex-admin-ops/FAILURES.md`、`skills/weex-fin-admin-ops/FAILURES.md`、`skills/weex-frontend-ops/FAILURES.md`。
 
 ## 最近完成
 
-- 已创建项目内前端页面操作与检查 skill：`skills/weex-frontend-ops/`。
-- 已参考 `/Users/gabriel/Downloads/p2p-frontend-operator` 实现前端 STG cookie 登录候选链路：
-  - 脚本：`skills/weex-frontend-ops/scripts/frontend-login-cookie.mjs`。
-  - 缓存动作：`frontend_login_cookie`。
-  - 可见浏览器验证通过：最终 URL `https://stg-www.weex.tech/zh-CN/account`，标题 `账号总览`，未保存截图。
-- 已按用户确认更新 `AGENTS.md`：
-  - 后管任务使用项目内 `skills/weex-admin-ops/`。
-  - 前端页面操作与检查任务使用项目内 `skills/weex-frontend-ops/`。
-  - 如果认为 `AGENTS.md` 需要更新，必须先提示用户、说明建议内容并等待确认；每次更新后整体检查规范，必要时修正。
-- 已按用户要求探测并跑通 STG 前端邮箱注册接口链路：
-  - 页面入口：`https://stg-www.weex.tech/zh-CN/register`。
-  - 接口路径：`/v1/user/public/validate/config`、`/v1/user/register/check`、`/v1/user/register/submit`。
-  - 使用测试 header 的接口层路径可跳过图形验证并创建账号；注册后通过 token cookie 注入打开账号页验证登录态。
-  - 验证结果：最终 URL `https://stg-www.weex.tech/zh-CN/account`，标题 `账号总览`，`WEEX_TOKEN_COOKIE_STAGING` 存在，页面可见账号总览相关内容，无失败响应；viewport `desktop 1440x1000`。
-  - 已按用户确认沉淀到 `skills/weex-frontend-ops/`：新增 `scripts/frontend-register-api.mjs`、缓存动作 `frontend_register_api`，并更新 auth operation、routes、assertions 和 action-cache 文档。
-  - 已验证缓存入口：dry-run 通过；真实执行 `--confirm-register` 创建新 STG 测试账号并进入 `/zh-CN/account`，标题 `账号总览`，token cookie 存在，无失败响应。
-- 已按用户补充规则更新前端认证文档：前端登录/注册即使用户说浏览器模式，也优先使用已验证的 cookie/API 路径，只需展示或验证最终登录后的页面；不要求真实点击登录/注册表单，除非用户明确要求测试表单 UI。
-- 已按用户确认更新 `AGENTS.md` 的前端认证例外：前端登录和注册认证链路可使用已沉淀的 cookie/API 路径完成认证或注册，并在浏览器中展示或验证最终登录后的页面，除非用户明确要求测试登录/注册表单 UI。
-- 已按用户要求使用 `frontend_register_api` 注册新的 STG 前端测试账号，并用该新账号执行 `frontend_login_cookie --visible` 浏览器模式登录验证；最终 URL `https://stg-www.weex.tech/zh-CN/account`，标题 `账号总览`，viewport `desktop 1440x1000`，未保存截图；按当前规则，后续 STG 测试账号邮箱和 UID 可以完整记录，密码和 token 仍禁止记录。
-- 已按用户要求使用 `frontend_register_api` 带邀请码注册新的短用户名 STG 前端测试账号；最终 URL `https://stg-www.weex.tech/zh-CN/account`，标题 `账号总览`，viewport `desktop 1440x1000`，未保存截图；密码、邀请码和 token 不记录。
-- 已按用户确认把 FIN Admin / 财务管理后台从活动后台 skill 中剥离，新增独立 `skills/weex-fin-admin-ops/`；FIN `空投奖励(产品化活动)` 候选脚本、operation 文档和动作缓存已迁入该 skill，原 `skills/weex-admin-ops/` 中的 FIN 入口已清理。
-- 已通过 CDP 探测并验证 FIN Admin `空投奖励(产品化活动)` 页面，脚本 `skills/weex-fin-admin-ops/scripts/finance-airdrop-reward-grant.mjs` 和动作缓存 `finance_airdrop_reward_grant` 已验证当前 Chrome 登录态、`bizType=125`、`OTHER_ACTIVITIES/其他活动`、`USDT coinId=2`、审核类型映射，以及 staging 创建+审核通过路径。
-- 已使用前端 STG 注册 API 创建新的测试账号，并通过 `skills/weex-fin-admin-ops/scripts/finance-airdrop-reward-grant.mjs` 给该账号发放并审核通过 1000 USDT；验证依据为待审核列表命中、`needGaVerify` 成功、审核通过接口成功、审核后列表回查命中。验证码、token 和 cookie 不记录。
-- 已按用户要求补充 skill 环境变量边界硬规则：各 skill 的本机运行配置只放对应 skill 目录 `.env.local`，根目录 `.env.local` 不作为配置来源，且不得跨 skill fallback。已迁移本机旧根目录环境变量到 `skills/weex-admin-ops/.env.local` 和 `skills/weex-fin-admin-ops/.env.local`，并移除根目录 `.env.local`。
-- 已验证环境边界相关脚本和文档：语法检查通过，三个 skill 知识结构校验通过，环境加载检查显示根目录 `.env.local` 不存在且各 skill-local 配置可加载。
-- 已实现 FIN Admin 持久 CDP profile 能力；旧实现曾在 FIN tab 关闭时自动打开 FIN 页面读取 localStorage。当前规则已收紧：FIN tab 关闭后默认改为直接读取 Chrome profile Local Storage 文件认证，不再自动打开 FIN tab/target。
-- 已按用户确认补充 FIN Admin 使用前基础验证规则，并新增 `skills/weex-fin-admin-ops/scripts/fin-auth-check.mjs`：使用 FIN 能力前先验证持久 CDP 登录态和基础只读接口；验证失败时要求用户在 CDP Chrome 登录，关闭 FIN 页面视为人工处理完成，关闭后复验。
-- 已按用户补充规则更新 `AGENTS.md` 和 FIN skill：`fin-auth-check.mjs --wait-for-close` 默认持续等待直到用户关闭 FIN 页面；用户明确要求“充值/发放/下发”且高风险值已明确时，视为已确认 FIN 充值/发放写操作，不再二次确认，但脚本级确认 flag 仍必须传入。
-- 本轮执行“创建 3 个账号，分别充值 1000u”：先创建了 3 个前端账号，但因 FIN 自动新开页短暂停在 `about:blank`，未能充值，且当时按旧规则未输出/保存完整 UID；随后修复 `readFinAuth` 等待 FIN host 加载后，重新创建 3 个 STG 前端账号，并为每个账号通过 `空投奖励(产品化活动)` 创建并审核 1000 USDT 发放订单。第 2、3 笔已审核列表即时命中；第 1 笔 `verifyPass` 成功且补查不在待审核列表。验证码、token 和 cookie 不记录。
-- 已按用户新规则更新：STG/test 非生产测试账号邮箱和 UID 不脱敏，脚本输出、最终回复、交接和失败复盘可以完整记录；生产或未明确非生产时仍脱敏或避免输出。
-- 已补充 FIN 执行模型说明：FIN 发放/审核脚本是 profile-auth/API 辅助执行；普通读写不再打开 FIN 页面读取 localStorage，只有登录恢复时打开可见页面让用户登录。认证可读后实际创建/审核走 FIN API，不是 UI 点击。
-- 已沉淀批量“注册 + 充值”脚本：`skills/weex-fin-admin-ops/scripts/batch-register-recharge.mjs`。脚本默认 headless 读取 FIN 持久 profile 登录态，只有 token/session 失效时才关闭 headless CDP 并打开可见 FIN 页面等待用户登录关闭；随后继续无头 API 执行。dry-run 已验证：不创建账号、不充值，当前 FIN 登录态可复用，`loginRequired=false`。
-- 已登记动作缓存 `batch_register_recharge`，自然语言 `创建3个账号分别充值1000 USDT` 可命中并推断 `--count 3 --amount 1000 --currency USDT --confirm-register --confirm-recharge`。
-- 已按用户要求执行“创建 10 个账号，分别存 1000u”：先通过 `fin-auth-check.mjs` 验证 FIN headless 持久登录态，再通过缓存动作 `batch_register_recharge` dry-run，随后真实执行 `--count 10 --amount 1000 --confirm-register --confirm-recharge`。结果：创建 10 个 STG 前端测试账号，并为每个账号通过 FIN `空投奖励(产品化活动)` 创建并审核 1000 USDT 发放订单；最终 URL `https://stg-admin-web-fin.weex.tech/zh-CN/spotProGrant/airdropRewardProd/`。订单号：1436715507181793280、1436715586672242688、1436715647187660800、1436715705740144640、1436715768809893888、1436715827291074560、1436715906777329664、1436715965606637568、1436716045789147136、1436716104329048064；全部 `approvalVerified=true`，第 2 笔通过 `verifyPass` 成功且审核后不在待审核列表作为补充证据，其余已审核列表即时命中。验证码、token、cookie 和密码不记录。
-- 已按用户确认更新 `AGENTS.md`：首次对话处理项目任务时，读取对应 skill 后必须先检查该 skill 自己的 `.env.local` / 同前缀环境变量、登录态、CDP profile、cookie/API auth 等依赖；任一必需依赖未准备完成时，不回答或处理业务提示词，不执行 dry-run、缓存动作、页面操作或写操作，先提示用户缺少什么以及应配置到哪里。
-- 已按用户要求参考 `/Users/gabriel/Downloads/weexpr/loginTool` 为前端登录态新增依赖登录态的资产划转接口能力：
-  - 新增脚本：`skills/weex-frontend-ops/scripts/frontend-assets-transfer.mjs`。
-  - 新增可复用 helper：`scripts/lib/login-tool-adapter.mjs` 的 `loginFrontendWithTokens`，通过 loginTool 登录并仅在内存中使用 access token。
-  - 新增缓存动作：`frontend_assets_transfer`，默认 STG endpoint `https://stg-gateway2.weex.tech/v1/assets/transfer`，默认 payload 为用户提供示例 `{amount:1000, fromAccountType:10, toAccountType:8, transferCoinId:"2"}`。
-  - 真实划转必须先 dry-run，并显式传 `--confirm-transfer`；本次仅完成 dry-run、语法、JSON 和知识结构验证，未执行真实划转。
-- 本轮执行“注册一个账号，转进合约 1000u”：前端注册成功，账号 `codexapi1778266620635@weex.com`、UID `7281095039`，账号页 `/zh-CN/account` 验证通过；随后用该账号调用前端划转接口 `POST https://stg-gateway2.weex.tech/v1/assets/transfer`，payload 为 `{amount:1000, fromAccountType:10, toAccountType:8, transferCoinId:"2"}`，接口鉴权通过但业务返回 `code=70008`、`msg=超出可划转的最大金额`。已补充前端失败复盘和流程限制；如需完成划转，需要先通过 FIN Admin 给该 STG 账号现货账户充值/发放 1000 USDT 后重试。
-- 已按用户确认补充“注册新账号并转进合约”目标态编排：
-  - 新增跨 skill 工作流文档：`docs/workflows/frontend-fin-account-funding.md`。
-  - 新增 FIN 侧组合脚本：`skills/weex-fin-admin-ops/scripts/register-recharge-transfer-contract.mjs`。
-  - 新增缓存动作：`register_recharge_transfer_contract`，自然语言 `注册一个账号 转进合约1000u` 已 dry-run 命中该动作。
-  - 组合链路固定为：前端注册新账号 -> FIN Admin 发放/充值 USDT 到现货 -> 前端登录态接口从现货账户类型 `10` 划转到合约账户类型 `8`。
-  - dry-run 已验证：前端注册配置、FIN headless 登录态、前端划转配置均可用；未执行真实注册、充值或划转。
-- 已按用户确认补充复合链路自动沉淀规则：当 agent 未实现或误解复合链路，用户给出正确解决方案且后续验证成功时，视为已授权自动沉淀，必须更新 playbook、组合脚本或动作缓存、失败复盘和交接记录。规则已写入 `AGENTS.md` 和 `docs/workflows/compound-workflow-maintenance.md`。
-- 已按用户要求更新 `AGENTS.md`：输出只保留必要内容，任务执行过程中的动作类更新必须极简，不写无必要解释、背景或寒暄。
-- 本轮执行“注册 10 个新账号，合约账户充 500u”：FIN 基础验证通过，组合动作 dry-run 命中；真实执行已创建 10 个 STG 账号并完成 10 笔 FIN `空投奖励(产品化活动)` 500 USDT 成功订单，但首个账号前端划转到合约失败，返回 `20105` 后重试为 `70008`。同批成功订单 UID/订单号：`4845048042/1436722371814600704`、`3815850320/1436722449040125952`、`9761770230/1436722528236974080`、`3717187714/1436722586143535104`、`3360119394/1436722648655441920`、`8966768361/1436722706994016256`、`4676015185/1436722765605220352`、`8856359958/1436722824174481408`、`9703549361/1436722882366255104`、`7595929790/1436722941371723776`。
-- 已将 `register_recharge_transfer_contract` 标记为 blocked，并更新脚本默认拒绝真实执行；原因是 FIN 现有发放成功不等于前端可划转源余额，当前 FIN 账号访问合约资产发放接口返回 `403 No permission`。失败已写入 FIN/前端通用复盘。
-- 本轮处理“创建10个账号 合约账户充110u”：用户纠正确认为复合链路，应执行“前端注册 -> FIN 现货充值 -> 前端划转合约”。已更新 `docs/workflows/frontend-fin-account-funding.md`、FIN action cache、FIN operation、前端资产划转说明和失败复盘，不再把该类请求直接 blocked。
-- 真实执行复合链路时，批量注册/FIN 发放阶段完成后，前端划转阶段账号 `codexapi17782688267245@weex.com` / UID `9010673441` 调用 `POST /v1/assets/transfer`，payload `{amount:110, fromAccountType:10, toAccountType:8, transferCoinId:"2"}`，HTTP 200 但业务返回 `20105 Operation failed. Try again.`，本次未完成合约到账验证。FIN 回查确认该 UID 有成功订单 `1436729135045914624`，金额 `110.00000000 USDT`，状态 `成功`。
-- 已修复三个执行问题：`readFinAuth` 现在会轮询所有 FIN tab 并等待 localStorage token 写入，避免登录后多 tab/新 tab 误判；`fin-auth-check.mjs --wait-for-close` 在用户关闭登录页后强制切回 headless 复验，不再继续打开可见 FIN tab；`register-recharge-transfer-contract.mjs` 现在在单账号划转失败时保留 accounts、grants、transfers 完整结果，不再只输出单个错误。未重复创建新批次，避免重复充值。
-- 本轮再次执行“创建10个账号 合约账户充110u”：前置检查通过，缓存 dry-run 命中 `register_recharge_transfer_contract`；真实执行创建 10 个 STG 账号并完成 10 笔 FIN 110 USDT 发放审核，订单号分别为 `1436732578007461888`、`1436732636937433088`、`1436732694781079552`、`1436732754134675456`、`1436732812271923200`、`1436732870455308288`、`1436732928470921216`、`1436732988294279168`、`1436733067096862720`、`1436733125947142144`。前端现货到合约划转成功 8 个账号；失败 2 个账号：`codexapi17782696618992@weex.com` / UID `4714521632`、`codexapi17782697455438@weex.com` / UID `2329983569`，首次返回 `20105`，单独重试返回 `70008 超出可划转的最大金额`。已更新 FIN 和前端通用失败复盘；未保存截图。
-- 本轮执行“创建20个账号 合约划进去213u”：前置检查通过，FIN 登录态可用，缓存 dry-run 命中 `register_recharge_transfer_contract`；真实执行创建 20 个 STG 账号并完成 20 笔 FIN 213 USDT 发放审核。前端现货到合约划转初次成功 17 个账号；失败账号中 `codexapi17782702259001@weex.com` / UID `1760722353` 单独重试成功，最终成功 18 个账号。仍失败 2 个账号：`codexapi17782702560173@weex.com` / UID `8809513388`、`codexapi17782703026366@weex.com` / UID `9372870551`，重试返回 `70008 超出可划转的最大金额`。已更新 FIN 和前端通用失败复盘；未保存截图。
-- 已按用户确认把 `register_recharge_transfer_contract` 改为单账号完整链路并发模型：每个账号内部顺序为前端注册 -> FIN 发放审核 -> 前端划转合约；多个账号默认按用户要求账号数量并发，最大并发 `100`，也可用 `--concurrency <N>` 覆盖但仍受 `100` 限制。已更新 FIN action cache、operation 文档和 `docs/workflows/frontend-fin-account-funding.md`；dry-run 和自然语言缓存命中验证通过，未执行真实写操作。
-- 已按用户要求收紧 FIN 登录态与打开页面规则：用户登录并关闭 FIN tab 后，后续默认禁止自动打开任何 FIN tab/target；脚本先读已有 FIN tab，若没有 tab 则直接读 Chrome profile Local Storage 文件认证。只有显式登录恢复流程 `fin-auth-check.mjs --wait-for-close` 才允许临时打开可见 FIN 页面，用户关闭后继续回到无 tab/profile-auth 模式。
-- 本轮执行“给我100个账号 邀请码8mja”：使用 STG 前端注册 API 并发创建账号，邀请码 `8mja`。首轮并发 100 成功 65 个，35 个在 `register/submit` 返回 `20105 Operation failed. Try again.`；随后补建 35 个账号并发 35 全部成功，最终累计 100 个账号创建成功。未保存截图，未输出或记录密码、token、cookie。
-- 已按用户确认沉淀批量前端注册链路：新增 `skills/weex-frontend-ops/scripts/frontend-register-batch-api.mjs` 和缓存动作 `frontend_register_batch_api`，支持 `--count`、`--invite-code`、默认并发等于数量且最大 100、`20105` 等失败自动换新邮箱补建、可选 `--output-csv` 只写 `email,uid`。dry-run 和缓存入口验证通过。
-- 本轮处理“创建20个账号 合约划进去213u”：前端配置检查通过，但 FIN 基础认证失败，`fin-auth-check.mjs` 返回 `非法Token,请登录`；执行 `fin-auth-check.mjs --wait-for-close` 登录恢复后复验返回 `fetch failed`，再次检查仍为非法 token。未执行 dry-run、未创建账号、未发放或划转。已记录到 `skills/weex-fin-admin-ops/failure-reviews/common.md`；下一步需用户重新完成 FIN 登录恢复并关闭 FIN 页面。
-- 最近一次处理“创建20个账号 合约划进去213u”：已读取 FIN/前端 skill、动作缓存和失败复盘；前端配置存在，FIN `WEEX_FIN_GOOGLE_CODE` 存在，但 FIN 基础认证仍返回 `非法Token,请登录`。已按固定流程运行 `fin-auth-check.mjs --wait-for-close`，登录恢复后复验返回 `fetch failed`，再次基础检查仍为非法 token。未执行 dry-run、未创建账号、未发放或划转；需用户确认重新走 CDP 登录恢复。
-- 用户纠正：FIN token 失效时应主动走 CDP 登录恢复流程，由流程打开持久 CDP Chrome 并等待用户登录后关闭 FIN 页面；不得手动打开普通 Chrome 代替。已同步到 FIN environments/action-cache/failure 规则。
-- 已修复 FIN 登录恢复未确认页面真实打开的问题：`fin-auth-check.mjs --wait-for-close` 现在调用 `openVisibleFinLoginPage` 强制打开可见 FIN 页面，并确认 CDP target 中存在 `stg-admin-web-fin.weex.tech` 后才等待用户关闭；如果未打开，会明确报错。已沉淀到 FIN environments、action-cache、operation 和失败复盘，待新会话验证。
-- 本轮执行“创建20个账号 合约划进去213u”：先按固定流程运行 `fin-auth-check.mjs`，发现 FIN token 失效后通过 `fin-auth-check.mjs --wait-for-close` 打开持久 CDP FIN 页面，用户登录并关闭页面后复验通过；随后 `register_recharge_transfer_contract` dry-run 命中并真实执行。结果：创建 20 个 STG 前端账号，完成 20 笔 FIN 213 USDT 发放审核，并且 20 个账号前端现货到合约划转全部返回 `code=00000`。账号/UID：`codexapi17784529343741@weex.com/2274364336`、`codexapi17784529343742@weex.com/3034349930`、`codexapi17784529343743@weex.com/8481535451`、`codexapi17784529343744@weex.com/1356103661`、`codexapi17784529343745@weex.com/3226450694`、`codexapi17784529343746@weex.com/5751772418`、`codexapi17784529343747@weex.com/2212230060`、`codexapi17784529343748@weex.com/2916596261`、`codexapi17784529343749@weex.com/2862910151`、`codexapi177845293437410@weex.com/8185562207`、`codexapi177845293437411@weex.com/4390693143`、`codexapi177845293437412@weex.com/7395222735`、`codexapi177845293437413@weex.com/8748089581`、`codexapi177845293437414@weex.com/1896274634`、`codexapi177845293437415@weex.com/3068075682`、`codexapi177845293437416@weex.com/2930216037`、`codexapi177845293437417@weex.com/7334506313`、`codexapi177845293437418@weex.com/5832744337`、`codexapi177845293437419@weex.com/6700461939`、`codexapi177845293437420@weex.com/1656813076`。未保存截图；验证码、token、cookie 和密码不记录。
-- 已修复前端 skill 依赖个人机器 `/Users/gabriel/Downloads/weexpr/loginTool` 的问题：新增内置最小运行时 `skills/weex-frontend-ops/vendor/loginTool/`，`login-tool-adapter.mjs` 默认使用 skill 内置副本，`WEEX_FRONTEND_LOGIN_TOOL_DIR` 仅作为可选覆盖；内置 HTTP helper 改用 Node 原生 `fetch`，避免要求同事安装外部 `node_modules`。已删除项目根 `.gitignore`，但本机 `.env.local`、`.DS_Store` 等仍不得提交。
-- 已新增项目级 `package.json`/`package-lock.json` 和自动依赖安装 helper；前端/后管 Playwright 依赖缺失时会自动在仓库根目录执行 `npm install --no-audit --no-fund`，可用 `WEEX_AUTO_INSTALL_DEPS=false` 禁用。FIN 发放、批量充值和合约充值脚本已改为登录态缺失时自动打开持久 CDP FIN 登录页并等待关闭后复验，不再只提示登录态未就绪。
-- 近期后管转盘抽奖、报名模板、奖品管理、资产迁移和失败复盘历史已归档到 `docs/session-handoffs/`。
-- 已按用户确认补充失败复盘闭环硬性规则：
-  - 写入 `AGENTS.md` 和 `skills/weex-admin-ops/SKILL.md`。
-  - 规则：同一问题第二次出现且成功应用复盘解决方式后，必须把解决方式替换为固定执行路径；固定路径验证通过后删除对应复盘条目。若暂时不能替换或删除，必须在交接和复盘后续状态说明原因、风险和下一步。
-- 已补齐 `weex-admin-ops` 下的 `活动任务管理` 模块文档，聚焦 `转盘抽奖` 新增弹窗的共性配置链路：
-  - 新增 playbook：`skills/weex-admin-ops/references/operations/activity-task-create-common.md`，收敛确认清单、默认项、多语言处理、提交断言和常见坑点。
-  - 补齐模块入口与索引：`references/operations/activity-task-management.md`、`references/operations/index.md`。
-  - 补齐页面字段与断言：`references/selectors/activity-task-management.md`、`references/assertions/activity-task-management.md`。
-  - 已同步更新 `docs/session-handoff.md`，本次未新增脚本或动作缓存。
-- 本轮按用户要求以可见浏览器模式创建带 `抽奖权重配置` 的转盘抽奖全配置草稿，未保存截图：
-  - 创建结果：活动 ID `9022`，标题 `严格UI转盘抽奖草稿20260507193419`，别名 `strict-ui-lottery-20260507193419`，状态 `DRAFT`，最终 URL `/activities/lottery`。
-  - 执行路径：真实 UI 点击/填写/选择/上传/提交，使用 `LOTTERY_VARIANT=varied` 和 `LOTTERY_WEIGHT_CONFIG=vip`，上传接口触发 27 次。
-  - 详情回查：`prizeCount=8`，奖品金额 `[1,2,3,4,5,6,7,8]`，库存 `[80,90,100,110,120,130,140,150]`，奖品权重 `[5,8,10,12,13,15,17,20]`；红签权重 `[4,6,8,10,12,14,18,28]`，白签权重 `[3,7,9,11,13,15,19,23]`；累计次数再权重 8 行且同奖品权重；`prizeWeightConfig` 保存 1 条 VIP 行，`vipLevelMin=0`、`vipLevelMax=0`、权重 `[5,8,10,12,13,15,17,20]`；普通任务 1 条，新手活动合约任务 1 条，任务类型 `TRADING_VOLUME`；每日限制 1 行，多语言 2 条，FAQ 1 条，预报名和活动日历入口已开启。
-  - 失败与修正：自然语言 dry-run 初次误命中转盘抽奖任务缓存，已改用显式 action 执行并修正 `scripts/cache/matcher.mjs`；系统 Node 缺少 Playwright，已切换 Codex bundled runtime 完成创建；两项已补充失败复盘。
-- 本轮按用户要求以可见浏览器模式跑通 `活动列表 / 转盘抽奖` 查询和新增草稿流程，未保存截图：
-  - 已完成启动读取：`AGENTS.md`、当前交接、skill、失败复盘、operation index、`temp/` 暂存索引和转盘抽奖新增暂存流程。
-  - 登录配置：当前 shell 环境变量未直接设置三项登录变量，但仓库未提交的 `.env.local` 中存在 `WEEX_ADMIN_USERNAME`、`WEEX_ADMIN_PASSWORD`、`WEEX_ADMIN_GOOGLE_CODE`，后续脚本通过公共 runtime 读取，未回显密钥。
-  - 菜单流程：从 `/activity/prize` 登录后，检查左侧父菜单 `活动列表`，点击展开后点击子菜单 `转盘抽奖`，最终进入 `/activities/lottery`。
-  - 查询验证：活动ID `8962`、活动标题 `自动化转盘抽奖活动20260504190520`、活动别名 `auto-lottery-20260504190520`、活动类型 `正式活动`、活动日期 `2026-05-01` 到 `2026-07-01` 均通过真实页面填写并点击 `查询`，列表接口 `/prod-api/activity/config/list` 返回 HTTP 200、业务 `code=200`，结果命中预期记录。
-  - 新增页只读探测：点击 `新增` 进入 `/activities/lottery/add`，确认模块包括活动基本信息、抽奖样式配置、抽奖奖品配置、抽奖权重配置、颜色签配置、配置分享信息、奖品每日限制配置、累计次数再权重配置、活动任务信息、多语言、常见问题、活动日历和操作。
-  - 新增页依赖接口：`getAreaInfoList`、`guideTemplate/list?activityType=LOTTERY`、`apply/vipLevel/list`、`getRiskLabelList`、`apply/selectAgencyGroupList`、`prize/all`、`apply/all`、`task/all?activityType=5` 均返回 HTTP 200、业务 `code=200`；当前数据量分别包含流程引导 14 条、奖品 453 条、报名模板 2669 条、任务 511 条。
-  - 新增配置：正式活动、负责人 `auto`、类别 `通用`、平台活动 `否`、不支持预报名、活动日历不同步；流程引导选择页面第一条转盘抽奖模板；报名模板选择页面第一条可用模板；抽奖样式选择 `圆形转盘`。
-  - 奖品配置：选择 8 个不同奖品，奖品池 ID 保持 `1`-`8`，奖金金额 `1`，总库存 `100`，权重均为 `12.5`，奖品标记按 `大奖/中奖/小奖` 轮换；红签和白签各 8 行权重均为 `12.5`。
-  - 其他模块：配置分享信息 8 个奖品页签均上传图片并填写分享文案/奖品名称；奖品每日限制配置 1 行；累计次数再权重配置添加累计抽奖次数 `5` 后生成 8 行并填权重；活动任务信息选择 1 条现有转盘任务并添加排序系数 `1`；多语言选择英语并填写标题、媒体和文案；FAQ 选择英语并添加 1 条问题；抽奖权重配置保持未添加复杂风控行。
-  - 创建结果：页面真实点击最终 `新增` 后触发 `POST /prod-api/activity/config`，HTTP 200、业务 `code=200`、`msg=操作成功`；活动 ID `9004`，标题 `浏览器模式转盘抽奖草稿20260507032017`，别名 `browser-lottery-20260507032017`，状态 `DRAFT`。
-  - 验证依据：提交后自动回到 `/activities/lottery`，列表首行出现 ID `9004`；按别名 `browser-lottery-20260507032017` 查询 `/prod-api/activity/config/list` 返回 `total=1`，命中状态 `DRAFT`。
-  - 已记录失败复盘：inline 脚本未加载 `.env.local`、DOM 提取误把元素对象当字符串、奖品池 ID 被通用数值填充误改、活动任务添加按钮与多语言选择需要按模块精确定位。
-  - 已按用户确认沉淀到 `skills/weex-admin-ops/`：新增 `references/operations/activity-management-lottery.md`、`references/relationships/activity-management.md`、`scripts/create-lottery-activity-draft.mjs`、`scripts/business/activity-management/lottery-draft-plan.mjs`；已更新 operation index、routes、relationships、action-cache 文档和动作缓存 matcher/command。
-  - 动作缓存：新增 `create_lottery_activity_draft`，当前状态为 `candidate_dry_run`，仅输出已验证配置计划和断言，不再次创建活动；实际写入仍需按可见浏览器流程真实点击、填写、上传和提交，等完整 UI helper 抽离并复验后再启用缓存写入。
-- 本轮按用户要求继续以可见浏览器模式跑通 `活动列表 / 转盘抽奖` 最复杂草稿配置，未保存截图：
-  - 创建结果：活动 ID `9006`，标题 `复杂配置转盘抽奖草稿20260507034455`，别名 `complex-lottery-20260507034455`，状态 `DRAFT`，最终 URL `/activities/lottery`。
-  - 验证依据：提交触发 `POST /prod-api/activity/config`，HTTP 200、业务 `code=200`、`msg=操作成功`；按别名查询 `/prod-api/activity/config/list` 返回 `total=1`；详情 `/prod-api/activity/config/9006` 返回 `code=200`。
-  - 复杂分支：预报名开启并绑定报名模板 `2730`；活动日历同步开启，包含一级/二级标签、分区、配图和小图标多语言；抽奖权重配置 1 行，覆盖国家、代理、VIP、指定用户、注册时间、合伙人分组、风控标签、黑灰名单、业务风控、累计/每日合约交易量和气泡开关；颜色签红/白各 8 行；每日限制 2 行；累计次数再权重 8 行；活动任务 1 行并启用新手活动合约任务；活动多语言 2 条；FAQ 2 个语言。
-  - 失败复盘：活动日历图片多语言开启后必须补齐全部语言；复杂多语言行需要区分活动多语言新 code 与 FAQ 旧 code。已记录到 `skills/weex-admin-ops/failure-reviews/activity-management.md`。
-  - 待处理：该“最复杂配置”尚未正式沉淀为 operation 文档或动作缓存写入脚本；如用户确认沉淀，应更新 `activity-management-lottery.md` 并将 dry-run planner 拆出复杂模式。
-- 用户指出 `9006` 的复杂配置没有在前端逐项可见配置；已确认该记录使用页面内部状态批量赋值，不符合“浏览器模式写操作必须真实 UI 点击/填写/选择/上传”的规则，只能作为复杂 payload 参考，不能作为严格 UI 成功证据。
-- 严格 UI 重跑进展：
-  - 第一次重跑未创建活动，卡在已默认选中且禁用的 `活动时间选择 / 活动开始结束时间` 单选，未触发创建接口。
-  - 第二次重跑未创建活动，基础区完成并上传 6 次图片后，卡在奖品表第二行 `奖品名称` 下拉未稳定展开。
-  - 已单独验证奖品表行内 locator 方案：按 `奖品池ID` 表格内可见行定位，再点击该行第二个 `.el-select`，前 4 行可连续展开并选择不同奖品。
-  - 第三次重跑未创建活动，已完成基础配置、8 行奖品选择、颜色签和分享信息，进入 `奖品每日限制配置` 时被人工停止；日志显示上传 13 次，未触发 `POST /prod-api/activity/config`。
-  - 后续按用户反馈修正验证方式：新增成功后仍可能停留在新增页签，必须回 `/activities/lottery` 原列表页，按 `活动别名` 搜索；列表接口参数为 `showUrl`，不是 `alias`。
-  - 已确认严格 UI 创建记录 ID `9009`、`9010`、`9011` 均由页面提交产生，其中 `9009` 通过原列表页 `showUrl=strict-ui-lottery-20260507050503` 回查命中。
-  - 用户指出最后一个奖品下拉展开后未选中、FAQ 内容未填写；详情回查确认 `9010` 的最后奖品 `linkPrizeId/prizeName` 为空，FAQ `title/content` 为空。
-  - 已修正严格 UI 试跑脚本 `skills/weex-admin-ops/scripts/strict-lottery-visible-attempt.mjs`：普通输入使用 `locator.fill()` 避免全页面全选；预报名选择 `支持` 后立即等待派生字段；奖品下拉点击可见选项 locator 并断言第二个 `.el-select input` 非空；FAQ 内容按 Quill 富文本 `.ql-editor` 填写；验证回列表按 `showUrl` 搜索。
-  - 修正版严格 UI 创建成功：活动 ID `9011`，标题 `严格UI转盘抽奖草稿20260507053652`，别名 `strict-ui-lottery-20260507053652`，状态 `DRAFT`，最终 URL `/activities/lottery`。
-  - `9011` 详情回查：`isPreApply=1`，预报名时间 `2026-06-07 00:00:00` 到 `2026-06-09 23:59:59`；`prizeCount=8`；最后奖品 `linkPrizeId=510`、`prizeName=migration_physical_visible_20260506120226`、权重 `12.5`；FAQ 为 `FAQ title` / `<p>FAQ content</p>`；`taskConfigCount=1`、颜色签 2 组、每日限制 1 行、累计次数再权重 8 行、多语言 2 条。
-  - 用户继续指出预报名支持后仍有停顿、奖品行选择后误触上一行金额、以及中间过程存在无意义校验；已二次修正临时脚本：预报名直接使用真实 label `预报名模版` 并快速失败，取消奖品逐行中间断言和抽奖权重配置空探测，奖品表按真实列序填写金额/库存/权重，奖品标记按 placeholder 定位，累计次数权重明确填第 2 列。
-  - 二次修正版严格 UI 创建成功：活动 ID `9013`，标题 `严格UI转盘抽奖草稿20260507060925`，别名 `strict-ui-lottery-20260507060925`，状态 `DRAFT`，最终 URL `/activities/lottery`。
-  - `9013` 详情回查：列表 `showUrl` 查询 `total=1`；`isPreApply=1`；`prizeCount=8`，最后奖品 `linkPrizeId=510`、`rewardAmount=1`、`inventoryQuantity=100`、`weight=12.5`；颜色签 2 组且每组 8 个权重 `12.5`；每日限制 1 行；累计次数再权重 8 行且权重均为 `12.5`；`taskConfig=1`、`activityConfigI18n=2`；FAQ 为 `FAQ title` / `<p>FAQ content</p>`。
-  - 用户确认沉淀后，已将 `create_lottery_activity_draft` 从 `candidate_dry_run` 提升为 `candidate`：`scripts/create-lottery-activity-draft.mjs` 保留 `--dry-run` 计划预览，实际创建必须传 `--visible`，并委托已验证的严格 UI 脚本；不可见写入会拒绝执行。
-  - 已通过 `run-cached-action` 真实执行缓存入口创建活动 ID `9015`，别名 `strict-ui-lottery-20260507061951`，状态 `DRAFT`；详情回查 `prizeCount=8`、最后奖品 `linkPrizeId=510`、累计次数权重 8 个均为 `12.5`、颜色签 2 组、每日限制 1 行、任务 1 条、多语言 2 条、FAQ 内容已保存。
-  - 用户要求再次尝试创建复杂转盘抽奖活动浏览器模式；已通过 action cache 可见浏览器入口创建活动 ID `9019`，标题 `严格UI转盘抽奖草稿20260507155144`，别名 `strict-ui-lottery-20260507155144`，状态 `DRAFT`，最终 URL `/activities/lottery`。
-  - 本次提交阶段捕获到一次 `别名重复` 响应/提示，但列表按 `showUrl` 查询 `total=1` 且详情回查完整，判定记录已落库；详情验证 `isPreApply=1`、`prizeCount=8`、最后奖品 `linkPrizeId=517`、累计次数权重 8 个均为 `12.5`、颜色签 2 组、每日限制 1 行、任务 1 条、多语言 2 条、FAQ 内容已保存。该响应不一致已补充失败复盘。
-  - 用户要求奖品奖金金额、权重、总库存和红白签都不同，并启用新手活动合约任务；已通过 `LOTTERY_VARIANT=varied` 可见浏览器模式创建活动 ID `9020`，标题 `严格UI转盘抽奖草稿20260507160627`，别名 `strict-ui-lottery-20260507160627`，状态 `DRAFT`。
-  - `9020` 详情回查：奖品金额 `[1,2,3,4,5,6,7,8]`、库存 `[80,90,100,110,120,130,140,150]`、奖品权重 `[5,8,10,12,13,15,17,20]`；红签权重 `[4,6,8,10,12,14,18,28]`，白签权重 `[3,7,9,11,13,15,19,23]`；累计次数再权重同奖品权重；`showBeginnerTaskConfig` 包含 1 条 `TRADING_VOLUME`，排序 `2`；FAQ 和多语言保存正常。
-  - 本次首次尝试未提交，因新手活动合约任务开关定位失败；已改为按 `.el-switch` 文本 `启用新手活动合约任务` 定位并补充失败复盘。差异化模式当前通过环境变量触发，尚未正式接入 action cache 参数。
-  - 用户要求设置 `抽奖权重配置` 的转盘抽奖活动浏览器模式；已通过 `LOTTERY_WEIGHT_CONFIG=vip` 可见浏览器模式创建活动 ID `9021`，标题 `严格UI转盘抽奖草稿20260507161414`，别名 `strict-ui-lottery-20260507161414`，状态 `DRAFT`。
-  - `9021` 详情回查：`prizeWeightConfig` 保存 1 条 VIP 配置行，`vipLevelMin=0`、`vipLevelMax=0`，8 个奖品权重 `[5,8,10,12,13,15,17,20]`；`prizeCount=8`、颜色签 2 组、累计次数再权重 8 行、任务 1 条、多语言 2 条、FAQ 保存正常。已补充 `activity-management-lottery.md` 的 VIP 抽奖权重配置步骤。
-  - 用户要求走无浏览器模式复杂链路创建；已通过 `LOTTERY_HEADLESS=1` headless 模式创建活动 ID `9023`，标题 `严格UI转盘抽奖草稿20260507200430`，别名 `strict-ui-lottery-20260507200430`，状态 `DRAFT`，最终 URL `/activities/lottery`。详情回查 `prizeCount=8`、奖品权重 8 个均为 `12.5`、颜色签 2 组、每日限制 1 行、累计次数再权重 8 行、任务 1 条、多语言 2 条、FAQ 保存正常。
-  - 用户要求测试上线流程；已在转盘抽奖列表按别名定位活动 ID `9023`，点击操作列 `上线`，在确认弹窗输入用户提供的固定验证码并确认；接口 `POST /prod-api/activity/lottery/online` 返回 HTTP 200、业务 `code=200`、`msg=操作成功`，列表状态变为 `上线`，只读接口回查 `status=ONLINE`。
-  - 用户继续要求可见浏览器模式测试转盘抽奖 `查看 / 修改 / 复制 / 删除`：
-    - 上线活动 `9023` 行按钮为 `查看 / 修改 / 下线 / 复制`，无 `删除`，符合已上线活动不可删除；`查看` 打开 `/activities/lottery/view?activityId=9023` 并触发详情接口 `code=200`；`修改` 可打开 `/activities/lottery/edit?activityId=9023`，未保存上线原活动。
-    - `复制` 在上线 `9023` 和草稿 `9022` 上均触发 `POST /prod-api/activity/config/copy`，但业务返回 `code=500 system busy, please retry later`，未创建复制件，已记入失败复盘。
-    - 为继续验证修改/删除，严格 UI 新建临时草稿 `9024`，别名 `strict-ui-lottery-20260507204920`；创建时 FAQ 定位漂移已修复。
-    - 草稿 `9024` 的 `修改` 已通过：编辑页底部真实按钮是 `保存`，修改活动副标题后触发 `PUT /prod-api/activity/config`，业务 `code=200`，页面提示 `编辑成功`。
-    - 草稿 `9024` 的 `删除` 已通过用户补充方式验证：确认弹窗 `确认删除该活动吗` 打开后验证码输入框自动聚焦，填入固定验证码后点击右下角 `确定`，触发 `POST /prod-api/activity/lottery/delete`，业务 `code=200`；按别名回查 `total=0`，记录已删除。
-    - 已修正删除/上线确认规则：有 `下线` 按钮的上线活动不展示删除；有 `上线` 按钮的草稿活动可以删除，删除和上线均需在确认弹窗输入验证码后点确认。
-  - 用户要求继续验证非浏览器模式；已用 headless 模式创建临时草稿 `9025`，别名 `strict-ui-lottery-20260507212249`，并完成同组操作验证：
-    - `查看`：进入 `/activities/lottery/view?activityId=9025`，详情接口 `code=200`。
-    - `修改`：编辑活动副标题，点击 `保存` 后 `PUT /prod-api/activity/config` 返回 `code=200`，详情回查命中修改值。
-    - `复制`：仍触发 `POST /prod-api/activity/config/copy`，返回 `code=500 system busy, please retry later`。
-    - `删除`：确认弹窗填验证码后点击 `确定`，`POST /prod-api/activity/lottery/delete` 返回 `code=200`，按别名回查 `total=0`，临时草稿已删除。
-  - 已更新 `references/operations/activity-management-lottery.md`、`references/action-cache.md`、`references/operations/index.md`、`scripts/action-cache.json` 和 `scripts/business/activity-management/lottery-draft-plan.mjs`；已验证语法、显式 action dry-run、自然语言 dry-run、不可见写入拒绝、缓存入口真实执行和知识结构校验。
-  - 后续可继续把 `strict-lottery-visible-attempt.mjs` 的大段表格、上传、下拉逻辑拆到公共 Element UI helper；当前为了复用已验证路径，先通过 action 入口委托该严格 UI 脚本。
-- 本轮按用户要求在可见浏览器模式完成复杂报名模板和活动流程引导配置验证，未保存截图：
-  - 报名模板：通过真实 UI 创建并清理 4 条复杂参与范围记录，ID `2776`-`2779`，覆盖 `指定参赛代理或用户+VIP等级+团体报名`、`指定参赛代理或用户+风控标签+团体报名`、`混合条件+注册+手动点击`、`非活跃用户+注册时间范围+注册+手动点击`。
-  - 报名模板验证：每条均完成列表回查、`查看` 弹窗详情接口 `code=200`、修改名称后 `PUT /prod-api/activity/apply` `code=200`、删除确认后 `DELETE /prod-api/activity/apply/{id}` `code=200`，并按修改后名称回查不存在。
-  - 活动流程引导配置：通过真实 UI 创建并清理 3 条 1/2/3 步记录，ID `84`-`86`，覆盖 `交易大赛/每次访问/1步`、`转盘抽奖/每日首次访问/2步`、`小丑牌活动/用户首次访问/3步`，上传次数分别为 4/8/12 且无上传失败。
-  - 活动流程引导配置验证：每条均完成 `查看`、修改活动类型为 `交易竞速赛` 后详情回查 `activityType=RACE_COMPETITION`、`复制` 生成 ID `87`-`89`、删除复制件和原件并回查不存在。
-  - 环境复盘：系统 Node 缺少 Playwright，已按既有方案切换 Codex bundled runtime 完成执行，并更新 `skills/weex-admin-ops/failure-reviews/common.md`。
-- 已跑通并沉淀 `活动通用模块管理 / 活动流程引导配置` 操作列 `查看 / 修改 / 复制 / 删除`：
-  - 新增脚本：`skills/weex-admin-ops/scripts/guide-template-row-actions.mjs`。
-  - 新增业务模块：`skills/weex-admin-ops/scripts/business/activity-common-module/guide-template-row-actions.mjs`。
-  - 新增动作缓存：`verify_guide_template_row_actions`，自然语言 `活动流程引导配置 操作列 查看 修改 复制 删除 浏览器模式` dry-run 应命中该动作。
-  - 无浏览器模式：临时 ID `80` 创建后，通过页面操作列完成 `查看`、将活动类型修改为 `交易竞速赛`、复制为 ID `81`（名称前缀 `复制从 `）、删除复制件和原件；两条记录均回查不存在。
-  - 可见浏览器模式：临时 ID `82` 通过真实 UI 点击新增、填写、上传 4 个媒体字段并确认创建；随后通过页面操作列完成 `查看`、将活动类型修改为 `交易竞速赛`、复制为 ID `83`、删除复制件和原件；两条记录均回查不存在。
-  - 页面行为确认：`复制` 不弹二次确认，直接触发 `POST /prod-api/activity/guideTemplate/copy`；`删除` 有二次确认弹窗，文案包含 `确认删除该活动吗`。
-  - 已清理失败尝试遗留的临时 ID `79`。
-  - 已更新 `skills/weex-admin-ops/references/operations/activity-guide-template.md`、`references/action-cache.md`、`references/operations/index.md`、`scripts/action-cache.json`、缓存 matcher/command 和失败复盘 `failure-reviews/activity-common-module.md`。
-  - 已修正公共 Element UI 表格 helper：操作列固定列点击先按主表可见行定位序号，再点右侧固定操作列同序号可见按钮。
-- 已将“浏览器模式写操作必须真实 UI 点击”提升为强制规则：
-  - 已更新 `AGENTS.md`、`skills/weex-admin-ops/SKILL.md`、`references/defaults.md`、`references/action-cache.md`。
-  - 规则：用户明确要求 `浏览器模式/可见操作/打开浏览器/让我看着` 时，写操作必须通过页面点击、填写、选择、上传、确认完成；接口只能做只读验证或页面触发后的证据采集。默认不可见模式可继续使用已验证的接口辅助路径。
-- 已修正并重跑原 `create-guide-templates.mjs --visible` 脚本验证：
-  - 新增记录 ID `73`，名称 `浏览器_转盘抽奖_每次访问_3步_01_20260506130517`。
-  - 脚本输出 `writePath=visible_ui_clicks`，上传次数 `uploadCount=12`，`uploadFailures=[]`。
-  - 最终 URL `/activity/guide`，创建结果成功。
-- 已修正“浏览器模式”语义误判：此前 ID `69` 和 ID `71` 虽在可见浏览器会话中运行，但写入是复用认证头调用接口，不算真实 UI 点击创建。
-- 已补跑真实可见浏览器 UI 点击路径，创建 1 条三步骤转盘抽奖流程引导配置：
-  - 名称：`浏览器UI_转盘抽奖_每次访问_3步_01_20260506130117`。
-  - ID：`72`。
-  - UI 行为：点击 `新增`，选择 `转盘抽奖` 和 `每次访问`，点击两次 `新增步骤`，填写 3 个步骤的标题、内容和按钮文案，为每个步骤通过页面上传控件上传 H5/Web 静图和动图，共 12 次上传，最后点击 `确认`。
-  - 创建验证：页面确认触发 `POST /prod-api/activity/guideTemplate`，HTTP 200，业务 `code=200`。
-  - 详情验证：按名称列表回查命中 ID `72`；详情回查 `activityType=LOTTERY`、`displayFrequency=EVERY_VISIT`，且 `step1I18nConfig`、`step2I18nConfig`、`step3I18nConfig` 均存在。
-  - 已修正 `scripts/create-guide-templates.mjs`：`--visible` 现在走真实 UI 点击/上传/确认路径；不可见模式仍走接口写入并验证。
-  - 已记录失败复盘：可见浏览器模式误用接口写入、UI 创建遗漏图片字段。
-- 已按用户要求用可见浏览器模式再创建 1 条三步骤转盘抽奖流程引导配置：
-  - 名称：`浏览器_转盘抽奖_每次访问_3步_01_20260506125815`。
-  - ID：`71`。
-  - 创建验证：`scripts/create-guide-templates.mjs --activity-types lottery --frequencies every_visit --steps 3 --visible` 返回成功，最终 URL `/activity/guide`。
-  - 详情验证：`GET /prod-api/activity/guideTemplate/71` HTTP 200，业务 `code=200`，`activityType=LOTTERY`，`displayFrequency=EVERY_VISIT`，且 `step1I18nConfig`、`step2I18nConfig`、`step3I18nConfig` 均存在。
-  - 用户未要求截图，因此未保存截图。
-- 已按用户要求用默认不可见浏览器模式再创建 1 条三步骤转盘抽奖流程引导配置：
-  - 名称：`无浏览器_转盘抽奖_每次访问_3步_01_20260506125632`。
-  - ID：`70`。
-  - 创建验证：`scripts/create-guide-templates.mjs --activity-types lottery --frequencies every_visit --steps 3` 返回成功，最终 URL `/activity/guide`。
-  - 详情验证：`GET /prod-api/activity/guideTemplate/70` HTTP 200，业务 `code=200`，`activityType=LOTTERY`，`displayFrequency=EVERY_VISIT`，且 `step1I18nConfig`、`step2I18nConfig`、`step3I18nConfig` 均存在。
-  - 用户未要求截图，因此未保存截图。
-- 已按用户要求用可见浏览器模式创建 1 条三步骤转盘抽奖流程引导配置：
-  - 名称：`浏览器_转盘抽奖_每次访问_3步_01_20260506125358`。
-  - ID：`69`。
-  - 创建验证：动作缓存 `create_guide_templates` 命中，最终 URL `/activity/guide`；创建脚本返回成功，按名称回查命中。
-  - 详情验证：`GET /prod-api/activity/guideTemplate/69` HTTP 200，业务 `code=200`，`activityType=LOTTERY`，`displayFrequency=EVERY_VISIT`，且 `step1I18nConfig`、`step2I18nConfig`、`step3I18nConfig` 均存在。
-  - 用户未要求截图，因此未保存截图。
-  - 为支持该单条链路，已扩展 `scripts/create-guide-templates.mjs` 支持 `--activity-types`、`--frequencies`、`--steps` 参数，并扩展自然语言解析 `三个步骤 + 转盘抽奖 + 浏览器模式`。
-- 已在 staging 探索 `活动通用模块管理 / 活动流程引导配置`：
-  - 入口路径：`/activity/guide`，菜单项在 `活动通用模块管理` 下；从 `/activity/prize` 登录后确认该模块已展开，并可点击进入。
-  - 页面搜索字段：`ID`、`模版名称`、`活动类型`；表格列：`ID`、`名称`、`活动类型`、`最近编辑人`、`更新时间`、`操作`。
-  - 搜索验证：`ID=37`、`模版名称=Wesley`、`活动类型=交易大赛` 均触发 `/prod-api/activity/guideTemplate/list`，HTTP 200，业务 `code=200`，列表回查命中预期记录。
-  - 新增弹窗字段：`模版名称`、`活动类型`、`引导弹窗显示频率`，以及每个步骤的 `活动简介标题`、`H5活动简介内容`、`H5配图（静图）`、`H5配图（动图）`、`Web配图（静图）`、`Web配图（动图）`、`按钮文案`。
-  - 活动类型下拉选项共 13 个；显示频率选项为 `每次访问`、`每日首次访问`、`用户首次访问`。
-  - 默认只有 `步骤1` 且无删除按钮；点击 `新增步骤` 后出现 `步骤1`、`步骤2`，两个步骤右上角均出现 `删除`。
-- 已按正式命名规则创建活动流程引导模板，默认步骤内容使用测试文案和既有 staging 图片/动图 URL；用户未要求截图，因此未保存截图：
-  - 不可见模式创建成功 15 条，ID `39`-`53`，覆盖 12 个有效活动类型的首频率、交易大赛另外两个频率、交易大赛首频率两步骤；每条均通过创建接口 `code=200` 和按模板名称列表回查验证。
-  - 可见浏览器模式创建成功 15 条，ID `54`-`68`，覆盖同一组组合；每条均通过创建接口 `code=200` 和按模板名称列表回查验证。
-  - `暂无特殊配置 / NONE` 在两种模式下创建均失败，后端返回 HTTP 200 但业务 `code=500`，提示 `系统繁忙，请稍后再试！`，未创建记录。
-  - 临时认证试跑记录 ID `38` 已清理，`DELETE /prod-api/activity/guideTemplate/38` 返回 `code=200`，按名称回查 `total=0`。
-  - 已按用户确认沉淀该链路到 `skills/weex-admin-ops/`：
-    - 新增 playbook：`skills/weex-admin-ops/references/operations/activity-guide-template.md`。
-    - 新增脚本：`skills/weex-admin-ops/scripts/create-guide-templates.mjs`。
-    - 新增业务模块：`skills/weex-admin-ops/scripts/business/activity-common-module/guide-template-plan.mjs`、`guide-template-create.mjs`。
-    - 新增动作缓存：`create_guide_templates`；默认 dry-run 可预览 15 个已验证组合，真实执行会创建记录，`--visible` 启用可见浏览器模式。
-    - 已更新 operation index、routes、action-cache 和 relationships；`暂无特殊配置 / NONE` 已在 `skills/weex-admin-ops/references/relationships/activity-common-module.md` 标记为后端阻塞分支，脚本默认排除，只有 `--include-none` 才复测。
-    - 已验证脚本 dry-run、显式 action dry-run、自然语言 dry-run、`--include-none` dry-run 和 skill 知识结构校验。
-- 已创建 `非活跃用户` 报名模板：ID `2772`，名称 `非活跃用户报名模板_注册时间_20260506104509`。
-- 该模板的可参与注册时间范围为 `2026-05-06 00:00:00` 到 `2026-05-07 23:59:59`。
-- 创建验证：`POST /prod-api/activity/apply` HTTP 200，响应 `code=200`；按模板名称搜索返回 ID `2772`。
-- 用户未要求截图，因此未保存截图。
-- 已沉淀报名模板注册时间范围能力：新增 `scripts/lib/element-ui-datetime.mjs`，扩展 `create-register-templates.mjs` 的 `--register-start` / `--register-end`，并更新动作缓存自然语言解析。
-- 已拆分报名模板 operation 文档：新增 `activity-register-management-date-range.md` 和 `activity-register-management-platform-scopes.md`。
-- 已拆分公共 Element UI helper：`scripts/lib/element-ui.mjs` 作为兼容导出入口，具体实现拆到 `scripts/lib/element-ui/` 子模块。
-- 已将历史交接从本文件拆分到 `docs/session-handoffs/`，避免单文件过长。
-- 已将 docs 增长管理写入 `AGENTS.md` 和 `skills/weex-admin-ops/SKILL.md`：`docs/session-handoff.md` 只保留当前摘要，历史归档到 `docs/session-handoffs/`，任意 `docs/**/*.md` 接近 250 行必须先拆分。
-- 已新增 `skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs`，用于检查 skill 知识结构和文件长度。
-- 已新增失败复盘体系：`skills/weex-admin-ops/FAILURES.md` 作为入口，`skills/weex-admin-ops/failure-reviews/` 按业务线保存失败场景、原因、解决方式和验证结果。
-- 已将失败复盘强制规则写入 `AGENTS.md` 和 `skills/weex-admin-ops/SKILL.md`：遇到失败必须主动更新复盘；重试前先查复盘；同类失败重复出现时必须反写原流程并验证。
-- 已补强仓库入口 README，明确根目录 `scripts/` 是项目治理脚本、`skills/weex-admin-ops/scripts/` 是后管业务动作脚本。
-- 已修正 `AGENTS.md` 中动作缓存路径歧义，并调整 `temp/` 启动规则：仅在当前任务相关或用户明确要求时汇总暂存流程。
-- 已在默认不可见浏览器模式跑通 `活动用户报名管理` 操作列 `查看 / 修改 / 删除`：
-  - 临时报名模板 ID `2773`，原名称 `操作列临时模板_auto_20260506113121`。
-  - 查看：`GET /prod-api/activity/apply/2773` HTTP 200，响应 `code=200`，弹窗标题 `用户报名管理（查看）`。
-  - 修改：名称改为 `操作列临时模板_auto_20260506113121_已修改`，`PUT /prod-api/activity/apply` HTTP 200，响应 `code=200`，按新名称搜索返回 ID `2773`。
-  - 删除：二次确认弹窗文案包含目标模板名称，确认后 `DELETE /prod-api/activity/apply/2773` HTTP 200，响应 `code=200`，按新名称搜索不再返回该记录。
-  - 本轮未保存截图；用户未要求截图。
-- 已按用户确认沉淀该链路到 `skills/weex-admin-ops/`，并新增动作缓存脚本：
-  - 脚本：`skills/weex-admin-ops/scripts/register-template-row-actions.mjs`。
-  - 缓存动作：`verify_register_template_row_actions`。
-  - 不可见脚本验证：临时 ID `2774` 创建、查看、修改、删除并回查不存在，全部通过。
-  - 可见脚本验证：临时 ID `2775` 创建、查看、修改、删除并回查不存在，全部通过。
-  - 已修正自然语言缓存匹配，`活动用户报名管理 操作列 查看 修改 删除 浏览器模式` dry-run 命中 `verify_register_template_row_actions`。
-- 已记录本轮失败复盘：
-  - 系统 Node 缺少 Playwright，改用 Codex bundled runtime 后通过。
-  - 查看弹窗断言不能依赖 `innerText` 或最后一个可见 `.el-dialog`，已抽出按标题定位业务弹窗的公共 helper。
-  - 操作列自然语言 dry-run 初次误命中创建模板动作，已通过动作评分修正。
-- 已按用户确认，在默认不可见浏览器模式删除 `活动用户报名管理` 下 `最近编辑人=auto` 的报名模板：
-  - 页面搜索接口 `operator=auto` 返回 63 条，其中 ID `177` 的 `operator=auto_test` 属于模糊匹配，已排除。
-  - 精确 `operator=auto` 候选 62 条，已成功删除 61 条。
-  - ID `2729`（`自动化报名模板_auto_manual_20260505161031`）删除失败，后端提示该报名模板已被活动 `8990,8993` 使用，已保留。
-  - 删除后回查：精确 `operator=auto` 仅剩 ID `2729`；模糊匹配还包含已排除的 ID `177`。
-  - 用户未要求截图，因此未保存截图。
-  - 已在 `skills/weex-admin-ops/failure-reviews/activity-register-management.md` 记录“已被活动引用的报名模板不可删除”复盘。
-- 已按用户要求沉淀“按最近编辑人批量删除报名模板”链路：
-  - 新增脚本：`skills/weex-admin-ops/scripts/delete-register-templates-by-operator.mjs`。
-  - 新增业务模块：`skills/weex-admin-ops/scripts/business/activity-register-management/bulk-delete.mjs`。
-  - 新增动作缓存：`delete_register_templates_by_operator`，默认只 dry-run，实际删除必须传 `--confirm-delete`。
-  - 新增 playbook：`skills/weex-admin-ops/references/operations/activity-register-management-bulk-delete.md`。
-  - 已补充报名模板被活动引用后不能删除的关联关系。
-  - 已验证自然语言缓存命中、显式 action dry-run、不可见 dry-run 和可见 dry-run；当前 dry-run 均只列出剩余被引用模板 ID `2729`，并跳过 ID `177`。
-- 已将后管 skill 专用资产和证据目录迁入 `skills/weex-admin-ops/`：
-  - `assets/default-prize-images/default-bonus-prize.webp` 已迁移到 `skills/weex-admin-ops/assets/default-prize-images/default-bonus-prize.webp`。
-  - `artifacts/screenshots/` 已迁移到 `skills/weex-admin-ops/artifacts/screenshots/`，历史截图通过 `git mv` 保留。
-  - 已全量替换 AGENTS、README、docs、temp 和 skill references 中的旧路径。
-  - 已修改 `skills/weex-admin-ops/scripts/lib/runtime.mjs`，默认奖品图片从 skill 内部 assets 读取。
-  - 受影响奖品创建链路验证通过：dry-run 通过；不可见模式创建实物奖品 ID `509`；可见模式创建实物奖品 ID `510`；两次均观察到图片上传接口和奖品创建接口 HTTP 200。
-- 已为“skill 可单独复制复用”继续迁移根目录治理内容：
-  - `FAILURES.md` 已迁移到 `skills/weex-admin-ops/FAILURES.md`。
-  - `failure-reviews/` 已迁移到 `skills/weex-admin-ops/failure-reviews/`。
-  - 原根目录知识结构校验脚本已迁移为 `skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs`。
-  - 校验脚本已改为以 skill 根目录为基准，不依赖根目录 docs。
-  - 已修复 `pathsFrom()` 和 `run-cached-action.mjs` 对仓库外层目录的假设，使 skill 在仓库内和独立复制目录中都能解析默认 assets。
-  - 已复制 skill 到 `/tmp/weex-admin-ops-standalone-test` 做独立验证：结构校验、奖品 dry-run、动作缓存 dry-run 和默认图片路径检查均通过。
-  - 已进一步修正 `scripts/lib/runtime.mjs`，`pathsFrom()` 兼容 `import.meta.url` 和普通文件路径，方便 standalone 维护校验。
-  - 已确认根目录不再保留 skill 专用 `scripts/`、`assets/`、`artifacts/`、`FAILURES.md`、`failure-reviews/`；这些内容均位于 `skills/weex-admin-ops/` 内。
-  - 已清理 skill 内部文档和脚本 usage 注释中的仓库路径前缀，统一改为 skill 根目录相对路径，例如 `scripts/...`、`assets/...`、`artifacts/...`。
-  - 已重新复制 skill 到临时独立目录验证：结构校验、奖品 dry-run、两个动作缓存 dry-run 和默认图片路径检查均通过。
+- 已内置前端 `loginTool` 最小运行时到 `skills/weex-frontend-ops/vendor/loginTool/`，不再依赖 `/Users/gabriel/Downloads/weexpr/loginTool`。
+- 已新增根 `package.json` / `package-lock.json`，前端和后管缺少 `playwright` 时默认自动执行 `npm install --no-audit --no-fund`，可用 `WEEX_AUTO_INSTALL_DEPS=false` 禁用。
+- 已修复 FIN 登录态未就绪时的处理：FIN 发放、批量充值、合约充值脚本现在自动打开持久 CDP FIN 登录页，等待用户登录并关闭页面后复验，再继续流程。
+- 已新增首次启动检查 `tools/first-run-check.mjs`，检查项目依赖、skill-local `.env.local` 必需项和 FIN 登录态。
+- 已新增对话配置工具 `tools/configure-skill-env.mjs`，支持把用户在对话中提供的缺失值写入对应 skill 的 `.env.local`，输出不回显真实值。
+- 已更新 `AGENTS.md`：首次对话必须先检查依赖/配置；缺失时必须说明缺失项、放置路径、文件配置方式、对话配置方式和脚本配置方式。
+- 已归档本轮运行时自包含改造：`docs/session-handoffs/2026-05-11-runtime-self-contained.md`。
 
 ## 当前 Git 状态
 
 - 当前分支：`dev`。
-- 最近远端同步提交：`108d9de feat: add WEEX frontend ops skill`。
-- 本轮 FIN Admin skill 拆分、`AGENTS.md` 规范更新、FIN 动作缓存迁移和交接摘要更新尚未提交。
+- 最近本地提交：`b882407 fix: vendor frontend login runtime and auto-install deps`。
+- 本轮首次检查/对话配置脚本、AGENTS/README/docs 更新尚未提交。
 
 ## 后续接力建议
 
-- 前端注册脚本已沉淀为 `frontend_register_api`；后续创建必须先 dry-run，真实执行必须显式传 `--confirm-register`。
-- 前端注册脚本在 STG/test 环境输出完整邮箱；token、cookie、验证码和密码仍不得输出。本机配置只放在对应 skill 目录内的 `.env.local` 并保持未提交。
-- 前端登录/注册认证链路例外已写入 `AGENTS.md`；后续前端认证默认使用已沉淀的 cookie/API 路径并验证最终登录页。
-- 活动后台和 FIN Admin 写操作仍需按 `AGENTS.md` 先说明动作；高风险业务参数不得猜测。
-- FIN Admin 真实发放/审核必须先运行 `skills/weex-fin-admin-ops/scripts/fin-auth-check.mjs`；通过后再使用 `skills/weex-fin-admin-ops/scripts/run-cached-action.mjs` dry-run。创建需 `--confirm-create`，审核需 `--confirm-approve` 和 `skills/weex-fin-admin-ops/.env.local` 内的 `WEEX_FIN_GOOGLE_CODE`。如果用户已明确要求充值/发放且金额、币种、环境、目标账号/UID、审核方式明确，不需要再二次确认。
-- FIN 可见页面只用于登录态失效恢复；登录页关闭后必须切回 headless/CDP/API 复验和执行业务，不能再打开可见 FIN tab 做普通验证或写操作。
-- FIN 默认不再为了读取 localStorage 自动打开 headless target；如果没有 FIN tab 且 profile auth 可读，应直接通过 profile 文件认证继续。不要在普通 FIN 读写中设置 `WEEX_FIN_ALLOW_OPEN_TARGET=true`，该开关只给登录恢复流程使用。
-- 后续批量“创建账号并充值”优先使用 `batch_register_recharge`：先 dry-run，再真实执行。STG/test 输出完整 email、UID、订单号和审核证据；脚本仍不得输出密码、验证码、token、cookie。
-- 后续前端“现货划转合约”优先使用 `frontend_assets_transfer`：先运行 `node scripts/run-cached-action.mjs --action frontend_assets_transfer --dry-run`，确认目标账号、金额、币种 id 和账户类型后再加 `-- --confirm-transfer` 真实执行；当前还没有余额回查断言，跑通真实划转后应补充余额验证再标记为 verified。
-- 后续“注册账号并让合约有 U / 转进合约 / 合约账户充 U”使用 `register_recharge_transfer_contract` 复合链路：先 dry-run，再真实执行注册、FIN 现货充值和前端划转合约；最终成功必须以前端划转业务码 `00000` 为准。面向用户的最终结果只输出 `用户名 / UID / 结果`，不展示 FIN 订单号；若划转失败，先报告失败账号和业务响应，不要重复创建新批次，优先做余额/账户类型回查或重试失败账号划转。
-- 该复合链路现在默认账号级并发：多账号默认并发数等于账号数量，最大 `100`，也可传 `--concurrency <N>` 覆盖但仍受 `100` 限制。单账号内部不可并发，必须保持注册、审核、划转顺序。
+- 新会话处理业务任务前，先运行 `tools/first-run-check.mjs` 检查对应 skill。
+- 若缺配置，优先让用户选择：
+  - 文件方式：复制对应 `.env.example` 到 skill `.env.local` 后填写。
+  - 对话方式：用户直接提供缺失值，Codex 写入对应 skill `.env.local`，不回显真实值。
+  - 脚本方式：通过 `tools/configure-skill-env.mjs --from-stdin` 写入。
+- FIN 登录态不能随仓库提交；同事首次使用 FIN 能力时需要在自动打开的持久 CDP FIN 页面登录并关闭该页面。
+- `.env.local`、`.DS_Store` 仍保持本机未跟踪；真实密码、验证码、token、cookie、API key 不提交。
 
 ## 安全说明
 
-- 不保存真实密码、验证码、token、cookie、API key 或完整账号凭证。
+- 不保存真实密码、验证码、token、cookie、API key 或完整账号凭证到可提交文件。
+- STG/test 测试账号邮箱和 UID 可完整记录；生产或未明确非生产时仍需脱敏。
 - 截图仅在用户明确要求时保存。

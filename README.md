@@ -26,6 +26,28 @@
 - `temp/`：用户明确要求暂不沉淀到 skill 的已跑通流程。
 
 ## 常用命令
+首次检查依赖、配置和登录态：
+
+```bash
+npm run first-run
+```
+
+只检查某个 skill：
+
+```bash
+node tools/first-run-check.mjs --skill frontend
+node tools/first-run-check.mjs --skill fin
+node tools/first-run-check.mjs --skill admin
+```
+
+对话式配置时，Codex 会把用户提供的缺失值写入对应 skill 的 `.env.local`，不回显真实值。也可以用 stdin 写入：
+
+```bash
+node tools/configure-skill-env.mjs --skill frontend --from-stdin
+```
+
+执行后粘贴 JSON，再按 `Ctrl-D` 结束输入。不要把密码、验证码、token、cookie 写在 shell 命令参数里。
+
 安装项目运行依赖：
 
 ```bash
