@@ -7,6 +7,7 @@ import {
   transferArgs,
   transferForAccount,
 } from "./commands.mjs";
+import { defaultCdpUrl, ensureFinAuthReady } from "../finance-airdrop-reward/api.mjs";
 
 export async function runRegisterRechargeTransferContract(argv) {
   const args = parseArgs(argv);
@@ -36,6 +37,9 @@ export async function runRegisterRechargeTransferContract(argv) {
         fromAccountType: Number(args.fromAccountType),
         toAccountType: Number(args.toAccountType),
         transferCoinId: String(args.transferCoinId),
+        retryableCodes: ["70008", "20105"],
+        maxRetries: args.transferRetries,
+        retryDelayMs: args.transferRetryDelayMs,
       },
       batchRegisterRecharge: batch,
       frontendTransfer: transfer,
@@ -45,6 +49,8 @@ export async function runRegisterRechargeTransferContract(argv) {
   }
 
   const runId = Date.now();
+  await ensureFinAuthReady(defaultCdpUrl(process.env), process.env);
+  process.env.WEEX_FIN_DISABLE_VISIBLE_RECOVERY = "true";
   const results = await runPool(args.count, concurrency, index => processAccount(index, args, runId));
   const accounts = results.map(item => item.account).filter(Boolean);
   const grants = results.map(item => item.grant).filter(Boolean);

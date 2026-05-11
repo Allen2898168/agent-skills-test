@@ -112,3 +112,23 @@
 - 追加记录：同日多次执行“创建20个账号 合约划进去213u”时，前端配置和 FIN/前端 `.env.local` 必需项存在；FIN 基础检查仍返回 `非法Token,请登录`，登录恢复后仍返回 `fetch failed`，二次基础检查仍为非法 Token。未执行 dry-run、未创建账号、未发放或划转。
 - 追加修复：确认根因之一是 `fin-auth-check.mjs --wait-for-close` 进入登录恢复后没有显式校验 FIN 页面是否真的打开；若 `readFinAuth` 先读到 profile 中的旧 token，可能直接复验失败而没有产生可见 FIN 页面。已新增 `openVisibleFinLoginPage`，恢复流程现在会强制打开可见 FIN 页面并验证 CDP target 包含 `stg-admin-web-fin.weex.tech`，否则直接报错，不再进入假等待。
 - 追加修复：FIN 发放、批量充值和合约充值脚本已接入 `ensureFinAuthReady`，当登录态缺失时会自动打开持久 CDP FIN 登录页并等待用户关闭后复验；基础验证通过后继续原写操作，不再要求操作员手动把 `loginRequired=true` 转成恢复命令。
+
+## 2026-05-11 30账号合约充值高并发 FIN fetch 失败后补齐成功
+- 业务线：FIN Admin 与前端组合动作。
+- 场景：执行“创建30个账号 然后合约划转进去20u”，目标态为 30 个 STG 新账号各收到 20 USDT 并完成现货到合约划转。
+- 失败表现：`register_recharge_transfer_contract --count 30 --amount 20` 高并发执行时，30 个账号实际均已创建；但多笔 FIN grant 子进程在 dry-run/发放阶段返回 `fetch failed`，仅 UID `3825489432`、`1362655258` 完成 FIN 发放审核；两账号首次前端划转返回 `70008 超出可划转的最大金额`。
+- 失败原因：30 并发下前端注册后的页面验证出现 DNS 失败，FIN grant 子进程并发读取/恢复 CDP auth 时出现 fetch 失败和可见 FIN 页面等待关闭；FIN 审核成功后前端可划转余额也存在短暂延迟。
+- 解决方式：不重复创建账号；先用前端登录接口按邮箱回查页面验证失败账号的 UID，再对未发放的 28 个 UID 顺序执行 `finance-airdrop-reward-grant.mjs --confirm-create --confirm-approve`，最后对 30 个账号顺序执行 `frontend-assets-transfer.mjs --confirm-transfer --amount 20 --from-account-type 10 --to-account-type 8 --transfer-coin-id 2`。
+- 验证结果：30 个账号均可登录并取得 UID；30 笔 FIN 20 USDT 发放审核均 `approvalVerified=true`；30 次前端划转均 HTTP 200、业务码 `00000 success`。
+- 关联流程或脚本：`scripts/register-recharge-transfer-contract.mjs`、`scripts/finance-airdrop-reward-grant.mjs`、前端 `scripts/frontend-assets-transfer.mjs`。
+- 后续处理：已修复子进程可见登录恢复问题：复合脚本和批量充值脚本启动时只做一次 FIN 登录态准备，随后设置 `WEEX_FIN_DISABLE_VISIBLE_RECOVERY=true`，FIN grant 子进程只复用登录态，不再自行打开可见 Chrome。高并发组合链路失败时固定恢复路径为“回查 UID -> 只补未发放账号 -> 顺序重试划转”；不得重复创建整批账号或重复给已发放 UID 充值。后续仍应把组合脚本改为注册阶段使用批量 API 或增加 `--skip-account-page-verify`。
+
+## 2026-05-11 10账号合约充值初始执行误降并发
+- 业务线：FIN Admin 与前端组合动作。
+- 场景：执行“创建10个账号 每个账号给合约充10u”时，操作员在真实初始执行命令中手动传入 `--concurrency 1`。
+- 失败表现：业务最终完成，但初始执行没有遵守 `register_recharge_transfer_contract` 默认并发规则；用户指出应默认并发，除非用户明确要求顺序。
+- 失败原因：操作员受此前高并发失败复盘影响，把“失败恢复阶段可顺序补发/重试划转”的策略错误提前用于初始执行。
+- 解决方式：已将组合链路说明和 action-cache 明确更新为：初始执行默认并发等于账号数量，禁止无用户要求时降低并发；只有用户明确要求顺序，或已出现部分失败并保留账号/发放状态后的恢复步骤，才使用顺序执行。
+- 验证结果：本次 10 个账号均创建成功，10 笔 FIN 10 USDT 发放审核验证成功；初次前端划转 2 个成功、8 个返回 `70008`，随后只对 8 个失败账号重试划转，全部返回 `00000 success`。
+- 关联流程或脚本：`scripts/register-recharge-transfer-contract.mjs`、`references/operations/finance-airdrop-reward.md`、`references/action-cache.md`。
+- 后续处理：已吸收到固定流程；后续类似请求初始命令不传 `--concurrency`，恢复阶段才按失败账号顺序处理。2026-05-11 再次执行 12 个账号 10 USDT 合约划转时复现初次 `70008`，只重试 5 个失败账号后 12/12 成功；已进一步把 `70008`/`20105` 短延迟重试内置到 `scripts/register-recharge-transfer-contract.mjs`，默认只重试前端划转，不重复注册或 FIN 发放。

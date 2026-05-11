@@ -139,7 +139,8 @@ export async function runFinanceAirdropRewardGrant(argv, env = process.env) {
   }
   validateGrantArgs(args, env);
 
-  const { auth } = await ensureFinAuthReady(args.cdpUrl, env);
+  const recoverAuth = env.WEEX_FIN_DISABLE_VISIBLE_RECOVERY !== "true";
+  const { auth } = await ensureFinAuthReady(args.cdpUrl, env, { recover: recoverAuth });
   const discovered = await discoverFinGrantConfig(auth, args);
   const payload = args.approveOnlyOrderId ? null : createPayload(args, discovered);
   const plan = buildPlan(args, auth, discovered, payload, env);

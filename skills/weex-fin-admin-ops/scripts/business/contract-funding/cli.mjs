@@ -14,6 +14,8 @@ export function parseArgs(argv) {
     confirmTransfer: false,
     skipGrantDryRun: false,
     allowUnverifiedTransferChain: false,
+    transferRetries: 2,
+    transferRetryDelayMs: 3000,
   };
   for (let index = 0; index < argv.length; index += 1) {
     const value = argv[index];
@@ -31,6 +33,8 @@ export function parseArgs(argv) {
     else if (value === "--confirm-transfer") args.confirmTransfer = true;
     else if (value === "--skip-grant-dry-run") args.skipGrantDryRun = true;
     else if (value === "--allow-unverified-transfer-chain") args.allowUnverifiedTransferChain = true;
+    else if (value === "--transfer-retries") args.transferRetries = Number(argv[++index] || 0);
+    else if (value === "--transfer-retry-delay-ms") args.transferRetryDelayMs = Number(argv[++index] || 0);
     else if (value === "--help" || value === "-h") args.help = true;
   }
   return args;
@@ -43,7 +47,8 @@ export function help() {
   node skills/weex-fin-admin-ops/scripts/register-recharge-transfer-contract.mjs --count 20 --amount 213 --concurrency 3 --confirm-register --confirm-recharge --confirm-transfer
 
 Runs one full account chain per account: frontend registration -> FIN spot recharge approval -> frontend spot-to-contract transfer.
-Concurrency is across accounts only; each account's internal chain remains ordered. Default concurrency equals count, capped at 100.`;
+Concurrency is across accounts only; each account's internal chain remains ordered. Default concurrency equals count, capped at 100.
+Frontend transfer retries retryable business responses 70008/20105 by default without repeating registration or FIN recharge.`;
 }
 
 export function assertArgs(args) {
@@ -56,6 +61,8 @@ export function assertArgs(args) {
   if (!/^\d+$/.test(String(args.toAccountType || ""))) missing.push("--to-account-type");
   if (!/^\d+$/.test(String(args.transferCoinId || ""))) missing.push("--transfer-coin-id");
   if (args.concurrency !== null && (!Number.isInteger(args.concurrency) || args.concurrency < 1)) missing.push("--concurrency");
+  if (!Number.isInteger(args.transferRetries) || args.transferRetries < 0) missing.push("--transfer-retries");
+  if (!Number.isInteger(args.transferRetryDelayMs) || args.transferRetryDelayMs < 0) missing.push("--transfer-retry-delay-ms");
   if (!args.dryRun && !args.confirmRegister) missing.push("--confirm-register");
   if (!args.dryRun && !args.confirmRecharge) missing.push("--confirm-recharge");
   if (!args.dryRun && !args.confirmTransfer) missing.push("--confirm-transfer");

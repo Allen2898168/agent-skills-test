@@ -137,3 +137,27 @@
 - 验证结果：语法检查通过；依赖解析走项目根 `package.json`，可用 `WEEX_AUTO_INSTALL_DEPS=false` 禁用自动安装。
 - 关联流程或脚本：`package.json`、`skills/weex-frontend-ops/scripts/lib/dependencies.mjs`、`skills/weex-admin-ops/scripts/lib/dependencies.mjs`。
 - 后续处理状态：固定路径已生效；新增 Node 依赖必须登记到根 `package.json`。
+
+## 批量注册后账号页验证 DNS 失败但账号已创建
+
+- 日期：2026-05-11
+- 页面/流程：`register_recharge_transfer_contract` 内部调用 `frontend-register-api.mjs` 创建 STG 账号后打开 `/zh-CN/account` 验证。
+- 环境/viewport：STG，注册为 API 路径，账号页验证为隐藏 Playwright 浏览器默认 desktop。
+- 失败表现：30 并发创建账号时，多笔注册在 `page.goto https://stg-www.weex.tech/zh-CN/account` 返回 `net::ERR_NAME_NOT_RESOLVED`，导致单账号脚本没有输出 UID；但对应邮箱后续通过登录接口均可登录并取得 UID。
+- 失败原因：注册 API 已成功返回 token/用户信息后，后置浏览器账号页验证依赖 `stg-www.weex.tech` DNS/页面可达性；高并发下该验证失败会把已创建账号误报为注册失败。
+- 解决方式：不要按“注册失败”重复创建同邮箱或整批账号；先用登录接口按邮箱回查 UID，再继续 FIN 发放和前端划转。后续组合脚本应优先使用 `frontend-register-batch-api.mjs` 或为内部注册增加跳过页面验证的 API-only 模式。
+- 验证结果：本次 17 个页面验证失败邮箱均可登录并取得 UID；最终 30 个账号均完成 20 USDT 合约划转，前端划转业务码均为 `00000 success`。
+- 关联流程或脚本：`scripts/frontend-register-api.mjs`、`scripts/frontend-register-batch-api.mjs`、FIN `scripts/register-recharge-transfer-contract.mjs`。
+- 后续处理状态：恢复路径已记录；待脚本固定化，避免后续高并发组合链路把页面验证失败误判为账号未创建。
+
+## 小额合约充值初次划转 70008 后重试成功
+
+- 日期：2026-05-11
+- 页面/流程：组合动作 `register_recharge_transfer_contract` 的前端划转阶段。
+- 环境/viewport：STG，API-only，无页面 viewport。
+- 失败表现：执行“创建10个账号 每个账号给合约充10u”时，10 个账号均创建成功且 FIN 10 USDT 发放审核验证成功；首次前端现货到合约划转只有 2 个账号返回 `00000 success`，8 个账号返回 `70008 超出可划转的最大金额`。
+- 失败原因：FIN 发放审核成功后，前端源账户类型 `10` 的可划转余额可能存在短暂延迟；初次划转失败不代表账号创建或 FIN 发放失败。
+- 解决方式：不重复创建账号或重复 FIN 发放，只对返回 `70008` 的账号按原 payload 重试前端划转。
+- 验证结果：8 个失败账号逐个重试后均返回 HTTP 200、业务码 `00000 success`；最终 10/10 个账号完成合约划转。
+- 关联流程或脚本：FIN `scripts/register-recharge-transfer-contract.mjs`、`scripts/frontend-assets-transfer.mjs`。
+- 后续处理状态：2026-05-11 再次执行“创建12个账号 合约划转10u”时复现该模式，初次 5/12 返回 `70008`，只重试失败账号后 12/12 均返回 `00000 success`。已吸收到 FIN 组合脚本固定路径：`register_recharge_transfer_contract` 对 `70008`/`20105` 默认短延迟重试 2 次，且只重试前端划转，不重复注册或 FIN 发放；初始执行并发仍遵守 FIN 组合链路默认规则。

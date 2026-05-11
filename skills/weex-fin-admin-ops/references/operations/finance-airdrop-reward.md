@@ -95,9 +95,11 @@ node skills/weex-fin-admin-ops/scripts/register-recharge-transfer-contract.mjs -
 
 Real contract funding must be verified per account by the frontend transfer response. On 2026-05-08, a real run created and recharged accounts, but one frontend transfer returned `20105`; the compound script now preserves partial registration/recharge results and records transfer failures per account.
 
-The compound script treats one account as one ordered chain: frontend registration -> FIN `空投奖励(产品化活动)` creation and approval -> frontend spot-to-contract transfer. Multiple account chains run in parallel by default with concurrency equal to the requested account count, capped at `100`, and each single account keeps that internal order. Use `--concurrency <n>` to override, still capped at `100`.
+The compound script treats one account as one ordered chain: frontend registration -> FIN `空投奖励(产品化活动)` creation and approval -> frontend spot-to-contract transfer. Multiple account chains run in parallel by default with concurrency equal to the requested account count, capped at `100`, and each single account keeps that internal order. Do not reduce concurrency for normal user requests unless the user explicitly asks for sequential execution, or unless recovering from a concrete partial failure after preserving the created accounts and grant state. Use `--concurrency <n>` to override, still capped at `100`. Frontend transfer business responses `70008` and `20105` are retried twice by default with a short delay; retries repeat only the transfer call for that account.
 
 User-facing final output for contract-funding requests must only show `用户名 / UID / 结果`. Do not include FIN order ids in the final result table unless the tester explicitly asks for them. Keep order ids available in internal script output, handoff, or failure reviews for traceability.
+
+For larger batches, the compound command still runs account chains concurrently by default. The parent process must prepare FIN auth once; child FIN grant processes run with visible login recovery disabled, so a valid FIN login state must not produce visible Chrome windows during the middle of execution. If high concurrency fails after some accounts are already created, do not rerun the whole compound command. Recover in this order: log in with the generated emails to recover missing UIDs, grant only UIDs without a successful FIN order, then retry only the frontend spot-to-contract transfer. This recovery path was used on 2026-05-11 for 30 accounts at 20 USDT each and completed with 30/30 frontend transfer responses `00000 success`.
 
 ## Target-State Composition
 
@@ -108,7 +110,7 @@ Current handling:
 1. Run dry-run to confirm the request maps to `register_recharge_transfer_contract`.
 2. If count, amount, currency, and contract target are clear from the user request, execute the compound chain with explicit confirmation flags.
 3. Verify each stage separately: account creation, FIN grant order approval, and frontend transfer business response.
-4. If transfer fails after successful recharge, report all known accounts and orders; do not create a duplicate batch unless the user explicitly asks.
+4. If transfer still fails after built-in retries and successful recharge, report all known accounts and orders; do not create a duplicate batch unless the user explicitly asks.
 5. In the user-facing result, summarize per account as username, UID, and result only. Hide FIN order ids from the main output by default.
 
 ## Safety
@@ -128,4 +130,6 @@ Current handling:
 - Actual staging create and approve verified on 2026-05-08 for a newly created frontend test account.
 - Verification evidence: created order appeared in wait-audit list, `needGaVerify` returned successfully, approval returned successfully, and approved-order list lookup hit the order.
 - Batch execution on 2026-05-08 created 3 additional STG frontend test accounts and submitted 3 grants of 1000 USDT each. Two orders hit the approved list immediately; one order returned `verifyPass` success and was absent from the pending list on approve-only recheck, so the script now records pending-absence as supplemental evidence.
+- On 2026-05-11, a 30-account contract-funding request at 20 USDT each was completed after recovery from high-concurrency failures: all 30 generated emails logged in and returned UID, all 30 FIN grants were approval-verified, and all 30 frontend spot-to-contract transfer responses returned `00000 success`.
+- On 2026-05-11, a 12-account contract-funding request at 10 USDT each completed after retrying only 5 initial transfer `70008` responses: all 12 accounts were created, all 12 FIN grants were approval-verified, and all 12 frontend spot-to-contract transfer responses ultimately returned `00000 success`. The script now applies the retry path automatically for `70008`/`20105`.
 - Do not record token, cookie, Google code, or complete account credentials in this reference. Staging/test UID can be recorded in full.

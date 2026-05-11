@@ -30,12 +30,13 @@ The FIN Admin action cache is the first execution layer for FIN workflows that h
 - Natural language such as `注册一个账号 转进合约1000u` should match this action, not the frontend transfer-only action.
 - Required parameters are `--count <n>` and `--amount <AMOUNT>`.
 - Default currency is `USDT`, default spot source account type is `10`, default contract target account type is `8`, and default `transferCoinId` is `2`.
-- Default concurrency equals the requested account count, capped at `100`, for multiple account contract-funding requests. Pass `--concurrency <n>` to override, still capped at `100`. Concurrency is across accounts only; each account still runs in strict order: frontend registration, FIN grant approval, then frontend transfer.
+- Default concurrency equals the requested account count, capped at `100`, for multiple account contract-funding requests. Operators must not lower concurrency for the initial run unless the user explicitly requests sequential execution. Pass `--concurrency <n>` to override, still capped at `100`. Concurrency is across accounts only; each account still runs in strict order: frontend registration, FIN grant approval, then frontend transfer.
+- Frontend transfer retry is built in: retryable business responses `70008` and `20105` are retried twice by default with a short delay. These retries repeat only the frontend transfer for that account; they must not repeat registration or FIN recharge.
 - Dry-run validates frontend registration config, FIN auth readiness, and frontend transfer config without creating accounts, grants, or transfers.
 - Actual execution requires `--confirm-register --confirm-recharge --confirm-transfer`.
 - While the chain remains candidate, use `--allow-unverified-transfer-chain` only when the user explicitly asks for the compound contract-funding target state.
 - FIN grant success alone does not satisfy contract balance; final success requires frontend transfer business code `00000`.
-- If transfer fails after successful recharge, preserve all known accounts, grant orders, and transfer responses internally; do not create a duplicate batch unless the user explicitly confirms it.
+- If transfer still fails after successful recharge and built-in retries, preserve all known accounts, grant orders, and transfer responses internally; do not create a duplicate batch unless the user explicitly confirms it.
 - User-facing output for this action should only include `用户名 / UID / 结果`. Do not show FIN order ids unless the tester explicitly asks for them.
 - The maximum effective concurrency is `100`.
 

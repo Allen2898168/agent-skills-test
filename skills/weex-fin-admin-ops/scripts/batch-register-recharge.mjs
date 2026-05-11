@@ -174,6 +174,7 @@ async function main() {
   }
 
   const finAuth = await ensureFinAuthForWrites();
+  process.env.WEEX_FIN_DISABLE_VISIBLE_RECOVERY = "true";
   const accounts = [];
   const grants = [];
   for (let index = 1; index <= args.count; index += 1) {

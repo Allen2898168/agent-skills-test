@@ -103,6 +103,19 @@ export async function grantRecharge(account, args) {
 
 export async function transferForAccount(account, args) {
   const env = { ...process.env, WEEX_FRONTEND_USERNAME: account.email };
+  const attempts = [];
+  const maxAttempts = Math.max(1, Number(args.transferRetries || 0) + 1);
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const transfer = await transferOnce(account, args, env);
+    attempts.push({ attempt, response: transfer.response, ok: transfer.ok });
+    if (transfer.ok || !isRetryableTransfer(transfer) || attempt === maxAttempts) {
+      return { ...transfer, attempts };
+    }
+    await sleep(Number(args.transferRetryDelayMs || 0));
+  }
+}
+
+async function transferOnce(account, args, env) {
   try {
     const transfer = await runNodeAsync(transferArgs(args, false), env);
     return {
@@ -128,6 +141,15 @@ export async function transferForAccount(account, args) {
       error: parsed?.error || error.message,
     };
   }
+}
+
+function isRetryableTransfer(transfer) {
+  return ["70008", "20105"].includes(String(transfer.response?.code || ""));
+}
+
+function sleep(ms) {
+  if (!ms) return Promise.resolve();
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function grantArgs(account, args, dryRun = false) {
