@@ -38,7 +38,7 @@ Use conservative defaults only in staging:
 - `类别配置`: `通用`
 - `流程引导配置`: first available `转盘抽奖` guide-flow template
 - `是否为平台活动`: `否`
-- `用户报名模板`: first compatible registration template
+- `用户报名模板`: fixed `【2729】 自动化报名模板_auto_manual_20260505161031`
 - `是否支持预报名`: `支持`
 - `预报名模版`: first compatible registration template
 - `预报名开始时间`: `2026-06-01 00:00:00`
@@ -51,6 +51,7 @@ Fill required text and rich fields:
 - `活动标题`, `活动副标题`, `分享活动文案`, `代理分享文案`, `活动规则`, and `活动别名配置`.
 - Upload default image files for web/h5 header, web/h5 share images, social preview, and prize share images.
 - Activity start time must be earlier than end time.
+- `用户报名模版`当前固定选择 `2729`：`【2729】 自动化报名模板_auto_manual_20260505161031`。不要再用“第一个兼容模板”作为默认规则。
 
 ## Lottery Styles
 

@@ -21,6 +21,8 @@
 
 ## 最近完成
 
+- 2026-05-11 已把转盘抽奖活动创建链路中的 `用户报名模版` 固定默认值沉淀到 `weex-admin-ops`：后续配置 `活动列表 / 转盘抽奖` 时，`用户报名模版` 默认固定选择 `2729` `【2729】 自动化报名模板_auto_manual_20260505161031`，不再按“第一个兼容模板”处理。已同步到脚本 `skills/weex-admin-ops/scripts/strict-lottery-visible-attempt.mjs`、计划文件 `skills/weex-admin-ops/scripts/business/activity-management/lottery-draft-plan.mjs`、操作文档 `skills/weex-admin-ops/references/operations/activity-management-lottery.md`、关系和 defaults 文档。
+- 2026-05-11 已完成“创建 3 个账号，合约划进去 213u”：`codexapi17785033381951@weex.com` / UID `3794362461`、`codexapi17785033381952@weex.com` / UID `9044888775`、`codexapi17785033381953@weex.com` / UID `2775257930` 已创建成功；3 笔 FIN `空投奖励(产品化活动)` 213 USDT 发放审核均成功。组合脚本首轮把前端子进程 warning 误记为 transfer 失败，随后按固定恢复思路只对 3 个账号单独补执行前端现货到合约划转，3/3 最终均返回 `00000 success`。复盘已写入 `skills/weex-fin-admin-ops/failure-reviews/common.md`。
 - 2026-05-11 已完成“前端转盘抽奖 5 种抽奖样式展示验证”：创建前端账号 `codexapi1778492089526@weex.com` / UID `7901867346`；活动后台创建并上线 5 个转盘抽奖活动，样式分别为圆形转盘、飞镖转盘、彩蛋、环形跑马灯、足球射门，最终均为 `ONLINE`、`stage=NOT_START`。前端验证使用 desktop `1440x1000`，先注入该账号登录态再访问 `https://stg-www.weex.tech/zh-CN/events/draw/<alias>`；5 个页面均命中活动标题、无登录表单、token cookie 存在、无失败响应。已将“创建一个 -> 上线一个 -> 注入登录态验证一个”、彩蛋 `彩蛋类型` 必填、上线前活动时间校验等沉淀到 `skills/weex-admin-ops/references/operations/activity-management-lottery.md`、`skills/weex-frontend-ops/references/operations/draw.md` 和对应失败复盘。
 - 2026-05-11 已完成“创建10个账号 划转20u合约”：10 个 STG 账号创建成功，10 笔 FIN 20 USDT 发放审核验证成功，10 次前端现货到合约划转最终均返回 `00000 success`。本次按默认并发 10 执行；其中 1 个账号首次划转返回 `70008`，组合脚本内置重试第 2 次成功，未重复创建账号或重复 FIN 发放。
 - 2026-05-11 已完成“创建12个账号 合约划转10u”：12 个 STG 账号创建成功，12 笔 FIN 10 USDT 发放审核验证成功；初次前端划转 7/12 成功、5/12 返回 `70008`，随后只重试失败账号划转，最终 12/12 返回 `00000 success`。已把合约充值组合脚本更新为对前端划转 `70008`/`20105` 默认延迟重试 2 次，不重复创建账号或重复 FIN 发放。

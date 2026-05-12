@@ -647,7 +647,7 @@ try {
   await fillLabel("活动副标题", "严格 UI 复杂配置副标题", 0);
   await fillLabel("活动开始时间", activityStartTime);
   await fillLabel("活动结束时间", activityEndTime);
-  await selectLabel("用户报名模版", null, 0, 0);
+  await selectLabel("用户报名模版", "【2729】 自动化报名模板_auto_manual_20260505161031");
   for (const label of ["WEB头图上传", "H5头图上传", "web分享图上传", "H5分享图片上传", "社媒活动预览图上传"]) await uploadLabel(label, 0);
   await fillLabel("分享活动文案", "严格 UI 分享活动文案", 0);
   await fillLabel("代理分享文案", "严格 UI 代理分享文案", 0);

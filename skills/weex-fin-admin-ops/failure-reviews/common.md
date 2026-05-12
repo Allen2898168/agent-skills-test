@@ -132,3 +132,13 @@
 - 验证结果：本次 10 个账号均创建成功，10 笔 FIN 10 USDT 发放审核验证成功；初次前端划转 2 个成功、8 个返回 `70008`，随后只对 8 个失败账号重试划转，全部返回 `00000 success`。
 - 关联流程或脚本：`scripts/register-recharge-transfer-contract.mjs`、`references/operations/finance-airdrop-reward.md`、`references/action-cache.md`。
 - 后续处理：已吸收到固定流程；后续类似请求初始命令不传 `--concurrency`，恢复阶段才按失败账号顺序处理。2026-05-11 再次执行 12 个账号 10 USDT 合约划转时复现初次 `70008`，只重试 5 个失败账号后 12/12 成功；已进一步把 `70008`/`20105` 短延迟重试内置到 `scripts/register-recharge-transfer-contract.mjs`，默认只重试前端划转，不重复注册或 FIN 发放。
+
+## 2026-05-11 3账号合约充值组合脚本将前端子进程 warning 误记为失败
+- 业务线：FIN Admin 与前端组合动作。
+- 场景：执行“创建 3 个账号，合约划进去 213u”，按固定链路运行 `register_recharge_transfer_contract`。
+- 失败表现：3 个账号均已创建成功，3 笔 FIN 213 USDT 发放审核均成功；但组合脚本在前端划转阶段把每个账号都记为失败，`transfer.response=null`，错误内容只有 Node 输出的 `NODE_TLS_REJECT_UNAUTHORIZED=0` warning。
+- 失败原因：组合链路对子进程失败信号的处理不够稳健；本次前端划转实际可单独成功执行，但组合脚本记录为 transfer 失败，导致主结果误判。
+- 解决方式：不重复注册或 FIN 发放，直接对已创建账号逐个单独执行 `skills/weex-frontend-ops/scripts/frontend-assets-transfer.mjs --confirm-transfer --amount 213 --from-account-type 10 --to-account-type 8 --transfer-coin-id 2` 补划转。
+- 验证结果：账号 `codexapi17785033381951@weex.com` / UID `3794362461`、`codexapi17785033381952@weex.com` / UID `9044888775`、`codexapi17785033381953@weex.com` / UID `2775257930` 单独划转均返回 HTTP 200、业务码 `00000 success`。
+- 关联流程或脚本：`scripts/register-recharge-transfer-contract.mjs`、`scripts/business/contract-funding/commands.mjs`、前端 `scripts/frontend-assets-transfer.mjs`。
+- 后续处理：后续应继续排查组合脚本对子进程 stderr/warning 与真实退出状态的判定，避免把可恢复 warning 误记为 transfer 失败；在修复前，出现同类结果时固定恢复路径为“保留已创建账号和已审核发放，只单独补前端划转”。
