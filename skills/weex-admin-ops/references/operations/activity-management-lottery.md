@@ -49,6 +49,7 @@ Use conservative defaults only in staging:
 
 Fill required text and rich fields:
 - `活动标题`, `活动副标题`, `分享活动文案`, `代理分享文案`, `活动规则`, and `活动别名配置`.
+- Hard rule: `活动标题` and `活动副标题` must each be no longer than 15 characters. Use exact short values for user-facing title fields; do not append timestamps to these fields.
 - Upload default image files for web/h5 header, web/h5 share images, social preview, and prize share images.
 - Activity start time must be earlier than end time.
 - `用户报名模版`当前固定选择 `2729`：`【2729】 自动化报名模板_auto_manual_20260505161031`。不要再用“第一个兼容模板”作为默认规则。
@@ -123,6 +124,8 @@ For each row:
 - Click the module `+` button to create a config row.
 - Fill `排序系数`; higher values sort earlier. The verified run used `1`.
 - The switch adds `新手活动合约任务` as another row; only `排序系数` is required there.
+- If the user explicitly asks for `转盘抽奖任务中的合约交易任务`, do not use the `新手活动合约任务` switch as a substitute. Use the activity task dropdown backed by `GET /prod-api/activity/task/all?activityType=5`, select a `TRADING_VOLUME` task such as `4873-自动化测试-转盘-合约100-奖次1000-20260507`, click the card-level `+`, and verify the task row appears before filling `排序系数=1`.
+- In edit mode, changing only the visible date input may not update the Vue form model. Before saving a near-future time update, verify the component model `baseForm.form.startTime/endTime` matches the visible inputs; otherwise the save request can return `code=200` while still submitting old times.
 
 `多语言`:
 - Select display language first. The validated run selected English.
@@ -163,6 +166,10 @@ Recommended sequence for multiple frontend-display activities:
 
 Do not treat a reachable draft URL as frontend display success.
 
+For "10 minutes later" or other near-future lottery activities, compute the activity time in the backend/admin business timezone observed by staging (UTC+8), not the local desktop timezone. The server validates `活动开始时间` against that business clock; local CEST `now + 10 minutes` was rejected as `开始时间不可小于现在时间` on 2026-05-12.
+
+If the tester asks to avoid pre-registration, set `是否支持预报名 = 不支持` and still keep the required `用户报名模版` value. Do not fill `预报名开始时间` / `预报名结束时间` in that branch.
+
 ## Row Actions
 
 Visible-browser checks on 2026-05-07:
@@ -197,6 +204,7 @@ Non-visible/headless checks on 2026-05-07:
 - Do not mark lottery delete as passed unless `POST /prod-api/activity/lottery/delete` returns business `code=200` and alias search returns `total=0`.
 - Direct API calls to `/prod-api/activity/lottery/online` with guessed fields such as `googleCode` or `code` returned `google验证码不得为空` on 2026-05-11. Until the real payload key is proven, use the UI confirmation dialog for online operations.
 - When the user asks to create several frontend-display lottery activities, prefer create -> online -> frontend verify per activity. If batching is still used, refresh every activity's time immediately before online.
+- For near-future activities, refresh time using the backend/admin business timezone before creation or before updating the draft. A start time that is future in the local machine timezone can still fail server validation.
 
 ## Cache
 

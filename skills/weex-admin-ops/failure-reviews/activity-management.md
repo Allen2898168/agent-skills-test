@@ -169,3 +169,33 @@
 - 验证结果：5 种样式活动均创建并上线成功，前端页面分别展示对应活动标题。
 - 关联流程：`skills/weex-admin-ops/scripts/strict-lottery-visible-attempt.mjs`、`references/operations/activity-management-lottery.md`。
 - 后续处理：已吸收到固定脚本和 operation 文档；后续如果 FAQ 被用户指定为验证目标，再单独补强样式差异下的 FAQ 定位。
+
+## 2026-05-12 转盘抽奖近未来开始时间按本地时区误填
+- 业务线：活动列表 / 转盘抽奖 / 新增并上线。
+- 场景：用户要求重新配置上线一个 10 分钟后开始的转盘抽奖活动，首次按本地 CEST 当前时间 +10 分钟填写活动开始时间。
+- 失败表现：关闭预报名后提交触发 `POST /prod-api/activity/config`，HTTP 200 但业务 `code=500`，提示 `开始时间不可小于现在时间`，列表按别名回查 `total=0`。
+- 失败原因：staging 后台服务按 admin 业务时区（UTC+8）校验活动开始时间；本地 CEST 的近未来时间在服务端视角已经早于当前时间。首次尝试还使用默认预报名时间，与当前活动时间不匹配，导致 `baseForm=false` 且未触发创建接口。
+- 解决方式：用户确认“不预报名，正常设置比赛开始结束时间”后，设置 `是否支持预报名=不支持`；近未来开始/结束时间改按 UTC+8 业务时区计算，活动开始时间为后台当前时间 +10 分钟，结束时间为开始后 7 天。
+- 验证结果：重跑创建活动 ID `9049`，别名 `lottery-10min-20260512034826`；`POST /prod-api/activity/config` 业务 `code=200`，列表回查 `status=DRAFT`、`stage=NOT_START`；随后列表行 `上线` 确认触发 `POST /prod-api/activity/lottery/online` 业务 `code=200`，最终回查 `status=ONLINE`、`stage=NOT_START`。
+- 关联流程：`skills/weex-admin-ops/scripts/strict-lottery-visible-attempt.mjs`、`活动列表 / 转盘抽奖 / 新增 / 上线`。
+- 后续处理：已补充到 `references/operations/activity-management-lottery.md`；后续自然语言出现“10 分钟后/近未来开始”时，创建前必须按后台业务时区刷新时间，并根据用户要求显式关闭预报名。
+
+## 2026-05-12 转盘抽奖合约任务强制长任务名未落值
+- 业务线：活动列表 / 转盘抽奖 / 新增并上线 / 活动任务信息。
+- 场景：用户要求“创建一个转盘抽奖活动，所有用户都可以报名，且有合约交易的转盘抽奖任务，如果没有则创建，6 分钟以后开赛，完成后上线，浏览器模式”。
+- 失败表现：首次可见 UI 创建时强制传入长任务名 `自动化测试-转盘-合约100-奖次1000-20260507`，提交前诊断 `activityTaskForm=false`，未触发 `POST /prod-api/activity/config`，别名 `lottery-6min-contract-20260512174047` 列表回查 `total=0`。
+- 失败原因：活动任务下拉按长名称选择和模块 `+` 添加没有形成有效任务配置行；页面无表单错误但 `activityTaskForm.submit()` 返回 `false`，说明任务模块状态未绑定成功。
+- 解决方式：重跑时不强制长名称过滤活动任务下拉，改为选择页面可用转盘任务，并显式开启 `新手活动合约任务` 开关；近未来活动时间重新按后台 UTC+8 当前时间 +6 分钟计算，且 `是否支持预报名=不支持`。
+- 验证结果：重跑创建活动 ID `9087`，别名 `lottery-6min-contract-20260512174523`；`POST /prod-api/activity/config` 业务 `code=200`，详情回查 `showBeginnerTaskConfig` 包含 `{ taskType: "TRADING_VOLUME", sorted: 2 }`；列表行 `上线` 触发 `POST /prod-api/activity/lottery/online` 业务 `code=200`，最终回查 `status=ONLINE`、`stage=NOT_START`。
+- 关联流程：`skills/weex-admin-ops/scripts/strict-lottery-visible-attempt.mjs`、`活动列表 / 转盘抽奖 / 新增 / 活动任务信息 / 新手活动合约任务 / 上线`。
+- 后续处理：2026-05-13 已按用户纠正补强指定转盘抽奖任务下拉选择、加号落行和排序系数填写逻辑，后续用户明确要求“转盘抽奖任务中的合约交易任务”时不得用 `新手活动合约任务` 开关替代。
+
+## 2026-05-13 转盘抽奖任务配置与编辑页时间模型不同步
+- 业务线：活动列表 / 转盘抽奖 / 新增并上线 / 活动任务信息 / 修改时间。
+- 场景：用户要求创建不同样式转盘抽奖活动，不预报名，比赛时间 4 分钟后开始，使用 `活动任务信息` 模块下 `转盘抽奖任务配置` 中的合约交易任务，并上线。
+- 失败表现：首次用 `新手活动合约任务` 开关不符合用户目标；随后选择 `转盘抽奖_合约交易量_retry_20260504204324` 未落行，提交前 `activityTaskForm=false`。改选下拉可见任务 `4873-自动化测试-转盘-合约100-奖次1000-20260507` 后能落行，但未填 `排序系数` 时 `activityTaskForm.submit()` 仍为 `false`。创建成功后因耗时导致开始时间过期，编辑页只改可见日期输入并点击保存，`PUT /prod-api/activity/config` 返回 `code=200`，但详情回查 `startTime` 仍是旧值，后续上线返回 `发布上线时间已超过活动开始时间，请调整后再发布上线`。
+- 失败原因：活动任务下拉数据源是 `GET /prod-api/activity/task/all?activityType=5`，需要选择后点击活动任务卡片内 `+` 并填写行内 `排序系数` 才会形成有效 `taskConfig`。编辑页日期输入值与 Vue 组件模型 `baseForm.form.startTime/endTime` 可能不同步，只改 DOM input 不会进入保存 payload。
+- 解决方式：脚本 `strict-lottery-visible-attempt.mjs` 改为限定在 `活动任务信息` 卡片内选择 `4873` 或匹配 `转盘/合约` 的任务，点击卡片主按钮 `+`，确认表格行出现后填写 `排序系数=1`。修改已创建草稿时间时，同时更新可见输入和 `baseForm.form.startTime/endTime`，并校验 `PUT` payload 与详情回查时间一致后再点击列表行 `上线`。
+- 验证结果：活动 ID `9093` 创建并上线成功；别名 `lottery-4min-dart-contract-20260513110241`，状态 `ONLINE`、阶段 `NOT_START`，时间 `2026-05-13 19:45:51` 至 `2026-05-20 19:15:51`，详情回查 `taskConfigIds=[4873]`，任务 `taskType=TRADING_VOLUME`、`requiredVolume=100`；上线接口 `POST /prod-api/activity/lottery/online` 返回 `code=200`。
+- 关联流程：`skills/weex-admin-ops/scripts/strict-lottery-visible-attempt.mjs`、`活动列表 / 转盘抽奖 / 新增 / 活动任务信息 / 修改 / 上线`。
+- 后续处理：已把指定转盘合约任务落行逻辑吸收到创建脚本，并补充 operation 文档；后续近未来上线若创建耗时较长，应优先设置更大的未来窗口或在上线前用模型级时间更新确认详情回查。

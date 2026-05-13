@@ -14,12 +14,15 @@ const { chromium } = loadPlaywright();
 const stamp = timestamp();
 const titlePrefix = process.env.LOTTERY_TITLE_PREFIX || "严格UI转盘抽奖草稿";
 const aliasPrefix = process.env.LOTTERY_ALIAS_PREFIX || "strict-ui-lottery";
-const title = `${titlePrefix}${stamp}`;
+const title = process.env.LOTTERY_TITLE_EXACT || `${titlePrefix}${stamp}`;
 const alias = `${aliasPrefix}-${stamp}`;
+const subTitle = process.env.LOTTERY_SUBTITLE || "严格 UI 复杂配置副标题";
 const activityStartTime = process.env.LOTTERY_START || "2026-06-10 00:00:00";
 const activityEndTime = process.env.LOTTERY_END || "2026-06-30 23:59:59";
 const preApplyStartTime = process.env.LOTTERY_PREAPPLY_START || "2026-06-01 00:00:00";
 const preApplyEndTime = process.env.LOTTERY_PREAPPLY_END || "2026-06-09 23:59:59";
+const registrationTemplateLabel = process.env.LOTTERY_REGISTRATION_TEMPLATE_LABEL || "【2729】 自动化报名模板_auto_manual_20260505161031";
+const activityTaskLabel = process.env.LOTTERY_ACTIVITY_TASK_LABEL || "";
 const enablePreApply = process.env.LOTTERY_PREAPPLY !== "0";
 const lotteryStyle = process.env.LOTTERY_STYLE || "圆形转盘";
 const evidence = { uploads: 0, activityResponses: [] };
@@ -571,19 +574,47 @@ async function enableBeginnerContractTask() {
 
 async function fillTask() {
   await scrollText("活动任务信息");
-  await selectLabel("活动任务", null, 0, 0).catch(async () => {
-    const select = page.locator("xpath=(//*[contains(normalize-space(.),'活动任务信息')]/following::div[contains(@class,'el-select')])[1]");
-    const box = await select.boundingBox();
-    if (box) {
-      await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-      await wait(450);
-      const option = await visibleOptionBox(null, 0);
-      if (option) await clickOption(option);
-    }
-  });
-  await page.locator("xpath=(//*[contains(normalize-space(.),'活动任务信息')]/following::*[contains(@class,'el-icon-plus')])[1]").click({ force: true }).catch(() => {});
-  await wait(700);
-  await fillControl(page.locator(".el-table").filter({ hasText: "排序系数" }).last().locator(".el-table__body-wrapper tbody tr").first().locator("input").last(), "1").catch(() => {});
+  const taskText = activityTaskLabel || "4873-自动化测试-转盘-合约100-奖次1000-20260507";
+  const added = await page.evaluate(async label => {
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    const visible = element => !!element && element.getClientRects().length
+      && getComputedStyle(element).display !== "none"
+      && getComputedStyle(element).visibility !== "hidden";
+    const card = [...document.querySelectorAll(".el-card")]
+      .filter(visible)
+      .find(element => element.innerText.includes("活动任务信息"));
+    if (!card) return { ok: false, reason: "task card missing" };
+    const select = [...card.querySelectorAll(".el-select")].filter(visible)[0];
+    if (!select) return { ok: false, reason: "task select missing" };
+    select.click();
+    await wait(700);
+    const options = [...document.querySelectorAll(".el-select-dropdown__item")].filter(visible);
+    const option = options.find(element => element.innerText.includes(label))
+      || options.find(element => element.innerText.includes("合约") && element.innerText.includes("转盘"))
+      || options[0];
+    if (!option) return { ok: false, reason: "task option missing" };
+    option.scrollIntoView({ block: "center", inline: "nearest" });
+    option.click();
+    await wait(700);
+    const plus = [...card.querySelectorAll("button.el-button--primary")].filter(visible)[0];
+    if (!plus) return { ok: false, reason: "task plus missing", selected: option.innerText.trim() };
+    plus.click();
+    await wait(900);
+    const rows = [...card.querySelectorAll(".el-table__body-wrapper tbody tr")].filter(visible);
+    const row = rows[0];
+    if (!row) return { ok: false, reason: "task row not added", selected: option.innerText.trim() };
+    const input = [...row.querySelectorAll("input:not([type=checkbox]):not([type=radio])")].filter(visible)
+      .find(element => element.placeholder.includes("排序系数"))
+      || [...row.querySelectorAll("input:not([type=checkbox]):not([type=radio])")].filter(visible).pop();
+    if (!input) return { ok: false, reason: "task sort input missing", selected: option.innerText.trim() };
+    input.focus();
+    input.value = "1";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    return { ok: true, selected: option.innerText.trim(), row: row.innerText.trim().replace(/\s+/g, " ") };
+  }, taskText);
+  if (!added.ok) throw new Error(`activity task config failed: ${JSON.stringify(added)}`);
+  console.log(JSON.stringify({ step: "task_added", ...added }));
   if (enableBeginnerTask) await enableBeginnerContractTask();
 }
 
@@ -592,7 +623,7 @@ async function fillI18n() {
   await page.locator("xpath=(//*[contains(normalize-space(.),'多语言')]/following::label[contains(@class,'el-checkbox')][contains(.,'英语')])[1]").click({ force: true }).catch(() => {});
   await wait(600);
   await fillLabel("活动标题", `EN ${title}`, 1).catch(() => {});
-  await fillLabel("活动副标题", "EN subtitle", 1).catch(() => {});
+  await fillLabel("活动副标题", `EN ${subTitle}`.slice(0, 15), 1).catch(() => {});
   for (const label of ["WEB头图上传", "H5头图上传", "web分享图上传", "H5分享图片上传"]) {
     await uploadLabel(label, 1).catch(() => {});
   }
@@ -644,10 +675,10 @@ try {
   await selectLabel("流程引导配置", null, 0, 0);
   await clickRadio("是否为平台活动", "否");
   await fillLabel("活动标题", title, 0);
-  await fillLabel("活动副标题", "严格 UI 复杂配置副标题", 0);
+  await fillLabel("活动副标题", subTitle, 0);
   await fillLabel("活动开始时间", activityStartTime);
   await fillLabel("活动结束时间", activityEndTime);
-  await selectLabel("用户报名模版", "【2729】 自动化报名模板_auto_manual_20260505161031");
+  await selectLabel("用户报名模版", registrationTemplateLabel);
   for (const label of ["WEB头图上传", "H5头图上传", "web分享图上传", "H5分享图片上传", "社媒活动预览图上传"]) await uploadLabel(label, 0);
   await fillLabel("分享活动文案", "严格 UI 分享活动文案", 0);
   await fillLabel("代理分享文案", "严格 UI 代理分享文案", 0);
