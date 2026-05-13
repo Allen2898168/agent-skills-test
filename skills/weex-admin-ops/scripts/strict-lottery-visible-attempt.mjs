@@ -95,7 +95,7 @@ function parseList(value) {
       return Array.isArray(parsed) ? parsed.map(item => String(item).trim()).filter(Boolean) : [];
     } catch {}
   }
-  return text.split("||").map(item => item.trim()).filter(Boolean);
+  return text.split(/\s*\|\|\s*|\s*\|\s*|\s*,\s*/).map(item => item.trim()).filter(Boolean);
 }
 
 function expandToEight(values) {

@@ -52,6 +52,7 @@ Fill required text and rich fields:
 - `活动标题`, `活动副标题`, `分享活动文案`, `代理分享文案`, `活动规则`, and `活动别名配置`.
 - Hard rule: `活动标题` and `活动副标题` must each be no longer than 15 characters. Use exact short values for user-facing title fields; do not append timestamps to these fields.
 - Hard rule: `活动别名配置` must use only lowercase letters, digits, and `-`, and should stay within `10` characters by default. Only exceed `10` when the tester is explicitly doing alias boundary-value validation.
+- If the tester says names, titles, subtitles, or aliases must not exceed 15 characters, use exact-value parameters such as `LOTTERY_TITLE_EXACT`, `LOTTERY_SUBTITLE`, and `LOTTERY_ALIAS_EXACT`; do not use timestamp-suffixed prefixes.
 - Upload default image files for web/h5 header, web/h5 share images, social preview, and prize share images.
 - Activity start time must be earlier than end time.
 - `用户报名模版`当前固定选择 `2729`：`【2729】 自动化报名模板_auto_manual_20260505161031`。不要再用“第一个兼容模板”作为默认规则。
@@ -241,6 +242,7 @@ Use:
 node skills/weex-admin-ops/scripts/run-cached-action.mjs --query "活动列表 转盘抽奖 新增草稿 浏览器模式" --dry-run
 node skills/weex-admin-ops/scripts/run-cached-action.mjs --query "活动列表 转盘抽奖 新增草稿 浏览器模式"
 node skills/weex-admin-ops/scripts/run-cached-action.mjs --action create_lottery_activity_draft --visible --style 彩蛋 --title-prefix 前端展示彩蛋 --alias-prefix frontend-draw-egg --start "2026-05-11 17:52:01" --end "2026-05-18 17:52:01"
+node skills/weex-admin-ops/scripts/run-cached-action.mjs --action create_lottery_activity_draft --visible --no-preapply --title-exact 三任务转盘 --subtitle 5分后开赛 --alias-exact zp3t0d --activity-task-labels "4744-转盘抽奖_充值任务_20260504203222|4874-自动化测试-转盘-现货1000-奖次1000-20260507|4873-自动化测试-转盘-合约100-奖次1000-20260507"
 node skills/weex-admin-ops/scripts/run-cached-action.mjs --action online_lottery_activity --activity-alias jonathan-test-20260514051431
 node skills/weex-admin-ops/scripts/run-cached-action.mjs --query "上线活动别名 jonathan-test-20260514051431"
 ```

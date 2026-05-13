@@ -83,6 +83,7 @@ function inferLotteryActivityDraftParams(query) {
     aliasPrefix: aliasPrefixMatch?.[1],
     uid: uidMatch?.[1],
     country: countryMatch?.[1]?.trim(),
+    noPreapply: /无预报名|不预报名|不要预报名|不支持预报名/.test(query),
     visible: /浏览器模式|可见|打开浏览器|让我看着/.test(query),
   };
 }

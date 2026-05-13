@@ -199,3 +199,13 @@
 - 验证结果：活动 ID `9093` 创建并上线成功；别名 `lottery-4min-dart-contract-20260513110241`，状态 `ONLINE`、阶段 `NOT_START`，时间 `2026-05-13 19:45:51` 至 `2026-05-20 19:15:51`，详情回查 `taskConfigIds=[4873]`，任务 `taskType=TRADING_VOLUME`、`requiredVolume=100`；上线接口 `POST /prod-api/activity/lottery/online` 返回 `code=200`。
 - 关联流程：`skills/weex-admin-ops/scripts/strict-lottery-visible-attempt.mjs`、`活动列表 / 转盘抽奖 / 新增 / 活动任务信息 / 修改 / 上线`。
 - 后续处理：已把指定转盘合约任务落行逻辑吸收到创建脚本，并补充 operation 文档；后续近未来上线若创建耗时较长，应优先设置更大的未来窗口或在上线前用模型级时间更新确认详情回查。
+
+## 2026-05-13 转盘抽奖多任务只落一行
+- 业务线：活动列表 / 转盘抽奖 / 新增并上线 / 活动任务信息。
+- 场景：用户要求配置一个无预报名、5 分钟后开赛并上线的转盘抽奖活动，同时包含充值任务、现货交易任务和合约交易任务。
+- 失败表现：首次尝试别名 `lottery-3tasks-5min-20260513141436` 未创建，提交前 `activityTaskForm=false`。
+- 失败原因：旧脚本只按单任务路径处理，未对每个任务执行“选择任务 -> 点击活动任务卡片 `+` -> 等待新增行 -> 填排序系数”，导致多任务配置未形成有效 `taskConfig`。
+- 解决方式：`strict-lottery-visible-attempt.mjs` 增加 `LOTTERY_ACTIVITY_TASK_LABELS`，支持 `|` 或逗号分隔多个任务；每个任务独立选择并点击卡片 `+`，按新增行匹配任务 ID，逐行填写 `排序系数`，最后校验任务行数。
+- 验证结果：重试创建并上线活动 ID `9098`，标题 `三任务转盘`，别名 `lottery-3tasks-5min-20260513141842`；详情回查 `status=ONLINE`、`stage=NOT_START`、`isPreApply=0`，任务包含充值 `4744`、现货 `4874`、合约 `4873`。
+- 关联流程：`skills/weex-admin-ops/scripts/strict-lottery-visible-attempt.mjs`、`skills/weex-admin-ops/scripts/create-lottery-activity-draft.mjs`、`活动列表 / 转盘抽奖 / 新增 / 活动任务信息 / 上线`。
+- 后续处理：已吸收到脚本参数和 operation/action-cache 文档；后续同类多任务活动必须走多任务逐个落行校验。

@@ -37,7 +37,10 @@ export const LOTTERY_DRAFT_DEFAULTS = {
 export function buildLotteryDraftPlan(args = {}) {
   const stamp = args.timestamp || timestamp();
   const titlePrefix = args.titlePrefix || "严格UI转盘抽奖草稿";
+  const title = args.titleExact || `${titlePrefix}${stamp}`;
+  const subtitle = args.subtitle || "严格 UI 复杂配置副标题";
   const aliasPrefix = args.aliasPrefix || "lt";
+  const alias = args.aliasExact || buildShortLotteryAlias(aliasPrefix, stamp);
   const start = args.start || "2026-06-10 00:00:00";
   const end = args.end || "2026-06-30 23:59:59";
   const writeEnabled = Boolean(args.visible && !args.dryRun);
@@ -48,8 +51,9 @@ export function buildLotteryDraftPlan(args = {}) {
     targetUrl: "/activities/lottery/add",
     listUrl: "/activities/lottery",
     type: "LOTTERY",
-    title: `${titlePrefix}${stamp}`,
-    alias: buildShortLotteryAlias(aliasPrefix, stamp),
+    title,
+    subtitle,
+    alias,
     activityTime: { start, end },
     defaults: LOTTERY_DRAFT_DEFAULTS,
     dependencies: {
@@ -85,6 +89,7 @@ export function buildLotteryDraftPlan(args = {}) {
       "预报名字段真实 label 是 预报名模版；选择支持后必须快速配置模版、开始时间、结束时间。",
       "奖品表按真实列序填写：奖金金额(USDT)、总库存数量、权重（%)；跳过禁用的有效期列。",
       "默认活动别名必须控制在 10 个字符以内；只有别名边界值测试才允许显式传入更长 alias。",
+      "多任务活动可通过 --activity-task-labels 或 LOTTERY_ACTIVITY_TASK_LABELS 传入，分隔符支持 | 或逗号。",
     ],
   };
 }

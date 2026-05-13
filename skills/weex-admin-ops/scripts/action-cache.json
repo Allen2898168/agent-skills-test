@@ -148,7 +148,7 @@
       "id": "create_lottery_activity_draft",
       "status": "candidate",
       "script": "scripts/create-lottery-activity-draft.mjs",
-      "description": "Create a draft 活动列表 / 转盘抽奖 activity through the verified real-UI workflow, with configurable title prefix, alias prefix, activity time, pre-apply toggle, and lottery style.",
+      "description": "Create a draft 活动列表 / 转盘抽奖 activity through the verified real-UI workflow (visible or headless-ui), with configurable title/alias, activity time, pre-apply toggle, lottery style, and one or more activity task labels.",
       "domains": ["活动列表", "转盘抽奖"],
       "intentKeywords": ["创建", "新增", "生成", "尝试", "走一下", "配置"],
       "objectKeywords": ["转盘抽奖", "活动列表", "草稿", "活动"],

@@ -46,11 +46,15 @@ Options:
   --steps <csv>      Step counts for create_guide_templates, 1-3
   --operator <name>   Recent editor/operator for delete_register_templates_by_operator
   --confirm-delete    Required by delete_register_templates_by_operator for actual deletion
+  --title-exact <x>   Exact title for create_lottery_activity_draft
   --title-prefix <x>  Title prefix for create_lottery_activity_draft dry-run plan
+  --subtitle <x>      Exact subtitle for create_lottery_activity_draft
+  --alias-exact <x>   Exact alias for create_lottery_activity_draft
   --alias-prefix <x>  Alias prefix for create_lottery_activity_draft dry-run plan
   --start <text>      Planned start time for create_lottery_activity_draft
   --end <text>        Planned end time for create_lottery_activity_draft
   --style <text>      Lottery style for create_lottery_activity_draft
+  --activity-task-labels <text> Task labels/ids for create_lottery_activity_draft, separated by | or comma
   --no-preapply       Disable pre-apply for create_lottery_activity_draft
   --activity-alias <x> Activity alias/showUrl for online_lottery_activity
   --activity-id <id>  Activity id for online_lottery_activity

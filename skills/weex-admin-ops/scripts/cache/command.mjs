@@ -42,13 +42,17 @@ function createLotteryActivityDraftCommand(match, args, skillRoot) {
   const params = { ...match.inferred, ...args.passthrough };
   const script = path.join(skillRoot, match.action.script);
   const commandArgs = [script];
+  if (params.titleExact) commandArgs.push("--title-exact", String(params.titleExact));
   if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.subtitle) commandArgs.push("--subtitle", String(params.subtitle));
+  if (params.aliasExact) commandArgs.push("--alias-exact", String(params.aliasExact));
   if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
   if (params.start) commandArgs.push("--start", String(params.start));
   if (params.end) commandArgs.push("--end", String(params.end));
   if (params.preapplyStart) commandArgs.push("--preapply-start", String(params.preapplyStart));
   if (params.preapplyEnd) commandArgs.push("--preapply-end", String(params.preapplyEnd));
   if (params.style) commandArgs.push("--style", String(params.style));
+  if (params.activityTaskLabels) commandArgs.push("--activity-task-labels", String(params.activityTaskLabels));
   if (params.noPreapply) commandArgs.push("--no-preapply");
   if (args.visible || params.visible) commandArgs.push("--visible");
   else commandArgs.push("--headless-ui");

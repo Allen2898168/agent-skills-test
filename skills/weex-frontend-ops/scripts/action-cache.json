@@ -198,6 +198,40 @@
       ],
       "status": "candidate",
       "lastVerifiedAt": "2026-05-12"
+    },
+    {
+      "id": "frontend_draw_kafka_recharge_verify",
+      "operation": "draw.kafka.recharge.verify",
+      "description": "For internal STG draw recharge-task checks: open draw page with a new account, complete signup when required, send Kafka callback value, then verify taskCompletions/frequency on the draw page.",
+      "keywords": [
+        "转盘充值任务",
+        "kafka 回调充值",
+        "充值任务回查",
+        "转盘 kafka 充值",
+        "draw kafka recharge"
+      ],
+      "script": "scripts/frontend-draw-kafka-recharge-verify.mjs",
+      "defaultParameters": {
+        "environment": "stg",
+        "activityAlias": "<required>",
+        "activityId": "<required>",
+        "taskId": "4991",
+        "email": "<required>",
+        "uid": "<required>",
+        "amount": 200,
+        "kafkaUrl": "http://10.5.53.28:8080/ui/clusters/new-stg-kafka/all-topics/flink.exchange.spot_capital_order_info/messages?keySerde=String&valueSerde=String&limit=100",
+        "confirmFlag": "--confirm-run is required for real execution",
+        "visible": "pass --visible when browser mode is required"
+      },
+      "requiresConfirmation": true,
+      "successAssertions": [
+        "signup is done by apply/applyStatus or 已报名 indicator",
+        "Kafka produce endpoint returns HTTP 200",
+        "taskCompletions contains RECHARGE task status COMPLETED",
+        "frequency.doTaskGetCount > 0"
+      ],
+      "status": "candidate",
+      "lastVerifiedAt": "2026-05-13"
     }
   ]
 }

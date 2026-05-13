@@ -17,13 +17,18 @@ function usage() {
 Options:
   --visible                 mark the intended mode as headed browser mode
   --headless-ui             run the same real UI workflow in headless browser mode
+  --title-exact <text>      exact activity title, no timestamp suffix
   --title-prefix <text>     activity title prefix
+  --subtitle <text>         exact activity subtitle
+  --alias-exact <text>      exact activity alias, no timestamp suffix
   --alias-prefix <text>     activity alias prefix
   --start <text>            planned activity start time
   --end <text>              planned activity end time
   --preapply-start <text>   planned pre-apply start time
   --preapply-end <text>     planned pre-apply end time
   --style <text>            lottery style label, e.g. 圆形转盘, 彩蛋
+  --activity-task-labels <text>
+                            activity task labels/ids separated by | or comma
   --no-preapply             select 不支持 for 是否支持预报名
   --dry-run                 print the verified creation plan without writing data
   --help                    show this message

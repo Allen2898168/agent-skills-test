@@ -104,7 +104,9 @@ For lottery activity drafts:
 - use `--action create_lottery_activity_draft` for explicit execution;
 - `--dry-run` prints the verified creation plan without writing data;
 - actual creation supports `--visible` and `--headless-ui`; both modes run the same strict real-UI browser workflow;
-- optional parameters include `--title-prefix`, `--alias-prefix`, `--start`, `--end`, `--style`, and `--no-preapply`; verified style labels are `圆形转盘`, `飞镖转盘`, `彩蛋`, `环形跑马灯`, and `足球射门`;
+- optional parameters include `--title-exact`, `--title-prefix`, `--subtitle`, `--alias-exact`, `--alias-prefix`, `--start`, `--end`, `--style`, `--activity-task-labels`, and `--no-preapply`; verified style labels are `圆形转盘`, `飞镖转盘`, `彩蛋`, `环形跑马灯`, and `足球射门`;
+- use `--title-exact`, `--subtitle`, and `--alias-exact` for user-facing short values; prefix options append a timestamp and can violate the 15-character title/subtitle/alias hard rule.
+- `--activity-task-labels` accepts one or more `活动任务信息` labels/ids separated by `|` or comma. The script selects each task, clicks the task-card `+`, fills row sort coefficients, and verifies the final row count.
 - the verified write path is `活动列表 / 转盘抽奖`, path `/activities/lottery/add`, and uses real page clicks, dropdowns, uploads, table scrolling, and submit in browser mode;
 - run `node skills/weex-admin-ops/scripts/run-cached-action.mjs --query "活动列表 转盘抽奖 新增草稿 浏览器模式" --dry-run` to inspect the planned defaults and assertions;
 - the script creates draft records only. For frontend display validation, put each activity online with the row `上线` action and verify `POST /prod-api/activity/lottery/online` business `code=200` before opening `https://stg-www.weex.tech/zh-CN/events/draw/<alias>`;
