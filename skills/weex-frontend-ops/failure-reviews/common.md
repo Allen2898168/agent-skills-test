@@ -185,3 +185,39 @@
 - 验证结果：本次未完成报名和合约交易任务；只验证到登录态、活动页展示、合约任务可见、正确交易页可打开、合约账户余额 1,000 USDT 可见、市价按钮和买入开多按钮可点击。
 - 关联流程或脚本：临时可见 Playwright 链路；前端 `references/operations/draw.md`。
 - 后续处理状态：本次为链路探索，暂不沉淀为固定流程；若后续用合格账号和正确数量跑通，再更新 draw playbook、selector/component 和动作缓存。
+
+## 9046 转盘合约任务下单被最大可开校验阻塞
+
+- 日期：2026-05-12
+- 页面/流程：前端转盘抽奖足球射门活动页到合约交易页，活动 ID `9046`，别名 `frontend-draw-football-20260511093107`。
+- 环境/viewport：STG，可见 Chrome，desktop `1440x1000`。
+- 失败表现：新账号 `codexapi17785621110411@weex.com` / UID `5845940922` 已通过 FIN 组合链路完成 1000 USDT 合约划转；活动页登录态正常，任务区显示 `合约交易 新用户冒烟1000 去交易 累计 0 合约交易量 ≥1,000 USDT`。该活动 `isPreApply=0`，页面没有 `立即报名` 按钮。点击 `去交易` 后未跳转；后台任务详情 `taskUrlWeb=null`。直接打开 `/zh-CN/futures/BTC-USDT` 后可见合约保证金余额 1000 USDT；切换 `市价` 并填右侧主下单面板数量输入，输入 `5000` 时默认按 `BTC` 解释，提示 `委托数量大于最大可开仓数量`；通过数量单位弹窗切换到 `USDT` 后输入 `5000`，页面显示 `数量 ≈ Infinity`、`可开 0.0000 USDT`，点击 `买入开多` 仍被同一最大可开校验拦截。未观察到下单接口发出，活动回查 `/v1/activity/general/taskCompletions` 返回 `completions: []`。
+- 失败原因：活动任务未配置可跳转交易 URL；合约页当前 STG 行情/订单面板状态下虽然 K 线接口返回价格数据，但下单面板仍显示价格、订单簿和可开数量为 `-` 或 0，导致市价单前端校验无法通过。`5000` 作为 BTC 数量超出最大可开；切到 USDT 后因价格计算异常变成 `Infinity`，仍无法下单。
+- 解决方式：后续继续该链路前，需要先修复或确认活动任务 `taskUrlWeb`，并确认 STG 合约页可开数量不为 0。若要求输入 `5000`，必须先确认页面数量单位是 `USDT` 且价格换算正常；否则不要把该链路沉淀为已跑通。
+- 验证结果：本次未完成合约交易任务；只验证到账户资金、活动展示、任务可见、活动已报名状态、直接合约页打开、单位切换和前端校验失败原因。
+- 关联流程或脚本：临时可见 Playwright 链路；FIN `register_recharge_transfer_contract`；前端 `references/operations/draw.md`。
+- 后续处理状态：暂不沉淀固定流程；待 `taskUrlWeb` 和合约页可开数量问题解决后，用同类账号重跑并再更新 draw playbook。
+
+## 合约交易页必须连接用户实际可用 CDP profile
+
+- 日期：2026-05-12
+- 页面/流程：STG 合约页 `https://stg-www.weex.tech/zh-CN/futures/BTC-USDT`，用于转盘合约交易任务。
+- 环境/viewport：STG，可见 Chrome/CDP，窗口尺寸沿用实际浏览器。
+- 失败表现：普通本地 Chrome 手动打开合约页时订单簿和下单可用，但 Agent 使用 Playwright 新 profile 或连接到非交易用的 9222 调试 profile 时，页面能显示登录态、保证金余额 `1,000.0000 USDT` 和部分行情标题，却长时间显示订单簿缺失、`可开 0.000000 BTC`，输入 USDT 金额后可能出现 `Infinity` 或无法通过下单校验。
+- 失败原因：隔离 Playwright profile 或错误 CDP profile 不等同于用户当前可正常交易的浏览器实例；缺少用户实际浏览器里的完整 localStorage、IndexedDB、线路选择、交易偏好、设备态和已稳定的行情 WebSocket 连接。只注入登录 cookie 不能复现用户本地交易页的完整运行状态。
+- 解决方式：需要调试或操作合约交易页时，必须先确认 CDP target 属于用户当前能正常加载订单簿的 Chrome 实例和 tab；如果普通 Chrome 未开启 remote debugging，不要用其他 9222 profile 替代。应让用户在可调试 Chrome 中打开同一交易页，或让用户普通 Chrome 启用 remote debugging 后再连接目标 tab。
+- 验证结果：连接非交易用 CDP profile 时观察到多个 WebSocket 事件，但订单簿仍未恢复为可用状态，`可开` 一直为 0；本次未执行真实下单。
+- 关联流程或脚本：临时 `connectOverCDP('http://127.0.0.1:9222')` 探测；前端转盘合约任务探索。
+- 后续处理状态：后续继续该链路前，先验证 CDP target URL 和 profile 是否就是用户手动确认可下单的页面；未确认前不要继续等待或填单。
+
+## 9046 活动 API 开仓后需前端真实平仓才计入交易任务
+
+- 日期：2026-05-12
+- 页面/流程：活动 ID `9046` 足球射门转盘活动，前端活动页 `https://stg-www.weex.tech/zh-CN/events/draw/frontend-draw-football-20260511093107`，合约页 `https://stg-www.weex.tech/zh-CN/futures/ETH-USDT`。
+- 环境/viewport：STG，可见浏览器，desktop `1440x1000`。
+- 失败表现：账号 `9207496838@weex.com` / UID `9207496838` 先通过合约 Open API 下 ETHUSDT 多单，订单 `748965118397645370` 成交额 `1004.547478 USDT`，但活动页刷新后仍显示累计 `0`，`taskCompletions.completions=[]`。
+- 失败原因：该活动的合约交易量任务不把纯 API 开仓直接计入前端活动任务统计；需要前端交易页面产生真实页面侧交易动作。页面下单入口仍受订单簿/可开数量为 0 和新手引导遮罩影响，直接前端开仓不稳定。
+- 解决方式：采用“API 开仓 -> 前端真实页面一键平仓 -> 回活动页刷新”的恢复链路。页面一键平仓前必须先关闭或处理持仓/订单新手引导；确认弹窗文案为 `确认一键平仓？`，点击 `确定` 后接口 `POST /api/v1/private/order/closeAllPosition` 返回 `SUCCESS`。
+- 验证结果：前端一键平仓订单 `748968366269530682` 成功，平仓成交额 `1001.731270 USDT`；活动页刷新后显示 `可用次数：1`、任务累计 `1,001.73`，`taskCompletions` 返回 `status=COMPLETED`、`tradingVolume=1001.73127000000000`、`tradingCount=1`。
+- 关联流程或脚本：FIN `system-account-create.mjs`、FIN `finance-airdrop-reward-grant.mjs`、前端 `frontend-assets-transfer.mjs`、前端 `frontend-contract-place-order.mjs`、临时可见 Playwright 页面平仓链路。
+- 后续处理状态：已验证为本次成功恢复路径；如后续要复用，应沉淀为前端 draw 活动合约任务 playbook 或组合脚本，包含关闭新手引导和一键平仓确认步骤。

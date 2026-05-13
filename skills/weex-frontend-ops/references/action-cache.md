@@ -18,6 +18,8 @@ The action cache is the first execution layer for frontend checks that have alre
 | `frontend_register_api` | `scripts/frontend-register-api.mjs` | candidate | Create a STG email account through the validated test API path, inject the returned token cookie, and verify account overview; requires `--confirm-register`. |
 | `frontend_register_batch_api` | `scripts/frontend-register-batch-api.mjs` | candidate | Create multiple STG email accounts through the validated registration API path, supports invite code, default concurrency equals count capped at 100, and backfills failed submissions with new emails; requires `--confirm-register`. |
 | `frontend_assets_transfer` | `scripts/frontend-assets-transfer.mjs` | candidate | Use runtime frontend credentials and loginTool access token to call `POST /v1/assets/transfer`; requires dry-run first and `--confirm-transfer` for real transfer. |
+| `frontend_contract_place_order` | `scripts/frontend-contract-place-order.mjs` | candidate | Use skill-local `WEEX_FRONTEND_CONTRACT_*` credentials to call STG Contract Open API `POST /capi/v3/order`; requires `--confirm-order`. |
+| `frontend_draw_signup_trade_close_verify` | `scripts/frontend-draw-signup-trade-close-verify.mjs` | candidate | For draw activities where trade tasks are valid only after signup: signup on draw page, place API order, one-key close on futures page, then verify `taskCompletions`/`frequency`; requires `--confirm-run`. |
 
 ## Natural-Language Matching
 
@@ -60,6 +62,25 @@ For frontend asset transfer:
 - default payload follows the provided STG example: `amount=1000`, `fromAccountType=10`, `toAccountType=8`, `transferCoinId=2`;
 - override risky values explicitly with `-- --amount <value> --from-account-type <value> --to-account-type <value> --transfer-coin-id <value>`;
 - this is API-only and keeps the login access token in memory; output must not include token, cookie, password, signature, or session values.
+
+For frontend contract API order placement:
+
+- use `--action frontend_contract_place_order` for explicit execution;
+- use `-- --ticker-only --symbol BTCUSDT` to verify the STG contract API base without credentials;
+- use `-- --check-balance` to verify skill-local API credentials;
+- always dry-run the order body before live placement;
+- real order placement must pass `-- --confirm-order`;
+- credentials must come only from `skills/weex-frontend-ops/.env.local` or current process `WEEX_FRONTEND_CONTRACT_*` variables.
+
+For draw signup-then-trade task completion:
+
+- use `--action frontend_draw_signup_trade_close_verify` for explicit execution;
+- always dry-run first:
+  `node scripts/run-cached-action.mjs --action frontend_draw_signup_trade_close_verify --dry-run -- --activity-alias <alias> --account-file <json>`;
+- real execution must pass `-- --confirm-run`;
+- for browser mode pass `-- --visible`;
+- if task ID is known, pass `-- --task-id <id>` for strict completion assertion;
+- account credential file must be local generated FIN system account json containing email/password/apiKey/secret/passphrase.
 
 ## Cache Graduation Rules
 

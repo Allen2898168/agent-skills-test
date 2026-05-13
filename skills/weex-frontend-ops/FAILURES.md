@@ -14,6 +14,7 @@
 
 - `failure-reviews/README.md`：目录结构、写入规范和复盘模板。
 - `failure-reviews/common.md`：浏览器、环境、登录态、渲染、网络、截图、selector、缓存匹配等通用失败。
+- `failure-reviews/draw-contract.md`：转盘合约交易任务、页面下单/平仓、活动任务统计相关失败。
 
 ## 当前已知高频问题摘要
 

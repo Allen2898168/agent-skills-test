@@ -127,6 +127,77 @@
       ],
       "status": "candidate",
       "lastVerifiedAt": "2026-05-08"
+    },
+    {
+      "id": "frontend_contract_place_order",
+      "operation": "contract.trade.place_order.api",
+      "description": "Use skill-local WEEX_FRONTEND_CONTRACT_* credentials to call the STG contract Open API PlaceOrder endpoint for activity trade-task verification.",
+      "keywords": [
+        "合约 API 下单",
+        "交易任务 API",
+        "走 API 交易",
+        "PlaceOrder",
+        "contract place order"
+      ],
+      "script": "scripts/frontend-contract-place-order.mjs",
+      "defaultParameters": {
+        "environment": "stg",
+        "baseUrl": "https://stg-api-contract.weex.tech",
+        "endpoint": "/capi/v3/order",
+        "credentialSource": "skills/weex-frontend-ops/.env.local WEEX_FRONTEND_CONTRACT_* only",
+        "payload": {
+          "symbol": "BTCUSDT",
+          "side": "BUY",
+          "positionSide": "LONG",
+          "type": "MARKET",
+          "quantity": "<required>"
+        },
+        "confirmFlag": "--confirm-order is required for real order placement"
+      },
+      "requiresConfirmation": true,
+      "successAssertions": [
+        "ticker or balance check confirms the selected contract API base is reachable",
+        "dry-run shows the exact order body without printing API secrets",
+        "PlaceOrder response HTTP status is 2xx and returns success payload"
+      ],
+      "status": "candidate",
+      "lastVerifiedAt": "2026-05-12"
+    },
+    {
+      "id": "frontend_draw_signup_trade_close_verify",
+      "operation": "draw.signup.trade.close.verify",
+      "description": "For draw trading-volume tasks that only count after signup: open draw page and complete signup, place a contract API order, close position in real futures page, then verify taskCompletions/frequency on draw page.",
+      "keywords": [
+        "转盘报名后交易",
+        "报名后交易才有效",
+        "转盘任务完成验证",
+        "报名 交易 平仓",
+        "draw signup trade"
+      ],
+      "script": "scripts/frontend-draw-signup-trade-close-verify.mjs",
+      "defaultParameters": {
+        "environment": "stg",
+        "activityHost": "https://stg-www.weex.tech",
+        "activityAlias": "<required>",
+        "taskId": "optional, used for strict task completion assertion",
+        "symbol": "ETHUSDT",
+        "side": "BUY",
+        "positionSide": "LONG",
+        "type": "MARKET",
+        "quantity": "0.5",
+        "accountCredentialSource": "local generated/fin-system-accounts/*.json with email/password/apiKey/secret/passphrase",
+        "confirmFlag": "--confirm-run is required for real execution",
+        "visible": "pass --visible when browser mode is required"
+      },
+      "requiresConfirmation": true,
+      "successAssertions": [
+        "apply returns code 00000 or applyStatus becomes true",
+        "contract order request returns HTTP 2xx success payload",
+        "futures one-key close and confirm are executed",
+        "taskCompletions contains COMPLETED for target task or TRADING_VOLUME"
+      ],
+      "status": "candidate",
+      "lastVerifiedAt": "2026-05-12"
     }
   ]
 }
