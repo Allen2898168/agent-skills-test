@@ -142,3 +142,13 @@
 - 验证结果：账号 `codexapi17785033381951@weex.com` / UID `3794362461`、`codexapi17785033381952@weex.com` / UID `9044888775`、`codexapi17785033381953@weex.com` / UID `2775257930` 单独划转均返回 HTTP 200、业务码 `00000 success`。
 - 关联流程或脚本：`scripts/register-recharge-transfer-contract.mjs`、`scripts/business/contract-funding/commands.mjs`、前端 `scripts/frontend-assets-transfer.mjs`。
 - 后续处理：后续应继续排查组合脚本对子进程 stderr/warning 与真实退出状态的判定，避免把可恢复 warning 误记为 transfer 失败；在修复前，出现同类结果时固定恢复路径为“保留已创建账号和已审核发放，只单独补前端划转”。
+
+## 2026-05-13 新账号合约划转返回 70008/70011
+
+- 场景：为 9046 转盘合约任务准备新账号合约余额。
+- 失败表现：前端注册账号 `codexapi17786669465371@weex.com` / UID `8377200673` 已 FIN 发放审核 `1100 USDT`，但前端划转 `1100` 和 `1000 USDT` 均返回 `70008 超出可划转的最大金额`；系统/API账号 `3447598495@weex.com` / UID `3447598495` 已 FIN 发放审核 `1100 USDT`，前端划转返回 `70011 划转处理中`，随后 BTC 合约页仍显示可用余额 `0.0000`。
+- 失败原因：FIN 审核通过不等于前端现货可划转余额立即可用；`70011` 也不等于合约余额已到账。
+- 解决方式：不要重复创建同一目标的新批次或重复 FIN 发放；先对失败账号延迟重试前端划转，并用前端合约页或可信只读余额确认合约余额到账后，再执行页面交易。
+- 验证结果：本次两个新账号均未完成合约到账；页面交易未在新账号上执行。
+- 关联流程或脚本：`register-recharge-transfer-contract.mjs`、`finance-airdrop-reward-grant.mjs`、前端 `frontend-assets-transfer.mjs`。
+- 后续处理状态：待补充 `70011` 状态轮询和余额确认逻辑；在补齐前，最终结果必须区分 FIN 发放成功、前端划转受理、合约页余额到账三个状态。

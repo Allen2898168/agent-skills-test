@@ -31,6 +31,17 @@ Options:
   --currency <text>    FIN airdrop reward currency
   --email-prefix <x>   Batch frontend registration email prefix
   --concurrency <n>    register_recharge_transfer_contract account-level concurrency; default 1
+  --user-type <x>      FIN system account user type
+  --remark <x>         FIN system account remark
+  --fund-amount <n>    Compound API-account order flow margin amount
+  --order-notional <n> Compound API-account order flow order notional
+  --symbol <x>         Contract order symbol
+  --side <BUY|SELL>    Contract order side
+  --position-side <x>  Contract order position side
+  --tag-id <id>        FIN system account tag id
+  --site <site>        FIN system account site
+  --authorities <csv>  FIN system account API permission ids
+  --output-dir <dir>   FIN system account local secret output dir
   --sub-biz-type <x>   FIN airdrop reward sub business type
   --remark1 <text>     FIN airdrop reward creation remark
   --audit-type <x>     FIN airdrop approval type code or label
@@ -40,12 +51,15 @@ Options:
   --confirm-register   Required by batch_register_recharge for account creation
   --confirm-recharge   Required by batch_register_recharge for FIN recharge
   --confirm-transfer   Required by register_recharge_transfer_contract for frontend spot-to-contract transfer
+  --confirm-create-account Required by create_api_account_fund_contract_order
+  --confirm-order      Required by create_api_account_fund_contract_order
+  --save-secrets       Save generated system account credentials/API keys to local output files
   --allow-unverified-transfer-chain  Required by register_recharge_transfer_contract while the chain is candidate
 `;
 }
 
 function parseCacheArgs() {
-  const parsed = parseFlags(process.argv.slice(2), { booleans: ["--list", "--dry-run", "--confirm-create", "--confirm-approve", "--confirm-register", "--confirm-recharge", "--confirm-transfer", "--skip-grant-dry-run", "--allow-unverified-transfer-chain"] });
+  const parsed = parseFlags(process.argv.slice(2), { booleans: ["--list", "--dry-run", "--confirm-create", "--confirm-approve", "--confirm-register", "--confirm-recharge", "--confirm-transfer", "--confirm-create-account", "--confirm-order", "--skip-grant-dry-run", "--allow-unverified-transfer-chain", "--save-secrets"] });
   const passthrough = {};
   for (const [key, value] of Object.entries(parsed)) {
     if (!["help", "list", "dryRun", "query", "action"].includes(key)) passthrough[key] = value;

@@ -1,7 +1,35 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-05-11",
+  "updatedAt": "2026-05-12",
   "actions": [
+    {
+      "id": "create_api_account_fund_contract_order",
+      "status": "verified",
+      "script": "scripts/create-api-account-fund-contract-order.mjs",
+      "description": "Compound staging flow: create one FIN system/API account, save generated credentials locally, recharge and approve USDT through FIN, transfer spot to contract through frontend assets API, then place a contract Open API order.",
+      "domains": ["FIN Admin", "WEEX 前端", "系统/API账号", "合约Open API", "充值", "划转", "合约下单"],
+      "intentKeywords": ["带API账号", "API账号", "API账户", "创建账号下单", "多单", "空单", "开多", "开空", "下单"],
+      "objectKeywords": ["账号", "ETH", "BTC", "USDT", "合约", "API Key", "Secret", "Passphrase"],
+      "requiredParams": ["fundAmount", "orderNotional or quantity", "symbol", "side", "positionSide", "confirm-create-account", "confirm-recharge", "confirm-transfer", "confirm-order"],
+      "defaultMode": "fin_system_account_then_fin_recharge_then_frontend_transfer_then_contract_order",
+      "verifiedModes": ["dry_run", "staging_ethusdt_long_10u"],
+      "lastVerifiedAt": "2026-05-12",
+      "fallback": "If FIN recharge succeeds but Open API balance remains zero, run frontend spot-to-contract transfer with the generated account password before placing the order. Never print generated API credentials."
+    },
+    {
+      "id": "fin_system_account_create",
+      "status": "verified",
+      "script": "scripts/system-account-create.mjs",
+      "description": "Create FIN Admin system/API accounts through /admin/fin/asset/system/account/add, poll add_progress, and retrieve generated account credentials plus API key, secret, and passphrase from temporary/list. Secrets are saved only to local ignored generated output when --save-secrets is present.",
+      "domains": ["FIN Admin", "系统账户管理", "系统账号", "API账号", "Open API"],
+      "intentKeywords": ["系统账号", "系统账户", "API账号", "API账户", "带API", "api", "申请账号", "生成账号"],
+      "objectKeywords": ["账号", "API Key", "Secret", "Passphrase", "权限", "合约"],
+      "requiredParams": ["count", "userType", "remark", "confirm-create", "save-secrets for local credential output"],
+      "defaultMode": "persistent_cdp_api",
+      "verifiedModes": ["dry_run", "staging_create_one_private_api_balance_verified"],
+      "lastVerifiedAt": "2026-05-12",
+      "fallback": "If add_progress does not finish, inspect the visible FIN System Account Management page and query temporary/list by clientId; do not print generated credentials in chat."
+    },
     {
       "id": "register_recharge_transfer_contract",
       "status": "candidate",

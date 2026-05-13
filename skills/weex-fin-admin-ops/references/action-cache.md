@@ -20,6 +20,8 @@ The FIN Admin action cache is the first execution layer for FIN workflows that h
 
 | Action ID | Script | Status | Purpose |
 | --- | --- | --- | --- |
+| `create_api_account_fund_contract_order` | `scripts/create-api-account-fund-contract-order.mjs` | verified | Create one FIN API account, fund and transfer USDT to contract, then place a contract Open API order. |
+| `fin_system_account_create` | `scripts/system-account-create.mjs` | verified | Create FIN system/API accounts, poll generation progress, and save returned credentials/API keys only to local ignored generated output. |
 | `register_recharge_transfer_contract` | `scripts/register-recharge-transfer-contract.mjs` | candidate | Compound flow for contract-balance requests: register frontend account, recharge spot through FIN, then transfer spot to contract through frontend API; report per-account transfer response. |
 | `batch_register_recharge` | `scripts/batch-register-recharge.mjs` | candidate | Batch create STG frontend accounts and recharge each account through FIN `空投奖励(产品化活动)`; FIN auth is checked headlessly first and visible login opens only when the session is invalid. |
 | `finance_airdrop_reward_grant` | `scripts/finance-airdrop-reward-grant.mjs` | verified | Use current FIN Admin CDP login state to create and optionally approve `空投奖励(产品化活动)` grants; staging create+approve verified, real execution requires script confirmation flags and runtime Google code. |
@@ -39,6 +41,24 @@ The FIN Admin action cache is the first execution layer for FIN workflows that h
 - If transfer still fails after successful recharge and built-in retries, preserve all known accounts, grant orders, and transfer responses internally; do not create a duplicate batch unless the user explicitly confirms it.
 - User-facing output for this action should only include `用户名 / UID / 结果`. Do not show FIN order ids unless the tester explicitly asks for them.
 - The maximum effective concurrency is `100`.
+
+## FIN System/API Account Create
+
+- Use `--action fin_system_account_create` for explicit execution.
+- Required parameters are `--count <n>`, `--user-type <TYPE>`, and `--remark <REMARK>`.
+- Defaults match the captured FIN UI flow: `--tag-id 9`, `--site GLOBAL`, `--authorities 1,2,3,4,5,6`, contract account mode.
+- Actual execution requires `--confirm-create`.
+- Saving generated password, Google code, API key, secret, and passphrase requires `--save-secrets`.
+- Stdout must not print generated credentials. Secret output is written to ignored `generated/fin-system-accounts/`.
+
+## Create API Account, Fund Contract, And Place Order
+
+- Use `--action create_api_account_fund_contract_order` for explicit execution.
+- Required parameters are order direction and either `--order-notional <USDT>` or `--quantity <n>`.
+- Defaults: `--user-type codex_api_order`, `--remark codex_api_order`, `--fund-amount 20`, `--symbol ETHUSDT`, `--side BUY`, `--position-side LONG`, `--order-notional 10`.
+- Actual execution requires all four flags: `--confirm-create-account --confirm-recharge --confirm-transfer --confirm-order`.
+- The script creates the account, saves secrets locally, grants USDT through FIN, transfers to contract through frontend API, calculates quantity from ticker when needed, places the Open API order, and checks balance after order.
+- Do not print generated credentials; final output may show staging/test email, UID, contract account id, order id, quantity, and balance verification.
 
 ## Batch Register And Recharge
 
