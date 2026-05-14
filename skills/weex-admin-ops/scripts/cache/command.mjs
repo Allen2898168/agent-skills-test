@@ -9,6 +9,7 @@ export function commandFor(match, args, skillRoot) {
   if (match.action.id === "create_guide_templates") return createGuideTemplatesCommand(match, args, skillRoot);
   if (match.action.id === "verify_guide_template_row_actions") return guideTemplateRowActionsCommand(match, args, skillRoot);
   if (match.action.id === "create_lottery_activity_draft") return createLotteryActivityDraftCommand(match, args, skillRoot);
+  if (match.action.id === "online_lottery_activity") return onlineLotteryActivityCommand(match, args, skillRoot);
   if (match.action.id !== "create_prizes") throw new Error(`No runner implemented for action: ${match.action.id}`);
   const params = { ...match.inferred, ...args.passthrough };
   if (!params.category || !params.subtype) {
@@ -35,6 +36,21 @@ function createLotteryActivityDraftCommand(match, args, skillRoot) {
   if (params.preapplyEnd) commandArgs.push("--preapply-end", String(params.preapplyEnd));
   if (params.style) commandArgs.push("--style", String(params.style));
   if (params.noPreapply) commandArgs.push("--no-preapply");
+  if (args.visible || params.visible) commandArgs.push("--visible");
+  else commandArgs.push("--headless-ui");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function onlineLotteryActivityCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  if (!params.activityAlias && !params.activityId) {
+    throw new Error("Cached online_lottery_activity action requires --activity-alias/--activity-id or a query containing 活动别名/活动ID.");
+  }
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
   if (args.visible || params.visible) commandArgs.push("--visible");
   if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
   return { script, commandArgs };

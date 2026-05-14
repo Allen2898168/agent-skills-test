@@ -6,7 +6,7 @@
 - 活动后台权威 skill：`skills/weex-admin-ops/`，默认 staging：`https://stg-activity.weex.tech`。
 - FIN Admin 权威 skill：`skills/weex-fin-admin-ops/`，默认 staging：`https://stg-admin-web-fin.weex.tech`。
 - 前端权威 skill：`skills/weex-frontend-ops/`，目标 URL 按用户输入或 `references/routes.md`。
-- 最近更新时间：2026-05-13。
+- 最近更新时间：2026-05-14。
 - 历史交接索引：`docs/session-handoffs/README.md`。
 
 ## 必读入口
@@ -20,6 +20,8 @@
 - 三个失败复盘入口：`skills/weex-admin-ops/FAILURES.md`、`skills/weex-fin-admin-ops/FAILURES.md`、`skills/weex-frontend-ops/FAILURES.md`。
 
 ## 最近完成
+
+- 2026-05-14 已在无头真实 UI 模式创建并上线新的转盘抽奖活动 ID `9107`，标题 `自动化测试抽奖活动`，副标题 `多语任务奖品`，别名 `jonathan-test-20260514051431`，活动时间 `2026-05-14 13:24:31` 至 `2027-05-14 13:14:31`，`是否支持预报名=不支持`。创建阶段通过 `skills/weex-admin-ops/scripts/create-lottery-activity-draft.mjs --headless-ui` 完成，`POST /prod-api/activity/config` 返回 `code=200`；列表行 `上线` 触发 `POST /prod-api/activity/lottery/online` 返回 `code=200`；详情回查 `status=ONLINE`、`stage=NOT_START`、`taskConfigIds=[4996,4997,4998]`、`activityConfigI18n` 为中英 2 条。奖品配置验证还补充了一个稳定规则：转盘新增页 `抽奖奖品配置 / 奖品名称` 下拉展示的是 `奖品别名`，脚本匹配时必须按 alias，如 `auto_bonus_100_20260514`，不能按中文奖品名称匹配。相关更新已写入 `skills/weex-admin-ops/references/operations/activity-management-lottery.md`、`skills/weex-admin-ops/references/action-cache.md` 和 `skills/weex-admin-ops/scripts/action-cache.json`。
 
 - 2026-05-13 已按“复制失败则重新创建、开赛时间 5 分钟后、活动名称/标题/副标题不超过 15 个字符”重新创建并上线转盘抽奖活动 ID `9095`。标题 `飞镖合约抽奖`（6 字符）、副标题 `5分后开赛`（5 字符），别名 `lottery-dart-5min-20260513112327`，抽奖样式 `飞镖转盘`，`是否支持预报名=不支持`，后台 UTC+8 活动时间最终刷新为 `2026-05-13 19:32:10` 至 `2026-05-20 19:27:10`。创建接口 `POST /prod-api/activity/config` 返回 `code=200`；上线前模型级刷新 `baseForm.form.startTime/endTime` 后 `PUT /prod-api/activity/config` 返回 `code=200`；列表行 `上线` 触发 `POST /prod-api/activity/lottery/online` 返回 `code=200`；详情回查 `status=ONLINE`、`stage=NOT_START`、`taskConfigIds=[4873]`。已把标题/副标题长度硬性规则写入 `skills/weex-admin-ops/references/operations/activity-management-lottery.md`。
 - 2026-05-13 已修复并上线转盘抽奖活动 ID `9093`：标题 `4分钟开赛飞镖合约转盘20260513110241`，别名 `lottery-4min-dart-contract-20260513110241`，抽奖样式 `飞镖转盘`，`是否支持预报名=不支持`，后台 UTC+8 活动时间更新为 `2026-05-13 19:45:51` 至 `2026-05-20 19:15:51`。详情回查 `status=ONLINE`、`stage=NOT_START`、`taskConfigIds=[4873]`，任务为 `自动化测试-转盘-合约100-奖次1000-20260507`，`taskType=TRADING_VOLUME`，`requiredVolume=100`。本轮失败点：活动任务下拉选择后未落行、排序系数未填导致 `activityTaskForm=false`；编辑页只改可见日期输入未同步 `baseForm.form.startTime/endTime`，保存接口仍提交旧时间；按模型和可见输入同时更新后，`PUT /prod-api/activity/config` 与 `POST /prod-api/activity/lottery/online` 均返回 `code=200`。修复已写入 `skills/weex-admin-ops/scripts/strict-lottery-visible-attempt.mjs` 和后台复盘。

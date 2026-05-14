@@ -12,9 +12,11 @@ function usage() {
   node scripts/create-lottery-activity-draft.mjs --dry-run
   node scripts/create-lottery-activity-draft.mjs --visible --dry-run
   node scripts/create-lottery-activity-draft.mjs --visible
+  node scripts/create-lottery-activity-draft.mjs --headless-ui
 
 Options:
   --visible                 mark the intended mode as headed browser mode
+  --headless-ui             run the same real UI workflow in headless browser mode
   --title-prefix <text>     activity title prefix
   --alias-prefix <text>     activity alias prefix
   --start <text>            planned activity start time
@@ -28,14 +30,15 @@ Options:
 
 Safety:
   --dry-run prints the verified plan without writing data.
-  Actual creation is enabled only with --visible and uses the verified strict UI
-  browser workflow. Non-visible writes remain disabled for this activity.
+  Actual creation uses the strict UI browser workflow. Use --visible for headed UI
+  or --headless-ui for headless real UI clicks.
 `;
 }
 
 function parseArgs() {
-  const args = parseFlags(process.argv.slice(2), { booleans: ["--visible", "--dry-run", "--no-preapply"] });
+  const args = parseFlags(process.argv.slice(2), { booleans: ["--visible", "--headless-ui", "--dry-run", "--no-preapply"] });
   args.visible = Boolean(args.visible);
+  args.headlessUi = Boolean(args["headless-ui"] || args.headlessUi);
   args.dryRun = Boolean(args.dryRun);
   return args;
 }
@@ -59,11 +62,11 @@ async function run() {
     });
     return 0;
   }
-  if (!args.visible) {
+  if (!args.visible && !args.headlessUi) {
     printJson({
       ok: false,
       dryRun: false,
-      error: "create_lottery_activity_draft actual writes require --visible because this workflow is verified only through real UI browser actions.",
+      error: "create_lottery_activity_draft actual writes require --visible or --headless-ui because this workflow uses real UI browser actions.",
       operationReference: "references/operations/activity-management-lottery.md",
       plan,
     }, process.stderr);
@@ -84,6 +87,7 @@ function buildStrictUiEnv(args) {
     ...(args.preapplyEnd ? { LOTTERY_PREAPPLY_END: String(args.preapplyEnd) } : {}),
     ...(args.style ? { LOTTERY_STYLE: String(args.style) } : {}),
     ...(args.noPreapply ? { LOTTERY_PREAPPLY: "0" } : {}),
+    ...(args.headlessUi ? { LOTTERY_HEADLESS: "1" } : {}),
   };
 }
 

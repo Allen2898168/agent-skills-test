@@ -37,6 +37,8 @@ function scoreAction(action, query) {
   if (action.id === "verify_guide_template_row_actions" && /活动.*引导.*配置|引导.*流程.*配置|流程.*引导.*配置|活动流程引导配置/.test(query) && query.includes("操作列")) score += 12;
   if (action.id === "create_lottery_activity_draft" && /活动列表/.test(query) && /转盘抽奖/.test(query) && /新增|创建|草稿|配置|走一下|尝试/.test(query)) score += 14;
   if (action.id === "create_lottery_activity_draft" && /转盘抽奖.{0,8}活动|活动.{0,8}转盘抽奖/.test(query) && /新增|创建|生成|草稿|配置|全配置|权重配置|走一下|尝试/.test(query)) score += 14;
+  if (action.id === "online_lottery_activity" && /活动列表|转盘抽奖|抽奖活动|活动/.test(query) && /上线|发布/.test(query)) score += 16;
+  if (action.id === "online_lottery_activity" && /活动ID|活动id|活动别名|showUrl|别名/.test(query) && /上线|发布/.test(query)) score += 12;
   if (action.supportedCategories?.some(item => query.includes(item))) score += 1;
   if (action.supportedSubtypes?.some(item => query.toUpperCase().includes(String(item).toUpperCase()))) score += 1;
   return score;
@@ -52,7 +54,19 @@ function inferParams(query) {
     ...inferGuideTemplateParams(query),
     ...inferGuideRowActionParams(query),
     ...inferLotteryActivityDraftParams(query),
+    ...inferLotteryOnlineParams(query),
     prizeId: inferPrizeId(query),
+  };
+}
+
+function inferLotteryOnlineParams(query) {
+  if (!/上线|发布/.test(query) || !/转盘抽奖|抽奖活动|活动列表|活动/.test(query)) return {};
+  const activityIdMatch = query.match(/(?:活动\s*(?:id|ID)|activity\s*id)\s*(?:为|是|=|:|：)?\s*(\d+)/i);
+  const activityAliasMatch = query.match(/(?:活动\s*别名|别名|showUrl)\s*(?:为|是|=|:|：)?\s*([A-Za-z0-9_.-]+)/i);
+  return {
+    activityId: activityIdMatch?.[1],
+    activityAlias: activityAliasMatch?.[1],
+    visible: /浏览器模式|可见|打开浏览器|让我看着/.test(query),
   };
 }
 

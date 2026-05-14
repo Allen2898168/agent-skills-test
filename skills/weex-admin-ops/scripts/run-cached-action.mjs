@@ -52,6 +52,8 @@ Options:
   --end <text>        Planned end time for create_lottery_activity_draft
   --style <text>      Lottery style for create_lottery_activity_draft
   --no-preapply       Disable pre-apply for create_lottery_activity_draft
+  --activity-alias <x> Activity alias/showUrl for online_lottery_activity
+  --activity-id <id>  Activity id for online_lottery_activity
 `;
 }
 

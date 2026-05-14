@@ -23,6 +23,9 @@ const preApplyStartTime = process.env.LOTTERY_PREAPPLY_START || "2026-06-01 00:0
 const preApplyEndTime = process.env.LOTTERY_PREAPPLY_END || "2026-06-09 23:59:59";
 const registrationTemplateLabel = process.env.LOTTERY_REGISTRATION_TEMPLATE_LABEL || "【2729】 自动化报名模板_auto_manual_20260505161031";
 const activityTaskLabel = process.env.LOTTERY_ACTIVITY_TASK_LABEL || "";
+const activityTaskLabels = parseList(process.env.LOTTERY_ACTIVITY_TASK_LABELS).length
+  ? parseList(process.env.LOTTERY_ACTIVITY_TASK_LABELS)
+  : [activityTaskLabel || "4873-自动化测试-转盘-合约100-奖次1000-20260507"];
 const enablePreApply = process.env.LOTTERY_PREAPPLY !== "0";
 const lotteryStyle = process.env.LOTTERY_STYLE || "圆形转盘";
 const evidence = { uploads: 0, activityResponses: [] };
@@ -32,6 +35,10 @@ const enableBeginnerTask = variedMode || process.env.LOTTERY_ENABLE_BEGINNER_TAS
 const prizeAmounts = variedMode ? ["1", "2", "3", "4", "5", "6", "7", "8"] : Array(8).fill("1");
 const prizeStocks = variedMode ? ["80", "90", "100", "110", "120", "130", "140", "150"] : Array(8).fill("100");
 const prizeWeights = variedMode ? ["5", "8", "10", "12", "13", "15", "17", "20"] : Array(8).fill("12.5");
+const configuredPrizeLabels = parseList(process.env.LOTTERY_PRIZE_LABELS);
+const prizeLabels = configuredPrizeLabels.length ? expandToEight(configuredPrizeLabels) : [];
+const configuredPrizeAmounts = parseList(process.env.LOTTERY_PRIZE_AMOUNTS);
+const effectivePrizeAmounts = configuredPrizeAmounts.length ? expandToEight(configuredPrizeAmounts) : prizeAmounts;
 const redSignWeights = variedMode ? ["4", "6", "8", "10", "12", "14", "18", "28"] : Array(8).fill("12.5");
 const whiteSignWeights = variedMode ? ["3", "7", "9", "11", "13", "15", "19", "23"] : Array(8).fill("12.5");
 const lotteryWeightConfigWeights = ["5", "8", "10", "12", "13", "15", "17", "20"];
@@ -43,6 +50,23 @@ const browser = await chromium.launch({
   slowMo: 120,
   args: ["--window-size=1440,1000"],
 });
+
+function parseList(value) {
+  const text = String(value || "").trim();
+  if (!text) return [];
+  if (text.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(text);
+      return Array.isArray(parsed) ? parsed.map(item => String(item).trim()).filter(Boolean) : [];
+    } catch {}
+  }
+  return text.split("||").map(item => item.trim()).filter(Boolean);
+}
+
+function expandToEight(values) {
+  if (!values.length) return [];
+  return Array.from({ length: 8 }, (_, index) => values[index % values.length]);
+}
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
 let authHeader = "";
 page.on("response", async response => {
@@ -233,42 +257,47 @@ async function openLotteryViaMenu() {
   await wait(1200);
 }
 
-async function clickPrize(rowIndex) {
-  const tableLocator = page.locator(".el-table").filter({ hasText: "奖品池ID" }).first();
-  const rowLocator = tableLocator.locator(".el-table__body-wrapper tbody tr").nth(rowIndex);
-  const selectLocator = rowLocator.locator(".el-select").nth(1);
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    await rowLocator.scrollIntoViewIfNeeded().catch(() => {});
-    await selectLocator.click({ force: true, timeout: 5000 }).catch(async () => {
-      const box = await page.evaluate(index => {
-        const visible = element => !!element && element.getClientRects().length
-          && getComputedStyle(element).display !== "none"
-          && getComputedStyle(element).visibility !== "hidden";
-        const table = [...document.querySelectorAll(".el-table")]
-          .filter(visible)
-          .find(element => /奖品池ID|奖品名称/.test(element.innerText));
-        if (!table) return null;
-        const row = [...table.querySelectorAll(".el-table__body-wrapper tbody tr")].filter(visible)[index];
-        if (!row) return null;
-        row.scrollIntoView({ block: "center", inline: "nearest" });
-        const select = [...row.querySelectorAll(".el-select")].filter(visible)[1];
-        if (!select) return null;
-        const rect = select.getBoundingClientRect();
-        return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-      }, rowIndex);
-      if (box) await page.mouse.click(box.x, box.y);
-    });
-    await wait(450);
-    const options = page.locator(".el-select-dropdown:visible .el-select-dropdown__item:not(.is-disabled)");
-    if (await options.count()) {
-      await options.first().click({ force: true });
-      await wait(180);
+async function clickPrize(rowIndex, label = null) {
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const selected = await page.evaluate(async ({ rowIndex, label }) => {
+      const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+      const visible = element => !!element && element.getClientRects().length
+        && getComputedStyle(element).display !== "none"
+        && getComputedStyle(element).visibility !== "hidden";
+      const table = [...document.querySelectorAll(".el-table")]
+        .filter(visible)
+        .find(element => /奖品池ID|奖品名称/.test(element.innerText));
+      if (!table) return null;
+      const rows = [...table.querySelectorAll(".el-table__body-wrapper tbody tr")].filter(visible);
+      const row = rows[rowIndex];
+      if (!row) return null;
+      row.scrollIntoView({ block: "center", inline: "nearest" });
+      const selects = [...row.querySelectorAll(".el-select")].filter(visible);
+      const select = selects[1];
+      if (!select) return null;
+      select.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true, view: window }));
+      select.click();
+      await sleep(500);
+      const dropdown = [...document.querySelectorAll(".el-select-dropdown")].filter(visible).pop();
+      if (!dropdown) return null;
+      const items = [...dropdown.querySelectorAll(".el-select-dropdown__item:not(.is-disabled)")].filter(visible);
+      const item = label
+        ? items.find(option => option.innerText.trim().includes(label))
+        : items[0];
+      if (!item) return null;
+      item.scrollIntoView({ block: "center", inline: "nearest" });
+      item.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true, view: window }));
+      item.click();
+      return item.innerText.trim();
+    }, { rowIndex, label });
+    if (selected) {
+      await wait(250);
       await page.keyboard.press("Escape").catch(() => {});
       await wait(120);
       return;
     }
     await page.keyboard.press("Escape").catch(() => {});
-    await wait(180);
+    await wait(250);
   }
   throw new Error(`prize dropdown missing row ${rowIndex + 1}`);
 }
@@ -387,8 +416,8 @@ async function fillPrizeRows() {
   await scrollText("抽奖奖品配置");
   if (!(await prizeTableBox())) throw new Error("prize table missing");
   for (let index = 0; index < 8; index += 1) {
-    await clickPrize(index);
-    await fillPrizeCell(index, 4, prizeAmounts[index]);
+    await clickPrize(index, prizeLabels[index] || null);
+    await fillPrizeCell(index, 4, effectivePrizeAmounts[index]);
     await fillPrizeCell(index, 5, prizeStocks[index]);
     await uploadPrizeImage(index);
   }
@@ -574,47 +603,51 @@ async function enableBeginnerContractTask() {
 
 async function fillTask() {
   await scrollText("活动任务信息");
-  const taskText = activityTaskLabel || "4873-自动化测试-转盘-合约100-奖次1000-20260507";
-  const added = await page.evaluate(async label => {
-    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
-    const visible = element => !!element && element.getClientRects().length
-      && getComputedStyle(element).display !== "none"
-      && getComputedStyle(element).visibility !== "hidden";
-    const card = [...document.querySelectorAll(".el-card")]
-      .filter(visible)
-      .find(element => element.innerText.includes("活动任务信息"));
-    if (!card) return { ok: false, reason: "task card missing" };
-    const select = [...card.querySelectorAll(".el-select")].filter(visible)[0];
-    if (!select) return { ok: false, reason: "task select missing" };
-    select.click();
-    await wait(700);
-    const options = [...document.querySelectorAll(".el-select-dropdown__item")].filter(visible);
-    const option = options.find(element => element.innerText.includes(label))
-      || options.find(element => element.innerText.includes("合约") && element.innerText.includes("转盘"))
-      || options[0];
-    if (!option) return { ok: false, reason: "task option missing" };
-    option.scrollIntoView({ block: "center", inline: "nearest" });
-    option.click();
-    await wait(700);
-    const plus = [...card.querySelectorAll("button.el-button--primary")].filter(visible)[0];
-    if (!plus) return { ok: false, reason: "task plus missing", selected: option.innerText.trim() };
-    plus.click();
-    await wait(900);
-    const rows = [...card.querySelectorAll(".el-table__body-wrapper tbody tr")].filter(visible);
-    const row = rows[0];
-    if (!row) return { ok: false, reason: "task row not added", selected: option.innerText.trim() };
-    const input = [...row.querySelectorAll("input:not([type=checkbox]):not([type=radio])")].filter(visible)
-      .find(element => element.placeholder.includes("排序系数"))
-      || [...row.querySelectorAll("input:not([type=checkbox]):not([type=radio])")].filter(visible).pop();
-    if (!input) return { ok: false, reason: "task sort input missing", selected: option.innerText.trim() };
-    input.focus();
-    input.value = "1";
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-    input.dispatchEvent(new Event("change", { bubbles: true }));
-    return { ok: true, selected: option.innerText.trim(), row: row.innerText.trim().replace(/\s+/g, " ") };
-  }, taskText);
-  if (!added.ok) throw new Error(`activity task config failed: ${JSON.stringify(added)}`);
-  console.log(JSON.stringify({ step: "task_added", ...added }));
+  const addedRows = [];
+  for (let index = 0; index < activityTaskLabels.length; index += 1) {
+    const taskText = activityTaskLabels[index];
+    const added = await page.evaluate(async ({ label, sortValue }) => {
+      const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+      const visible = element => !!element && element.getClientRects().length
+        && getComputedStyle(element).display !== "none"
+        && getComputedStyle(element).visibility !== "hidden";
+      const card = [...document.querySelectorAll(".el-card")]
+        .filter(visible)
+        .find(element => element.innerText.includes("活动任务信息"));
+      if (!card) return { ok: false, reason: "task card missing" };
+      const select = [...card.querySelectorAll(".el-select")].filter(visible)[0];
+      if (!select) return { ok: false, reason: "task select missing" };
+      select.click();
+      await wait(700);
+      const options = [...document.querySelectorAll(".el-select-dropdown__item")].filter(visible);
+      const option = options.find(element => element.innerText.includes(label))
+        || options.find(element => element.innerText.includes("合约") && element.innerText.includes("转盘"))
+        || options[0];
+      if (!option) return { ok: false, reason: "task option missing" };
+      option.scrollIntoView({ block: "center", inline: "nearest" });
+      option.click();
+      await wait(700);
+      const plus = [...card.querySelectorAll("button.el-button--primary")].filter(visible)[0];
+      if (!plus) return { ok: false, reason: "task plus missing", selected: option.innerText.trim() };
+      plus.click();
+      await wait(900);
+      const rows = [...card.querySelectorAll(".el-table__body-wrapper tbody tr")].filter(visible);
+      const row = rows[rows.length - 1];
+      if (!row) return { ok: false, reason: "task row not added", selected: option.innerText.trim() };
+      const input = [...row.querySelectorAll("input:not([type=checkbox]):not([type=radio])")].filter(visible)
+        .find(element => element.placeholder.includes("排序系数"))
+        || [...row.querySelectorAll("input:not([type=checkbox]):not([type=radio])")].filter(visible).pop();
+      if (!input) return { ok: false, reason: "task sort input missing", selected: option.innerText.trim() };
+      input.focus();
+      input.value = String(sortValue);
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+      return { ok: true, selected: option.innerText.trim(), row: row.innerText.trim().replace(/\s+/g, " ") };
+    }, { label: taskText, sortValue: index + 1 });
+    if (!added.ok) throw new Error(`activity task config failed: ${JSON.stringify(added)}`);
+    addedRows.push(added);
+    console.log(JSON.stringify({ step: "task_added", ...added }));
+  }
   if (enableBeginnerTask) await enableBeginnerContractTask();
 }
 

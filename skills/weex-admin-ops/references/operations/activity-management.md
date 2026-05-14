@@ -3,7 +3,7 @@
 ## Lottery Activity Create And Online
 
 Status: candidate
-Last verified: 2026-05-07
+Last verified: 2026-05-14
 Environment: staging
 
 Business domain:
@@ -33,11 +33,8 @@ Validated create constraints:
 Validated online behavior:
 - List-row action `上线` opens a confirmation dialog.
 - Confirming `上线` triggers `POST /prod-api/activity/lottery/online`.
-- Backend rejects the online action when the Google code is missing.
-- Observed backend response:
-  - HTTP 200
-  - `code=500`
-  - `msg=google验证码不得为空`
+- The confirmation dialog requires a verification input; missing code still returns backend rejection.
+- Verified success on 2026-05-14: activity `9107` / alias `jonathan-test-20260514051431` was put online in headless real-UI mode, `POST /prod-api/activity/lottery/online` returned HTTP 200 / `code=200`, and follow-up detail re-query showed `status=ONLINE`.
 
 Operator rule:
 - Treat `上线` as a second-factor-protected state change.

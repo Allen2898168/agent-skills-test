@@ -28,7 +28,8 @@ The action cache is the first execution layer for workflows that have already be
 | `delete_register_templates_by_operator` | `scripts/delete-register-templates-by-operator.mjs` | candidate | Dry-run and delete activity registration templates by exact `最近编辑人`; destructive execution requires `--confirm-delete`; invisible deletion and visible/invisible dry-run verified on 2026-05-06. |
 | `create_guide_templates` | `scripts/create-guide-templates.mjs` | candidate | Create activity guide-flow templates for verified activity-type/frequency/step combinations; visible and invisible modes verified on 2026-05-06. |
 | `verify_guide_template_row_actions` | `scripts/guide-template-row-actions.mjs` | candidate | Create a temporary activity guide template, verify `查看` / `修改` / `复制` / `删除`, and delete the temporary records; visible and invisible modes verified on 2026-05-06. |
-| `create_lottery_activity_draft` | `scripts/create-lottery-activity-draft.mjs` | candidate | Create a draft `活动列表 / 转盘抽奖` activity through the verified visible-browser UI workflow, with configurable time and lottery style. |
+| `create_lottery_activity_draft` | `scripts/create-lottery-activity-draft.mjs` | candidate | Create a draft `活动列表 / 转盘抽奖` activity through the verified real-UI workflow, with configurable time and lottery style. |
+| `online_lottery_activity` | `scripts/online-lottery-activity.mjs` | candidate | Put a draft `活动列表 / 转盘抽奖` activity online through the verified list-row confirmation flow. |
 
 ## Natural-Language Matching
 
@@ -101,13 +102,20 @@ For activity guide-template row actions:
 For lottery activity drafts:
 - use `--action create_lottery_activity_draft` for explicit execution;
 - `--dry-run` prints the verified creation plan without writing data;
-- actual creation requires `--visible`; non-visible writes are intentionally rejected because only the UI browser path is verified;
+- actual creation supports `--visible` and `--headless-ui`; both modes run the same strict real-UI browser workflow;
 - optional parameters include `--title-prefix`, `--alias-prefix`, `--start`, `--end`, `--style`, and `--no-preapply`; verified style labels are `圆形转盘`, `飞镖转盘`, `彩蛋`, `环形跑马灯`, and `足球射门`;
 - the verified write path is `活动列表 / 转盘抽奖`, path `/activities/lottery/add`, and uses real page clicks, dropdowns, uploads, table scrolling, and submit in browser mode;
 - run `node skills/weex-admin-ops/scripts/run-cached-action.mjs --query "活动列表 转盘抽奖 新增草稿 浏览器模式" --dry-run` to inspect the planned defaults and assertions;
 - the script creates draft records only. For frontend display validation, put each activity online with the row `上线` action and verify `POST /prod-api/activity/lottery/online` business `code=200` before opening `https://stg-www.weex.tech/zh-CN/events/draw/<alias>`;
 - natural language such as `创建一个带权重配置的 转盘抽奖活动 全配置 浏览器模式` should match this activity-create action, not the roulette task action; when in doubt, use explicit `--action create_lottery_activity_draft`;
-- the latest cache-backed visible path was verified through direct script execution on 2026-05-11 for five lottery styles. The five created activities were later put online and verified on frontend draw pages with injected login state.
+- the latest cache-backed visible path was verified through direct script execution on 2026-05-11 for five lottery styles. On 2026-05-14, the same draft-create path was also verified in `--headless-ui` mode for activity `9107`, followed by a successful real-UI online action returning `POST /prod-api/activity/lottery/online` business `code=200`.
+
+For lottery activity online:
+- use `--action online_lottery_activity` for explicit execution;
+- default mode is invisible/headless real UI, and `--visible` enables headed browser mode;
+- pass `--activity-alias <showUrl>` or `--activity-id <id>`; alias is recommended because the row action is driven from the list result;
+- the script searches the target row, clicks row action `上线`, fills the verification input in the confirmation dialog, clicks `确定`, and verifies `POST /prod-api/activity/lottery/online` business `code=200` plus final `status=ONLINE`;
+- natural language such as `把活动ID 9107 的转盘抽奖活动上线` or `上线活动别名 jonathan-test-20260514051431` should match this action.
 
 ## Cache Graduation Rules
 

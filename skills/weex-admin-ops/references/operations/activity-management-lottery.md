@@ -74,6 +74,7 @@ The prize table has eight rows. Keep `奖品池ID` as `1-8`; do not use a generi
 
 For each row:
 - Select one prize from the row `奖品名称` dropdown.
+- Current page behavior: the dropdown option text is driven by `奖品别名`, not the Chinese `奖品名称`. When scripting or matching a target option, use the prize alias text such as `auto_bonus_100_20260514`, not the display name `自动化测试赠金100`.
 - Fill `奖金金额(USDT)` with `1`.
 - Fill `总库存数量` with `100`.
 - Fill `权重(%)` with `12.5`, so eight rows sum to `100`.
@@ -189,6 +190,12 @@ Non-visible/headless checks on 2026-05-07:
 - `复制` again triggered `POST /prod-api/activity/config/copy` and returned business `code=500`, `system busy, please retry later`.
 - `删除` filled the verification input in the confirmation dialog and clicked `确定`; `POST /prod-api/activity/lottery/delete` returned business `code=200`, and alias search returned `total=0`.
 
+Headless real-UI checks on 2026-05-14:
+- Activity `9107` (`jonathan-test-20260514051431`) was created through `create-lottery-activity-draft.mjs --headless-ui`.
+- The stable path reused the real UI add page, completed prize rows, task rows, multilingual config, FAQ, calendar, and submit, then verified the draft by alias search `showUrl=jonathan-test-20260514051431`.
+- The same activity was then put online from the list row action `上线`; the confirmation dialog required the verification input and triggered `POST /prod-api/activity/lottery/online` with business `code=200`.
+- Detail re-query confirmed `status=ONLINE`, `stage=NOT_START`, `taskConfigIds=[4996,4997,4998]`, `taskConfig` count `3`, and `activityConfigI18n` count `2`.
+
 ## Known Failure Avoidance
 
 - Load `skills/weex-admin-ops/.env.local` through `loadLocalEnv(process.cwd())` or a resolved skill root; relative `pathsFrom('./...')` can miss local login variables in inline scripts.
@@ -213,12 +220,19 @@ Action cache entry:
 - Script: `scripts/create-lottery-activity-draft.mjs`
 - Current status: candidate.
 
+Action cache entry:
+- `online_lottery_activity`
+- Script: `scripts/online-lottery-activity.mjs`
+- Current status: candidate.
+
 Use:
 
 ```bash
 node skills/weex-admin-ops/scripts/run-cached-action.mjs --query "活动列表 转盘抽奖 新增草稿 浏览器模式" --dry-run
 node skills/weex-admin-ops/scripts/run-cached-action.mjs --query "活动列表 转盘抽奖 新增草稿 浏览器模式"
 node skills/weex-admin-ops/scripts/run-cached-action.mjs --action create_lottery_activity_draft --visible --style 彩蛋 --title-prefix 前端展示彩蛋 --alias-prefix frontend-draw-egg --start "2026-05-11 17:52:01" --end "2026-05-18 17:52:01"
+node skills/weex-admin-ops/scripts/run-cached-action.mjs --action online_lottery_activity --activity-alias jonathan-test-20260514051431
+node skills/weex-admin-ops/scripts/run-cached-action.mjs --query "上线活动别名 jonathan-test-20260514051431"
 ```
 
-Actual writes require visible browser mode and are delegated to the strict UI workflow. Non-visible writes are intentionally disabled until separately verified. The cache entry creates a draft only; online and frontend-display verification remain separate steps.
+Actual writes support both `--visible` and `--headless-ui`, and both modes use the same strict real-UI workflow. The cache entry still creates a draft only; online and frontend-display verification remain separate steps.
