@@ -5,6 +5,7 @@
 - Web host: `https://stg-admin-web-fin.weex.tech`
 - Current airdrop reward product page: `https://stg-admin-web-fin.weex.tech/zh-CN/spotProGrant/airdropRewardProd/`
 - Observed API base: `https://stg-admin-fin-app.weex.tech/api`
+- Verified recharge MQ Kafka UI page: `http://10.5.53.28:8080/ui/clusters/new-stg-kafka/all-topics/flink.exchange.spot_capital_order_info/messages?keySerde=String&valueSerde=String&limit=100`
 - Default CDP URL: `http://127.0.0.1:9222`
 - Default persistent Chrome profile: `~/.codex/browser-profiles/weex-fin-admin`
 
@@ -18,6 +19,7 @@
 - Persistent profile override: `WEEX_FIN_CDP_USER_DATA_DIR`.
 - Chrome executable override: `WEEX_FIN_CHROME_EXECUTABLE`.
 - FIN page URL override: `WEEX_FIN_PAGE_URL`.
+- Recharge MQ Kafka UI override: `WEEX_FIN_MQ_RECHARGE_URL`.
 - Local runtime config must live in `skills/weex-fin-admin-ops/.env.local`.
 - Approval Google code source: `WEEX_FIN_GOOGLE_CODE`.
 - Optional Google OAuth exploration variables: `WEEX_FIN_GOOGLE_USERNAME`, `WEEX_FIN_GOOGLE_PASSWORD`.

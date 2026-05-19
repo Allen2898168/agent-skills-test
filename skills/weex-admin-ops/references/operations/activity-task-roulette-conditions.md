@@ -77,6 +77,8 @@ Common defaults:
 - Task update count: `仅1次，直至结束`.
 - Daily claim limit: `5`.
 - Total claim limit: `50`.
+- Do not use `kyc任务` as the default branch for `转盘抽奖`.
+- Reason: `kyc任务` hides old-user scenarios and is therefore prohibited for general lottery-task configuration.
 
 Validated created records:
 - `kyc任务`: task ID `4740`, name `转盘抽奖_kyc任务_20260504203222`.
@@ -94,6 +96,7 @@ Validated created records:
 - `邀请任务`: task ID `4752`, name `转盘抽奖_邀请任务_retry3_20260504204857`.
 
 Known gaps:
+- `kyc任务`: keep as historical discovery evidence only. Do not continue using it for current `转盘抽奖` default or automated configuration.
 - `首次登录APP`: using an `抽奖次数` prize returned `code=500`, message `任务奖品只能选择合约抵扣金`. Retry this branch with a contract-deduction prize instead of the default lottery-count prize.
 - `新老现货划转任务`: field handling was resolved on 2026-05-05. For this task type, `判定开始时间` only shows `活动开始时间`; do not try to select `报名活动后`. Submit reached the backend but returned `code=500`, message `新老划转任务重复，已配置新老划转任务的编号是:964`. Treat creation as blocked by a business uniqueness rule unless the existing task can be reused, modified, or removed.
 

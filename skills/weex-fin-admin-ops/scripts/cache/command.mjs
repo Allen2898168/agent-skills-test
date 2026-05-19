@@ -51,6 +51,15 @@ export function commandFor(match, args, skillRoot) {
     if (args.allowUnverifiedTransferChain || params.allowUnverifiedTransferChain) commandArgs.push("--allow-unverified-transfer-chain");
     return { script, commandArgs };
   }
+  if (match.action.id === "mq_recharge_callback_send") {
+    if (params.uid) commandArgs.push("--uid", String(params.uid));
+    if (params.amount) commandArgs.push("--amount", String(params.amount));
+    if (params.messageId) commandArgs.push("--message-id", String(params.messageId));
+    if (params.kafkaUrl) commandArgs.push("--kafka-url", String(params.kafkaUrl));
+    if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+    if (args.confirmSend || params.confirmSend) commandArgs.push("--confirm-send");
+    return { script, commandArgs };
+  }
   if (match.action.id !== "finance_airdrop_reward_grant") {
     throw new Error(`No runner implemented for action: ${match.action.id}`);
   }

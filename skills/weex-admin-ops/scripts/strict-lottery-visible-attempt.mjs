@@ -15,23 +15,39 @@ const stamp = timestamp();
 const titlePrefix = process.env.LOTTERY_TITLE_PREFIX || "严格UI转盘抽奖草稿";
 const aliasPrefix = process.env.LOTTERY_ALIAS_PREFIX || "strict-ui-lottery";
 const title = process.env.LOTTERY_TITLE_EXACT || `${titlePrefix}${stamp}`;
-const alias = `${aliasPrefix}-${stamp}`;
+const alias = process.env.LOTTERY_ALIAS_EXACT || `${aliasPrefix}-${stamp}`;
 const subTitle = process.env.LOTTERY_SUBTITLE || "严格 UI 复杂配置副标题";
 const activityStartTime = process.env.LOTTERY_START || "2026-06-10 00:00:00";
 const activityEndTime = process.env.LOTTERY_END || "2026-06-30 23:59:59";
 const preApplyStartTime = process.env.LOTTERY_PREAPPLY_START || "2026-06-01 00:00:00";
 const preApplyEndTime = process.env.LOTTERY_PREAPPLY_END || "2026-06-09 23:59:59";
 const registrationTemplateLabel = process.env.LOTTERY_REGISTRATION_TEMPLATE_LABEL || "【2729】 自动化报名模板_auto_manual_20260505161031";
+const guideTemplateLabel = process.env.LOTTERY_GUIDE_TEMPLATE_LABEL || "";
+const ownerLabel = process.env.LOTTERY_OWNER || config.username || "auto";
+const platformActivity = process.env.LOTTERY_PLATFORM_ACTIVITY || "否";
 const activityTaskLabel = process.env.LOTTERY_ACTIVITY_TASK_LABEL || "";
 const activityTaskLabels = parseList(process.env.LOTTERY_ACTIVITY_TASK_LABELS).length
   ? parseList(process.env.LOTTERY_ACTIVITY_TASK_LABELS)
-  : [activityTaskLabel || "4873-自动化测试-转盘-合约100-奖次1000-20260507"];
+  : [activityTaskLabel || "4998-自动化转盘首充100_20260514332054", "4997-自动化转盘现货100_20260514332054", "4996-自动化转盘合约100_20260514332054", "5102-自动化测试 - 非首次充值"];
 const enablePreApply = process.env.LOTTERY_PREAPPLY !== "0";
 const lotteryStyle = process.env.LOTTERY_STYLE || "圆形转盘";
+const shareCopy = process.env.LOTTERY_SHARE_COPY || "严格 UI 分享活动文案";
+const agentShareCopy = process.env.LOTTERY_AGENT_SHARE_COPY || "严格 UI 代理分享文案";
+const activityRules = process.env.LOTTERY_RULES || "严格 UI 活动规则：完成转盘抽奖复杂配置验证。";
+const englishTitle = process.env.LOTTERY_EN_TITLE || `EN ${title}`;
+const englishSubTitle = process.env.LOTTERY_EN_SUBTITLE || `EN ${subTitle}`.slice(0, 15);
+const englishShareCopy = process.env.LOTTERY_EN_SHARE_COPY || "EN share copy";
+const englishAgentShareCopy = process.env.LOTTERY_EN_AGENT_SHARE_COPY || "EN agent copy";
+const englishActivityRules = process.env.LOTTERY_EN_RULES || "EN activity rules.";
+const faqTitle = process.env.LOTTERY_FAQ_TITLE || "FAQ title";
+const faqContent = process.env.LOTTERY_FAQ_CONTENT || "FAQ content";
+const keepOpenOnError = process.env.LOTTERY_DEBUG_KEEP_OPEN === "1";
 const evidence = { uploads: 0, activityResponses: [] };
 const variedMode = process.env.LOTTERY_VARIANT === "varied";
 const weightConfigMode = process.env.LOTTERY_WEIGHT_CONFIG === "vip";
 const enableBeginnerTask = variedMode || process.env.LOTTERY_ENABLE_BEGINNER_TASK === "1";
+const enableDailyLimit = process.env.LOTTERY_ENABLE_DAILY_LIMIT === "1";
+const enableAccumulatedWeight = process.env.LOTTERY_ENABLE_ACCUMULATED_WEIGHT === "1";
 const prizeAmounts = variedMode ? ["1", "2", "3", "4", "5", "6", "7", "8"] : Array(8).fill("1");
 const prizeStocks = variedMode ? ["80", "90", "100", "110", "120", "130", "140", "150"] : Array(8).fill("100");
 const prizeWeights = variedMode ? ["5", "8", "10", "12", "13", "15", "17", "20"] : Array(8).fill("12.5");
@@ -39,6 +55,8 @@ const configuredPrizeLabels = parseList(process.env.LOTTERY_PRIZE_LABELS);
 const prizeLabels = configuredPrizeLabels.length ? expandToEight(configuredPrizeLabels) : [];
 const configuredPrizeAmounts = parseList(process.env.LOTTERY_PRIZE_AMOUNTS);
 const effectivePrizeAmounts = configuredPrizeAmounts.length ? expandToEight(configuredPrizeAmounts) : prizeAmounts;
+const configuredPrizeStocks = parseList(process.env.LOTTERY_PRIZE_STOCKS);
+const effectivePrizeStocks = configuredPrizeStocks.length ? expandToEight(configuredPrizeStocks) : prizeStocks;
 const redSignWeights = variedMode ? ["4", "6", "8", "10", "12", "14", "18", "28"] : Array(8).fill("12.5");
 const whiteSignWeights = variedMode ? ["3", "7", "9", "11", "13", "15", "19", "23"] : Array(8).fill("12.5");
 const lotteryWeightConfigWeights = ["5", "8", "10", "12", "13", "15", "17", "20"];
@@ -283,12 +301,17 @@ async function clickPrize(rowIndex, label = null) {
       const items = [...dropdown.querySelectorAll(".el-select-dropdown__item:not(.is-disabled)")].filter(visible);
       const item = label
         ? items.find(option => option.innerText.trim().includes(label))
-        : items[0];
+        : items[Math.min(rowIndex, Math.max(items.length - 1, 0))];
       if (!item) return null;
+      const selectedLabel = item.innerText.trim();
       item.scrollIntoView({ block: "center", inline: "nearest" });
       item.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true, view: window }));
       item.click();
-      return item.innerText.trim();
+      await sleep(350);
+      const input = [...select.querySelectorAll("input")].filter(visible)[0];
+      const boundLabel = input?.value?.trim() || "";
+      if (!boundLabel || boundLabel !== selectedLabel) return null;
+      return boundLabel;
     }, { rowIndex, label });
     if (selected) {
       await wait(250);
@@ -300,6 +323,23 @@ async function clickPrize(rowIndex, label = null) {
     await wait(250);
   }
   throw new Error(`prize dropdown missing row ${rowIndex + 1}`);
+}
+
+async function readPrizeSelections() {
+  return page.evaluate(() => {
+    const visible = element => !!element && element.getClientRects().length
+      && getComputedStyle(element).display !== "none"
+      && getComputedStyle(element).visibility !== "hidden";
+    const table = [...document.querySelectorAll(".el-table")]
+      .filter(visible)
+      .find(element => /奖品池ID|奖品名称/.test(element.innerText));
+    const rows = [...(table?.querySelectorAll(".el-table__body-wrapper tbody tr") || [])].filter(visible);
+    return rows.map(row => {
+      const selects = [...row.querySelectorAll(".el-select")].filter(visible);
+      const prizeInput = [...(selects[1]?.querySelectorAll("input") || [])].filter(visible)[0];
+      return prizeInput?.value?.trim() || "";
+    });
+  });
 }
 
 async function prizeTableBox() {
@@ -418,7 +458,7 @@ async function fillPrizeRows() {
   for (let index = 0; index < 8; index += 1) {
     await clickPrize(index, prizeLabels[index] || null);
     await fillPrizeCell(index, 4, effectivePrizeAmounts[index]);
-    await fillPrizeCell(index, 5, prizeStocks[index]);
+    await fillPrizeCell(index, 5, effectivePrizeStocks[index]);
     await uploadPrizeImage(index);
   }
   await setPrizeScroll(1000);
@@ -435,6 +475,10 @@ async function fillPrizeRows() {
     }
   }
   await setPrizeScroll(0);
+  const selections = await readPrizeSelections();
+  if (selections.length !== 8 || selections.some(value => !value)) {
+    throw new Error(`prize selection not bound: ${JSON.stringify(selections)}`);
+  }
 }
 
 async function fillTableWeightsByMarker(marker, values = Array(8).fill("12.5")) {
@@ -655,14 +699,14 @@ async function fillI18n() {
   await scrollText("多语言");
   await page.locator("xpath=(//*[contains(normalize-space(.),'多语言')]/following::label[contains(@class,'el-checkbox')][contains(.,'英语')])[1]").click({ force: true }).catch(() => {});
   await wait(600);
-  await fillLabel("活动标题", `EN ${title}`, 1).catch(() => {});
-  await fillLabel("活动副标题", `EN ${subTitle}`.slice(0, 15), 1).catch(() => {});
+  await fillLabel("活动标题", englishTitle, 1).catch(() => {});
+  await fillLabel("活动副标题", englishSubTitle, 1).catch(() => {});
   for (const label of ["WEB头图上传", "H5头图上传", "web分享图上传", "H5分享图片上传"]) {
     await uploadLabel(label, 1).catch(() => {});
   }
-  await fillLabel("分享活动文案", "EN share copy", 1).catch(() => {});
-  await fillLabel("代理分享文案", "EN agent copy", 1).catch(() => {});
-  await fillRich("活动规则", "EN activity rules.", 1).catch(() => {});
+  await fillLabel("分享活动文案", englishShareCopy, 1).catch(() => {});
+  await fillLabel("代理分享文案", englishAgentShareCopy, 1).catch(() => {});
+  await fillRich("活动规则", englishActivityRules, 1).catch(() => {});
 }
 
 async function fillFaq() {
@@ -676,9 +720,9 @@ async function fillFaq() {
     titleInput = page.locator("xpath=(//*[contains(normalize-space(.),'常见问题')]/following::input[contains(@placeholder,'标题')])[1]");
   }
   if (!(await titleInput.isVisible({ timeout: 2500 }).catch(() => false))) return;
-  await fillControl(titleInput, "FAQ title");
+  await fillControl(titleInput, faqTitle);
   const editor = page.locator("xpath=(//*[contains(normalize-space(.),'常见问题')]/following::*[contains(@class,'ql-editor')])[1]");
-  await fillControl(editor, "FAQ content");
+  await fillControl(editor, faqContent);
 }
 
 async function fillCalendar() {
@@ -703,19 +747,19 @@ try {
 
   console.log(JSON.stringify({ step: "basic" }));
   await clickRadio("配置类型", "正式活动");
-  await fillLabel("负责人", config.username || "auto");
+  await fillLabel("负责人", ownerLabel);
   await selectLabel("类别配置", "通用");
-  await selectLabel("流程引导配置", null, 0, 0);
-  await clickRadio("是否为平台活动", "否");
+  await selectLabel("流程引导配置", guideTemplateLabel || null, 0, 0);
+  await clickRadio("是否为平台活动", platformActivity);
   await fillLabel("活动标题", title, 0);
   await fillLabel("活动副标题", subTitle, 0);
   await fillLabel("活动开始时间", activityStartTime);
   await fillLabel("活动结束时间", activityEndTime);
   await selectLabel("用户报名模版", registrationTemplateLabel);
   for (const label of ["WEB头图上传", "H5头图上传", "web分享图上传", "H5分享图片上传", "社媒活动预览图上传"]) await uploadLabel(label, 0);
-  await fillLabel("分享活动文案", "严格 UI 分享活动文案", 0);
-  await fillLabel("代理分享文案", "严格 UI 代理分享文案", 0);
-  await fillRich("活动规则", "严格 UI 活动规则：完成转盘抽奖复杂配置验证。", 0);
+  await fillLabel("分享活动文案", shareCopy, 0);
+  await fillLabel("代理分享文案", agentShareCopy, 0);
+  await fillRich("活动规则", activityRules, 0);
   await fillLabel("活动别名配置", alias);
   if (enablePreApply) {
     await ensurePreApplySupport();
@@ -740,10 +784,14 @@ try {
   await fillTableWeightsByMarker("白签", whiteSignWeights);
   console.log(JSON.stringify({ step: "share" }));
   await fillShareInfo();
-  console.log(JSON.stringify({ step: "daily" }));
-  await fillDailyLimit();
-  console.log(JSON.stringify({ step: "probability" }));
-  await fillProbability();
+  if (enableDailyLimit) {
+    console.log(JSON.stringify({ step: "daily" }));
+    await fillDailyLimit();
+  }
+  if (enableAccumulatedWeight) {
+    console.log(JSON.stringify({ step: "probability" }));
+    await fillProbability();
+  }
   console.log(JSON.stringify({ step: "task" }));
   await fillTask();
   console.log(JSON.stringify({ step: "i18n" }));
@@ -884,8 +932,15 @@ try {
     return { formErrors: formErrors.slice(0, 80), messages: messages.slice(0, 20) };
   }).catch(() => []);
   console.error(JSON.stringify({ ok: false, error: error.message, url: page.url(), title, alias, errors, uploads: evidence.uploads, activityResponses: evidence.activityResponses }, null, 2));
-  await wait(5000).catch(() => {});
+  if (keepOpenOnError && !headlessMode) {
+    console.error(JSON.stringify({ debug: true, message: "browser kept open on error for manual inspection", url: page.url(), alias }, null, 2));
+    await wait(30 * 60 * 1000).catch(() => {});
+  } else {
+    await wait(5000).catch(() => {});
+  }
   process.exitCode = 1;
 } finally {
-  await browser.close().catch(() => {});
+  if (!(keepOpenOnError && process.exitCode && !headlessMode)) {
+    await browser.close().catch(() => {});
+  }
 }

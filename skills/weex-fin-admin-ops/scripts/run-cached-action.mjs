@@ -19,6 +19,7 @@ function usage() {
   node scripts/run-cached-action.mjs --list
   node scripts/run-cached-action.mjs --query "FIN 财务充值发放 USDT 目标账号 uid <UID> 数量 <AMOUNT>"
   node scripts/run-cached-action.mjs --action finance_airdrop_reward_grant --uid <UID> --amount <AMOUNT> --dry-run
+  node scripts/run-cached-action.mjs --action mq_recharge_callback_send --uid <UID> --amount <AMOUNT> --dry-run
 
 Options:
   --query <text>       Natural-language request to match against cached FIN actions
@@ -46,8 +47,11 @@ Options:
   --remark1 <text>     FIN airdrop reward creation remark
   --audit-type <x>     FIN airdrop approval type code or label
   --audit-remark <x>   FIN airdrop approval remark
+  --message-id <id>    MQ recharge callback unique message id override
+  --kafka-url <url>    MQ recharge callback Kafka UI URL override
   --confirm-create     Required by finance_airdrop_reward_grant for actual creation
   --confirm-approve    Required by finance_airdrop_reward_grant for actual approval
+  --confirm-send       Required by mq_recharge_callback_send for real message send
   --confirm-register   Required by batch_register_recharge for account creation
   --confirm-recharge   Required by batch_register_recharge for FIN recharge
   --confirm-transfer   Required by register_recharge_transfer_contract for frontend spot-to-contract transfer

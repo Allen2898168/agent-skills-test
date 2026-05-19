@@ -1,5 +1,5 @@
 import { bodyText, sleep } from "../../lib/browser.mjs";
-import { clickVisibleDialogText as clickDialogText, dialog, fillLabel, selectFirstByLabel, selectPlaceholder, visibleFormErrors } from "../../lib/element-ui.mjs";
+import { clickVisibleDialogText as clickDialogText, dialog, fillLabel, selectFirstByLabel, selectOptionByLabel, selectPlaceholder, visibleFormErrors } from "../../lib/element-ui.mjs";
 import { fillEnglishIfVisible, fillRewardRange, firstNumericCell, searchTaskByName, selectCountry } from "./roulette-participant-ui.mjs";
 
 export async function createRouletteParticipantTasks(page, config, plan) {
@@ -50,8 +50,7 @@ async function fillScopeExtra(page, task) {
 async function fillDefaultTaskConfig(page, task) {
   await clickDialogText(page, "不审核KYC");
   if (!(await optionalClickDialogText(page, "单一任务条件"))) await selectFirstByLabel(page, "任务组合");
-  await selectFirstByLabel(page, "任务条件1");
-  await clickDialogText(page, "无kyc限制");
+  await selectOptionByLabel(page, "任务条件1", "KOL绑定");
   await clickDialogText(page, "报名活动后");
   await clickDialogText(page, "仅1次，直至结束");
   await clickDialogText(page, "单一奖励");

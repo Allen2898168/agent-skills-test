@@ -14,25 +14,27 @@ FIN workflows are usually financial, reward-affecting, or hard to revert. Treat 
 ## Operating Workflow
 
 1. Classify the request as read-only inspection, dry-run planning, order creation, approval, or another state-changing FIN operation.
-2. Read only the needed references:
+2. Before changing FIN automation, define the exact target result, success signal, and non-goals for the request. If UID, amount, currency, approval scope, or environment is unclear, ask first.
+3. Prefer the smallest safe extension to existing cached actions, helpers, and verified flows. Do not widen financial write scope just because a nearby script looks similar.
+4. Read only the needed references:
    - Environments and auth: `references/environments.md`
    - Operation index: `references/operations/index.md`
    - Existing operation playbooks: `references/operations/<business-domain>.md`
    - Cached action catalog: `references/action-cache.md`
    - Failure review index: `FAILURES.md`
    - Relevant failure reviews: `failure-reviews/<business-domain>.md`
-3. Before using FIN platform capability, run `scripts/fin-auth-check.mjs` to verify the persistent CDP login state and a basic read-only FIN interface.
-4. If the base check fails, open the persistent CDP Chrome FIN page and ask the user to log in. Keep waiting until the user closes the FIN page; do not stop because of a default timeout. Treat closing the FIN page as the signal that user-side login/handling is complete. Re-run the base check after the page closes. If it still fails, ask whether to retry; if the user says no, ask whether to continue with non-FIN parts of the current task when such parts exist.
-5. If the base check succeeds after the FIN page closes, do not add extra commentary; continue with the requested FIN operation in default non-visible/headless CDP/API-assisted mode.
-6. For every state-changing operation, identify missing required parameters before acting. Do not guess UID, amount, asset, approval type, Google code, or production/staging target.
-7. Before creating or approving FIN records, summarize the exact action, target environment, UID, amount, currency, sub business type, and approval scope. If the user explicitly requested a FIN recharge/grant such as `充值`, `发放`, or `下发`, and the environment, target account/UID, amount, currency, and approval method are available from the request or current workflow, treat that as confirmation and do not ask for a second confirmation. If any high-risk value is missing or ambiguous, ask for it before acting.
-8. Check `scripts/action-cache.json`. If the request matches a cached script and required parameters are available, run `scripts/run-cached-action.mjs --dry-run` first.
-9. If the cache script is missing, fails, or the page/API chain is unclear, use CDP against the user's current FIN Chrome session for read-only exploration. Do not print or store token, cookie, or Google code.
-10. Default execution mode is dry-run or non-visible CDP/API-assisted execution after confirmation. Visible browser mode is for observation or UI verification unless a FIN operation playbook explicitly marks visible UI writes as verified.
-11. Verify success with a business response and result lookup, not only HTTP 200. For grants and approvals, verify the created order appears in the expected list/status.
-12. Save screenshots only when the user explicitly asks. Store FIN screenshots under `artifacts/screenshots/<中文业务域>/<中文页面或操作>/`.
-13. If a FIN flow is newly discovered or changed, update the relevant reference and evaluate action-cache registration. Keep `SKILL.md` focused on workflow rules and navigation.
-14. If a failure, blocker, false assumption, retry success, script error, cache mismatch, or backend validation problem occurs, update `FAILURES.md` or the relevant `failure-reviews/` file before finishing.
+5. Before using FIN platform capability, run `scripts/fin-auth-check.mjs` to verify the persistent CDP login state and a basic read-only FIN interface.
+6. If the base check fails, open the persistent CDP Chrome FIN page and ask the user to log in. Keep waiting until the user closes the FIN page; do not stop because of a default timeout. Treat closing the FIN page as the signal that user-side login/handling is complete. Re-run the base check after the page closes. If it still fails, ask whether to retry; if the user says no, ask whether to continue with non-FIN parts of the current task when such parts exist.
+7. If the base check succeeds after the FIN page closes, do not add extra commentary; continue with the requested FIN operation in default non-visible/headless CDP/API-assisted mode.
+8. For every state-changing operation, identify missing required parameters before acting. Do not guess UID, amount, asset, approval type, Google code, or production/staging target.
+9. Before creating or approving FIN records, summarize the exact action, target environment, UID, amount, currency, sub business type, and approval scope. If the user explicitly requested a FIN recharge/grant such as `充值`, `发放`, or `下发`, and the environment, target account/UID, amount, currency, and approval method are available from the request or current workflow, treat that as confirmation and do not ask for a second confirmation. If any high-risk value is missing or ambiguous, ask for it before acting.
+10. Check `scripts/action-cache.json`. If the request matches a cached script and required parameters are available, run `scripts/run-cached-action.mjs --dry-run` first.
+11. If the cache script is missing, fails, or the page/API chain is unclear, use CDP against the user's current FIN Chrome session for read-only exploration. Do not print or store token, cookie, or Google code.
+12. Default execution mode is dry-run or non-visible CDP/API-assisted execution after confirmation. Visible browser mode is for observation or UI verification unless a FIN operation playbook explicitly marks visible UI writes as verified.
+13. Verify success with a business response and result lookup, not only HTTP 200. For grants and approvals, verify the created order appears in the expected list/status.
+14. Save screenshots only when the user explicitly asks. Store FIN screenshots under `artifacts/screenshots/<中文业务域>/<中文页面或操作>/`.
+15. If a FIN flow is newly discovered or changed, update the relevant reference and evaluate action-cache registration. Keep `SKILL.md` focused on workflow rules and navigation.
+16. If a failure, blocker, false assumption, retry success, script error, cache mismatch, or backend validation problem occurs, update `FAILURES.md` or the relevant `failure-reviews/` file before finishing.
 
 ## Cached Execution
 
@@ -60,6 +62,7 @@ Actual FIN writes must still pass explicit confirmation flags in the target scri
 ## Script Organization
 
 - Keep script entrypoints thin. Files directly under `scripts/*.mjs` should parse almost nothing and delegate to modules.
+- Keep edits narrow and auditable. Avoid opportunistic refactors in financial scripts; every extra change raises review and rollback cost.
 - Put reusable CLI helpers under `scripts/lib/`.
 - Put action cache matching and command construction under `scripts/cache/`.
 - Put FIN business automation under `scripts/business/<business-domain>/`.

@@ -101,6 +101,9 @@ When the user asks to create a newbie activity with default configuration:
   - default suggested `输入最小数值=10`
   - default suggested `输入最大数值` left blank
 - These values must still be shown to the user as defaults and confirmed before execution.
+- For `转盘抽奖` task condition defaults, do not suggest or auto-select `kyc任务`.
+- `kyc任务` is prohibited for general lottery-task configuration because it hides old-user scenarios.
+- If the user asks for a lottery task and does not specify `任务条件1`, prefer a non-KYC branch that is already validated for the current chain, such as `KOL绑定`, or ask the user to choose an explicit non-KYC task type.
 - If the chosen task condition or backend rule requires a different prize type, do not keep the default lottery-count reward. Explain the restriction and ask for a valid reward choice.
 
 ## Prize Image Defaults

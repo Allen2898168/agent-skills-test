@@ -1,7 +1,7 @@
 # Activity Management - Lottery Activity
 
-Status: candidate
-Last verified: 2026-05-11
+Status: verified
+Last verified: 2026-05-19
 Verified mode: visible browser
 Environment: staging `https://stg-activity.weex.tech`
 
@@ -30,7 +30,7 @@ Verified behavior:
 
 ## Draft Creation Path
 
-The latest cache-backed strict UI run created draft activity `9015` with title `严格UI转盘抽奖草稿20260507061951` and alias `strict-ui-lottery-20260507061951`.
+The latest cache-backed strict UI run created draft activity `9223` with title `回归转盘05` and alias `autotest-20260519103256-stock`.
 
 Use conservative defaults only in staging:
 - `配置类型`: `正式活动`
@@ -53,6 +53,11 @@ Fill required text and rich fields:
 - Upload default image files for web/h5 header, web/h5 share images, social preview, and prize share images.
 - Activity start time must be earlier than end time.
 - `用户报名模版`当前固定选择 `2729`：`【2729】 自动化报名模板_auto_manual_20260505161031`。不要再用“第一个兼容模板”作为默认规则。
+
+## Regression Templates
+
+Authoritative regression template definitions for lottery automation are maintained in `references/operations/activity-management-lottery-templates.md`.
+Use that file for `普通回归活动模板` / `二次权重专项活动模板` / `小库存专项活动模板`, plus verified activity IDs, alias conventions, and template-specific runtime rules.
 
 ## Lottery Styles
 
@@ -155,6 +160,7 @@ Accept creation only when at least one durable assertion passes:
 - The created row is visible in the list and remains `DRAFT`.
 
 For frontend display validation, draft creation is not enough. The activity must be online before opening `https://stg-www.weex.tech/zh-CN/events/draw/<alias>`.
+For lottery frontend signup-state validation, use `references/operations/activity-management-lottery-frontend.md`.
 
 Recommended sequence for multiple frontend-display activities:
 
@@ -202,6 +208,7 @@ Headless real-UI checks on 2026-05-14:
 - Treat DOM nodes as nodes, not strings, when extracting labels or options.
 - Do not fill all prize table inputs by index; the first column is the locked prize-pool ID.
 - Do not fill the disabled `有效期（天）` prize column; current verified rows start editable data at `奖金金额(USDT)`.
+- When selecting prize rows in the visible UI, do not assume a clicked dropdown option is already bound. Read back the row prize input value after selection and require all eight rows to be non-empty before submission.
 - Activity task rows appear only after clicking the module-level `+`.
 - Scope language checkboxes to the current `多语言` or `常见问题` container to avoid cross-module selection.
 - `预报名模版` uses the character `模版` in the current page label. Looking first for `预报名模板` causes unnecessary timeout.

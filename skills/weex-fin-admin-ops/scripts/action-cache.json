@@ -3,6 +3,20 @@
   "updatedAt": "2026-05-12",
   "actions": [
     {
+      "id": "mq_recharge_callback_send",
+      "status": "verified",
+      "script": "scripts/mq-recharge-callback-send.mjs",
+      "description": "Send one staging recharge MQ callback message through the verified Kafka UI page for topic flink.exchange.spot_capital_order_info, using uid plus amount and a generated unique message id.",
+      "domains": ["Kafka UI", "MQ", "充值任务", "WEEX 前端", "测试回调"],
+      "intentKeywords": ["充值", "回调", "mq", "MQ", "kafka", "Kafka"],
+      "objectKeywords": ["uid", "UID", "金额", "amount"],
+      "requiredParams": ["uid", "amount", "confirm-send"],
+      "defaultMode": "headless_playwright_kafka_ui",
+      "verifiedModes": ["dry_run", "staging_uid_5139967417_amount_1000_real_send"],
+      "lastVerifiedAt": "2026-05-19",
+      "fallback": "If the Kafka UI layout changes, inspect the Ace editor ids and the produce request payload before retrying. Do not sediment a null-content request as success."
+    },
+    {
       "id": "create_api_account_fund_contract_order",
       "status": "verified",
       "script": "scripts/create-api-account-fund-contract-order.mjs",

@@ -25,6 +25,7 @@ function scoreAction(action, query) {
   if (action.id === "create_api_account_fund_contract_order" && /创建|申请|生成/i.test(query) && /API账号|API账户|带API|api/i.test(query) && /下单|多单|空单|开多|开空|order|合约/i.test(query)) score += 36;
   if (action.id === "fin_system_account_create" && /创建|申请|生成/i.test(query) && /系统账号|系统账户|API账号|API账户|带API|api/i.test(query)) score += 28;
   if (action.id === "batch_register_recharge" && /创建|注册/i.test(query) && /账号/i.test(query) && /充值|发放|下发/i.test(query)) score += 20;
+  if (action.id === "mq_recharge_callback_send" && /uid|UID/.test(query) && /充值|回调|mq|MQ|kafka|Kafka/i.test(query)) score += 32;
   if (action.id === "finance_airdrop_reward_grant" && /充值|发放|下发|增加|空投奖励|财务|FIN/i.test(query) && /自动化|跑通|创建|审核|通过|USDT/i.test(query)) score += 14;
   return score;
 }
@@ -33,6 +34,7 @@ function inferFinanceAirdropGrantParams(query) {
   if (!/充值|发放|下发|增加|空投奖励|财务|FIN|合约|转进|转入|划转|系统账号|系统账户|API账号|API账户|带API|api/i.test(query)) return {};
   const uidMatch = query.match(/(?:uid|UID|目标账号uid|目标UID|目标账号)\s*(?:用|为|是|=|:|：)?\s*(\d+)/);
   const amountMatch = query.match(/(?:数量|金额|amount)\s*(?:用|为|是|=|:|：)?\s*(\d+(?:\.\d+)?)/i)
+    || query.match(/(?:充值|发放|下发|增加)\s*(\d+(?:\.\d+)?)/i)
     || query.match(/(\d+(?:\.\d+)?)\s*(?:U|USDT)\b/i);
   const symbolMatch = query.match(/\b([A-Z]{2,10})(?:USDT|USD)\b/i)
     || query.match(/\b(eth|btc|sol|xrp|doge)\b/i);
@@ -64,6 +66,7 @@ function inferFinanceAirdropGrantParams(query) {
     subBizType: query.includes("其他活动") ? "OTHER_ACTIVITIES" : undefined,
     approveOnlyOrderId: orderMatch?.[1],
     confirmCreate: /确认创建|真实创建|执行创建/.test(query),
+    confirmSend: /充值|回调|mq|MQ|kafka|Kafka/i.test(query) && Boolean(uidMatch?.[1]) && Boolean(amountMatch?.[1]),
     saveSecrets: /保存密钥|保存凭证|保存结果|API账号|API账户|带API|api/i.test(query),
     confirmApprove: /确认审核|审核通过|执行通过|真实通过/.test(query),
     confirmRegister: isBatchRegisterRecharge || isContractFunding || /确认注册|真实注册|执行注册/.test(query),

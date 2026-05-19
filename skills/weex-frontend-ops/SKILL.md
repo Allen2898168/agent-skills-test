@@ -14,7 +14,9 @@ This skill is for user-facing frontend pages, not activity-admin backend operati
 ## Operating Workflow
 
 1. Classify the request as read-only inspection, interaction check, visual/layout check, form submission, or state-changing frontend operation.
-2. Read only the needed references:
+2. Before changing frontend automation, define the target page, expected visible result, verification signal, and what is out of scope for this request.
+3. Prefer the smallest reusable change. Reuse existing routes, cached actions, selectors, assertions, and component helpers before adding new page-specific logic.
+4. Read only the needed references:
    - Environment and URL rules: `references/environments.md`
    - Runtime auth and account config: `references/runtime-auth.md`
    - Operation index: `references/operations/index.md`
@@ -29,15 +31,15 @@ This skill is for user-facing frontend pages, not activity-admin backend operati
    - Known issues: `references/known-issues.md`
    - Failure review index: `FAILURES.md`
    - Relevant failure review: `failure-reviews/<domain>.md`
-3. Identify the target URL, device/viewport, locale, login/session requirements, test data, and expected result before running browser actions.
-4. If required information is missing, list only the missing items. Do not guess production URLs, user credentials, order amounts, KYC/account state, or other high-risk data.
-5. Check the action cache. If the request matches a cached check and required parameters are available, run `scripts/run-cached-action.mjs --dry-run` first.
-6. If the cached action is suitable, execute it; otherwise use Playwright browser automation or the in-app browser workflow appropriate to the task.
-7. Prefer real page behavior for frontend checks: navigate, click, type, select, upload, resize, scroll, and wait for visible page or network state. Use API calls only as supporting evidence unless the task is explicitly API-only.
-8. Verify success using at least one durable signal: final URL, visible text, DOM state, screenshot, console/network evidence, API response, local storage/session state, or user-specified assertion.
-9. Save screenshots only when the user explicitly asks for screenshots, visual evidence, or a screenshot comparison. Store them under `artifacts/screenshots/<业务域>/<页面或操作>/`.
-10. If a flow is newly discovered or improved, ask whether to persist it unless the user has already authorized automatic skill updates. If persisted, update the relevant operation, selectors, assertions, components, relationships, and action-cache docs.
-11. If any browser, selector, layout, network, data, environment, cache, or verification failure occurs, update `FAILURES.md` or the relevant `failure-reviews/` file before finishing.
+5. Identify the target URL, device/viewport, locale, login/session requirements, test data, and expected result before running browser actions.
+6. If required information is missing, list only the missing items. Do not guess production URLs, user credentials, order amounts, KYC/account state, or other high-risk data.
+7. Check the action cache. If the request matches a cached check and required parameters are available, run `scripts/run-cached-action.mjs --dry-run` first.
+8. If the cached action is suitable, execute it; otherwise use Playwright browser automation or the in-app browser workflow appropriate to the task.
+9. Prefer real page behavior for frontend checks: navigate, click, type, select, upload, resize, scroll, and wait for visible page or network state. Use API calls only as supporting evidence unless the task is explicitly API-only.
+10. Verify success using at least one durable signal: final URL, visible text, DOM state, screenshot, console/network evidence, API response, local storage/session state, or user-specified assertion.
+11. Save screenshots only when the user explicitly asks for screenshots, visual evidence, or a screenshot comparison. Store them under `artifacts/screenshots/<业务域>/<页面或操作>/`.
+12. If a flow is newly discovered or improved, ask whether to persist it unless the user has already authorized automatic skill updates. If persisted, update the relevant operation, selectors, assertions, components, relationships, and action-cache docs.
+13. If any browser, selector, layout, network, data, environment, cache, or verification failure occurs, update `FAILURES.md` or the relevant `failure-reviews/` file before finishing.
 
 ## Browser Execution
 
@@ -51,6 +53,7 @@ This skill is for user-facing frontend pages, not activity-admin backend operati
 ## Script Organization
 
 - Keep script entrypoints under `scripts/*.mjs`.
+- Keep changes local to the page or shared helper that actually needs them. Do not mix selector cleanup, route renames, and new flow logic in one change unless the request truly needs all of them.
 - Put cache matching and command construction under `scripts/cache/`.
 - Put reusable browser, viewport, selector, screenshot, console, and network helpers under `scripts/lib/`.
 - Put page- or product-specific automation under `scripts/business/<domain>/` when added later.

@@ -67,6 +67,10 @@ Business domain:
 - Multilingual fields: `任务名称`, `任务内容`, `任务标签`
 - Multilingual switch text: `多语言`
 - English multilingual input placeholder: `英语`
+- Visible counters observed in task dialog:
+  - `任务内容`: `0/200`
+  - `任务标签`: `0/10`
+  - `标签说明`: `0/60`
 - Participant scope label: `任务参与范围`
 - Participant scope options: `报名的所有用户`, `指定代理`, `指定用户`, `指定国家或地区`, `VIP 等级`, `注册新用户`, `未充值新用户`, `老用户`
 - Participant scope extra fields:
@@ -97,7 +101,9 @@ Business domain:
 
 - `任务名称`、`任务内容` and `任务标签` each expose their own multilingual control.
 - `任务备注` is required in the validated create flows.
+- Create/edit verification should check visible counters for touched text fields; current validated limits are `任务内容 <= 200`、`任务标签 <= 10`、`标签说明 <= 60`.
 - `任务风控` and `KYC限制` may render as radios or radio-like options depending on mode; use the actually visible control.
+- For current lottery-task defaults, do not auto-select `kyc任务`; it remains an observable option but is prohibited for general `转盘抽奖` configuration because it hides old-user scenarios.
 - In invisible mode, `任务组合` can render as a select whose placeholder is `请选择任务数`; selecting the first visible option is more reliable than matching rendered text only.
 
 ## Task Condition Options

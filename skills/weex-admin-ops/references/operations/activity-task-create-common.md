@@ -40,8 +40,7 @@ If the user only says `用默认配置` or equivalent:
 
 - `活动类型`: `转盘抽奖`
 - `任务组合`: `单一任务条件`
-- `任务条件1`: `kyc任务`
-- `KYC限制`: `无kyc限制`
+- `任务条件1`: `KOL绑定`
 - `任务参与范围`: `报名的所有用户`
 - `任务风控`: `不审核KYC`
 - `判定开始时间`: `报名活动后`
@@ -50,11 +49,27 @@ If the user only says `用默认配置` or equivalent:
 - `总领奖人数上限`: `50`
 - `任务备注`: required; do not leave empty.
 
+### KYC prohibition
+
+- `转盘抽奖` 任务配置禁止把 `任务条件1` 设为 `kyc任务` 作为默认或自动化链路。
+- 原因：`kyc任务` 会对老用户隐藏，不适合作为通用抽奖任务配置。
+- 如果用户明确要求配置 `kyc任务`，不要直接执行；先说明该限制，并要求用户确认改为非 KYC 条件。
+
 ### Multilingual handling
 
 - `任务名称`、`任务内容` and `任务标签` have separate multilingual switches.
 - Fill multilingual content by form item label; do not assume one visible `英语` control covers all three fields.
 - In invisible mode, hidden English inputs or textareas can exist in the DOM. Only the field-local visible control should be used.
+
+### Visible character limits
+
+- Every `活动任务管理` create/edit verification must inspect the visible counters before submit.
+- Currently validated limits in the `转盘抽奖` add/edit dialog:
+  - `任务内容 <= 200`
+  - `任务标签 <= 10`
+  - `标签说明 <= 60`
+- If create succeeds but edit view shows a red counter or blocks save for the same value, treat it as a page validation inconsistency and record it in failure review or handoff.
+- Generated automation defaults for this chain must stay within the visible limits above unless the user explicitly asks for a negative test.
 
 ### Stable workflow
 

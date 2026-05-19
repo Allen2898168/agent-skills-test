@@ -20,6 +20,7 @@ The FIN Admin action cache is the first execution layer for FIN workflows that h
 
 | Action ID | Script | Status | Purpose |
 | --- | --- | --- | --- |
+| `mq_recharge_callback_send` | `scripts/mq-recharge-callback-send.mjs` | verified | Send one recharge MQ callback through the verified Kafka UI topic page by UID and amount, then verify HTTP 200, success toast, and message-list hit by generated message id. |
 | `create_api_account_fund_contract_order` | `scripts/create-api-account-fund-contract-order.mjs` | verified | Create one FIN API account, fund and transfer USDT to contract, then place a contract Open API order. |
 | `fin_system_account_create` | `scripts/system-account-create.mjs` | verified | Create FIN system/API accounts, poll generation progress, and save returned credentials/API keys only to local ignored generated output. |
 | `register_recharge_transfer_contract` | `scripts/register-recharge-transfer-contract.mjs` | candidate | Compound flow for contract-balance requests: register frontend account, recharge spot through FIN, then transfer spot to contract through frontend API; report per-account transfer response. |
@@ -41,6 +42,19 @@ The FIN Admin action cache is the first execution layer for FIN workflows that h
 - If transfer still fails after successful recharge and built-in retries, preserve all known accounts, grant orders, and transfer responses internally; do not create a duplicate batch unless the user explicitly confirms it.
 - User-facing output for this action should only include `用户名 / UID / 结果`. Do not show FIN order ids unless the tester explicitly asks for them.
 - The maximum effective concurrency is `100`.
+
+## MQ Recharge Callback
+
+- Use `--action mq_recharge_callback_send` for explicit execution.
+- Required parameters are `--uid <UID>` and `--amount <AMOUNT>`.
+- Dry-run prints the exact Kafka payload plan and generated message id.
+- Actual execution requires `--confirm-send`.
+- Verified Kafka UI page and topic are fixed by default; override only with `--kafka-url <url>` when the environment changes.
+- Success requires all of these:
+  - Kafka produce API HTTP `200`
+  - page text `Message successfully sent`
+  - reloaded page can find the generated message id in the message list
+- Real verified sample on `2026-05-19` used `uid=5139967417` and `amount=1000`.
 
 ## FIN System/API Account Create
 
@@ -82,6 +96,14 @@ The FIN Admin action cache is the first execution layer for FIN workflows that h
 - Do not pass Google code in CLI arguments and do not log token, cookie, fingerprint, or Google code. Staging/test UIDs can be printed in full; production or unspecified-environment identifiers must still be redacted or avoided.
 
 ## Examples
+
+```bash
+node skills/weex-fin-admin-ops/scripts/run-cached-action.mjs --action mq_recharge_callback_send --uid <UID> --amount <AMOUNT> --dry-run
+```
+
+```bash
+node skills/weex-fin-admin-ops/scripts/run-cached-action.mjs --query "帮我 uid <UID> 充值<AMOUNT>"
+```
 
 ```bash
 node skills/weex-fin-admin-ops/scripts/run-cached-action.mjs --action finance_airdrop_reward_grant --uid <UID> --amount <AMOUNT> --dry-run

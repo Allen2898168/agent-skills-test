@@ -4,6 +4,7 @@ Use this file as the table of contents for FIN Admin operation playbooks. Keep f
 
 ## Business Domains
 
+- MQ recharge callback: `mq-recharge.md`
 - FIN airdrop reward grant: `finance-airdrop-reward.md`
 - Batch frontend register and FIN recharge: `finance-airdrop-reward.md`
 - FIN system/API account create: `system-account.md`
@@ -13,6 +14,7 @@ Use this file as the table of contents for FIN Admin operation playbooks. Keep f
 
 | Operation | Domain file | Status | Last verified | Notes |
 | --- | --- | --- | --- | --- |
+| MQ recharge callback send | `mq-recharge.md` | verified | 2026-05-19 | Verified with UID `5139967417`, amount `1000`, Kafka UI produce API HTTP 200, success toast, and message-list reload hit by generated message id. |
 | FIN API account create, fund, and contract order | `api-account-contract-order.md` | verified | 2026-05-12 | Compound flow: create API-enabled FIN system account, grant and transfer USDT to contract, then place contract Open API order. Verified with 10 USDT ETH long. |
 | FIN system/API account create | `system-account.md` | verified | 2026-05-12 | Creates FIN system accounts with API credentials, polls progress, saves returned secrets only to local ignored generated output, and validates credentials through contract private balance when needed. |
 | Register frontend account with contract balance | `finance-airdrop-reward.md` | candidate | 2026-05-08 | Compound flow: register STG frontend account, FIN spot recharge, then frontend spot-to-contract transfer; report per-account transfer business response. |

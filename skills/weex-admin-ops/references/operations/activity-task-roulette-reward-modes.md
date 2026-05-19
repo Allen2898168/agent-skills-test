@@ -36,11 +36,15 @@ Common defaults:
 - Task participant scope: select one visible option. Validated successful creates used `报名的所有用户` because other participant scopes may expose extra required fields.
 - Task risk control: choose one visible option. Although displayed as checkboxes, `转盘抽奖` behaves like single choice; selecting one can hide the other. Validated with `不审核KYC`.
 - Task combo: only `单一任务条件` is available for `转盘抽奖`.
-- Task condition 1: selecting the first task type `kyc任务` changes the condition section to `KYC限制`; choose `无kyc限制`.
+- Task condition 1: use `KOL绑定` as the default non-KYC branch.
 - Judge start time: choose `报名活动后`.
 - Task update count: choose `仅1次，直至结束`.
 - Daily claim limit: `5`.
 - Total claim limit: `50`.
+
+KYC prohibition:
+- `转盘抽奖` 任务配置禁止把 `kyc任务` 当作默认或自动化分支。
+- 原因：`kyc任务` 会对老用户隐藏，不适合作为通用抽奖任务链路。
 
 Reward-mode branches:
 - `单一奖励`:

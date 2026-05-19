@@ -14,7 +14,9 @@ This skill is not only for testing. It should help Codex interpret natural-langu
 ## Operating Workflow
 
 1. Classify the user's request as read-only inspection, low-risk navigation, or state-changing operation.
-2. Read only the needed references:
+2. Before adding or changing automation logic, define the target outcome, completion signal, and out-of-scope items for this request. If a high-risk business value is still unclear, stop and ask instead of guessing.
+3. Prefer the smallest proven change that satisfies the request. Reuse an existing playbook, cached action, helper, selector, or assertion before adding new business logic.
+4. Read only the needed references:
    - Login or session behavior: `references/login.md`
    - Default credential profile and secret sources: `references/credentials.md`
    - Operation index: `references/operations/index.md`
@@ -31,23 +33,24 @@ This skill is not only for testing. It should help Codex interpret natural-langu
    - Known redirects, permission issues, and failures: `references/known-issues.md`
    - Skill failure review index: `FAILURES.md`
    - Relevant business failure reviews: `failure-reviews/<business-domain>.md`
-3. For state-changing operations, identify missing required parameters before acting.
-4. Before creating, editing, or deleting records, summarize the current chain's required fields, configurable fields, safe defaults, and known limits, then ask the tester which items should use defaults and which should be explicitly set.
-5. Use stored defaults only for low-risk fields. Ask the tester to confirm high-risk values such as activity time, reward amount, reward scope, user scope, enable/disable state, and risk-control behavior.
-6. If the tester's requested parameters conflict with the proven workflow, page constraints, or known backend rules, explain the issue first and wait for confirmation or corrected inputs.
-7. Before executing a known failure-prone workflow, check `FAILURES.md` and the relevant `failure-reviews/` file for existing solutions.
-8. Check the action cache. If the request matches a cached script and required parameters are available, run `scripts/run-cached-action.mjs` first.
-9. If the cached script fails or matching confidence is low, fall back to project Playwright browser automation. Use optional `web-access`/CDP only when reusing the user's Chrome login state, exploring a dynamic page through an existing browser session, or when CDP behavior is explicitly needed.
-10. Execute browser automation in invisible/background mode by default. If the user explicitly requests visible operation, open a headed real browser so the tester can watch the page actions.
-11. When the tester explicitly requests `浏览器模式`, visible operation, or watching the operation, state-changing work must be performed through real UI actions: click buttons, fill fields, select dropdown/radio/checkbox controls, upload files, and click submit/confirm in the page. Do not replace visible-mode writes with a direct API call. API calls may be used only for read-only verification or evidence after the UI action.
-12. Invisible/background mode does not require user-like clicks when a proven script can safely use a faster page-context or API-assisted path; still verify business response and result lookup.
-13. Before adding new browser script logic, check `references/components.md`, page-specific component references, and `scripts/lib/` for existing helpers. Reuse or extend shared helpers for dropdowns, radios, checkboxes, switches, date pickers, uploads, tables, dialogs, search forms, buttons, and form-label lookup.
-14. Keep business scripts as orchestration only. If a component-level helper cannot be reused, document why and evaluate extraction after the flow succeeds.
-15. Verify success using URL, page text, table/form state, toast/message, API response, or user-requested screenshot evidence. Do not treat a completed click as success by itself.
-16. Save screenshots only when the user explicitly asks for screenshots or visual evidence. Store them under `artifacts/screenshots/<中文业务域>/<中文页面或操作>/`.
-17. If a flow is newly discovered or improved, update the references with placeholders instead of secrets.
-18. For newly proven reusable flows, evaluate both documentation and action-cache updates. If a flow is cacheable, add or update the script and cache manifest; if it is not cached, record the reason.
-19. If any failure, blocker, false assumption, retry success, script error, cache mismatch, or backend validation problem occurred, update `FAILURES.md` or the relevant `failure-reviews/` file before finishing the task.
+5. For state-changing operations, identify missing required parameters before acting.
+6. Before creating, editing, or deleting records, summarize the current chain's required fields, configurable fields, safe defaults, and known limits, then ask the tester which items should use defaults and which should be explicitly set.
+7. Use stored defaults only for low-risk fields. Ask the tester to confirm high-risk values such as activity time, reward amount, reward scope, user scope, enable/disable state, and risk-control behavior.
+8. If the tester's requested parameters conflict with the proven workflow, page constraints, or known backend rules, explain the issue first and wait for confirmation or corrected inputs.
+9. Before executing a known failure-prone workflow, check `FAILURES.md` and the relevant `failure-reviews/` file for existing solutions.
+10. Check the action cache. If the request matches a cached script and required parameters are available, run `scripts/run-cached-action.mjs` first.
+11. If the cached script fails or matching confidence is low, fall back to project Playwright browser automation. Use optional `web-access`/CDP only when reusing the user's Chrome login state, exploring a dynamic page through an existing browser session, or when CDP behavior is explicitly needed.
+12. Execute browser automation in invisible/background mode by default. If the user explicitly requests visible operation, open a headed real browser so the tester can watch the page actions.
+13. When the tester explicitly requests `浏览器模式`, visible operation, or watching the operation, state-changing work must be performed through real UI actions: click buttons, fill fields, select dropdown/radio/checkbox controls, upload files, and click submit/confirm in the page. Do not replace visible-mode writes with a direct API call. API calls may be used only for read-only verification or evidence after the UI action.
+14. Invisible/background mode does not require user-like clicks when a proven script can safely use a faster page-context or API-assisted path; still verify business response and result lookup.
+15. Before adding new browser script logic, check `references/components.md`, page-specific component references, and `scripts/lib/` for existing helpers. Reuse or extend shared helpers for dropdowns, radios, checkboxes, switches, date pickers, uploads, tables, dialogs, search forms, buttons, and form-label lookup.
+16. Keep business scripts as orchestration only. If a component-level helper cannot be reused, document why and evaluate extraction after the flow succeeds.
+17. During every backend configuration test, inspect the visible text-field counters or maxlength hints on the page. Record the limit for each field touched by the current chain, keep generated default values within those limits unless the tester explicitly asks for a negative test, and treat any "create succeeds but edit view shows red over-limit counter" case as a validation inconsistency that must be documented.
+18. Verify success using URL, page text, table/form state, toast/message, API response, or user-requested screenshot evidence. Do not treat a completed click as success by itself.
+19. Save screenshots only when the user explicitly asks for screenshots or visual evidence. Store them under `artifacts/screenshots/<中文业务域>/<中文页面或操作>/`.
+20. If a flow is newly discovered or improved, update the references with placeholders instead of secrets.
+21. For newly proven reusable flows, evaluate both documentation and action-cache updates. If a flow is cacheable, add or update the script and cache manifest; if it is not cached, record the reason.
+22. If any failure, blocker, false assumption, retry success, script error, cache mismatch, or backend validation problem occurred, update `FAILURES.md` or the relevant `failure-reviews/` file before finishing the task.
 
 ## Browser Execution
 
@@ -74,6 +77,7 @@ This skill is not only for testing. It should help Codex interpret natural-langu
 ## Script Organization
 
 - Keep script entrypoints thin. Files directly under `scripts/*.mjs` should parse arguments, call modules, and print results.
+- Keep code changes surgical. Do not refactor unrelated domains, rename stable files, or broaden a script's scope unless the current request requires it.
 - Put reusable browser, CLI, runtime, and Element UI helpers under `scripts/lib/`.
 - Put action cache matching and command construction under `scripts/cache/`.
 - Put business-specific automation under `scripts/business/<business-domain>/`, for example `scripts/business/prize-management/`.
