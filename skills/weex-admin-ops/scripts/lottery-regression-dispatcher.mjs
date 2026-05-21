@@ -1,0 +1,203 @@
+#!/usr/bin/env node
+import path from "node:path";
+import { spawnSync } from "node:child_process";
+import { parseFlags, printJson } from "./lib/cli.mjs";
+import { loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
+import {
+  buildScenarioMenu,
+  collectAutomationCaseIdsForScenarios,
+  loadLotteryRegressionManifest,
+  resolveScenarioSelection,
+} from "./lib/lottery-regression-manifest.mjs";
+import { resolvePreconditions } from "./lib/lottery-precondition-resolver.mjs";
+import { summarizeDispatcherResult } from "./lib/lottery-result-reporter.mjs";
+
+const { repoRoot, skillRoot } = pathsFrom(import.meta.url);
+
+function usage() {
+  return `Usage:
+  node skills/weex-admin-ops/scripts/lottery-regression-dispatcher.mjs --menu
+  node skills/weex-admin-ops/scripts/lottery-regression-dispatcher.mjs --selection "奖品管理,活动配置 / 活动信息" --dry-run
+  node skills/weex-admin-ops/scripts/lottery-regression-dispatcher.mjs --all --dry-run
+
+Options:
+  --menu                print the grouped scenario menu and exit
+  --selection <text>    scenario/group selection, supports single or multiple values
+  --all                 select all runnable scenarios from the manifest policy
+  --visible             pass visible mode to executable child workflows
+  --dry-run             print the execution plan without running child workflows
+  --help                show this message
+`;
+}
+
+function parseArgs() {
+  const args = parseFlags(process.argv.slice(2), { booleans: ["--menu", "--all", "--visible", "--dry-run"] });
+  args.menu = Boolean(args.menu);
+  args.all = Boolean(args.all);
+  args.visible = Boolean(args.visible);
+  args.dryRun = Boolean(args.dryRun);
+  return args;
+}
+
+function parseLastJson(text) {
+  const source = String(text || "").trim();
+  if (!source) return null;
+  let last = null;
+  for (let index = 0; index < source.length; index += 1) {
+    if (source[index] !== "{") continue;
+    const candidate = source.slice(index);
+    try {
+      last = JSON.parse(candidate);
+    } catch {}
+  }
+  return last;
+}
+
+function runChild(commandArgs) {
+  const result = spawnSync(process.execPath, commandArgs, {
+    cwd: repoRoot,
+    env: process.env,
+    encoding: "utf8",
+  });
+  const payload = parseLastJson(result.stdout) || parseLastJson(result.stderr);
+  return {
+    ok: (result.status ?? 1) === 0 && payload?.ok !== false,
+    exitCode: result.status ?? 1,
+    payload,
+    stdout: result.stdout || "",
+    stderr: result.stderr || "",
+  };
+}
+
+function buildEntrypointCommands(selectedScenarios, args) {
+  const buckets = new Map();
+  for (const scenario of selectedScenarios) {
+    if (!scenario.entrypoint) continue;
+    if (!buckets.has(scenario.entrypoint)) buckets.set(scenario.entrypoint, []);
+    buckets.get(scenario.entrypoint).push(scenario);
+  }
+  return Array.from(buckets.entries()).map(([entrypoint, scenarios]) => {
+    if (entrypoint !== "lottery_admin_main_regression") {
+      return { entrypoint, scenarios, commandArgs: [] };
+    }
+    const childPath = path.join(skillRoot, "scripts/lottery-admin-main-regression.mjs");
+    const caseIds = collectAutomationCaseIdsForScenarios(scenarios);
+    if (!caseIds.length) return { entrypoint, scenarios, commandArgs: [] };
+    const commandArgs = [childPath, "--case-ids", caseIds.join(",")];
+    if (args.visible) commandArgs.push("--visible");
+    if (args.dryRun) commandArgs.push("--dry-run");
+    return { entrypoint, scenarios, commandArgs };
+  });
+}
+
+async function main() {
+  const args = parseArgs();
+  if (args.help) {
+    process.stdout.write(usage());
+    return 0;
+  }
+
+  loadLocalEnv(repoRoot);
+  const manifest = loadLotteryRegressionManifest();
+  if (args.menu) {
+    printJson({
+      ok: true,
+      actionId: "lottery_regression_dispatcher",
+      mode: "menu",
+      groups: buildScenarioMenu(manifest),
+    });
+    return 0;
+  }
+
+  const selection = args.all
+    ? resolveScenarioSelection("全部", manifest)
+    : resolveScenarioSelection(args.selection || "", manifest);
+
+  if (!selection.selectedScenarios.length) {
+    printJson({
+      ok: false,
+      actionId: "lottery_regression_dispatcher",
+      error: "No runnable scenarios were selected.",
+      requested: selection.requested,
+      unresolved: selection.unresolved,
+      groups: buildScenarioMenu(manifest),
+    }, process.stderr);
+    return 1;
+  }
+
+  const preconditions = resolvePreconditions(selection.selectedScenarios, manifest);
+  const entryExecutions = buildEntrypointCommands(selection.selectedScenarios, args);
+
+  if (args.dryRun) {
+    printJson({
+      ok: true,
+      actionId: "lottery_regression_dispatcher",
+      mode: "dry_run",
+      requested: selection.requested,
+      unresolved: selection.unresolved,
+      selectedScenarios: selection.selectedScenarios.map(item => ({
+        scenarioId: item.scenarioId,
+        title: item.title,
+        status: item.status,
+        entrypoint: item.entrypoint || "",
+        caseIds: item.caseIds || [],
+        automationCaseIds: item.automationCaseIds || [],
+      })),
+      preconditions,
+      executions: entryExecutions.map(item => ({
+        entrypoint: item.entrypoint,
+        scenarioIds: item.scenarios.map(entry => entry.scenarioId),
+        command: [process.execPath, ...item.commandArgs],
+      })),
+    });
+    return 0;
+  }
+
+  const executionResults = [];
+  for (const execution of entryExecutions) {
+    if (!execution.commandArgs.length) {
+      executionResults.push({
+        entrypoint: execution.entrypoint,
+        ok: false,
+        context: { scenarioIds: execution.scenarios.map(item => item.scenarioId) },
+        caseResults: [],
+      });
+      continue;
+    }
+    const result = runChild(execution.commandArgs);
+    executionResults.push({
+      entrypoint: execution.entrypoint,
+      ok: result.ok,
+      context: {
+        scenarioIds: execution.scenarios.map(item => item.scenarioId),
+        command: [process.execPath, ...execution.commandArgs],
+      },
+      phaseResults: result.payload?.phaseResults || [],
+      caseResults: result.payload?.caseResults || [],
+      raw: result.payload,
+    });
+  }
+
+  const report = summarizeDispatcherResult({
+    selectedScenarios: selection.selectedScenarios,
+    manifest,
+    executionResults,
+  });
+
+  printJson({
+    ok: !report.summary.caseStatusCounts.FAIL,
+    actionId: "lottery_regression_dispatcher",
+    requested: selection.requested,
+    unresolved: selection.unresolved,
+    preconditions,
+    ...report,
+  });
+  return report.summary.caseStatusCounts.FAIL ? 1 : 0;
+}
+
+try {
+  process.exitCode = await main();
+} catch (error) {
+  printJson({ ok: false, error: error.message }, process.stderr);
+  process.exitCode = 1;
+}

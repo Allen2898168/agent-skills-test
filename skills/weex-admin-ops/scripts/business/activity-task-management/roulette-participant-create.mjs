@@ -20,7 +20,18 @@ async function createOneTask(page, config, task) {
   await fillDefaultTaskConfig(page, task);
   const submit = await submitTask(page, task.name);
   const row = await searchTaskByName(page, config, task.name);
-  return { id: firstNumericCell(row), name: task.name, scope: task.scopeLabel, selected, submit, row };
+  return {
+    id: firstNumericCell(row),
+    name: task.name,
+    scope: task.scopeLabel,
+    taskCondition: task.taskCondition,
+    rewardMode: task.rewardMode,
+    rewardMin: task.rewardMin,
+    rewardMax: task.rewardMax,
+    selected,
+    submit,
+    row,
+  };
 }
 
 async function fillBaseText(page, task) {
@@ -50,11 +61,11 @@ async function fillScopeExtra(page, task) {
 async function fillDefaultTaskConfig(page, task) {
   await clickDialogText(page, "不审核KYC");
   if (!(await optionalClickDialogText(page, "单一任务条件"))) await selectFirstByLabel(page, "任务组合");
-  await selectOptionByLabel(page, "任务条件1", "KOL绑定");
+  await selectOptionByLabel(page, "任务条件1", task.taskCondition);
   await clickDialogText(page, "报名活动后");
   await clickDialogText(page, "仅1次，直至结束");
-  await clickDialogText(page, "单一奖励");
-  await selectFirstByLabel(page, "正常奖励");
+  await clickDialogText(page, task.rewardMode);
+  await selectFirstByLabel(page, task.rewardType);
   await fillRewardRange(page, task.rewardMin, task.rewardMax);
   await fillLabel(page, "每日领奖人数上限", task.dailyLimit);
   await fillLabel(page, "总领奖人数上限", task.totalLimit);

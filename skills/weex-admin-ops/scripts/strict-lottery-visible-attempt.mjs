@@ -1,7 +1,11 @@
 #!/usr/bin/env node
 import fs from "node:fs";
-import { loginToPrizePage } from "./lib/browser.mjs";
+import { ensureAdminSession, loginToPrizePage } from "./lib/browser.mjs";
 import { timestamp } from "./lib/cli.mjs";
+import {
+  isLotteryDraftCreateSuccessful,
+  shouldSearchLotteryListAfterSubmit,
+} from "./lib/lottery-draft-verification.mjs";
 import { adminConfig, assertAdminConfig, loadLocalEnv, loadPlaywright, pathsFrom } from "./lib/runtime.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
@@ -107,7 +111,7 @@ page.on("response", async response => {
   }
 });
 page.on("request", request => {
-  if (request.url().includes("/prod-api/activity/config/list")) authHeader = request.headers().authorization || authHeader;
+  if (request.url().includes("/prod-api/activity/")) authHeader = request.headers().authorization || authHeader;
 });
 
 const wait = ms => page.waitForTimeout(ms);
@@ -135,6 +139,27 @@ async function visibleOptionBox(text = null, index = 0) {
 async function clickOption(option) {
   await page.mouse.click(option.x, option.y);
   await wait(250);
+}
+
+async function clickVisibleOptionByDom(text = null, index = 0) {
+  const selected = await page.evaluate(({ text, index }) => {
+    const visible = element => !!element && element.getClientRects().length
+      && getComputedStyle(element).display !== "none"
+      && getComputedStyle(element).visibility !== "hidden";
+    const dropdown = [...document.querySelectorAll(".el-select-dropdown")].filter(visible).pop();
+    if (!dropdown) return null;
+    const items = [...dropdown.querySelectorAll(".el-select-dropdown__item:not(.is-disabled)")].filter(visible);
+    const item = text
+      ? items.find(option => option.innerText.trim() === text || option.innerText.trim().includes(text))
+      : items[index];
+    if (!item) return null;
+    item.scrollIntoView({ block: "center", inline: "nearest" });
+    item.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true, view: window }));
+    item.click();
+    return item.innerText.trim();
+  }, { text, index });
+  await wait(250);
+  return selected;
 }
 
 async function clickRadio(label, option, nth = 0) {
@@ -230,17 +255,95 @@ async function selectLabel(label, text = null, nth = 0, index = 0) {
     if (!box) throw new Error(`select missing: ${label}`);
     await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
     await wait(450);
-    let option = await visibleOptionBox(text, index);
-    if (!option && text) option = await visibleOptionBox(null, index);
-    if (option) {
-      await clickOption(option);
-      await page.keyboard.press("Escape").catch(() => {});
-      return option.label;
+    let selected = await clickVisibleOptionByDom(text, index);
+    if (!selected && text) selected = await clickVisibleOptionByDom(null, index);
+    if (selected) {
+      return selected;
     }
     await page.keyboard.press("Escape").catch(() => {});
     await wait(200);
   }
   throw new Error(`option missing: ${label}`);
+}
+
+async function readSelectLabelValue(label, nth = 0) {
+  const item = await formItem(label, nth);
+  if (!(await item.count())) throw new Error(`form item missing: ${label}`);
+  return item.locator(".el-select input").first().inputValue().catch(() => "");
+}
+
+function selectValueMatches(actual, expected) {
+  const current = String(actual || "").trim();
+  const target = String(expected || "").trim();
+  if (!target) return Boolean(current);
+  return current.includes(target) || target.includes(current);
+}
+
+async function ensureSelectLabel(label, text = null, nth = 0, index = 0) {
+  const current = await readSelectLabelValue(label, nth).catch(() => "");
+  if (selectValueMatches(current, text)) return current;
+  const selected = await selectLabel(label, text, nth, index);
+  const after = await readSelectLabelValue(label, nth).catch(() => "");
+  if (!selectValueMatches(after, text || selected)) {
+    throw new Error(`select not bound: ${label}; current=${after}; expected=${text || selected}`);
+  }
+  return after;
+}
+
+async function readApplyConfigId() {
+  return page.evaluate(() => {
+    const roots = [...document.querySelectorAll("*")]
+      .map(element => element.__vue__)
+      .filter(Boolean)
+      .filter(vue => vue.$refs && vue.$refs.baseForm && vue.$refs.styleForm);
+    return roots[0]?.$refs?.baseForm?.form?.applyConfigId ?? "";
+  }).catch(() => "");
+}
+
+async function selectRegistrationTemplate(text) {
+  const item = await formItem("用户报名模版");
+  if (!(await item.count())) throw new Error("form item missing: 用户报名模版");
+  await item.scrollIntoViewIfNeeded({ timeout: 5000 });
+  await item.locator(".el-select").first().click({ timeout: 7000 });
+  await wait(600);
+  const selected = await page.evaluate(targetText => {
+    const visible = element => !!element && element.getClientRects().length
+      && getComputedStyle(element).display !== "none"
+      && getComputedStyle(element).visibility !== "hidden";
+    const dropdown = [...document.querySelectorAll(".el-select-dropdown")].filter(visible).pop();
+    const option = [...(dropdown?.querySelectorAll(".el-select-dropdown__item:not(.is-disabled)") || [])]
+      .filter(visible)
+      .find(element => element.innerText.includes(targetText));
+    if (!option) return "";
+    option.scrollIntoView({ block: "center", inline: "nearest" });
+    option.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true, view: window }));
+    option.click();
+    return option.innerText.trim();
+  }, text);
+  await wait(800);
+  const applyConfigId = await readApplyConfigId();
+  if (!selected || !applyConfigId) {
+    throw new Error(`registration template not bound: selected=${selected || ""}; applyConfigId=${applyConfigId || ""}`);
+  }
+  return { selected, applyConfigId };
+}
+
+async function fetchActivityConfigDetail(detailId, authHeader, attempts = 5) {
+  let last = null;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    last = await page.evaluate(async ({ detailId, authHeader }) => {
+      const response = await fetch(`/prod-api/activity/config/${encodeURIComponent(detailId)}`, {
+        headers: { Authorization: authHeader },
+        credentials: "include",
+      });
+      return response.json();
+    }, { detailId, authHeader }).catch(() => null);
+    const prizeCount = Array.isArray(last?.data?.prize) ? last.data.prize.length : 0;
+    const taskCount = Array.isArray(last?.data?.taskConfig) ? last.data.taskConfig.length : 0;
+    if (prizeCount >= 8 && taskCount > 0) return last;
+    if (attempt < attempts - 1) await wait(1500);
+  }
+  return last;
 }
 
 async function uploadLabel(label, nth = 0) {
@@ -273,6 +376,10 @@ async function openLotteryViaMenu() {
   await page.locator("text=转盘抽奖").first().click();
   await page.waitForURL(/\/activities\/lottery/, { timeout: 15000 }).catch(() => {});
   await wait(1200);
+  if (await ensureAdminSession(page, config, "/activities/lottery")) {
+    await page.goto(`${config.baseUrl}/activities/lottery`, { waitUntil: "domcontentloaded" });
+    await wait(1500);
+  }
 }
 
 async function clickPrize(rowIndex, label = null) {
@@ -648,46 +755,33 @@ async function enableBeginnerContractTask() {
 async function fillTask() {
   await scrollText("活动任务信息");
   const addedRows = [];
+  const card = page.locator(".el-card").filter({ hasText: "活动任务信息" }).first();
+  await card.scrollIntoViewIfNeeded().catch(() => {});
   for (let index = 0; index < activityTaskLabels.length; index += 1) {
     const taskText = activityTaskLabels[index];
-    const added = await page.evaluate(async ({ label, sortValue }) => {
-      const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
-      const visible = element => !!element && element.getClientRects().length
-        && getComputedStyle(element).display !== "none"
-        && getComputedStyle(element).visibility !== "hidden";
-      const card = [...document.querySelectorAll(".el-card")]
-        .filter(visible)
-        .find(element => element.innerText.includes("活动任务信息"));
-      if (!card) return { ok: false, reason: "task card missing" };
-      const select = [...card.querySelectorAll(".el-select")].filter(visible)[0];
-      if (!select) return { ok: false, reason: "task select missing" };
-      select.click();
-      await wait(700);
-      const options = [...document.querySelectorAll(".el-select-dropdown__item")].filter(visible);
-      const option = options.find(element => element.innerText.includes(label))
-        || options.find(element => element.innerText.includes("合约") && element.innerText.includes("转盘"))
-        || options[0];
-      if (!option) return { ok: false, reason: "task option missing" };
-      option.scrollIntoView({ block: "center", inline: "nearest" });
-      option.click();
-      await wait(700);
-      const plus = [...card.querySelectorAll("button.el-button--primary")].filter(visible)[0];
-      if (!plus) return { ok: false, reason: "task plus missing", selected: option.innerText.trim() };
-      plus.click();
-      await wait(900);
-      const rows = [...card.querySelectorAll(".el-table__body-wrapper tbody tr")].filter(visible);
-      const row = rows[rows.length - 1];
-      if (!row) return { ok: false, reason: "task row not added", selected: option.innerText.trim() };
-      const input = [...row.querySelectorAll("input:not([type=checkbox]):not([type=radio])")].filter(visible)
-        .find(element => element.placeholder.includes("排序系数"))
-        || [...row.querySelectorAll("input:not([type=checkbox]):not([type=radio])")].filter(visible).pop();
-      if (!input) return { ok: false, reason: "task sort input missing", selected: option.innerText.trim() };
-      input.focus();
-      input.value = String(sortValue);
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-      input.dispatchEvent(new Event("change", { bubbles: true }));
-      return { ok: true, selected: option.innerText.trim(), row: row.innerText.trim().replace(/\s+/g, " ") };
-    }, { label: taskText, sortValue: index + 1 });
+    const select = card.locator(".el-select:visible").first();
+    await select.click({ timeout: 7000 });
+    await wait(700);
+    const selected = await clickVisibleOptionByDom(taskText, 0)
+      || await clickVisibleOptionByDom("合约", 0)
+      || await clickVisibleOptionByDom(null, 0);
+    if (!selected) throw new Error(`activity task option missing: ${taskText}`);
+    const rowCountBefore = await card.locator(".el-table__body-wrapper tbody tr").count().catch(() => 0);
+    await card.locator("button.el-button--primary:visible").first().click({ timeout: 7000 });
+    await wait(900);
+    const rows = card.locator(".el-table__body-wrapper tbody tr");
+    const rowCountAfter = await rows.count();
+    if (rowCountAfter <= rowCountBefore) {
+      throw new Error(`activity task row not added: ${taskText}`);
+    }
+    const row = rows.nth(rowCountAfter - 1);
+    const sortInput = row.locator('input[placeholder*="排序"], input:not([type=checkbox]):not([type=radio])').last();
+    await fillControl(sortInput, String(index + 1));
+    const added = {
+      ok: true,
+      selected,
+      row: (await row.innerText()).trim().replace(/\s+/g, " "),
+    };
     if (!added.ok) throw new Error(`activity task config failed: ${JSON.stringify(added)}`);
     addedRows.push(added);
     console.log(JSON.stringify({ step: "task_added", ...added }));
@@ -734,7 +828,6 @@ async function fillCalendar() {
   await uploadLabel("配图", 0).catch(() => {});
   await uploadLabel("小图标", 0).catch(() => {});
   await selectLabel("所属分区", null, 0, 0).catch(() => {});
-  await page.locator("button").filter({ hasText: "新增" }).last().click().catch(() => {});
   await wait(600);
 }
 
@@ -755,7 +848,7 @@ try {
   await fillLabel("活动副标题", subTitle, 0);
   await fillLabel("活动开始时间", activityStartTime);
   await fillLabel("活动结束时间", activityEndTime);
-  await selectLabel("用户报名模版", registrationTemplateLabel);
+  await selectRegistrationTemplate(registrationTemplateLabel);
   for (const label of ["WEB头图上传", "H5头图上传", "web分享图上传", "H5分享图片上传", "社媒活动预览图上传"]) await uploadLabel(label, 0);
   await fillLabel("分享活动文案", shareCopy, 0);
   await fillLabel("代理分享文案", agentShareCopy, 0);
@@ -771,6 +864,7 @@ try {
   }
   await clickRadio("是否显示活动日历入口", "是");
   await selectLabel("抽奖样式", lotteryStyle).catch(() => {});
+  if (!(await readApplyConfigId())) await selectRegistrationTemplate(registrationTemplateLabel);
 
   console.log(JSON.stringify({ step: "prizes" }));
   await fillPrizeRows();
@@ -800,6 +894,9 @@ try {
   await fillFaq();
   console.log(JSON.stringify({ step: "calendar" }));
   await fillCalendar();
+  if (!(await readApplyConfigId())) {
+    await selectRegistrationTemplate(registrationTemplateLabel);
+  }
 
   console.log(JSON.stringify({ step: "submit" }));
   const preSubmitDiagnostics = await page.evaluate(async () => {
@@ -843,6 +940,14 @@ try {
     } catch (error) {
       result.activityCalendarConfig = { validate: false, error: error.message };
     }
+    result.baseFormModel = {
+      applyConfigId: refs.baseForm?.form?.applyConfigId ?? null,
+      guideTemplateId: refs.baseForm?.form?.guideTemplateId ?? null,
+      showUrl: refs.baseForm?.form?.showUrl ?? null,
+      registrationInputValue: [...document.querySelectorAll(".el-form-item")]
+        .find(item => item.querySelector(".el-form-item__label")?.innerText?.trim().includes("用户报名模版"))
+        ?.querySelector(".el-select input")?.value || "",
+    };
     return result;
   }).catch(error => ({ error: error.message }));
   const createPromise = page.waitForResponse(response => (
@@ -882,12 +987,6 @@ try {
       .filter(Boolean);
     return { formErrors: formErrors.slice(0, 80), messages: messages.slice(0, 20) };
   });
-  await page.goto(`${config.baseUrl}/activities/lottery`, { waitUntil: "domcontentloaded" });
-  await wait(1800);
-  const aliasItem = await formItem("活动别名");
-  await fillControl(aliasItem.locator("input").first(), alias);
-  await page.locator("button:visible").filter({ hasText: "查询" }).first().click();
-  await wait(1500);
   let verify = null;
   if (authHeader) {
     verify = await page.evaluate(async ({ activityAlias, authHeader }) => {
@@ -898,8 +997,27 @@ try {
       return response.json();
     }, { activityAlias: alias, authHeader });
   }
+  const verifyListItem = verify?.rows?.[0] || verify?.data?.[0] || null;
+  let verifyDetail = null;
+  if (authHeader && (verifyListItem?.activityId || verifyListItem?.id)) {
+    const detailId = String(verifyListItem.activityId || verifyListItem.id);
+    verifyDetail = await fetchActivityConfigDetail(detailId, authHeader);
+  }
+  const shouldSearchList = shouldSearchLotteryListAfterSubmit({
+    currentUrl: page.url(),
+    authHeader,
+  });
+  if (!verify && shouldSearchList) {
+    await page.goto(`${config.baseUrl}/activities/lottery`, { waitUntil: "domcontentloaded" });
+    await wait(1800);
+    const aliasItem = await formItem("活动别名");
+    await fillControl(aliasItem.locator("input").first(), alias);
+    await page.locator("button:visible").filter({ hasText: "查询" }).first().click();
+    await wait(1500);
+  }
+  const ok = isLotteryDraftCreateSuccessful({ createBody, verify });
   console.log(JSON.stringify({
-    ok: createBody?.code === 200 || verify?.total === 1,
+    ok,
     title,
     alias,
     lotteryStyle,
@@ -913,12 +1031,14 @@ try {
     errors,
     preSubmitDiagnostics,
     verifyTotal: verify?.total,
-    verifyFirst: verify?.rows?.[0] || verify?.data?.[0],
+    verifyFirst: verifyDetail?.data || verifyListItem,
+    verifyListFirst: verifyListItem,
+    skippedUiSearchAfterSubmit: !shouldSearchList,
     uploads: evidence.uploads,
     activityResponses: evidence.activityResponses,
   }, null, 2));
   await wait(5000);
-  if (!(createBody?.code === 200 || verify?.total === 1)) process.exitCode = 1;
+  if (!ok) process.exitCode = 1;
 } catch (error) {
   const errors = await page.evaluate(() => {
     const formErrors = [...document.querySelectorAll(".el-form-item.is-error")].map(item => ({

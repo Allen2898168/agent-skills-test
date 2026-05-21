@@ -37,6 +37,8 @@ function scoreAction(action, query) {
   if (action.id === "verify_guide_template_row_actions" && /活动.*引导.*配置|引导.*流程.*配置|流程.*引导.*配置|活动流程引导配置/.test(query) && query.includes("操作列")) score += 12;
   if (action.id === "create_lottery_activity_draft" && /活动列表/.test(query) && /转盘抽奖/.test(query) && /新增|创建|草稿|配置|走一下|尝试/.test(query)) score += 14;
   if (action.id === "create_lottery_activity_draft" && /转盘抽奖.{0,8}活动|活动.{0,8}转盘抽奖/.test(query) && /新增|创建|生成|草稿|配置|全配置|权重配置|走一下|尝试/.test(query)) score += 14;
+  if (action.id === "lottery_admin_main_regression" && /转盘抽奖/.test(query) && /后管|后台|活动后台/.test(query) && /主回归|回归/.test(query)) score += 18;
+  if (action.id === "lottery_admin_main_regression" && /自动化/.test(query) && /跑|执行|开始做/.test(query)) score += 8;
   if (action.id === "online_lottery_activity" && /活动列表|转盘抽奖|抽奖活动|活动/.test(query) && /上线|发布/.test(query)) score += 16;
   if (action.id === "online_lottery_activity" && /活动ID|活动id|活动别名|showUrl|别名/.test(query) && /上线|发布/.test(query)) score += 12;
   if (action.supportedCategories?.some(item => query.includes(item))) score += 1;
@@ -74,9 +76,13 @@ function inferLotteryActivityDraftParams(query) {
   if (!/转盘抽奖/.test(query) || (!/活动列表/.test(query) && !/活动|草稿|全配置|权重配置/.test(query))) return {};
   const titlePrefixMatch = query.match(/(?:标题前缀|活动标题前缀)\s*(?:用|为|是|=|:|：)?\s*([\u4e00-\u9fa5A-Za-z0-9_.-]+)/);
   const aliasPrefixMatch = query.match(/(?:别名前缀|活动别名前缀)\s*(?:用|为|是|=|:|：)?\s*([A-Za-z0-9_.-]+)/);
+  const uidMatch = query.match(/(?:uid|UID)\s*(?:用|为|是|=|:|：)?\s*(\d+)/);
+  const countryMatch = query.match(/(?:国家|地区)\s*(?:用|为|是|=|:|：)\s*([\u4e00-\u9fa5A-Za-z -]+)/);
   return {
     titlePrefix: titlePrefixMatch?.[1],
     aliasPrefix: aliasPrefixMatch?.[1],
+    uid: uidMatch?.[1],
+    country: countryMatch?.[1]?.trim(),
     visible: /浏览器模式|可见|打开浏览器|让我看着/.test(query),
   };
 }

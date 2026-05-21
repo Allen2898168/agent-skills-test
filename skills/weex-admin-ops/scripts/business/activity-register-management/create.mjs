@@ -43,6 +43,7 @@ async function createOneTemplate(page, config, spec) {
   }
   await clearCheckedByLabel(page, "用户报名方式");
   await clickChoiceByLabel(page, "用户报名方式", spec.signupModeLabel, "checkbox");
+  if (spec.minTeam) await ensureDependentFormItem(page, "用户报名方式", spec.signupModeLabel, "最小团队人数");
   if (spec.minTeam) await fillLabel(page, "最小团队人数", spec.minTeam);
   if (spec.peopleLimit) await fillLabel(page, "报名人数限制", spec.peopleLimit);
 
@@ -161,4 +162,33 @@ async function configureRestrictScope(page, spec) {
     await fillLabel(page, "合约账户余额", spec.contractBalance);
     spec.branchDefaults.contractBalance = spec.contractBalance;
   }
+}
+
+async function waitForVisibleFormItem(page, label, timeout = 4000) {
+  await page.waitForFunction(targetLabel => {
+    const normalize = text => (text || "").replace(/\s/g, "");
+    const visible = element => {
+      const rect = element.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    };
+    const dialogs = [...document.querySelectorAll(".el-dialog")].filter(visible);
+    const root = dialogs.at(-1) || document;
+    return [...root.querySelectorAll(".el-form-item")]
+      .filter(visible)
+      .some(item => normalize(item.querySelector(".el-form-item__label")?.innerText || "").includes(normalize(targetLabel)));
+  }, label, { timeout });
+  await sleep(200);
+}
+
+async function ensureDependentFormItem(page, groupLabel, choiceLabel, dependentLabel) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      await waitForVisibleFormItem(page, dependentLabel, 2500);
+      return;
+    } catch {}
+    await clickChoiceByLabel(page, groupLabel, choiceLabel, "checkbox");
+    await page.mouse.click(40, 40).catch(() => {});
+    await sleep(400 + attempt * 250);
+  }
+  await waitForVisibleFormItem(page, dependentLabel, 10000);
 }

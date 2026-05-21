@@ -7,6 +7,7 @@ export async function selectPlaceholder(page, placeholder, option) {
   await input.scrollIntoViewIfNeeded();
   await input.click();
   await sleep(500);
+  await waitForVisibleDropdown(page, option);
   await page.evaluate(selectVisibleOption, option);
   await sleep(700);
 }
@@ -89,6 +90,25 @@ async function openSelectByLabel(page, label) {
   });
   if (!opened) throw new Error(`Select input not found: ${label}`);
   await sleep(800);
+}
+
+async function waitForVisibleDropdown(page, optionText) {
+  await page.waitForFunction(targetText => {
+    const visible = element => {
+      const rect = element.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    };
+    const dropdown = [...document.querySelectorAll(".el-select-dropdown")]
+      .filter(visible)
+      .at(-1);
+    if (!dropdown) return false;
+    const items = [...dropdown.querySelectorAll(".el-select-dropdown__item")]
+      .filter(visible);
+    return items.some(element => {
+      const text = (element.innerText || "").trim();
+      return text === targetText || text.includes(targetText);
+    });
+  }, optionText, { timeout: 4000 });
 }
 
 function selectVisibleOption(optionText) {

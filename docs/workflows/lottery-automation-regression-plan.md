@@ -3,13 +3,15 @@
 ## 文档说明
 
 - 适用范围：WEEX 转盘抽奖活动的后管自动化回归、前端自动化回归、专项自动化回归。
-- 当前目标：把已沉淀的后管 56 条、前端 78 条回归用例，拆成可持续执行的自动化主回归与专项回归。
+- 当前目标：把已沉淀的后管 56 条、前端 84 条回归用例，拆成可持续执行的自动化主回归与专项回归。
 - 当前原则：先落稳定主链路，再补专项；不把高波动、低复现、强并发场景直接塞进日常全量回归。
 
 ## 关联文档
 
 - 后管回归用例集：`docs/test-cases/lottery-admin-regression-cases.md`
 - 前端回归用例集：`docs/test-cases/lottery-frontend-regression-cases.md`
+- 编排设计稿：`docs/workflows/lottery-regression-orchestration-design.md`
+- 机器可读 manifest：`docs/workflows/lottery-regression-manifest.json`
 
 ## 一、自动化目标
 

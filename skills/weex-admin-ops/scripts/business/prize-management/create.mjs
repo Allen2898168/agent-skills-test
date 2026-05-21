@@ -3,6 +3,7 @@ import {
   dialog,
   fillLabel,
   selectFirstByLabel,
+  selectOptionByLabel,
   selectPlaceholder,
   setEnglish,
   tableRows,
@@ -51,7 +52,11 @@ async function fillPrizeFields(page, reward) {
 
 async function fillVirtualPrizeFields(page, reward) {
   const selected = {};
-  if (reward.subtype === "抽奖次数") selected.color = reward.color || await selectFirstByLabel(page, "颜色签");
+  if (reward.subtype === "抽奖次数") {
+    selected.color = reward.color
+      ? await selectOptionByLabel(page, "颜色签", reward.color)
+      : await selectFirstByLabel(page, "颜色签");
+  }
   if (reward.subtype === "合约抵扣金") {
     await fillLabel(page, "领取后有效期", reward.receiveDays);
     await fillLabel(page, "发放有效期", reward.issueDays);
@@ -75,9 +80,9 @@ async function fillCommonValidity(page, reward) {
 async function fillPositionAirdrop(page, reward, selected) {
   await fillLabel(page, "开仓后有效期", reward.validDays);
   await fillLabel(page, "发放有效期", reward.issueDays);
-  selected.coin = reward.coin || await selectFirstByLabel(page, "币种");
-  selected.tradePair = reward.tradePair || await selectFirstByLabel(page, "交易对", true, true);
-  selected.marginMode = reward.marginMode || await selectFirstByLabel(page, "保证金模式");
+  selected.coin = reward.coin ? await selectOptionByLabel(page, "币种", reward.coin) : await selectFirstByLabel(page, "币种");
+  selected.tradePair = reward.tradePair ? await selectOptionByLabel(page, "交易对", reward.tradePair, true, true) : await selectFirstByLabel(page, "交易对", true, true);
+  selected.marginMode = reward.marginMode ? await selectOptionByLabel(page, "保证金模式", reward.marginMode) : await selectFirstByLabel(page, "保证金模式");
   await fillLabel(page, "杠杆倍数", reward.leverage);
   await fillLabel(page, "数量", reward.quantity);
 }

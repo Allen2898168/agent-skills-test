@@ -3,6 +3,21 @@
   "updatedAt": "2026-05-11",
   "actions": [
     {
+      "id": "lottery_admin_main_regression",
+      "status": "candidate",
+      "script": "scripts/lottery-admin-main-regression.mjs",
+      "description": "Run the first-stage lottery admin main regression orchestration by chaining stable prize, register-template, roulette-task, activity-draft, and online workflows.",
+      "domains": ["活动列表", "转盘抽奖", "活动通用模块管理"],
+      "intentKeywords": ["回归", "自动化", "执行", "跑"],
+      "objectKeywords": ["后管", "后台", "活动后台", "转盘抽奖"],
+      "scopeKeywords": ["主回归"],
+      "defaultMode": "invisible",
+      "verifiedModes": ["dry_run"],
+      "lastVerifiedAt": "2026-05-21",
+      "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
+      "fallback": "If orchestration fails, run the child cached actions separately and retain the phaseResults summary for recovery."
+    },
+    {
       "id": "create_prizes",
       "status": "candidate",
       "script": "scripts/create-prizes.mjs",

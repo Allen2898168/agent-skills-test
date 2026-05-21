@@ -1,6 +1,7 @@
 import path from "node:path";
 
 export function commandFor(match, args, skillRoot) {
+  if (match.action.id === "lottery_admin_main_regression") return lotteryAdminMainRegressionCommand(match, args, skillRoot);
   if (match.action.id === "copy_prize_by_id") return copyPrizeCommand(match, args, skillRoot);
   if (match.action.id === "create_roulette_participant_scope_tasks") return rouletteParticipantScopeCommand(match, args, skillRoot);
   if (match.action.id === "create_register_templates") return registerTemplateCommand(match, args, skillRoot);
@@ -21,6 +22,19 @@ export function commandFor(match, args, skillRoot) {
   if (params.aliasPrefix) commandArgs.push("--alias-prefix", params.aliasPrefix);
   if (args.visible || params.visible) commandArgs.push("--visible");
   if (args.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function lotteryAdminMainRegressionCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.uid) commandArgs.push("--uid", String(params.uid));
+  if (params.country) commandArgs.push("--country", String(params.country));
+  if (args.visible || params.visible) commandArgs.push("--visible");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
   return { script, commandArgs };
 }
 
