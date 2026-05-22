@@ -35,6 +35,7 @@ The following fields are shared by all three regression templates unless a templ
 Shared runtime rules:
 - `活动标题` and `活动副标题` must stay within the current 15-character page limit.
 - Use short exact runtime titles. Do not append timestamps to the title field itself.
+- `活动别名配置` must stay within `10` characters by default. Use longer aliases only for explicit alias boundary-value testing.
 - `活动开始时间` must be computed in the admin business timezone and stay safely in the future at submit time.
 - Prize rows should use eight real selected prizes.
 - Visible UI creation must read back the selected prize value for all eight rows before submit.
@@ -44,7 +45,7 @@ Shared runtime rules:
 Verified result:
 - Activity ID `9219`
 - Title `回归转盘03`
-- Alias `autotest-20260519100833-normal`
+- Alias `autotest-20260519100833-normal` (historical verified record; do not reuse this long format for new default runs)
 - Status `DRAFT`
 
 Template-specific fields:
@@ -54,7 +55,7 @@ Template-specific fields:
 Recommended runtime values:
 - `活动标题`: short title such as `回归转盘03`
 - `活动副标题`: short subtitle such as `普通回归模板`
-- `活动别名配置`: `autotest-<yyyymmddhhmmss>-normal`
+- `活动别名配置`: short alias such as `ln<8位时间片>` and keep total length `<=10`
 
 Use this template for:
 - Main backend regression
@@ -66,7 +67,7 @@ Use this template for:
 Verified result:
 - Activity ID `9222`
 - Title `回归转盘04`
-- Alias `autotest-20260519102933-weight`
+- Alias `autotest-20260519102933-weight` (historical verified record; do not reuse this long format for new default runs)
 - Status `DRAFT`
 
 Template-specific fields:
@@ -77,7 +78,7 @@ Template-specific fields:
 Recommended runtime values:
 - `活动标题`: short title such as `回归转盘04`
 - `活动副标题`: short subtitle such as `二次权重模板`
-- `活动别名配置`: `autotest-<yyyymmddhhmmss>-weight`
+- `活动别名配置`: short alias such as `lw<8位时间片>` and keep total length `<=10`
 
 Use this template for:
 - Accumulated-draw-weight regression
@@ -88,7 +89,7 @@ Use this template for:
 Verified result:
 - Activity ID `9223`
 - Title `回归转盘05`
-- Alias `autotest-20260519103256-stock`
+- Alias `autotest-20260519103256-stock` (historical verified record; do not reuse this long format for new default runs)
 - Status `DRAFT`
 
 Template-specific fields:
@@ -98,7 +99,7 @@ Template-specific fields:
 Recommended runtime values:
 - `活动标题`: short title such as `回归转盘05`
 - `活动副标题`: short subtitle such as `小库存模板`
-- `活动别名配置`: `autotest-<yyyymmddhhmmss>-stock`
+- `活动别名配置`: short alias such as `ls<8位时间片>` and keep total length `<=10`
 
 Use this template for:
 - Low-stock backend validation

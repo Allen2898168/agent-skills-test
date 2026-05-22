@@ -1,5 +1,18 @@
 import { timestamp } from "../../lib/cli.mjs";
 
+function buildShortLotteryAlias(prefixValue, stampValue, maxLength = 10) {
+  const numericStamp = String(stampValue || "").replace(/\D+/g, "") || "00000000";
+  const cleanPrefix = String(prefixValue || "lt")
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "") || "lt";
+  const suffixLength = cleanPrefix.length <= 2 ? Math.min(8, Math.max(4, maxLength - cleanPrefix.length)) : 4;
+  const suffix = numericStamp.slice(-suffixLength).padStart(suffixLength, "0");
+  const prefix = cleanPrefix.slice(0, Math.max(1, maxLength - suffix.length));
+  return `${prefix}${suffix}`.slice(0, maxLength);
+}
+
 export const LOTTERY_DRAFT_DEFAULTS = {
   configType: "正式活动",
   owner: "auto",
@@ -24,7 +37,7 @@ export const LOTTERY_DRAFT_DEFAULTS = {
 export function buildLotteryDraftPlan(args = {}) {
   const stamp = args.timestamp || timestamp();
   const titlePrefix = args.titlePrefix || "严格UI转盘抽奖草稿";
-  const aliasPrefix = args.aliasPrefix || "strict-ui-lottery";
+  const aliasPrefix = args.aliasPrefix || "lt";
   const start = args.start || "2026-06-10 00:00:00";
   const end = args.end || "2026-06-30 23:59:59";
   const writeEnabled = Boolean(args.visible && !args.dryRun);
@@ -36,7 +49,7 @@ export function buildLotteryDraftPlan(args = {}) {
     listUrl: "/activities/lottery",
     type: "LOTTERY",
     title: `${titlePrefix}${stamp}`,
-    alias: `${aliasPrefix}-${stamp}`,
+    alias: buildShortLotteryAlias(aliasPrefix, stamp),
     activityTime: { start, end },
     defaults: LOTTERY_DRAFT_DEFAULTS,
     dependencies: {
@@ -71,6 +84,7 @@ export function buildLotteryDraftPlan(args = {}) {
       "多语言与 FAQ 语言选择必须限定在各自模块容器内。",
       "预报名字段真实 label 是 预报名模版；选择支持后必须快速配置模版、开始时间、结束时间。",
       "奖品表按真实列序填写：奖金金额(USDT)、总库存数量、权重（%)；跳过禁用的有效期列。",
+      "默认活动别名必须控制在 10 个字符以内；只有别名边界值测试才允许显式传入更长 alias。",
     ],
   };
 }

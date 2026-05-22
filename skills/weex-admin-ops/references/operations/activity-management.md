@@ -27,6 +27,7 @@ Validated create result:
 Validated create constraints:
 - `活动别名` only accepts lowercase letters, digits, and `-`.
 - An alias like `Jonathan_test` is invalid and must be normalized before submit.
+- Default regression aliases must stay within `10` characters unless the run is explicitly a boundary-value test.
 - `是否支持预报名 = 不支持` can be submitted with `preApplyConfig = null`.
 - A valid `用户报名模版` is still required even when pre-registration is disabled.
 

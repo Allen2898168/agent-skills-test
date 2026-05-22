@@ -1,3 +1,5 @@
+import { isFrontendAutoHandledPrecondition } from "./lottery-frontend-preconditions.mjs";
+
 export function resolvePreconditions(selectedScenarios, manifest) {
   const descriptions = manifest?.scenarios || {};
   const requiredKeys = Array.from(new Set((selectedScenarios || []).flatMap(item => item.preconditions || [])));
@@ -13,5 +15,6 @@ function isAutoHandledPrecondition(key, scenarios) {
   if (["REGISTER_TEMPLATE_READY", "ROULETTE_TASK_READY", "PRIZE_SET_READY", "NORMAL_ACTIVITY_DRAFT"].includes(key)) {
     return (scenarios || []).some(item => item.entrypoint === "lottery_admin_main_regression");
   }
+  if (isFrontendAutoHandledPrecondition(key, scenarios)) return true;
   return false;
 }

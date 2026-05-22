@@ -13,6 +13,7 @@
 - 自动化落地方案：`docs/workflows/lottery-automation-regression-plan.md`
 - 活动模板验证清单：`docs/workflows/lottery-activity-template-validation-checklist.md`
 - 机器可读 manifest：`docs/workflows/lottery-regression-manifest.json`
+- 能力差距清单：`docs/workflows/lottery-automation-capability-gap-v2.md`
 
 ## 一、当前用例总览
 
@@ -162,6 +163,20 @@
 
 - 前端稳定主链路
 - 不混入二次权重、小库存、并发等专项场景
+
+当前已落地首批覆盖：
+
+- `frontend_page_basic`：`FE-01`、`FE-07`
+- `frontend_state_ui`：`FE-17`、`FE-19`、`FE-22`
+- `frontend_signup_flow`：`FE-79`、`FE-81`、`FE-82`、`FE-83`
+- `frontend_single_draw`：`FE-32`、`FE-33`、`FE-34`、`FE-35`
+- `frontend_reward_record`：`FE-48`、`FE-49`、`FE-50`
+- `frontend_backend_linkage`：`FE-84`
+
+当前状态说明：
+
+- 该入口已接入 dispatcher 与 manifest。
+- 当前属于 `partial`，还不是完整前端全量回归入口。
 
 ## 七、专项回归入口设计
 

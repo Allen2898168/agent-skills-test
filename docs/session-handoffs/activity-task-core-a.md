@@ -91,6 +91,50 @@
 
 ## 未解决问题
 
+## 2026-05-22 14:00 CST 现货交易量新增链路稳定修复
+
+- 当前目标：把 `任务管理 / 转盘抽奖 / 任务条件1 = 现货交易量` 从编排中的 `SKIPPED` 拉到真实可执行 `PASS`。
+- 环境：staging。
+- 页面：`/activity/task`。
+- 操作类型：排障、真实新增任务、更新 skill 与编排脚本。
+- 根因确认：
+  - 新增弹窗里 `交易量统计方式` 是必填。
+  - 历史成功任务 `4749` 的修改弹窗能看到 `交易量统计方式 = 有手续费订单 / 无手续费订单`。
+  - 但在新增弹窗里，该表单项会渲染出来而没有任何可见 checkbox 选项。
+  - 对比表单模型后确认：
+    - 新增态 `model.volumeCountType` 为 `undefined`
+    - 修改态 `model.volumeCountType = ["FEE"]`
+    - 修改态 `model.requirement[0].volumeCountType = ["FEE"]`
+  - 结论：当前 staging 新增链路没有正确初始化 `volumeCountType`，导致 `交易量统计方式` 选项不渲染。
+- 已完成事项：
+  - 先用探针验证：在新增态手动把表单模型补成
+    - `model.volumeCountType = ["FEE"]`
+    - `model.requirement[0].volumeCountType = ["FEE"]`
+    后，可以真实创建成功。
+  - 探针任务创建成功：
+    - `5248`：`转盘抽奖_spot_probe_1779429166099`
+  - 已把这条 fallback 写入正式自动化脚本：
+    - 当新增态可直接看到 `有手续费订单` 时，优先走正常点击。
+    - 当新增态 checkbox group 为空时，自动回退到模型绑定 `["FEE"]`。
+  - 正式任务条件编排回归创建成功：
+    - `5249`：`KOL绑定`
+    - `5250`：`合约交易量`
+    - `5251`：`现货交易量`
+    - `5252`：`充值任务`
+  - 回归结果：
+    - `TM-08 任务条件分支覆盖` 从 `SKIPPED` 变为 `PASS`
+    - `任务管理` 整组变为 `11 / 11 PASS`
+- 当前稳定规则：
+  - `现货交易量` 的 create automation 必须允许 `volumeCountType` 模型兜底。
+  - 在页面后续修复之前，不要仅依赖新增弹窗是否渲染出 `有手续费订单`。
+- 相关文件：
+  - `skills/weex-admin-ops/scripts/business/activity-task-management/roulette-condition-create.mjs`
+  - `skills/weex-admin-ops/scripts/create-roulette-condition-tasks.mjs`
+  - `skills/weex-admin-ops/references/operations/activity-task-roulette-conditions.md`
+- 下一步建议：
+  - 若后续页面修复新增态 `交易量统计方式` 初始化，需要再做一次只读对比，确认是否可移除模型兜底。
+  - 在 skill 文档里保留该 fallback，直到开发明确修复并验证通过。
+
 ## 2026-05-04 20:45 CEST 活动任务管理任务条件与单一奖励
 
 - 当前目标：确认 `转盘抽奖 / 单一任务条件` 下不同任务条件的选项和展开字段，并尝试创建不同任务条件的 `单一奖励` 任务。

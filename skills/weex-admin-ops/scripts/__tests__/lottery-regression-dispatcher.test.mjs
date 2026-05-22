@@ -3,10 +3,12 @@ import assert from "node:assert/strict";
 
 import {
   buildScenarioMenu,
+  collectAutomationCaseIdsForScenarios,
   collectCaseIdsForScenarios,
   loadLotteryRegressionManifest,
   resolveScenarioSelection,
 } from "../lib/lottery-regression-manifest.mjs";
+import { buildEntrypointCommands } from "../lottery-regression-dispatcher.mjs";
 
 test("scenario menu exposes grouped admin and frontend items with status labels", () => {
   const manifest = loadLotteryRegressionManifest();
@@ -16,7 +18,7 @@ test("scenario menu exposes grouped admin and frontend items with status labels"
   assert.ok(admin);
   assert.ok(frontend);
   assert.ok(admin.scenarios.some(item => item.title === "奖品管理" && item.status === "ready"));
-  assert.ok(frontend.scenarios.some(item => item.title === "报名链路" && item.status === "planned"));
+  assert.ok(frontend.scenarios.some(item => item.title === "报名链路" && item.status === "partial"));
 });
 
 test("selection resolves group names and scenario aliases", () => {
@@ -41,4 +43,18 @@ test("collectCaseIdsForScenarios deduplicates shared case ids", () => {
   const selection = resolveScenarioSelection("二次权重专项, 活动配置 / 活动信息", manifest);
   const caseIds = collectCaseIdsForScenarios(selection.selectedScenarios);
   assert.equal(caseIds.filter(item => item === "AC-14").length, 1);
+});
+
+test("dispatcher builds frontend main regression command for partial frontend scenarios", () => {
+  const manifest = loadLotteryRegressionManifest();
+  const selection = resolveScenarioSelection("报名链路, 单抽主流程", manifest);
+  const executions = buildEntrypointCommands(selection.selectedScenarios, { visible: true, dryRun: false });
+  const frontendExecution = executions.find(item => item.entrypoint === "lottery_frontend_main_regression");
+  assert.ok(frontendExecution);
+  assert.ok(frontendExecution.commandArgs[0].endsWith("scripts/lottery-frontend-main-regression.mjs"));
+  const caseIdsFlagIndex = frontendExecution.commandArgs.indexOf("--case-ids");
+  assert.ok(caseIdsFlagIndex >= 0);
+  const automationCaseIds = collectAutomationCaseIdsForScenarios(selection.selectedScenarios);
+  assert.equal(frontendExecution.commandArgs[caseIdsFlagIndex + 1], automationCaseIds.join(","));
+  assert.ok(frontendExecution.commandArgs.includes("--visible"));
 });

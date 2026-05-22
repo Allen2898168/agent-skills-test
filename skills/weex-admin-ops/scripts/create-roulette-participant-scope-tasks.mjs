@@ -4,6 +4,7 @@ import { bodyText, loginToTaskPage, watchTaskResponses } from "./lib/browser.mjs
 import { adminConfig, assertAdminConfig, loadLocalEnv, loadPlaywright, pathsFrom } from "./lib/runtime.mjs";
 import { buildRouletteParticipantPlan, participantScopeCatalog } from "./business/activity-task-management/roulette-participant-plan.mjs";
 import { createRouletteParticipantTasks } from "./business/activity-task-management/roulette-participant-create.mjs";
+import { runTaskSearchChecks } from "./business/activity-task-management/search.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
 
@@ -60,6 +61,7 @@ async function run() {
   const { chromium } = loadPlaywright();
   const responses = [];
   const created = [];
+  let searchChecks = null;
   const browser = await chromium.launch({
     headless: !args.visible,
     executablePath: config.chromePath,
@@ -71,7 +73,8 @@ async function run() {
   try {
     await loginToTaskPage(page, config);
     created.push(...await createRouletteParticipantTasks(page, config, plan));
-    printJson({ ok: true, mode: args.visible ? "visible_browser" : "invisible_browser", finalUrl: page.url(), created, evidence: { responses } });
+    searchChecks = await runTaskSearchChecks(page, config, created);
+    printJson({ ok: true, mode: args.visible ? "visible_browser" : "invisible_browser", finalUrl: page.url(), created, searchChecks, evidence: { responses } });
     return 0;
   } catch (error) {
     printJson({
@@ -80,6 +83,7 @@ async function run() {
       finalUrl: page.url(),
       error: error.message,
       created,
+      searchChecks,
       responses,
       pageText: (await bodyText(page)).slice(0, 1000),
     }, process.stderr);

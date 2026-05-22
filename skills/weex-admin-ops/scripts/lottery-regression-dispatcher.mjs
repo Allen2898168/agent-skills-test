@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { parseFlags, printJson } from "./lib/cli.mjs";
 import { loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
 import {
@@ -69,7 +70,7 @@ function runChild(commandArgs) {
   };
 }
 
-function buildEntrypointCommands(selectedScenarios, args) {
+export function buildEntrypointCommands(selectedScenarios, args) {
   const buckets = new Map();
   for (const scenario of selectedScenarios) {
     if (!scenario.entrypoint) continue;
@@ -77,16 +78,27 @@ function buildEntrypointCommands(selectedScenarios, args) {
     buckets.get(scenario.entrypoint).push(scenario);
   }
   return Array.from(buckets.entries()).map(([entrypoint, scenarios]) => {
-    if (entrypoint !== "lottery_admin_main_regression") {
+    if (entrypoint === "lottery_admin_main_regression") {
+      const childPath = path.join(skillRoot, "scripts/lottery-admin-main-regression.mjs");
+      const caseIds = collectAutomationCaseIdsForScenarios(scenarios);
+      if (!caseIds.length) return { entrypoint, scenarios, commandArgs: [] };
+      const commandArgs = [childPath, "--case-ids", caseIds.join(",")];
+      if (args.visible) commandArgs.push("--visible");
+      if (args.dryRun) commandArgs.push("--dry-run");
+      return { entrypoint, scenarios, commandArgs };
+    }
+    if (entrypoint === "lottery_frontend_main_regression") {
+      const childPath = path.join(skillRoot, "scripts/lottery-frontend-main-regression.mjs");
+      const caseIds = collectAutomationCaseIdsForScenarios(scenarios);
+      if (!caseIds.length) return { entrypoint, scenarios, commandArgs: [] };
+      const commandArgs = [childPath, "--case-ids", caseIds.join(",")];
+      if (args.visible) commandArgs.push("--visible");
+      if (args.dryRun) commandArgs.push("--dry-run");
+      return { entrypoint, scenarios, commandArgs };
+    }
+    {
       return { entrypoint, scenarios, commandArgs: [] };
     }
-    const childPath = path.join(skillRoot, "scripts/lottery-admin-main-regression.mjs");
-    const caseIds = collectAutomationCaseIdsForScenarios(scenarios);
-    if (!caseIds.length) return { entrypoint, scenarios, commandArgs: [] };
-    const commandArgs = [childPath, "--case-ids", caseIds.join(",")];
-    if (args.visible) commandArgs.push("--visible");
-    if (args.dryRun) commandArgs.push("--dry-run");
-    return { entrypoint, scenarios, commandArgs };
   });
 }
 
@@ -195,9 +207,11 @@ async function main() {
   return report.summary.caseStatusCounts.FAIL ? 1 : 0;
 }
 
-try {
-  process.exitCode = await main();
-} catch (error) {
-  printJson({ ok: false, error: error.message }, process.stderr);
-  process.exitCode = 1;
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  try {
+    process.exitCode = await main();
+  } catch (error) {
+    printJson({ ok: false, error: error.message }, process.stderr);
+    process.exitCode = 1;
+  }
 }

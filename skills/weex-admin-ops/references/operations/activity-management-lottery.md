@@ -30,7 +30,8 @@ Verified behavior:
 
 ## Draft Creation Path
 
-The latest cache-backed strict UI run created draft activity `9223` with title `回归转盘05` and alias `autotest-20260519103256-stock`.
+The latest cache-backed strict UI run created draft activity `9223` with title `回归转盘05` and historical alias `autotest-20260519103256-stock`.
+That alias is retained here only as historical verification evidence. For all future non-boundary runs, keep `活动别名配置` within `10` characters.
 
 Use conservative defaults only in staging:
 - `配置类型`: `正式活动`
@@ -50,6 +51,7 @@ Use conservative defaults only in staging:
 Fill required text and rich fields:
 - `活动标题`, `活动副标题`, `分享活动文案`, `代理分享文案`, `活动规则`, and `活动别名配置`.
 - Hard rule: `活动标题` and `活动副标题` must each be no longer than 15 characters. Use exact short values for user-facing title fields; do not append timestamps to these fields.
+- Hard rule: `活动别名配置` must use only lowercase letters, digits, and `-`, and should stay within `10` characters by default. Only exceed `10` when the tester is explicitly doing alias boundary-value validation.
 - Upload default image files for web/h5 header, web/h5 share images, social preview, and prize share images.
 - Activity start time must be earlier than end time.
 - `用户报名模版`当前固定选择 `2729`：`【2729】 自动化报名模板_auto_manual_20260505161031`。不要再用“第一个兼容模板”作为默认规则。
@@ -184,6 +186,7 @@ Visible-browser checks on 2026-05-07:
 - `查看` opened `/activities/lottery/view?activityId=9023` and triggered `GET /prod-api/activity/config/9023` with business `code=200`.
 - `修改` opened `/activities/lottery/edit?activityId=9023`; the original online activity was not saved during row-action validation.
 - `复制` on both online `9023` and draft `9022` triggered `POST /prod-api/activity/config/copy`, but backend returned business `code=500`, `system busy, please retry later`; no copied row was created.
+- The latest dev feedback attributes that failure to the source activity alias being too long, not to a newly generated copied alias.
 - A temporary draft `9024` was created through the strict visible UI path to continue row-action checks. Its row actions included `查看` / `修改` / `上线` / `删除` / `复制`.
 - `修改` on draft `9024` opened `/activities/lottery/edit?activityId=9024`; changing `活动副标题` and clicking the page `保存` button triggered `PUT /prod-api/activity/config` with business `code=200` and page message `编辑成功`.
 - `删除` on draft `9024` opened a confirmation dialog `确认删除该活动吗`; the verification input auto-focused. Fill the fixed staging verification code, then click the bottom-right `确定`. The page triggered `POST /prod-api/activity/lottery/delete`, business `code=200`, and alias search returned `total=0`.

@@ -17,9 +17,9 @@ if (!fs.existsSync(config.imagePath)) throw new Error(`image missing: ${config.i
 const { chromium } = loadPlaywright();
 const stamp = timestamp();
 const titlePrefix = process.env.LOTTERY_TITLE_PREFIX || "严格UI转盘抽奖草稿";
-const aliasPrefix = process.env.LOTTERY_ALIAS_PREFIX || "strict-ui-lottery";
+const aliasPrefix = process.env.LOTTERY_ALIAS_PREFIX || "lt";
 const title = process.env.LOTTERY_TITLE_EXACT || `${titlePrefix}${stamp}`;
-const alias = process.env.LOTTERY_ALIAS_EXACT || `${aliasPrefix}-${stamp}`;
+const alias = process.env.LOTTERY_ALIAS_EXACT || buildShortLotteryAlias(aliasPrefix, stamp);
 const subTitle = process.env.LOTTERY_SUBTITLE || "严格 UI 复杂配置副标题";
 const activityStartTime = process.env.LOTTERY_START || "2026-06-10 00:00:00";
 const activityEndTime = process.env.LOTTERY_END || "2026-06-30 23:59:59";
@@ -72,6 +72,19 @@ const browser = await chromium.launch({
   slowMo: 120,
   args: ["--window-size=1440,1000"],
 });
+
+function buildShortLotteryAlias(prefixValue, stampValue, maxLength = 10) {
+  const numericStamp = String(stampValue || "").replace(/\D+/g, "") || "00000000";
+  const cleanPrefix = String(prefixValue || "lt")
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "") || "lt";
+  const suffixLength = cleanPrefix.length <= 2 ? Math.min(8, Math.max(4, maxLength - cleanPrefix.length)) : 4;
+  const suffix = numericStamp.slice(-suffixLength).padStart(suffixLength, "0");
+  const prefix = cleanPrefix.slice(0, Math.max(1, maxLength - suffix.length));
+  return `${prefix}${suffix}`.slice(0, maxLength);
+}
 
 function parseList(value) {
   const text = String(value || "").trim();

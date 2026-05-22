@@ -12,6 +12,22 @@
 - 前端回归用例集：`docs/test-cases/lottery-frontend-regression-cases.md`
 - 编排设计稿：`docs/workflows/lottery-regression-orchestration-design.md`
 - 机器可读 manifest：`docs/workflows/lottery-regression-manifest.json`
+- 能力差距清单：`docs/workflows/lottery-automation-capability-gap-v2.md`
+
+## 当前落地状态
+
+当前已经落地：
+
+1. `lottery_admin_main_regression`
+2. `lottery_frontend_main_regression`
+3. `lottery-regression-dispatcher.mjs`
+4. `lottery-regression-manifest.json`
+
+其中：
+
+1. 后管主回归入口当前状态为 `ready`。
+2. 前端主回归入口当前状态为 `partial`，已接报名链路、MQ 回充、单抽、奖励记录首批 case。
+3. 五连抽、小库存、二次权重仍属于专项待补阶段。
 
 ## 一、自动化目标
 

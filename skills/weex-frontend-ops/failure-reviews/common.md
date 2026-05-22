@@ -233,3 +233,15 @@
 - 验证结果：前端一键平仓订单 `748968366269530682` 成功，平仓成交额 `1001.731270 USDT`；活动页刷新后显示 `可用次数：1`、任务累计 `1,001.73`，`taskCompletions` 返回 `status=COMPLETED`、`tradingVolume=1001.73127000000000`、`tradingCount=1`。
 - 关联流程或脚本：FIN `system-account-create.mjs`、FIN `finance-airdrop-reward-grant.mjs`、前端 `frontend-assets-transfer.mjs`、前端 `frontend-contract-place-order.mjs`、临时可见 Playwright 页面平仓链路。
 - 后续处理状态：已验证为本次成功恢复路径；如后续要复用，应沉淀为前端 draw 活动合约任务 playbook 或组合脚本，包含关闭新手引导和一键平仓确认步骤。
+
+## 抽奖页 cookie 登录在 Playwright 中退化为游客态
+
+- 日期：2026-05-22
+- 页面/流程：`lottery_frontend_main_regression`、`lottery-frontend-main-flow.mjs`、`frontend-login-cookie.mjs` 打开 `https://stg-www.weex.tech/zh-CN/events/draw/<alias>`。
+- 环境/viewport：STG，隐藏 Playwright Chrome，desktop `1440x1000`。
+- 失败表现：同一套 `WEEX_TOKEN_COOKIE_STAGING` 在 `/zh-CN/account` 可打开 `账号总览`，但进入抽奖页后页面正文仍出现 `登录 / 注册`、主按钮为 `注册`，而不是 `立即报名 / 抽奖 / 即将开始`。页面还能看到 `我的奖品`、活动标题和任务区，容易被误判为已登录态。运行期证据还显示多个 `stg-gateway*`、`stg-http-gateway*`、`stg-spotpro-http-gateway*` 请求在浏览器内报 `net::ERR_FAILED`。
+- 失败原因：当前“cookie 注入后直接打开抽奖页”的前端登录链路，对抽奖页不是稳定认证方案。至少在 Playwright 隔离浏览器里，抽奖页会退化为游客态；仅凭 token cookie 存在或 `我的奖品` 入口可见，不能认定 `FRONTEND_SESSION` 成立。
+- 解决方式：在真正跑通新的前端认证路径前，`FRONTEND_SESSION`、`NORMAL_ACTIVITY_SIGNED_UP`、`NORMAL_ACTIVITY_DRAW_GE1`、`REWARD_RECORD_DELAY_READY` 不再视为自动补齐前置。脚本侧已增加游客态识别：若抽奖页仍出现 `注册` 主按钮或 `立即注册，领$10,000+ 迎新礼包！`，直接返回 `frontend draw page still showed guest state after cookie login`，不再误判为“按钮未识别”。
+- 验证结果：真实创建并上线活动 `9307 / lf22121600` 后复现；`lottery-frontend-main-flow.mjs` 已能稳定输出准确失败，附带按钮和页面片段证据。
+- 关联流程或脚本：`skills/weex-admin-ops/scripts/lottery-frontend-main-flow.mjs`、`skills/weex-admin-ops/scripts/lib/lottery-frontend-preconditions.mjs`、`skills/weex-frontend-ops/scripts/frontend-login-cookie.mjs`。
+- 后续处理状态：该问题当前作为前端主回归 P0 阻塞项保留；后续需补可用于抽奖页的稳定前端登录链路，再恢复前置条件自动补齐。

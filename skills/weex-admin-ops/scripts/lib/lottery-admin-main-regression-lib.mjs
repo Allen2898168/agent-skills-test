@@ -1,14 +1,13 @@
 export function resolvePhaseCommands(phase, args, createdActivity) {
   return phase.commands.map(command => {
-    const next = [...command];
-    if (phase.phaseId === "online_lottery_activity") {
-      if (createdActivity.activityAlias) {
-        const index = next.indexOf("<created-alias>");
-        if (index >= 0) next.splice(index, 1, createdActivity.activityAlias);
-      } else if (createdActivity.activityId) {
-        const aliasFlagIndex = next.indexOf("--activity-alias");
-        if (aliasFlagIndex >= 0) next.splice(aliasFlagIndex, 2, "--activity-id", createdActivity.activityId);
-      }
+    const next = command.flatMap(token => {
+      if (token === "<created-alias>" && createdActivity.activityAlias) return [createdActivity.activityAlias];
+      if (token === "<created-id>" && createdActivity.activityId) return [createdActivity.activityId];
+      return [token];
+    });
+    if (next.includes("<created-alias>") && createdActivity.activityId) {
+      const aliasFlagIndex = next.indexOf("--activity-alias");
+      if (aliasFlagIndex >= 0) next.splice(aliasFlagIndex, 2, "--activity-id", createdActivity.activityId);
     }
     if (args.visible) next.push("--visible");
     return next;
@@ -33,6 +32,74 @@ export function evaluateAdminMainCase(caseEntry, phaseResult) {
     const passed = Boolean(payload.ok && (verifyFirst.id || verifyFirst.activityId || payload.verifyTotal === 1));
     return buildCaseResult(caseEntry, phaseResult.phaseId, passed ? "PASS" : "FAIL", payload);
   }
+  if (caseEntry.caseId === "AL-01") {
+    return buildMatchedRecordResult(caseEntry, phaseResult, payload?.searchChecks?.byId?.ok ? payload.searchChecks.byId : null);
+  }
+  if (caseEntry.caseId === "AL-02") {
+    return buildMatchedRecordResult(caseEntry, phaseResult, payload?.searchChecks?.byTitle?.ok ? payload.searchChecks.byTitle : null);
+  }
+  if (caseEntry.caseId === "AL-03") {
+    return buildMatchedRecordResult(caseEntry, phaseResult, payload?.searchChecks?.byAlias?.ok ? payload.searchChecks.byAlias : null);
+  }
+  if (caseEntry.caseId === "AL-04") {
+    return buildMatchedRecordResult(caseEntry, phaseResult, payload?.searchChecks?.byType?.ok ? payload.searchChecks.byType : null);
+  }
+  if (caseEntry.caseId === "AL-05") {
+    return buildMatchedRecordResult(caseEntry, phaseResult, payload?.searchChecks?.byDate?.ok ? payload.searchChecks.byDate : null);
+  }
+  if (caseEntry.caseId === "AL-06") {
+    return buildMatchedRecordResult(caseEntry, phaseResult, payload?.draftRowActions?.ok ? {
+      recordType: "activity_row_action_visibility",
+      stage: "draft",
+      actions: payload.draftRowActions.actions || [],
+      alias: payload.alias || "",
+      id: payload.activityId || "",
+    } : null);
+  }
+  if (caseEntry.caseId === "AL-07") {
+    return buildMatchedRecordResult(caseEntry, phaseResult, payload?.onlineRowActions?.ok && payload?.copyCheck?.copiedId ? {
+      recordType: "activity_row_action_visibility",
+      stage: "online",
+      actions: payload.onlineRowActions.actions || [],
+      alias: payload.alias || "",
+      id: payload.activityId || "",
+      copiedActivityId: payload.copyCheck.copiedId || "",
+      copiedAlias: payload.copyCheck.copiedAlias || "",
+    } : null);
+  }
+  if (caseEntry.caseId === "AC-15") {
+    return buildMatchedRecordResult(caseEntry, phaseResult, payload?.copyCheck?.copiedId ? {
+      recordType: "activity_copy",
+      id: payload.activityId || "",
+      alias: payload.alias || "",
+      copiedActivityId: payload.copyCheck.copiedId || "",
+      copiedAlias: payload.copyCheck.copiedAlias || "",
+    } : null);
+  }
+  if (caseEntry.caseId === "RT-01") {
+    return buildMatchedRecordResult(caseEntry, phaseResult, payload?.searchChecks?.byName?.ok ? payload.searchChecks.byName : null);
+  }
+  if (caseEntry.caseId === "RT-02") {
+    return buildMatchedRecordResult(caseEntry, phaseResult, payload?.searchChecks?.byId?.ok ? payload.searchChecks.byId : null);
+  }
+  if (caseEntry.caseId === "TM-01") {
+    return buildMatchedRecordResult(caseEntry, phaseResult, payload?.searchChecks?.byId?.ok ? payload.searchChecks.byId : null);
+  }
+  if (caseEntry.caseId === "TM-02") {
+    return buildMatchedRecordResult(caseEntry, phaseResult, payload?.searchChecks?.byAlias?.ok ? payload.searchChecks.byAlias : null);
+  }
+  if (caseEntry.caseId === "TM-03") {
+    return buildMatchedRecordResult(caseEntry, phaseResult, payload?.searchChecks?.byTag?.ok ? payload.searchChecks.byTag : null);
+  }
+  if (caseEntry.caseId === "TM-04") {
+    return buildMatchedRecordResult(caseEntry, phaseResult, payload?.searchChecks?.byRemark?.ok ? payload.searchChecks.byRemark : null);
+  }
+  if (caseEntry.caseId === "TM-05") {
+    return buildMatchedRecordResult(caseEntry, phaseResult, payload?.searchChecks?.byStartTime?.ok ? payload.searchChecks.byStartTime : null);
+  }
+  if (caseEntry.caseId === "TM-06") {
+    return buildMatchedRecordResult(caseEntry, phaseResult, payload?.searchChecks?.byEndTime?.ok ? payload.searchChecks.byEndTime : null);
+  }
   if (caseEntry.caseId === "AC-07") {
     const passed = Array.isArray(verifyFirst.prize) && verifyFirst.prize.length === 8;
     return buildCaseResult(caseEntry, phaseResult.phaseId, passed ? "PASS" : "FAIL", payload);
@@ -51,6 +118,20 @@ export function evaluateAdminMainCase(caseEntry, phaseResult) {
   if (caseEntry.caseId === "ST-01") {
     const passed = verifyItem.status === "ONLINE" || payload.onlineBody?.code === 200;
     return buildCaseResult(caseEntry, phaseResult.phaseId, passed ? "PASS" : "FAIL", payload);
+  }
+  if (caseEntry.caseId === "ST-02") {
+    const passed = verifyItem.status === "OFFLINE"
+      || verifyItem.status === "DOWNLINE"
+      || (payload.offlineBody?.code === 200 && verifyItem.status !== "ONLINE");
+    return buildCaseResult(caseEntry, phaseResult.phaseId, passed ? "PASS" : "FAIL", payload);
+  }
+  if (caseEntry.caseId === "ST-03") {
+    return buildMatchedRecordResult(caseEntry, phaseResult, payload?.deleteCopiedDraft?.code === 200 && payload?.deleteCopiedDraft?.rowAbsentAfterSearch ? {
+      recordType: "activity_delete",
+      confirmText: payload.deleteCopiedDraft.confirmText || "",
+      copiedActivityId: payload.copyCheck?.copiedId || "",
+      copiedAlias: payload.deleteCopiedDraft.alias || payload.copyCheck?.copiedAlias || "",
+    } : null);
   }
   if (caseEntry.caseId === "PM-04") {
     return buildMatchedRecordResult(caseEntry, phaseResult, findPrize(created, { category: "赠金" }));
@@ -105,17 +186,27 @@ export function evaluateAdminMainCase(caseEntry, phaseResult) {
     }));
   }
   if (caseEntry.caseId === "RT-05") {
-    return buildMatchedRecordResult(caseEntry, phaseResult, findTemplate(created, {
-      customMatcher: item => ["指定渠道码或邀请码", "自然流量", "非活跃用户", "混合条件", "假钱账户"].includes(item.platformScope),
-    }), "SKIPPED");
+    return buildMatchedRecordResult(caseEntry, phaseResult, hasTemplatePlatformScopeCoverage(created, [
+      "指定渠道码或邀请码",
+      "自然流量",
+      "非活跃用户",
+      "混合条件",
+      "假钱账户",
+    ]) ? { recordType: "register_template_branch_coverage", coveredPlatformScopes: ["指定渠道码或邀请码", "自然流量", "非活跃用户", "混合条件", "假钱账户"] } : null);
   }
   if (caseEntry.caseId === "RT-06") {
     return buildMatchedRecordResult(caseEntry, phaseResult, findTemplate(created, {
       customMatcher: item => Boolean(item.registerTimeRange?.start && item.registerTimeRange?.end),
-    }), "SKIPPED");
+    }));
   }
-  if (["RT-07", "RT-08", "RT-09"].includes(caseEntry.caseId)) {
-    return buildCaseResult(caseEntry, phaseResult.phaseId, "SKIPPED", payload);
+  if (caseEntry.caseId === "RT-07") {
+    return buildMatchedRecordResult(caseEntry, phaseResult, findRegisterTemplateRowAction(phaseResult, "view"));
+  }
+  if (caseEntry.caseId === "RT-08") {
+    return buildMatchedRecordResult(caseEntry, phaseResult, findRegisterTemplateRowAction(phaseResult, "modify"));
+  }
+  if (caseEntry.caseId === "RT-09") {
+    return buildMatchedRecordResult(caseEntry, phaseResult, findRegisterTemplateRowAction(phaseResult, "delete"));
   }
   if (caseEntry.caseId === "TM-07") {
     return buildMatchedRecordResult(caseEntry, phaseResult, findTask(created, {
@@ -137,10 +228,17 @@ export function evaluateAdminMainCase(caseEntry, phaseResult) {
       rewardMode: "单一奖励",
       rewardMin: "10",
       rewardMax: "100",
-    }), "SKIPPED");
+    }));
   }
-  if (["TM-10", "TM-11"].includes(caseEntry.caseId)) {
-    return buildCaseResult(caseEntry, phaseResult.phaseId, "SKIPPED", payload);
+  if (caseEntry.caseId === "TM-10") {
+    return buildMatchedRecordResult(caseEntry, phaseResult, findTask(created, {
+      rewardMode: "限时奖励不同",
+    }));
+  }
+  if (caseEntry.caseId === "TM-11") {
+    return buildMatchedRecordResult(caseEntry, phaseResult, findTask(created, {
+      rewardMode: "正常奖励+权益奖励",
+    }));
   }
   return buildCaseResult(caseEntry, phaseResult.phaseId, "PASS", payload);
 }
@@ -245,6 +343,15 @@ function hasTaskConditionCoverage(created, expectedConditions) {
   return expectedConditions.every(condition => covered.has(condition));
 }
 
+function hasTemplatePlatformScopeCoverage(created, expectedScopes) {
+  const covered = new Set(
+    created
+      .filter(item => isSuccessfulCreate(item) && item?.platformScope)
+      .map(item => item.platformScope)
+  );
+  return expectedScopes.every(scope => covered.has(scope));
+}
+
 function findPrizeRowAction(phaseResult, stepName) {
   const actionResults = Array.isArray(phaseResult?.childResults)
     ? phaseResult.childResults.flatMap(item => Array.isArray(item?.payload?.results) ? item.payload.results : [])
@@ -270,14 +377,37 @@ function findPrizeRowAction(phaseResult, stepName) {
   return null;
 }
 
+function findRegisterTemplateRowAction(phaseResult, stepName) {
+  const actionResults = Array.isArray(phaseResult?.childResults)
+    ? phaseResult.childResults.flatMap(item => Array.isArray(item?.payload?.results) ? item.payload.results : [])
+    : [];
+  for (const result of actionResults) {
+    const step = Array.isArray(result?.steps) ? result.steps.find(item => item?.step === stepName) : null;
+    if (!step) continue;
+    if (stepName === "view" && !(Number(step.status) === 200 && Number(step.responseCode) === 200)) continue;
+    if (stepName === "modify" && !(Number(step.status) === 200 && Number(step.responseCode) === 200 && Array.isArray(step.row))) continue;
+    if (stepName === "delete" && !(Number(step.status) === 200 && Number(step.responseCode) === 200 && step.rowAbsentAfterSearch)) continue;
+    return {
+      recordType: "register_template_row_action",
+      step: stepName,
+      id: result.id || "",
+      name: result.originalName || "",
+      modifiedName: result.modifiedName || "",
+      confirmText: step.confirmText || "",
+    };
+  }
+  return null;
+}
+
 function summarizeEvidence(payload) {
   const verifyFirst = payload?.verifyFirst || {};
   const verifyItem = payload?.verifyItem || {};
+  const target = payload?.target || {};
   const summary = {
     ok: payload?.ok,
     error: payload?.error || "",
-    alias: payload?.alias || verifyFirst?.showUrl || "",
-    activityId: verifyFirst?.id || verifyFirst?.activityId || verifyItem?.id || payload?.id || "",
+    alias: payload?.alias || target?.activityAlias || verifyFirst?.showUrl || verifyItem?.showUrl || "",
+    activityId: verifyFirst?.id || verifyFirst?.activityId || verifyItem?.id || verifyItem?.activityId || target?.activityId || payload?.id || "",
     prizeCount: Array.isArray(verifyFirst?.prize) ? verifyFirst.prize.length : 0,
     taskRequirementCount: Array.isArray(verifyFirst?.taskRequirement)
       ? verifyFirst.taskRequirement.length
@@ -286,7 +416,7 @@ function summarizeEvidence(payload) {
       : Array.isArray(verifyFirst?.taskConfigIds)
         ? verifyFirst.taskConfigIds.length
         : 0,
-    status: verifyItem?.status || "",
+    status: verifyItem?.status || verifyFirst?.status || "",
     onlineCode: payload?.onlineBody?.code || "",
     finalUrl: payload?.finalUrl || "",
     pageText: payload?.pageText ? String(payload.pageText).slice(0, 300) : "",
@@ -306,6 +436,29 @@ function summarizeEvidence(payload) {
     summary.platformScope = payload.platformScope || "";
     summary.restrictScope = payload.restrictScope || "";
   }
+  if (payload?.recordType === "register_template_search") {
+    summary.recordType = "register_template_search";
+    summary.searchBy = payload.searchBy || "";
+    summary.templateId = payload.templateId || "";
+    summary.templateName = payload.templateName || "";
+    summary.searchedValue = payload.searchedValue || "";
+    summary.rowCount = payload.rowCount || 0;
+  }
+  if (payload?.recordType === "task_search") {
+    summary.recordType = "task_search";
+    summary.searchBy = payload.searchBy || "";
+    summary.taskId = payload.taskId || "";
+    summary.taskName = payload.taskAlias || "";
+    summary.searchedValue = payload.searchedValue || "";
+    summary.rowCount = payload.rowCount || 0;
+  }
+  if (payload?.recordType === "register_template_row_action") {
+    summary.recordType = "register_template_row_action";
+    summary.actionStep = payload.step || "";
+    summary.templateId = payload.id || "";
+    summary.templateName = payload.name || "";
+    summary.modifiedName = payload.modifiedName || "";
+  }
   if (payload?.scope && payload?.submit) {
     summary.recordType = "roulette_task";
     summary.taskId = payload.id || "";
@@ -323,6 +476,28 @@ function summarizeEvidence(payload) {
     summary.copiedPrizeId = payload.copiedPrizeId || "";
     summary.name = payload.name || "";
     summary.modifiedName = payload.modifiedName || "";
+  }
+  if (payload?.recordType === "activity_row_action_visibility") {
+    summary.recordType = "activity_row_action_visibility";
+    summary.stage = payload.stage || "";
+    summary.activityId = payload.id || summary.activityId;
+    summary.alias = payload.alias || summary.alias;
+    summary.actions = payload.actions || [];
+    summary.copiedActivityId = payload.copiedActivityId || "";
+    summary.copiedAlias = payload.copiedAlias || "";
+  }
+  if (payload?.recordType === "activity_copy") {
+    summary.recordType = "activity_copy";
+    summary.activityId = payload.id || summary.activityId;
+    summary.alias = payload.alias || summary.alias;
+    summary.copiedActivityId = payload.copiedActivityId || "";
+    summary.copiedAlias = payload.copiedAlias || "";
+  }
+  if (payload?.recordType === "activity_delete") {
+    summary.recordType = "activity_delete";
+    summary.confirmText = payload.confirmText || "";
+    summary.copiedActivityId = payload.copiedActivityId || "";
+    summary.copiedAlias = payload.copiedAlias || "";
   }
   if (Array.isArray(payload?.responses) && payload.responses.length) {
     summary.lastResponse = summarizeLastResponse(payload.responses[payload.responses.length - 1]);

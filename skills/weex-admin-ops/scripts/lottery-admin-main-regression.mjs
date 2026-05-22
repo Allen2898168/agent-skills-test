@@ -42,7 +42,8 @@ function parseArgs() {
 
 function buildTimeWindow() {
   const now = new Date();
-  const start = new Date(now.getTime() + 10 * 60 * 1000);
+  const shanghaiNow = pseudoDateInTimeZone(now, "Asia/Shanghai");
+  const start = new Date(shanghaiNow.getTime() + 30 * 60 * 1000);
   const end = new Date(start.getTime() + 365 * 24 * 60 * 60 * 1000);
   return {
     start: formatDateTime(start),
@@ -52,7 +53,34 @@ function buildTimeWindow() {
 
 function formatDateTime(value) {
   const pad = number => String(number).padStart(2, "0");
-  return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())} ${pad(value.getHours())}:${pad(value.getMinutes())}:${pad(value.getSeconds())}`;
+  return `${value.getUTCFullYear()}-${pad(value.getUTCMonth() + 1)}-${pad(value.getUTCDate())} ${pad(value.getUTCHours())}:${pad(value.getUTCMinutes())}:${pad(value.getUTCSeconds())}`;
+}
+
+function pseudoDateInTimeZone(date, timeZone) {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+  const parts = Object.fromEntries(
+    formatter
+      .formatToParts(date)
+      .filter(part => part.type !== "literal")
+      .map(part => [part.type, part.value]),
+  );
+  return new Date(Date.UTC(
+    Number(parts.year),
+    Number(parts.month) - 1,
+    Number(parts.day),
+    Number(parts.hour),
+    Number(parts.minute),
+    Number(parts.second),
+  ));
 }
 
 export function buildPlan(args) {
@@ -75,26 +103,64 @@ export function buildPlan(args) {
         phaseId: "create_register_templates",
         dependsOn: [],
         description: "Create stable registration templates for admin regression.",
-        caseIds: ["RT-03", "RT-04", "RT-05", "RT-06", "RT-07", "RT-08", "RT-09"],
+        caseIds: ["RT-03", "RT-04", "RT-05", "RT-06"],
         commands: [
           ["skills/weex-admin-ops/scripts/create-register-templates.mjs", "--signup-modes", "auto", "--name-prefix", "自动化报名模板"],
           ["skills/weex-admin-ops/scripts/create-register-templates.mjs", "--signup-modes", "manual", "--name-prefix", "自动化报名模板"],
           ["skills/weex-admin-ops/scripts/create-register-templates.mjs", "--signup-modes", "team", "--name-prefix", "自动化报名模板", "--min-team", "2"],
-          ["skills/weex-admin-ops/scripts/create-register-templates.mjs", "--signup-modes", "auto_manual", "--name-prefix", "自动化报名模板"]
+          ["skills/weex-admin-ops/scripts/create-register-templates.mjs", "--signup-modes", "auto_manual", "--name-prefix", "自动化报名模板"],
+          ["skills/weex-admin-ops/scripts/create-register-templates.mjs", "--signup-modes", "auto", "--platform-scopes", "channel_invite,natural,non_active,mixed,fake_money", "--name-prefix", "自动化报名模板"],
+          ["skills/weex-admin-ops/scripts/create-register-templates.mjs", "--signup-modes", "auto", "--platform-scopes", "non_active", "--register-start", timeWindow.start, "--register-end", timeWindow.end, "--name-prefix", "自动化报名模板"]
+        ]
+      },
+      {
+        phaseId: "verify_register_template_search",
+        dependsOn: ["create_register_templates"],
+        description: "Verify registration template search by name and template id.",
+        caseIds: ["RT-01", "RT-02"],
+        commands: [
+          ["skills/weex-admin-ops/scripts/register-template-search-checks.mjs", "--name-prefix", "自动化报名模板"]
+        ]
+      },
+      {
+        phaseId: "verify_register_template_row_actions",
+        dependsOn: [],
+        description: "Verify registration template row actions view/modify/delete.",
+        caseIds: ["RT-07", "RT-08", "RT-09"],
+        commands: [
+          ["skills/weex-admin-ops/scripts/register-template-row-actions.mjs", "--name-prefix", "操作列临时模板"]
         ]
       },
       {
         phaseId: "create_roulette_tasks",
         dependsOn: [],
         description: "Create roulette tasks for representative participant scopes.",
-        caseIds: ["TM-07", "TM-08", "TM-09", "TM-10", "TM-11"],
+        caseIds: ["TM-01", "TM-02", "TM-03", "TM-04", "TM-05", "TM-06", "TM-07", "TM-09"],
         commands: [
           ["skills/weex-admin-ops/scripts/create-roulette-participant-scope-tasks.mjs", "--scopes", "all,vip,newuser,nocharge,olduser,agent,user,country", "--uid", String(args.uid || "9881271952"), "--country", String(args.country || "中国"), "--reward-max", "100"]
         ]
       },
       {
+        phaseId: "create_roulette_condition_tasks",
+        dependsOn: [],
+        description: "Create roulette tasks for representative task-condition branches.",
+        caseIds: ["TM-08"],
+        commands: [
+          ["skills/weex-admin-ops/scripts/create-roulette-condition-tasks.mjs", "--conditions", "kol,contract,spot,recharge"]
+        ]
+      },
+      {
+        phaseId: "create_roulette_reward_mode_tasks",
+        dependsOn: [],
+        description: "Create roulette tasks for limited and normal+rights reward modes.",
+        caseIds: ["TM-10", "TM-11"],
+        commands: [
+          ["skills/weex-admin-ops/scripts/create-roulette-reward-mode-tasks.mjs", "--modes", "limited,rights"]
+        ]
+      },
+      {
         phaseId: "create_lottery_activity_draft",
-        dependsOn: ["create_prizes", "create_register_templates", "create_roulette_tasks"],
+        dependsOn: [],
         description: "Create the main regression lottery draft with the verified template chain.",
         caseIds: ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05", "AC-06", "AC-07", "AC-08", "AC-09", "AC-10", "AC-11", "AC-12", "AC-13"],
         commands: [
@@ -104,7 +170,7 @@ export function buildPlan(args) {
             "--title-prefix",
             String(args.titlePrefix || "后管主回归"),
             "--alias-prefix",
-            String(args.aliasPrefix || "lottery-admin-main"),
+            String(args.aliasPrefix || "ln"),
             "--start",
             timeWindow.start,
             "--end",
@@ -116,12 +182,39 @@ export function buildPlan(args) {
         ]
       },
       {
+        phaseId: "verify_activity_list_draft",
+        dependsOn: ["create_lottery_activity_draft"],
+        description: "Verify draft activity list search filters and draft-row action visibility.",
+        caseIds: ["AL-01", "AL-02", "AL-03", "AL-04", "AL-05", "AL-06"],
+        commands: [
+          ["skills/weex-admin-ops/scripts/lottery-activity-list-draft-checks.mjs", "--activity-alias", "<created-alias>"]
+        ]
+      },
+      {
         phaseId: "online_lottery_activity",
         dependsOn: ["create_lottery_activity_draft"],
         description: "Put the created draft online.",
         caseIds: ["ST-01"],
         commands: [
           ["skills/weex-admin-ops/scripts/online-lottery-activity.mjs", "--activity-alias", "<created-alias>"]
+        ]
+      },
+      {
+        phaseId: "verify_activity_list_online",
+        dependsOn: ["online_lottery_activity"],
+        description: "Verify online activity row actions and copied draft creation from the list.",
+        caseIds: ["AL-07", "AC-15", "ST-03"],
+        commands: [
+          ["skills/weex-admin-ops/scripts/lottery-activity-list-online-checks.mjs", "--activity-alias", "<created-alias>"]
+        ]
+      },
+      {
+        phaseId: "offline_lottery_activity",
+        dependsOn: ["online_lottery_activity"],
+        description: "Take the created online activity offline after copy and draft-delete checks pass.",
+        caseIds: ["ST-02"],
+        commands: [
+          ["skills/weex-admin-ops/scripts/offline-lottery-activity.mjs", "--activity-alias", "<created-alias>"]
         ]
       }
     ]
@@ -131,15 +224,16 @@ export function buildPlan(args) {
 function parseLastJson(text) {
   const source = String(text || "").trim();
   if (!source) return null;
-  let last = null;
-  for (let index = 0; index < source.length; index += 1) {
-    if (source[index] !== "{") continue;
-    const candidate = source.slice(index);
+  const lines = source.split("\n");
+  for (let index = lines.length - 1; index >= 0; index -= 1) {
+    const line = lines[index].trimStart();
+    if (!line.startsWith("{") && !line.startsWith("[")) continue;
+    const candidate = lines.slice(index).join("\n").trim();
     try {
-      last = JSON.parse(candidate);
+      return JSON.parse(candidate);
     } catch {}
   }
-  return last;
+  return null;
 }
 
 function runNodeJson(commandArgs) {
@@ -147,6 +241,7 @@ function runNodeJson(commandArgs) {
     cwd: repoRoot,
     env: process.env,
     encoding: "utf8",
+    maxBuffer: 20 * 1024 * 1024,
   });
   const stdoutJson = parseLastJson(result.stdout);
   const stderrJson = parseLastJson(result.stderr);
@@ -232,6 +327,79 @@ function resolveActivityTarget(payload) {
   return { activityId: activityId ? String(activityId) : "", activityAlias: activityAlias ? String(activityAlias) : "" };
 }
 
+function compactPhasePayload(payload) {
+  if (!payload || typeof payload !== "object") return payload;
+  const verifyFirst = payload.verifyFirst || {};
+  const verifyItem = payload.verifyItem || {};
+  const target = payload.target || {};
+  return {
+    ok: payload.ok,
+    error: payload.error || "",
+    finalUrl: payload.finalUrl || payload.url || "",
+    title: payload.title || "",
+    alias: payload.alias || target.activityAlias || verifyFirst.showUrl || "",
+    activityId: payload.activityId || target.activityId || verifyFirst.id || verifyFirst.activityId || "",
+    status: verifyItem.status || verifyFirst.status || "",
+    verifyTotal: payload.verifyTotal || 0,
+    createStatus: payload.createStatus || null,
+    createBody: payload.createBody ? { code: payload.createBody.code || null, msg: payload.createBody.msg || "" } : null,
+    onlineBody: payload.onlineBody ? { code: payload.onlineBody.code || null, msg: payload.onlineBody.msg || "" } : null,
+    offlineBody: payload.offlineBody ? { code: payload.offlineBody.code || null, msg: payload.offlineBody.msg || "" } : null,
+    verifyFirst: Object.keys(verifyFirst).length ? {
+      activityId: verifyFirst.activityId || verifyFirst.id || "",
+      showUrl: verifyFirst.showUrl || "",
+      title: verifyFirst.title || "",
+      status: verifyFirst.status || "",
+      prizeCount: Array.isArray(verifyFirst.prize) ? verifyFirst.prize.length : 0,
+      taskCount: Array.isArray(verifyFirst.taskConfig)
+        ? verifyFirst.taskConfig.length
+        : Array.isArray(verifyFirst.taskRequirement)
+          ? verifyFirst.taskRequirement.length
+          : 0,
+    } : null,
+    verifyItem: Object.keys(verifyItem).length ? {
+      activityId: verifyItem.activityId || verifyItem.id || "",
+      showUrl: verifyItem.showUrl || "",
+      title: verifyItem.title || "",
+      status: verifyItem.status || "",
+    } : null,
+    searchChecks: payload.searchChecks || null,
+    draftRowActions: payload.draftRowActions || null,
+    onlineRowActions: payload.onlineRowActions || null,
+    copyCheck: payload.copyCheck ? {
+      copiedId: payload.copyCheck.copiedId || "",
+      copiedAlias: payload.copyCheck.copiedAlias || "",
+      submit: payload.copyCheck.submit || null,
+      directCopy: payload.copyCheck.directCopy || null,
+    } : null,
+    deleteCopiedDraft: payload.deleteCopiedDraft || null,
+    responses: Array.isArray(payload.responses) ? payload.responses.slice(-6) : [],
+    errors: payload.errors ? {
+      formErrors: Array.isArray(payload.errors.formErrors) ? payload.errors.formErrors.slice(0, 8) : [],
+      messages: Array.isArray(payload.errors.messages) ? payload.errors.messages.slice(0, 8) : [],
+    } : null,
+  };
+}
+
+function compactPhaseResults(phaseResults) {
+  return phaseResults.map(phase => ({
+    phaseId: phase.phaseId,
+    description: phase.description,
+    caseIds: phase.caseIds,
+    cases: phase.cases,
+    commands: phase.commands,
+    ok: phase.ok,
+    payload: compactPhasePayload(phase.payload),
+    childResults: Array.isArray(phase.childResults)
+      ? phase.childResults.map(child => ({
+          command: child.command,
+          ok: child.ok,
+          payload: compactPhasePayload(child.payload),
+        }))
+      : [],
+  }));
+}
+
 async function run() {
   const args = parseArgs();
   if (args.help) {
@@ -248,20 +416,29 @@ async function run() {
 
   const phaseResults = [];
   let createdActivity = { activityId: "", activityAlias: "" };
+  let hadPhaseFailure = false;
 
   for (const phase of plan.phases) {
+    const unmetDependencies = (phase.dependsOn || []).filter(dependency => {
+      const dependencyPhase = phaseResults.find(item => item.phaseId === dependency);
+      return !dependencyPhase || !dependencyPhase.ok;
+    });
+    if (unmetDependencies.length) {
+      continue;
+    }
     if (phase.phaseId === "online_lottery_activity" && !createdActivity.activityAlias && !createdActivity.activityId) {
-      const failedCaseResults = buildRegressionCaseResults(plan, phaseResults);
-      printJson({
+      hadPhaseFailure = true;
+      phaseResults.push({
+        phaseId: phase.phaseId,
+        description: phase.description,
+        caseIds: phase.caseIds,
+        cases: phase.caseEntries,
+        commands: [],
         ok: false,
-        actionId: plan.actionId,
-        failedPhase: phase.phaseId,
-        mode: plan.mode,
-        phaseResults,
-        caseResults: failedCaseResults,
-        error: "Missing created activity target from previous phase.",
-      }, process.stderr);
-      return 1;
+        payload: { ok: false, error: "Missing created activity target from previous phase." },
+        childResults: [],
+      });
+      continue;
     }
     const commandArgsList = resolvePhaseCommands(phase, args, createdActivity);
     const childResults = [];
@@ -297,30 +474,22 @@ async function run() {
     phaseResults.push(phaseSummary);
 
     if (!phaseSummary.ok) {
-      const caseResults = buildRegressionCaseResults(plan, phaseResults);
-      printJson({
-        ok: false,
-        actionId: plan.actionId,
-        failedPhase: phase.phaseId,
-        mode: plan.mode,
-        phaseResults,
-        caseResults,
-      }, process.stderr);
-      return 1;
+      hadPhaseFailure = true;
     }
   }
 
   const caseResults = buildRegressionCaseResults(plan, phaseResults);
+  const reportPhaseResults = compactPhaseResults(phaseResults);
   printJson({
-    ok: true,
+    ok: !hadPhaseFailure,
     actionId: plan.actionId,
     mode: plan.mode,
     selectedCaseIds: plan.selectedCaseIds || [],
     createdActivity,
-    phaseResults,
+    phaseResults: reportPhaseResults,
     caseResults,
-  });
-  return 0;
+  }, hadPhaseFailure ? process.stderr : process.stdout);
+  return hadPhaseFailure ? 1 : 0;
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
