@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import path from "node:path";
-import { spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { parseFlags, printJson } from "./lib/cli.mjs";
 import { loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
@@ -25,6 +25,10 @@ Options:
   --menu                print the grouped scenario menu and exit
   --selection <text>    scenario/group selection, supports single or multiple values
   --all                 select all runnable scenarios from the manifest policy
+  --activity-alias <t>  reuse an existing online activity alias for frontend regression
+  --recharge-amount <n> override mq recharge amount for frontend regression
+  --wait-for-start-ms <n>
+                        override frontend activity-start wait window in milliseconds
   --visible             pass visible mode to executable child workflows
   --dry-run             print the execution plan without running child workflows
   --help                show this message
@@ -55,19 +59,58 @@ function parseLastJson(text) {
 }
 
 function runChild(commandArgs) {
-  const result = spawnSync(process.execPath, commandArgs, {
-    cwd: repoRoot,
-    env: process.env,
-    encoding: "utf8",
+  return new Promise(resolve => {
+    const child = spawn(process.execPath, commandArgs, {
+      cwd: repoRoot,
+      env: process.env,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    let stdoutLineBuffer = "";
+    const flushProgressLines = force => {
+      const source = force ? stdoutLineBuffer : stdoutLineBuffer.replace(/\r/g, "");
+      const parts = source.split("\n");
+      stdoutLineBuffer = force ? "" : parts.pop() ?? "";
+      for (const part of force ? parts.filter(Boolean) : parts) {
+        const line = String(part || "").trim();
+        if (!line) continue;
+        if (/^\{"step":/.test(line)) process.stderr.write(`${line}\n`);
+      }
+    };
+    child.stdout.on("data", chunk => {
+      const text = chunk.toString();
+      stdout += text;
+      stdoutLineBuffer += text;
+      flushProgressLines(false);
+    });
+    child.stderr.on("data", chunk => {
+      const text = chunk.toString();
+      stderr += text;
+      process.stderr.write(text);
+    });
+    child.on("error", error => {
+      const nextStderr = `${stderr}${error.message}\n`;
+      resolve({
+        ok: false,
+        exitCode: 1,
+        payload: parseLastJson(stdout) || parseLastJson(nextStderr),
+        stdout,
+        stderr: nextStderr,
+      });
+    });
+    child.on("close", code => {
+      flushProgressLines(true);
+      const payload = parseLastJson(stdout) || parseLastJson(stderr);
+      resolve({
+        ok: (code ?? 1) === 0 && payload?.ok !== false,
+        exitCode: code ?? 1,
+        payload,
+        stdout,
+        stderr,
+      });
+    });
   });
-  const payload = parseLastJson(result.stdout) || parseLastJson(result.stderr);
-  return {
-    ok: (result.status ?? 1) === 0 && payload?.ok !== false,
-    exitCode: result.status ?? 1,
-    payload,
-    stdout: result.stdout || "",
-    stderr: result.stderr || "",
-  };
 }
 
 export function buildEntrypointCommands(selectedScenarios, args) {
@@ -92,6 +135,9 @@ export function buildEntrypointCommands(selectedScenarios, args) {
       const caseIds = collectAutomationCaseIdsForScenarios(scenarios);
       if (!caseIds.length) return { entrypoint, scenarios, commandArgs: [] };
       const commandArgs = [childPath, "--case-ids", caseIds.join(",")];
+      if (args.activityAlias) commandArgs.push("--activity-alias", String(args.activityAlias));
+      if (args.rechargeAmount) commandArgs.push("--recharge-amount", String(args.rechargeAmount));
+      if (args.waitForStartMs) commandArgs.push("--wait-for-start-ms", String(args.waitForStartMs));
       if (args.visible) commandArgs.push("--visible");
       if (args.dryRun) commandArgs.push("--dry-run");
       return { entrypoint, scenarios, commandArgs };
@@ -176,7 +222,7 @@ async function main() {
       });
       continue;
     }
-    const result = runChild(execution.commandArgs);
+    const result = await runChild(execution.commandArgs);
     executionResults.push({
       entrypoint: execution.entrypoint,
       ok: result.ok,

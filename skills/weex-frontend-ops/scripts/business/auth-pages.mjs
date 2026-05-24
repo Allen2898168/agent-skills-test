@@ -1,15 +1,28 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+export function homeUrlFor(targetUrl) {
+  return process.env.WEEX_FRONTEND_HOME_URL || new URL('/zh-CN', targetUrl).href;
+}
+
 export function accountUrlFor(targetUrl) {
   return process.env.WEEX_FRONTEND_ACCOUNT_URL || new URL('/zh-CN/account', targetUrl).href;
 }
 
 export async function openLoginStatePage(page, targetUrl) {
-  await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.goto(homeUrlFor(targetUrl), { waitUntil: 'domcontentloaded', timeout: 60000 });
   await page.waitForTimeout(5000);
+
+  await page.goto(accountUrlFor(targetUrl), {
+    waitUntil: 'domcontentloaded',
+    timeout: 60000
+  });
+  await page.waitForTimeout(8000);
+
   const body = await page.evaluate(() => document.body.innerText || document.body.textContent || '');
-  if (/登录\s*邮箱\/手机号|还没有账户|请输入邮箱|Log\s*in|Sign\s*up/i.test(body) && page.url().includes('/login')) {
+  if (/登录\s*邮箱\/手机号|还没有账户|请输入邮箱|Log\s*in|Sign\s*up/i.test(body)) {
+    await page.goto(homeUrlFor(targetUrl), { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.waitForTimeout(4000);
     await page.goto(accountUrlFor(targetUrl), {
       waitUntil: 'domcontentloaded',
       timeout: 60000

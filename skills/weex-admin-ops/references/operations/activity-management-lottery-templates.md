@@ -1,8 +1,8 @@
 # Activity Management - Lottery Regression Templates
 
 Status: verified
-Last verified: 2026-05-19
-Verified mode: visible browser
+Last verified: 2026-05-25
+Verified mode: headless real UI
 Environment: staging `https://stg-activity.weex.tech`
 
 ## Scope
@@ -37,6 +37,8 @@ Shared runtime rules:
 - Use short exact runtime titles. Do not append timestamps to the title field itself.
 - `活动别名配置` must stay within `10` characters by default. Use longer aliases only for explicit alias boundary-value testing.
 - `活动开始时间` must be computed in the admin business timezone and stay safely in the future at submit time.
+- Stable default path: fill `活动开始时间` / `活动结束时间` last, not at the top of the form.
+- If the tester does not provide exact times, use `UTC+8 当前时间 + 2 分钟` for start and `UTC+8 当前时间 + 365 天` for end at the moment the time fields are filled.
 - Prize rows should use eight real selected prizes.
 - Visible UI creation must read back the selected prize value for all eight rows before submit.
 

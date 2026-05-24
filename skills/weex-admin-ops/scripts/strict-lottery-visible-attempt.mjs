@@ -21,8 +21,8 @@ const aliasPrefix = process.env.LOTTERY_ALIAS_PREFIX || "lt";
 const title = process.env.LOTTERY_TITLE_EXACT || `${titlePrefix}${stamp}`;
 const alias = process.env.LOTTERY_ALIAS_EXACT || buildShortLotteryAlias(aliasPrefix, stamp);
 const subTitle = process.env.LOTTERY_SUBTITLE || "严格 UI 复杂配置副标题";
-const activityStartTime = process.env.LOTTERY_START || "2026-06-10 00:00:00";
-const activityEndTime = process.env.LOTTERY_END || "2026-06-30 23:59:59";
+const configuredActivityStartTime = process.env.LOTTERY_START || "";
+const configuredActivityEndTime = process.env.LOTTERY_END || "";
 const preApplyStartTime = process.env.LOTTERY_PREAPPLY_START || "2026-06-01 00:00:00";
 const preApplyEndTime = process.env.LOTTERY_PREAPPLY_END || "2026-06-09 23:59:59";
 const registrationTemplateLabel = process.env.LOTTERY_REGISTRATION_TEMPLATE_LABEL || "【2729】 自动化报名模板_auto_manual_20260505161031";
@@ -66,12 +66,14 @@ const whiteSignWeights = variedMode ? ["3", "7", "9", "11", "13", "15", "19", "2
 const lotteryWeightConfigWeights = ["5", "8", "10", "12", "13", "15", "17", "20"];
 const headlessMode = process.env.LOTTERY_HEADLESS === "1";
 
-const browser = await chromium.launch({
-  headless: headlessMode,
-  executablePath: config.chromePath,
-  slowMo: 120,
-  args: ["--window-size=1440,1000"],
-});
+const browser = config.useExistingChrome
+  ? await chromium.connectOverCDP(config.chromeCdpUrl)
+  : await chromium.launch({
+      headless: headlessMode,
+      executablePath: config.chromePath,
+      slowMo: 120,
+      args: ["--window-size=1440,1000"],
+    });
 
 function buildShortLotteryAlias(prefixValue, stampValue, maxLength = 10) {
   const numericStamp = String(stampValue || "").replace(/\D+/g, "") || "00000000";
@@ -102,7 +104,13 @@ function expandToEight(values) {
   if (!values.length) return [];
   return Array.from({ length: 8 }, (_, index) => values[index % values.length]);
 }
-const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+const context = config.useExistingChrome
+  ? (browser.contexts()[0] || await browser.newContext({ viewport: { width: 1440, height: 1000 } }))
+  : browser;
+const existingPage = config.useExistingChrome
+  ? context.pages().find(item => /\/activities\/lottery(\/add)?/.test(item.url()))
+  : null;
+const page = existingPage || await context.newPage({ viewport: { width: 1440, height: 1000 } });
 let authHeader = "";
 page.on("response", async response => {
   if (response.url().includes("/prod-api/common/upload")) evidence.uploads += 1;
@@ -128,6 +136,37 @@ page.on("request", request => {
 });
 
 const wait = ms => page.waitForTimeout(ms);
+
+function formatUtc8DateTime(date) {
+  const parts = new Intl.DateTimeFormat("zh-CN", {
+    timeZone: "Asia/Shanghai",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date);
+  const get = type => parts.find(item => item.type === type)?.value || "00";
+  return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}:${get("second")}`;
+}
+
+function resolveActivityWindow() {
+  if (configuredActivityStartTime || configuredActivityEndTime) {
+    return {
+      start: configuredActivityStartTime || "2026-06-10 00:00:00",
+      end: configuredActivityEndTime || "2026-06-30 23:59:59",
+    };
+  }
+  const now = new Date();
+  const start = new Date(now.getTime() + 2 * 60 * 1000);
+  const end = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+  return {
+    start: formatUtc8DateTime(start),
+    end: formatUtc8DateTime(end),
+  };
+}
 async function formItem(label, nth = 0) {
   return page
     .locator(`xpath=(//div[contains(@class,'el-form-item')][.//label[contains(normalize-space(.), "${label}")]])`)
@@ -241,6 +280,26 @@ async function fillLabel(label, value, nth = 0) {
   if (!(await item.count())) throw new Error(`form item missing: ${label}`);
   await item.scrollIntoViewIfNeeded({ timeout: 5000 });
   await fillControl(item.locator("input:not([type=radio]):not([type=checkbox]), textarea").first(), value);
+}
+
+async function fillDateLabel(label, value, nth = 0) {
+  const item = await formItem(label, nth);
+  if (!(await item.count())) throw new Error(`form item missing: ${label}`);
+  await item.scrollIntoViewIfNeeded({ timeout: 5000 });
+  const input = item.locator("input:not([type=radio]):not([type=checkbox])").first();
+  await input.waitFor({ state: "visible", timeout: 7000 }).catch(() => {});
+  await input.click({ force: true, timeout: 7000 });
+  await page.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A").catch(() => {});
+  await page.keyboard.type(String(value), { delay: 8 }).catch(async () => {
+    await input.fill(String(value), { timeout: 7000 });
+  });
+  await input.evaluate(element => {
+    element.dispatchEvent(new Event("input", { bubbles: true }));
+    element.dispatchEvent(new Event("change", { bubbles: true }));
+    element.blur();
+  }).catch(() => {});
+  await page.keyboard.press("Tab").catch(() => {});
+  await wait(200);
 }
 
 async function fillRich(label, value, nth = 0) {
@@ -375,11 +434,37 @@ async function clickButton(text, nth = 0) {
 }
 
 async function scrollText(text) {
-  await page.locator(`text=${text}`).first().scrollIntoViewIfNeeded().catch(() => {});
+  await page.evaluate(targetText => {
+    const visible = element => !!element && element.getClientRects().length
+      && getComputedStyle(element).display !== "none"
+      && getComputedStyle(element).visibility !== "hidden";
+    const normalizedTarget = String(targetText || "").trim();
+    if (!normalizedTarget) return false;
+    const candidates = [...document.querySelectorAll("body *")]
+      .filter(visible)
+      .filter(element => {
+        const textContent = (element.textContent || "").replace(/\s+/g, " ").trim();
+        return textContent.includes(normalizedTarget);
+      })
+      .sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
+    const element = candidates[0];
+    if (!element) return false;
+    element.scrollIntoView({ block: "center", inline: "nearest" });
+    return true;
+  }, text).catch(() => {});
   await wait(300);
 }
 
 async function openLotteryViaMenu() {
+  if (config.useExistingChrome) {
+    await page.goto(`${config.baseUrl}/activities/lottery`, { waitUntil: "domcontentloaded" });
+    await wait(1500);
+    if (await ensureAdminSession(page, config, "/activities/lottery")) {
+      await page.goto(`${config.baseUrl}/activities/lottery`, { waitUntil: "domcontentloaded" });
+      await wait(1500);
+    }
+    return;
+  }
   await loginToPrizePage(page, config);
   await wait(1000);
   if (!(await page.locator("text=转盘抽奖").first().isVisible().catch(() => false))) {
@@ -527,49 +612,67 @@ async function uploadPrizeImage(rowIndex) {
 }
 
 async function selectPrizeMark(rowIndex, text) {
-  const box = await page.evaluate(index => {
-    const visible = element => !!element && element.getClientRects().length
-      && getComputedStyle(element).display !== "none"
-      && getComputedStyle(element).visibility !== "hidden";
-    const table = [...document.querySelectorAll(".el-table")]
-      .filter(visible)
-      .find(element => /奖品池ID|奖品名称/.test(element.innerText));
-    const row = [...(table?.querySelectorAll(".el-table__body-wrapper tbody tr") || [])].filter(visible)[index];
-    const input = row?.querySelector('input[placeholder="请选择奖品标记"]');
-    if (!input) return null;
-    input.scrollIntoView({ block: "center", inline: "center" });
-    const rect = input.getBoundingClientRect();
-    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-  }, rowIndex);
-  if (!box) throw new Error(`prize mark select missing row ${rowIndex + 1}`);
-  await page.mouse.click(box.x, box.y);
-  await wait(250);
-  const option = await visibleOptionBox(text, 0);
-  if (!option) throw new Error(`prize mark option missing: ${text}`);
-  await clickOption(option);
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const opened = await page.evaluate(index => {
+      const visible = element => !!element && element.getClientRects().length
+        && getComputedStyle(element).display !== "none"
+        && getComputedStyle(element).visibility !== "hidden";
+      const table = [...document.querySelectorAll(".el-table")]
+        .filter(visible)
+        .find(element => /奖品池ID|奖品名称/.test(element.innerText));
+      const row = [...(table?.querySelectorAll(".el-table__body-wrapper tbody tr") || [])].filter(visible)[index];
+      const input = row?.querySelector('input[placeholder="请选择奖品标记"]');
+      if (!input) return false;
+      input.scrollIntoView({ block: "center", inline: "center" });
+      input.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true, view: window }));
+      input.click();
+      return true;
+    }, rowIndex);
+    if (!opened) throw new Error(`prize mark select missing row ${rowIndex + 1}`);
+    await wait(450);
+    const selected = await clickVisibleOptionByDom(text, 0);
+    if (selected) return;
+    const option = await visibleOptionBox(text, 0);
+    if (option) {
+      await clickOption(option);
+      return;
+    }
+    await page.keyboard.press("Escape").catch(() => {});
+    await wait(200);
+  }
+  throw new Error(`prize mark option missing: ${text}`);
 }
 
 async function selectEasterEggType(rowIndex, text) {
-  const box = await page.evaluate(index => {
-    const visible = element => !!element && element.getClientRects().length
-      && getComputedStyle(element).display !== "none"
-      && getComputedStyle(element).visibility !== "hidden";
-    const table = [...document.querySelectorAll(".el-table")]
-      .filter(visible)
-      .find(element => /奖品池ID|奖品名称/.test(element.innerText));
-    const row = [...(table?.querySelectorAll(".el-table__body-wrapper tbody tr") || [])].filter(visible)[index];
-    const input = row?.querySelector('input[placeholder="请选择彩蛋类型"]');
-    if (!input) return null;
-    input.scrollIntoView({ block: "center", inline: "center" });
-    const rect = input.getBoundingClientRect();
-    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-  }, rowIndex);
-  if (!box) throw new Error(`easter egg type select missing row ${rowIndex + 1}`);
-  await page.mouse.click(box.x, box.y);
-  await wait(250);
-  const option = await visibleOptionBox(text, 0);
-  if (!option) throw new Error(`easter egg type option missing: ${text}`);
-  await clickOption(option);
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const opened = await page.evaluate(index => {
+      const visible = element => !!element && element.getClientRects().length
+        && getComputedStyle(element).display !== "none"
+        && getComputedStyle(element).visibility !== "hidden";
+      const table = [...document.querySelectorAll(".el-table")]
+        .filter(visible)
+        .find(element => /奖品池ID|奖品名称/.test(element.innerText));
+      const row = [...(table?.querySelectorAll(".el-table__body-wrapper tbody tr") || [])].filter(visible)[index];
+      const input = row?.querySelector('input[placeholder="请选择彩蛋类型"]');
+      if (!input) return false;
+      input.scrollIntoView({ block: "center", inline: "center" });
+      input.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true, view: window }));
+      input.click();
+      return true;
+    }, rowIndex);
+    if (!opened) throw new Error(`easter egg type select missing row ${rowIndex + 1}`);
+    await wait(450);
+    const selected = await clickVisibleOptionByDom(text, 0);
+    if (selected) return;
+    const option = await visibleOptionBox(text, 0);
+    if (option) {
+      await clickOption(option);
+      return;
+    }
+    await page.keyboard.press("Escape").catch(() => {});
+    await wait(200);
+  }
+  throw new Error(`easter egg type option missing: ${text}`);
 }
 
 async function fillPrizeRows() {
@@ -845,7 +948,7 @@ async function fillCalendar() {
 }
 
 try {
-  console.log(JSON.stringify({ step: "start", title, alias, activityStartTime, activityEndTime, lotteryStyle }));
+  console.log(JSON.stringify({ step: "start", title, alias, configuredActivityStartTime, configuredActivityEndTime, lotteryStyle }));
   await openLotteryViaMenu();
   await clickButton("新增");
   await page.waitForURL(/\/activities\/lottery\/add/, { timeout: 15000 });
@@ -859,8 +962,6 @@ try {
   await clickRadio("是否为平台活动", platformActivity);
   await fillLabel("活动标题", title, 0);
   await fillLabel("活动副标题", subTitle, 0);
-  await fillLabel("活动开始时间", activityStartTime);
-  await fillLabel("活动结束时间", activityEndTime);
   await selectRegistrationTemplate(registrationTemplateLabel);
   for (const label of ["WEB头图上传", "H5头图上传", "web分享图上传", "H5分享图片上传", "社媒活动预览图上传"]) await uploadLabel(label, 0);
   await fillLabel("分享活动文案", shareCopy, 0);
@@ -911,6 +1012,11 @@ try {
     await selectRegistrationTemplate(registrationTemplateLabel);
   }
 
+  console.log(JSON.stringify({ step: "activity_time" }));
+  const activityWindow = resolveActivityWindow();
+  await fillDateLabel("活动开始时间", activityWindow.start);
+  await fillDateLabel("活动结束时间", activityWindow.end);
+
   console.log(JSON.stringify({ step: "submit" }));
   const preSubmitDiagnostics = await page.evaluate(async () => {
     const roots = [...document.querySelectorAll("*")]
@@ -953,13 +1059,41 @@ try {
     } catch (error) {
       result.activityCalendarConfig = { validate: false, error: error.message };
     }
+    const baseFormSnapshot = refs.baseForm?.form || {};
     result.baseFormModel = {
+      configType: baseFormSnapshot.configType ?? null,
+      activityOwner: baseFormSnapshot.activityOwner ?? null,
+      channelCategory: baseFormSnapshot.channelCategory ?? null,
       applyConfigId: refs.baseForm?.form?.applyConfigId ?? null,
       guideTemplateId: refs.baseForm?.form?.guideTemplateId ?? null,
+      title: baseFormSnapshot.title ?? null,
+      subTitle: baseFormSnapshot.subTitle ?? null,
+      startTime: baseFormSnapshot.startTime ?? null,
+      endTime: baseFormSnapshot.endTime ?? null,
+      applicationMode: baseFormSnapshot.applicationMode ?? null,
+      showActivityCalendar: baseFormSnapshot.showActivityCalendar ?? null,
+      shareContent: baseFormSnapshot.shareContent ?? null,
+      agentShareContent: baseFormSnapshot.agentShareContent ?? null,
+      introLength: String(baseFormSnapshot.intro || "").length,
+      webBannerUrl: baseFormSnapshot.webBannerUrl ?? null,
+      appBannerUrl: baseFormSnapshot.appBannerUrl ?? null,
+      webShareUrl: baseFormSnapshot.webShareUrl ?? null,
+      appShareUrl: baseFormSnapshot.appShareUrl ?? null,
+      ogImageUrl: baseFormSnapshot.ogImageUrl ?? null,
       showUrl: refs.baseForm?.form?.showUrl ?? null,
       registrationInputValue: [...document.querySelectorAll(".el-form-item")]
         .find(item => item.querySelector(".el-form-item__label")?.innerText?.trim().includes("用户报名模版"))
         ?.querySelector(".el-select input")?.value || "",
+      visibleFieldValues: [...document.querySelectorAll(".el-form-item")]
+        .map(item => ({
+          label: item.querySelector(".el-form-item__label")?.innerText?.trim() || "",
+          inputValue: item.querySelector("input:not([type=radio]):not([type=checkbox]), textarea")?.value || "",
+          selectValue: item.querySelector(".el-select input")?.value || "",
+          radioValue: [...item.querySelectorAll(".el-radio.is-checked")].map(radio => radio.innerText.trim()).filter(Boolean)[0] || "",
+          error: item.querySelector(".el-form-item__error")?.innerText?.trim() || "",
+        }))
+        .filter(entry => entry.label)
+        .slice(0, 40),
     };
     return result;
   }).catch(error => ({ error: error.message }));
@@ -968,21 +1102,45 @@ try {
   ), { timeout: 25000 }).catch(() => null);
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight || document.body.scrollHeight));
   await wait(700);
-  const submitBox = await page.evaluate(() => {
+  const submitButtons = await page.evaluate(() => {
+    const visible = element => !!element && element.getClientRects().length
+      && getComputedStyle(element).display !== "none"
+      && getComputedStyle(element).visibility !== "hidden";
+    return [...document.querySelectorAll("button")]
+      .filter(button => visible(button) && button.innerText.trim() === "新增")
+      .map(button => {
+        const rect = button.getBoundingClientRect();
+        return {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2,
+          top: rect.top,
+          bottom: rect.bottom,
+          left: rect.left,
+          right: rect.right,
+          text: button.innerText.trim(),
+        };
+      })
+      .sort((a, b) => b.bottom - a.bottom);
+  });
+  const submitBox = submitButtons[0] || null;
+  if (!submitBox) throw new Error("submit button not found");
+  const submitClickResult = await page.evaluate(() => {
     const visible = element => !!element && element.getClientRects().length
       && getComputedStyle(element).display !== "none"
       && getComputedStyle(element).visibility !== "hidden";
     const buttons = [...document.querySelectorAll("button")]
       .filter(button => visible(button) && button.innerText.trim() === "新增")
-      .map(button => {
-        const rect = button.getBoundingClientRect();
-        return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, bottom: rect.bottom };
-      })
-      .sort((a, b) => b.bottom - a.bottom);
-    return buttons[0] || null;
-  });
-  if (!submitBox) throw new Error("submit button not found");
-  await page.mouse.click(submitBox.x, submitBox.y);
+      .sort((a, b) => b.getBoundingClientRect().bottom - a.getBoundingClientRect().bottom);
+    const button = buttons[0];
+    if (!button) return { ok: false };
+    button.scrollIntoView({ block: "center", inline: "nearest" });
+    button.click();
+    return { ok: true, text: button.innerText.trim() };
+  }).catch(error => ({ ok: false, error: error.message }));
+  await wait(800);
+  if (!submitClickResult?.ok) {
+    await page.mouse.click(submitBox.x, submitBox.y);
+  }
   const createResponse = await createPromise;
   let createBody = null;
   if (createResponse) {
@@ -1035,14 +1193,16 @@ try {
     alias,
     lotteryStyle,
     activityTime: {
-      start: activityStartTime,
-      end: activityEndTime,
+      start: activityWindow.start,
+      end: activityWindow.end,
     },
     finalUrl: page.url(),
     createStatus: createResponse?.status?.(),
     createBody,
     errors,
     preSubmitDiagnostics,
+    submitButtons,
+    submitClickResult,
     verifyTotal: verify?.total,
     verifyFirst: verifyDetail?.data || verifyListItem,
     verifyListFirst: verifyListItem,
@@ -1074,6 +1234,8 @@ try {
   process.exitCode = 1;
 } finally {
   if (!(keepOpenOnError && process.exitCode && !headlessMode)) {
-    await browser.close().catch(() => {});
+    if (!config.useExistingChrome) {
+      await browser.close().catch(() => {});
+    }
   }
 }

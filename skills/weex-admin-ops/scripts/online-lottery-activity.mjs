@@ -45,6 +45,11 @@ async function fillCodeAndConfirmMessageBox(page, googleCode, expectedText = "�
 }
 
 async function openLotteryViaMenu(page, config) {
+  if (config.useExistingChrome) {
+    await page.goto(`${config.baseUrl}/activities/lottery`, { waitUntil: "domcontentloaded" });
+    await sleep(1500);
+    return;
+  }
   await loginToPrizePage(page, config);
   await sleep(1000);
   if (!(await page.locator("text=转盘抽奖").first().isVisible().catch(() => false))) {
@@ -100,13 +105,21 @@ async function run() {
   }
 
   const { chromium } = loadPlaywright();
-  const browser = await chromium.launch({
-    headless: !args.visible,
-    executablePath: config.chromePath,
-    slowMo: 100,
-    args: ["--window-size=1440,1000"],
-  });
-  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  const browser = config.useExistingChrome
+    ? await chromium.connectOverCDP(config.chromeCdpUrl)
+    : await chromium.launch({
+        headless: !args.visible,
+        executablePath: config.chromePath,
+        slowMo: 100,
+        args: ["--window-size=1440,1000"],
+      });
+  const context = config.useExistingChrome
+    ? (browser.contexts()[0] || await browser.newContext({ viewport: { width: 1440, height: 1000 } }))
+    : browser;
+  const existingPage = config.useExistingChrome
+    ? context.pages().find(item => /\/activities\/lottery/.test(item.url()))
+    : null;
+  const page = existingPage || await context.newPage({ viewport: { width: 1440, height: 1000 } });
   let authHeader = "";
   page.on("request", request => {
     if (request.url().includes("/prod-api/activity/config/list")) {
@@ -169,7 +182,9 @@ async function run() {
     }, process.stderr);
     return 1;
   } finally {
-    await browser.close().catch(() => {});
+    if (!config.useExistingChrome) {
+      await browser.close().catch(() => {});
+    }
   }
 }
 

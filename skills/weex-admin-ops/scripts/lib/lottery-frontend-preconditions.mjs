@@ -1,5 +1,9 @@
 const FRONTEND_AUTO_HANDLED_KEYS = new Set([
+  "FRONTEND_SESSION",
   "NORMAL_ACTIVITY_ONLINE",
+  "NORMAL_ACTIVITY_SIGNED_UP",
+  "NORMAL_ACTIVITY_DRAW_GE1",
+  "REWARD_RECORD_DELAY_READY",
 ]);
 
 export function isFrontendAutoHandledPrecondition(key, scenarios) {

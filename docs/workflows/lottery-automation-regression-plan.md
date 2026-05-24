@@ -12,7 +12,7 @@
 - 前端回归用例集：`docs/test-cases/lottery-frontend-regression-cases.md`
 - 编排设计稿：`docs/workflows/lottery-regression-orchestration-design.md`
 - 机器可读 manifest：`docs/workflows/lottery-regression-manifest.json`
-- 能力差距清单：`docs/workflows/lottery-automation-capability-gap-v2.md`
+- 能力差距清单：`docs/workflows/lottery-automation-capability-gap-v3.md`
 
 ## 当前落地状态
 

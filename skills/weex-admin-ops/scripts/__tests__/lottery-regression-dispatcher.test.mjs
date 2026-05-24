@@ -9,6 +9,7 @@ import {
   resolveScenarioSelection,
 } from "../lib/lottery-regression-manifest.mjs";
 import { buildEntrypointCommands } from "../lottery-regression-dispatcher.mjs";
+import { resolvePreconditions } from "../lib/lottery-precondition-resolver.mjs";
 
 test("scenario menu exposes grouped admin and frontend items with status labels", () => {
   const manifest = loadLotteryRegressionManifest();
@@ -48,7 +49,13 @@ test("collectCaseIdsForScenarios deduplicates shared case ids", () => {
 test("dispatcher builds frontend main regression command for partial frontend scenarios", () => {
   const manifest = loadLotteryRegressionManifest();
   const selection = resolveScenarioSelection("报名链路, 单抽主流程", manifest);
-  const executions = buildEntrypointCommands(selection.selectedScenarios, { visible: true, dryRun: false });
+  const executions = buildEntrypointCommands(selection.selectedScenarios, {
+    visible: true,
+    dryRun: false,
+    activityAlias: "lfd3040",
+    rechargeAmount: "2000",
+    waitForStartMs: "900000",
+  });
   const frontendExecution = executions.find(item => item.entrypoint === "lottery_frontend_main_regression");
   assert.ok(frontendExecution);
   assert.ok(frontendExecution.commandArgs[0].endsWith("scripts/lottery-frontend-main-regression.mjs"));
@@ -56,5 +63,32 @@ test("dispatcher builds frontend main regression command for partial frontend sc
   assert.ok(caseIdsFlagIndex >= 0);
   const automationCaseIds = collectAutomationCaseIdsForScenarios(selection.selectedScenarios);
   assert.equal(frontendExecution.commandArgs[caseIdsFlagIndex + 1], automationCaseIds.join(","));
+  assert.equal(frontendExecution.commandArgs[frontendExecution.commandArgs.indexOf("--activity-alias") + 1], "lfd3040");
+  assert.equal(frontendExecution.commandArgs[frontendExecution.commandArgs.indexOf("--recharge-amount") + 1], "2000");
+  assert.equal(frontendExecution.commandArgs[frontendExecution.commandArgs.indexOf("--wait-for-start-ms") + 1], "900000");
   assert.ok(frontendExecution.commandArgs.includes("--visible"));
+});
+
+test("frontend scenario automation list includes newly wired state and draw interaction cases", () => {
+  const manifest = loadLotteryRegressionManifest();
+  const selection = resolveScenarioSelection("登录态 / 活动态 / 次数态, 单抽主流程", manifest);
+  const automationCaseIds = collectAutomationCaseIdsForScenarios(selection.selectedScenarios);
+  assert.ok(automationCaseIds.includes("FE-21"));
+  assert.ok(automationCaseIds.includes("FE-24"));
+  assert.ok(automationCaseIds.includes("FE-26"));
+  assert.ok(automationCaseIds.includes("FE-28"));
+  assert.ok(automationCaseIds.includes("FE-36"));
+  assert.ok(automationCaseIds.includes("FE-37"));
+});
+
+test("dispatcher marks staged frontend preconditions as auto-handled for main regression selection", () => {
+  const manifest = loadLotteryRegressionManifest();
+  const selection = resolveScenarioSelection("报名链路, 单抽主流程, 我的奖品 / 奖励记录", manifest);
+  const preconditions = resolvePreconditions(selection.selectedScenarios, manifest);
+  const byKey = new Map(preconditions.map(item => [item.key, item]));
+  assert.equal(byKey.get("FRONTEND_SESSION")?.autoHandled, true);
+  assert.equal(byKey.get("NORMAL_ACTIVITY_ONLINE")?.autoHandled, true);
+  assert.equal(byKey.get("NORMAL_ACTIVITY_SIGNED_UP")?.autoHandled, true);
+  assert.equal(byKey.get("NORMAL_ACTIVITY_DRAW_GE1")?.autoHandled, true);
+  assert.equal(byKey.get("REWARD_RECORD_DELAY_READY")?.autoHandled, true);
 });

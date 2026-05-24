@@ -1,8 +1,8 @@
 # Activity Management - Lottery Activity
 
 Status: verified
-Last verified: 2026-05-19
-Verified mode: visible browser
+Last verified: 2026-05-25
+Verified mode: headless real UI + list online confirm
 Environment: staging `https://stg-activity.weex.tech`
 
 ## Entry
@@ -32,6 +32,24 @@ Verified behavior:
 
 The latest cache-backed strict UI run created draft activity `9223` with title `回归转盘05` and historical alias `autotest-20260519103256-stock`.
 That alias is retained here only as historical verification evidence. For all future non-boundary runs, keep `活动别名配置` within `10` characters.
+
+Latest fully verified stable path on 2026-05-25:
+- Draft create succeeded for activity `9430`, alias `lf24162505`.
+- The page submitted `POST /prod-api/activity/config` with business `code=200`, `msg=操作成功`.
+- The same activity was then put online from the list row action `上线`.
+- The confirm dialog accepted verification code `888888`.
+- `POST /prod-api/activity/lottery/online` returned business `code=200`, `msg=操作成功`.
+- Detail re-query showed `status=ONLINE`, `stage=NOT_START`.
+
+Stable create rule set:
+- Use `Playwright + 独立浏览器` via the strict real-UI workflow.
+- Fill all backend sections first.
+- Fill `活动开始时间` and `活动结束时间` last, immediately before submit.
+- Default activity start time is computed at fill time as `UTC+8 当前时间 + 2 分钟`.
+- Default activity end time is computed at fill time as `UTC+8 当前时间 + 365 天`.
+- The date inputs must be bound with explicit `input/change/blur/Tab`; visual text alone is not enough.
+- Click the page bottom-most visible `新增` button. Prefer DOM `click()` on that exact button, then fall back to mouse click only if needed.
+- After draft save succeeds, return to the list immediately and perform `上线`; do not leave the draft idle when the start time is near-future.
 
 Use conservative defaults only in staging:
 - `配置类型`: `正式活动`
@@ -174,6 +192,20 @@ Recommended sequence for multiple frontend-display activities:
 5. Re-query the row and require status `ONLINE`. For a future start time, `stage=NOT_START` is acceptable.
 6. Only then open the frontend draw URL with an authenticated frontend account.
 
+Recommended sequence for the stable create-and-online path:
+
+1. Open `活动列表 / 转盘抽奖 / 新增`.
+2. Fill all non-time backend sections first: base text, images, prize rows, color signs, share info, tasks, i18n, FAQ, calendar.
+3. Only at the end, fill `活动开始时间` and `活动结束时间`.
+4. Use the default near-future rule unless the tester gave exact times:
+   - `活动开始时间 = UTC+8 当前时间 + 2 分钟`
+   - `活动结束时间 = UTC+8 当前时间 + 365 天`
+5. Trigger the page bottom `新增` button and require `POST /prod-api/activity/config` business `code=200`.
+6. Return to the lottery list immediately.
+7. Find the new row by alias, click `上线`, fill verification code `888888`, click `确定`.
+8. Require `POST /prod-api/activity/lottery/online` business `code=200`.
+9. Re-query the row and require `status=ONLINE`. For a just-created future-start activity, `stage=NOT_START` is the expected result.
+
 Do not treat a reachable draft URL as frontend display success.
 
 For "10 minutes later" or other near-future lottery activities, compute the activity time in the backend/admin business timezone observed by staging (UTC+8), not the local desktop timezone. The server validates `活动开始时间` against that business clock; local CEST `now + 10 minutes` was rejected as `开始时间不可小于现在时间` on 2026-05-12.
@@ -223,6 +255,8 @@ Headless real-UI checks on 2026-05-14:
 - Direct API calls to `/prod-api/activity/lottery/online` with guessed fields such as `googleCode` or `code` returned `google验证码不得为空` on 2026-05-11. Until the real payload key is proven, use the UI confirmation dialog for online operations.
 - When the user asks to create several frontend-display lottery activities, prefer create -> online -> frontend verify per activity. If batching is still used, refresh every activity's time immediately before online.
 - For near-future activities, refresh time using the backend/admin business timezone before creation or before updating the draft. A start time that is future in the local machine timezone can still fail server validation.
+- Before the 2026-05-25 fix, `活动结束时间` could appear filled while `baseForm.endTime` stayed empty; the create request was then never sent. Treat successful Vue model binding, not just visible text, as the real pass condition.
+- Before the 2026-05-25 fix, clicking a generic visible `新增` target was unstable on the long add page. Use the bottom-most visible submit button.
 
 ## Cache
 

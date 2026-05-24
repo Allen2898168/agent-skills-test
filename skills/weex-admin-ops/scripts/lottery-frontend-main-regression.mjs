@@ -27,6 +27,40 @@ Options:
 `;
 }
 
+export function buildPhaseProgressLine({ status, phaseId, description = "", attempt = 1, totalAttempts = 1, ok = null, reason = "" }) {
+  const normalizedStatus = String(status || "").toUpperCase();
+  if (normalizedStatus === "START") {
+    const attemptText = totalAttempts > 1 ? ` (attempt ${attempt}/${totalAttempts})` : "";
+    const descriptionText = description ? ` ${description}` : "";
+    return `[frontend-main] START ${phaseId}${attemptText}${descriptionText}`;
+  }
+  if (normalizedStatus === "DONE") {
+    return `[frontend-main] DONE ${phaseId} ${ok ? "PASS" : "FAIL"}`;
+  }
+  if (normalizedStatus === "RETRY") {
+    const detail = reason ? ` ${reason}` : "";
+    return `[frontend-main] RETRY ${phaseId} attempt ${attempt}/${totalAttempts}${detail}`;
+  }
+  if (normalizedStatus === "SKIP") {
+    const detail = reason ? ` ${reason}` : "";
+    return `[frontend-main] SKIP ${phaseId}${detail}`;
+  }
+  return `[frontend-main] ${normalizedStatus} ${phaseId}`;
+}
+
+function logPhaseProgress(event) {
+  process.stderr.write(`${buildPhaseProgressLine(event)}\n`);
+}
+
+function relayChildProgress(text) {
+  const lines = String(text || "")
+    .split("\n")
+    .map(item => item.trimEnd())
+    .filter(Boolean)
+    .filter(item => item.startsWith("[frontend-flow:"));
+  for (const line of lines) process.stderr.write(`${line}\n`);
+}
+
 function parseArgs() {
   const args = parseFlags(process.argv.slice(2), { booleans: ["--visible", "--dry-run"] });
   args.visible = Boolean(args.visible);
@@ -38,17 +72,7 @@ function parseArgs() {
   return args;
 }
 
-function buildTimeWindow() {
-  const now = new Date();
-  const start = new Date(now.getTime() + 2 * 60 * 1000);
-  const end = new Date(start.getTime() + 365 * 24 * 60 * 60 * 1000);
-  const pad = number => String(number).padStart(2, "0");
-  const format = value => `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())} ${pad(value.getHours())}:${pad(value.getMinutes())}:${pad(value.getSeconds())}`;
-  return { start: format(start), end: format(end) };
-}
-
 export function buildPlan(args) {
-  const timeWindow = buildTimeWindow();
   const phases = [];
   if (!args.activityAlias) {
     phases.push({
@@ -63,10 +87,6 @@ export function buildPlan(args) {
         String(args.titlePrefix || "前端主回归"),
         "--alias-prefix",
         String(args.aliasPrefix || "lf"),
-        "--start",
-        timeWindow.start,
-        "--end",
-        timeWindow.end,
         "--style",
         "圆形转盘",
         "--no-preapply",
@@ -84,25 +104,132 @@ export function buildPlan(args) {
       ]],
     });
   }
+  const baseDependsOn = args.activityAlias ? [] : ["online_lottery_activity"];
+  const activityAliasToken = args.activityAlias ? String(args.activityAlias) : "<created-alias>";
   phases.push({
-    phaseId: "run_frontend_main_flow",
-    dependsOn: args.activityAlias ? [] : ["online_lottery_activity"],
-    description: "Run the frontend signup, mq recharge, single draw, and reward-record flow.",
-    caseIds: ["FE-01", "FE-07", "FE-17", "FE-19", "FE-22", "FE-32", "FE-33", "FE-34", "FE-35", "FE-48", "FE-49", "FE-50", "FE-79", "FE-81", "FE-82", "FE-83", "FE-84"],
+    phaseId: "frontend_readonly_checks",
+    dependsOn: baseDependsOn,
+    description: "Open the draw page and verify readonly logged-in frontend signals.",
+    caseIds: ["FE-79", "FE-01", "FE-07", "FE-17", "FE-19"],
     commands: [[
       "skills/weex-admin-ops/scripts/lottery-frontend-main-flow.mjs",
+      "--phase",
+      "readonly",
       "--activity-alias",
-      args.activityAlias ? String(args.activityAlias) : "<created-alias>",
+      activityAliasToken,
+      "--wait-for-start-ms",
+      String(args.waitForStartMs || "720000"),
+    ]],
+  });
+  phases.push({
+    phaseId: "frontend_signup_flow",
+    dependsOn: ["frontend_readonly_checks"],
+    description: "Verify not-signed-up to signed-up state transition.",
+    caseIds: ["FE-81", "FE-82", "FE-83"],
+    commands: [[
+      "skills/weex-admin-ops/scripts/lottery-frontend-main-flow.mjs",
+      "--phase",
+      "signup",
+      "--activity-alias",
+      activityAliasToken,
+      "--wait-for-start-ms",
+      String(args.waitForStartMs || "720000"),
+    ]],
+  });
+  phases.push({
+    phaseId: "frontend_recharge_prepare",
+    dependsOn: ["frontend_readonly_checks"],
+    description: "Prepare draw count through recharge task linkage.",
+    caseIds: ["FE-21", "FE-22", "FE-84"],
+    commands: [[
+      "skills/weex-admin-ops/scripts/lottery-frontend-main-flow.mjs",
+      "--phase",
+      "recharge",
+      "--activity-alias",
+      activityAliasToken,
       "--recharge-amount",
       String(args.rechargeAmount || "1000"),
       "--wait-for-start-ms",
-      String(args.waitForStartMs || "240000"),
+      String(args.waitForStartMs || "720000"),
+    ]],
+  });
+  phases.push({
+    phaseId: "frontend_single_draw",
+    dependsOn: ["frontend_recharge_prepare"],
+    description: "Run the single-draw transaction checks.",
+    caseIds: ["FE-24", "FE-26", "FE-28", "FE-32", "FE-33", "FE-34", "FE-35"],
+    commands: [[
+      "skills/weex-admin-ops/scripts/lottery-frontend-main-flow.mjs",
+      "--phase",
+      "draw",
+      "--activity-alias",
+      activityAliasToken,
+      "--wait-for-start-ms",
+      String(args.waitForStartMs || "720000"),
+    ]],
+  });
+  phases.push({
+    phaseId: "frontend_reward_record",
+    dependsOn: ["frontend_readonly_checks"],
+    description: "Open reward record after the single draw and assert fields.",
+    caseIds: ["FE-36", "FE-37", "FE-48", "FE-49", "FE-50"],
+    commands: [[
+      "skills/weex-admin-ops/scripts/lottery-frontend-main-flow.mjs",
+      "--phase",
+      "reward_record",
+      "--activity-alias",
+      activityAliasToken,
+      "--wait-for-start-ms",
+      String(args.waitForStartMs || "720000"),
     ]],
   });
   return {
     actionId: "lottery_frontend_main_regression",
     mode: args.visible ? "visible_browser" : "headless_ui",
     phases,
+  };
+}
+
+function caseTransitivelyDependsOn(caseId, targetCaseId, manifest = readJson(manifestPath), seen = new Set()) {
+  if (!caseId || seen.has(caseId)) return false;
+  if (caseId === targetCaseId) return true;
+  seen.add(caseId);
+  const entry = (manifest.entries || []).find(item => item.caseId === caseId);
+  return Boolean((entry?.dependsOnCaseIds || []).some(dependency => (
+    caseTransitivelyDependsOn(dependency, targetCaseId, manifest, seen)
+  )));
+}
+
+export function expandFrontendSelectedCaseIds(selectedCaseIds, manifest = readJson(manifestPath)) {
+  if (!selectedCaseIds?.length) return [];
+  const entryByCaseId = new Map((manifest.entries || []).map(item => [item.caseId, item]));
+  const expanded = [];
+  const seen = new Set();
+
+  function visit(caseId) {
+    if (!caseId || seen.has(caseId)) return;
+    seen.add(caseId);
+    const entry = entryByCaseId.get(caseId);
+    for (const dependency of entry?.dependsOnCaseIds || []) visit(dependency);
+    expanded.push(caseId);
+  }
+
+  for (const caseId of selectedCaseIds) visit(caseId);
+  return expanded;
+}
+
+export function resolveFrontendExecutionSelection(args, manifest = readJson(manifestPath)) {
+  const requestedCaseIds = args.caseIds || [];
+  const expandedCaseIds = expandFrontendSelectedCaseIds(requestedCaseIds, manifest);
+  const selectedEntries = (manifest.entries || []).filter(item => expandedCaseIds.includes(item.caseId));
+  const forceFreshActivity = selectedEntries.some(item => item.executionClass === "FRESH_ROOT");
+  return {
+    requestedCaseIds,
+    expandedCaseIds,
+    selectedEntries,
+    forceFreshActivity,
+    effectiveActivityAlias: forceFreshActivity ? "" : String(args.activityAlias || ""),
+    ignoredActivityAlias: forceFreshActivity && args.activityAlias ? String(args.activityAlias) : "",
   };
 }
 
@@ -121,6 +248,10 @@ function parseLastJson(text) {
   return null;
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function runNodeJson(commandArgs) {
   const result = spawnSync(process.execPath, commandArgs, {
     cwd: repoRoot,
@@ -136,17 +267,23 @@ function runNodeJson(commandArgs) {
   };
 }
 
-function readCoveredEntries(caseIds) {
-  const manifest = readJson(manifestPath);
+function isRetryableFrontendGuestState(phase, child) {
+  if (!phase?.phaseId?.startsWith("frontend_")) return false;
+  const payload = child?.payload || {};
+  const page = payload.page || {};
+  return Boolean(page.guestVisible || page.mainButtonState === "注册");
+}
+
+function readCoveredEntries(caseIds, manifest = readJson(manifestPath)) {
   return manifest.entries.filter(item => caseIds.includes(item.caseId));
 }
 
-function hydratePlanWithCases(plan) {
+function hydratePlanWithCases(plan, manifest = readJson(manifestPath)) {
   return {
     ...plan,
     phases: plan.phases.map(phase => ({
       ...phase,
-      caseEntries: readCoveredEntries(phase.caseIds),
+      caseEntries: readCoveredEntries(phase.caseIds, manifest),
     })),
   };
 }
@@ -199,6 +336,36 @@ function resolveActivityTarget(payload, explicitAlias) {
   return { activityId: activityId ? String(activityId) : "", activityAlias: activityAlias ? String(activityAlias) : "" };
 }
 
+export function prepareFrontendRegressionPlan(args, manifest = readJson(manifestPath)) {
+  const selection = resolveFrontendExecutionSelection(args, manifest);
+  const effectiveArgs = {
+    ...args,
+    activityAlias: selection.effectiveActivityAlias,
+  };
+  const filteredPlan = filterPlanByCaseIds(
+    hydratePlanWithCases(buildPlan(effectiveArgs), manifest),
+    selection.expandedCaseIds,
+  );
+  const plan = {
+    ...filteredPlan,
+    phases: filteredPlan.phases.map(phase => {
+      if (phase.phaseId !== "frontend_reward_record") return phase;
+      const needsSingleDraw = (phase.caseIds || []).some(caseId => caseTransitivelyDependsOn(caseId, "FE-32", manifest));
+      if (!needsSingleDraw) return phase;
+      return {
+        ...phase,
+        dependsOn: Array.from(new Set([...(phase.dependsOn || []), "frontend_single_draw"])),
+      };
+    }),
+  };
+  return {
+    ...plan,
+    requestedCaseIds: selection.requestedCaseIds,
+    selectedCaseIds: selection.expandedCaseIds,
+    executionSelection: selection,
+  };
+}
+
 async function run() {
   const args = parseArgs();
   if (args.help) {
@@ -206,7 +373,7 @@ async function run() {
     return 0;
   }
   loadLocalEnv(repoRoot);
-  const plan = filterPlanByCaseIds(hydratePlanWithCases(buildPlan(args)), args.caseIds);
+  const plan = prepareFrontendRegressionPlan(args);
 
   if (args.dryRun) {
     printJson({ ok: true, dryRun: true, ...plan });
@@ -214,7 +381,12 @@ async function run() {
   }
 
   const phaseResults = [];
-  let createdActivity = { activityId: "", activityAlias: args.activityAlias ? String(args.activityAlias) : "" };
+  let createdActivity = {
+    activityId: "",
+    activityAlias: plan.executionSelection?.effectiveActivityAlias
+      ? String(plan.executionSelection.effectiveActivityAlias)
+      : "",
+  };
   let hadPhaseFailure = false;
 
   for (const phase of plan.phases) {
@@ -222,30 +394,63 @@ async function run() {
       const dependencyPhase = phaseResults.find(item => item.phaseId === dependency);
       return !dependencyPhase || !dependencyPhase.ok;
     });
-    if (unmetDependencies.length) continue;
+    if (unmetDependencies.length) {
+      logPhaseProgress({
+        status: "skip",
+        phaseId: phase.phaseId,
+        reason: `blocked by ${unmetDependencies.join(", ")}`,
+      });
+      continue;
+    }
     const commandArgsList = resolvePhaseCommands(phase, args, createdActivity);
     const childResults = [];
     let phaseOk = true;
     let phasePayload = null;
     for (const commandArgs of commandArgsList) {
-      const result = runNodeJson(commandArgs);
-      const child = {
-        command: [process.execPath, ...commandArgs],
-        ok: result.exitCode === 0 && result.payload?.ok !== false,
-        payload: result.payload,
-      };
-      childResults.push(child);
+      let child = null;
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        logPhaseProgress({
+          status: "start",
+          phaseId: phase.phaseId,
+          description: phase.description,
+          attempt: attempt + 1,
+          totalAttempts: 2,
+        });
+        const result = runNodeJson(commandArgs);
+        child = {
+          command: [process.execPath, ...commandArgs],
+          ok: result.exitCode === 0 && result.payload?.ok !== false,
+          payload: result.payload,
+          attempt: attempt + 1,
+        };
+        childResults.push(child);
+        relayChildProgress(result.stderr);
+        logPhaseProgress({
+          status: "done",
+          phaseId: phase.phaseId,
+          ok: child.ok,
+        });
+        if (child.ok || !isRetryableFrontendGuestState(phase, child) || attempt > 0) break;
+        logPhaseProgress({
+          status: "retry",
+          phaseId: phase.phaseId,
+          attempt: attempt + 2,
+          totalAttempts: 2,
+          reason: "guest state detected, retrying once",
+        });
+        await sleep(2000);
+      }
       if (!child.ok) {
         phaseOk = false;
-        phasePayload = result.payload;
+        phasePayload = child.payload;
         break;
       }
-      phasePayload = result.payload;
+      phasePayload = child.payload;
       if (phase.phaseId === "create_lottery_activity_draft") {
-        createdActivity = resolveActivityTarget(result.payload, createdActivity.activityAlias);
+        createdActivity = resolveActivityTarget(child.payload, createdActivity.activityAlias);
       }
-      if (phase.phaseId === "run_frontend_main_flow") {
-        createdActivity = resolveActivityTarget(result.payload, createdActivity.activityAlias);
+      if (phase.phaseId.startsWith("frontend_")) {
+        createdActivity = resolveActivityTarget(child.payload, createdActivity.activityAlias);
       }
     }
     phaseResults.push({
@@ -266,7 +471,9 @@ async function run() {
     ok: !hadPhaseFailure,
     actionId: plan.actionId,
     mode: plan.mode,
+    requestedCaseIds: plan.requestedCaseIds || [],
     selectedCaseIds: plan.selectedCaseIds || [],
+    executionSelection: plan.executionSelection || {},
     createdActivity,
     phaseResults,
     caseResults,

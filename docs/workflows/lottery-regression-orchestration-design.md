@@ -10,10 +10,12 @@
 
 - 后管回归用例集：`docs/test-cases/lottery-admin-regression-cases.md`
 - 前端回归用例集：`docs/test-cases/lottery-frontend-regression-cases.md`
+- 前端回归编排版用例库：`docs/test-cases/lottery-frontend-regression-library-orchestrated.md`
+- 用例分类与执行边界：`docs/workflows/lottery-regression-case-classification-v1.md`
 - 自动化落地方案：`docs/workflows/lottery-automation-regression-plan.md`
 - 活动模板验证清单：`docs/workflows/lottery-activity-template-validation-checklist.md`
 - 机器可读 manifest：`docs/workflows/lottery-regression-manifest.json`
-- 能力差距清单：`docs/workflows/lottery-automation-capability-gap-v2.md`
+- 能力差距清单：`docs/workflows/lottery-automation-capability-gap-v3.md`
 
 ## 一、当前用例总览
 
@@ -150,14 +152,14 @@
 执行顺序：
 
 1. 依赖 `NORMAL_ACTIVITY_ONLINE`
-2. `frontend_signup_flow`
-3. 准备 `NORMAL_ACTIVITY_DRAW_GE1`
-4. `frontend_page_basic`
-5. `frontend_state_ui`
-6. `frontend_interaction_basic`
-7. `frontend_single_draw`
-8. `frontend_reward_record`
-9. `frontend_backend_linkage`
+2. `frontend_page_basic`
+3. `frontend_state_ui`
+4. `frontend_signup_flow`
+5. `frontend_backend_linkage`
+6. 准备 `NORMAL_ACTIVITY_DRAW_GE1`
+7. `frontend_interaction_basic`
+8. `frontend_single_draw`
+9. `frontend_reward_record`
 
 覆盖目标：
 
@@ -177,6 +179,52 @@
 
 - 该入口已接入 dispatcher 与 manifest。
 - 当前属于 `partial`，还不是完整前端全量回归入口。
+
+### 3. 前端状态污染执行规则
+
+前端 case 不能简单按页面分组顺序串跑。凡是会改变 `报名态 / 次数态 / 奖励记录 / 库存态` 的用例，都必须按状态机编排。
+
+核心规则：
+
+1. `FE-81 -> FE-82 -> FE-83` 是同一条报名状态链路。
+2. `FE-81` 必须在“活动进行中且账号未报名”时执行；一旦执行 `FE-82`，该账号就不再满足 `FE-81` 前置条件。
+3. `FE-84` 必须在“已报名且充值任务未完成”场景执行，不应与 `FE-81` 共用“未报名”初始态。
+4. `FE-32 ~ FE-35` 属于单抽事务组，会消耗 1 次抽奖次数并写入奖励记录，建议连续执行并共用一次抽奖动作。
+5. `FE-48 ~ FE-50` 若只校验入口、弹窗和字段结构，可独立执行；若要校验“刚抽完后的奖励记录”，必须承接单抽之后执行。
+6. `FE-80` 与 `FE-81` 时间态互斥，不能放在同一活动、同一时间窗口回归。
+7. 五连抽、小库存、二次权重场景必须拆到专项入口，不能混入普通主回归。
+
+前端主回归推荐顺序：
+
+1. 只读首屏组：`FE-79`、`FE-01`、`FE-07`、`FE-17`、`FE-19`
+2. 未报名状态组：`FE-81`
+3. 报名状态切换组：`FE-82`、`FE-83`
+4. 次数准备组：`FE-84`、`FE-22`
+5. 单抽事务组：`FE-32`、`FE-33`、`FE-34`、`FE-35`
+6. 奖励记录组：`FE-48`、`FE-49`、`FE-50`
+
+前端状态污染矩阵：
+
+| Case ID | 用例名称 | 执行前置状态 | 执行后副作用 | 污染风险 | 是否必须 Fresh | 可承接 / 依赖 |
+| --- | --- | --- | --- | --- | --- | --- |
+| FE-01 | 落地页打开正常 | 活动在线可访问 | 无 | 低 | 否 | 可最先执行 |
+| FE-07 | 我的奖品入口展示正常 | 登录态，活动页正常加载 | 仅打开弹窗，不改业务状态 | 低 | 否 | 可最先执行，也可承接单抽后 |
+| FE-17 | 已登录态页面展示正常 | 已登录 | 无 | 低 | 否 | 可最先执行 |
+| FE-19 | 活动进行中展示正常 | 活动进行中 | 无 | 低 | 否 | 可最先执行 |
+| FE-22 | 抽奖次数大于0展示正常 | 账号已有抽奖次数 | 无 | 中 | 否 | 建议承接 `FE-84` 后 |
+| FE-32 | 单抽接口正常请求 | 已报名，次数 >= 1 | 消耗 1 次抽奖次数 | 高 | 否 | 建议承接 `FE-84` |
+| FE-33 | 单抽成功展示奖品弹窗 | 已报名，次数 >= 1 | 消耗 1 次抽奖次数，新增中奖记录 | 高 | 否 | 与 `FE-32` 同事务 |
+| FE-34 | 单抽成功后可用次数消耗 | 已报名，次数 >= 1 | 消耗 1 次抽奖次数 | 高 | 否 | 与 `FE-32` 同事务 |
+| FE-35 | 单抽成功后优先按次数扣减确认成功 | 已报名，次数 >= 1 | 消耗 1 次抽奖次数 | 高 | 否 | 与 `FE-32` 同事务 |
+| FE-48 | 我的奖品入口打开奖励记录弹窗 | 活动页可打开 | 仅打开弹窗 | 低 | 否 | 可独立，也可承接单抽后 |
+| FE-49 | 奖励记录弹窗展示正常 | 可打开奖励记录 | 无 | 低 | 否 | 承接 `FE-48` |
+| FE-50 | 奖励记录字段展示正确 | 奖励记录弹窗已打开 | 无 | 低 | 否 | 承接 `FE-48` |
+| FE-79 | 活动别名 URL 打开正确活动页 | 活动已上线 | 无 | 低 | 否 | 可最先执行 |
+| FE-80 | 活动未开始时显示即将开始 | 活动未开始 | 无 | 高 | 是 | 不能和 `FE-81/82/83` 共用同一时间态 |
+| FE-81 | 活动开始后未报名显示立即报名 | 活动进行中，账号未报名 | 无 | 高 | 是 | 应先于 `FE-82` |
+| FE-82 | 点击立即报名后切换为抽奖状态 | 活动进行中，账号未报名 | 账号变为已报名 | 高 | 否 | 承接 `FE-81` 最佳 |
+| FE-83 | 已报名账号再次进入活动页直显抽奖 | 账号已报名 | 无 | 中 | 否 | 承接 `FE-82` |
+| FE-84 | 充值任务-报名后发送MQ回调 | 已报名，充值任务未完成 | 增加抽奖次数，改变任务完成态 | 高 | 建议是 | 应在 `FE-82` 后、`FE-32` 前 |
 
 ## 七、专项回归入口设计
 

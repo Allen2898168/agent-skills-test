@@ -84,7 +84,10 @@ async function run() {
 function buildStrictUiEnv(args) {
   return {
     ...process.env,
+    ...(args.titleExact ? { LOTTERY_TITLE_EXACT: String(args.titleExact) } : {}),
     ...(args.titlePrefix ? { LOTTERY_TITLE_PREFIX: String(args.titlePrefix) } : {}),
+    ...(args.subtitle ? { LOTTERY_SUBTITLE: String(args.subtitle) } : {}),
+    ...(args.aliasExact ? { LOTTERY_ALIAS_EXACT: String(args.aliasExact) } : {}),
     ...(args.aliasPrefix ? { LOTTERY_ALIAS_PREFIX: String(args.aliasPrefix) } : {}),
     ...(args.start ? { LOTTERY_START: String(args.start) } : {}),
     ...(args.end ? { LOTTERY_END: String(args.end) } : {}),

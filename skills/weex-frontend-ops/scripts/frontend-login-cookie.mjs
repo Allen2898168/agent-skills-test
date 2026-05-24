@@ -21,7 +21,7 @@ function parseArgs(argv) {
 
 function printHelp() {
   console.log(`Usage: node scripts/frontend-login-cookie.mjs [--dry-run] [--visible] [--screenshot]
-       node scripts/frontend-login-cookie.mjs --account DEFAULT --target-url https://stg-www.weex.tech/zh-CN/login
+       node scripts/frontend-login-cookie.mjs --account DEFAULT --target-url https://stg-www.weex.tech/zh-CN/account
 
 Reads runtime config from skills/weex-frontend-ops/.env.local or same-skill WEEX_FRONTEND_* environment variables.`);
 }
@@ -33,7 +33,10 @@ if (args.help) {
   process.exit(0);
 }
 
-const targetUrl = args.targetUrl || process.env.WEEX_FRONTEND_URL || 'https://stg-www.weex.tech/zh-CN/login';
+const targetUrl = args.targetUrl
+  || process.env.WEEX_FRONTEND_ACCOUNT_URL
+  || process.env.WEEX_FRONTEND_URL
+  || 'https://stg-www.weex.tech/zh-CN/account';
 const visible = args.visible ?? boolEnv('WEEX_FRONTEND_BROWSER_VISIBLE', false);
 const saveScreenshot = args.screenshot || boolEnv('WEEX_FRONTEND_SAVE_SCREENSHOT', false);
 const screenshot = path.resolve(

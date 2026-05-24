@@ -31,6 +31,8 @@ export function adminConfig(repoRoot) {
     googleCode: process.env.WEEX_ADMIN_GOOGLE_CODE || "",
     imagePath: process.env.WEEX_PRIZE_IMAGE_PATH || path.join(skillRoot, "assets/default-prize-images/default-bonus-prize.webp"),
     chromePath: process.env.CHROME_EXECUTABLE_PATH || "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    useExistingChrome: process.env.WEEX_ADMIN_USE_EXISTING_CHROME === "1",
+    chromeCdpUrl: process.env.WEEX_ADMIN_CHROME_CDP_URL || "http://127.0.0.1:9222",
   };
 }
 

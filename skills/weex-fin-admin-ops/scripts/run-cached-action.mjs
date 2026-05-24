@@ -63,7 +63,7 @@ Options:
 }
 
 function parseCacheArgs() {
-  const parsed = parseFlags(process.argv.slice(2), { booleans: ["--list", "--dry-run", "--confirm-create", "--confirm-approve", "--confirm-register", "--confirm-recharge", "--confirm-transfer", "--confirm-create-account", "--confirm-order", "--skip-grant-dry-run", "--allow-unverified-transfer-chain", "--save-secrets"] });
+  const parsed = parseFlags(process.argv.slice(2), { booleans: ["--list", "--dry-run", "--confirm-create", "--confirm-approve", "--confirm-send", "--confirm-register", "--confirm-recharge", "--confirm-transfer", "--confirm-create-account", "--confirm-order", "--skip-grant-dry-run", "--allow-unverified-transfer-chain", "--save-secrets"] });
   const passthrough = {};
   for (const [key, value] of Object.entries(parsed)) {
     if (!["help", "list", "dryRun", "query", "action"].includes(key)) passthrough[key] = value;
