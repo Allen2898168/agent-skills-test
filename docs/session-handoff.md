@@ -21,6 +21,8 @@
 
 ## 最近完成
 
+- 2026-05-25 执行抽奖全量无头回归（selection=全部）：`node orchestrations/lottery-regression/scripts/run-full-headless.mjs --selection "全部" --admin-concurrency 1 --concurrency 10 --start-offset-seconds 3 --wait-for-start-ms 60000`。结果 `ok=true`，报告目录 `orchestrations/lottery-regression/artifacts/reports/20260525_190116`；活动别名：普通 `n28494119`、二次权重 `w28496675`、小库存 `s28498991`；用例汇总 `PASS 78 / FAIL 0 / SKIPPED 0`（后管 `55/55`、前端 `23/23`）；总耗时 `571.98s`；前端验证 URL `https://stg-www.weex.tech/zh-CN/events/draw/n28494119`，默认 viewport `1440x1000`。
+
 - 2026-05-25 修复 `run-full-headless.mjs` 汇总统计只显示前端 `caseResults`、忽略后管用例的问题：后管脚本 `--compact` 输出不含 `phaseResults/caseResults`，导致 `summary.json` 的 `caseSummary.byEntrypoint.admin.total=0`。现改为优先读取 `--report-path` 生成的 `admin.json`（含 `caseResults`）再统计，后续汇总应为后管 `55` + 前端 `23` = `78` 条自动化用例。
 
 - 2026-05-25 执行抽奖全量无头回归：`node orchestrations/lottery-regression/scripts/run-full-headless.mjs --admin-concurrency 1 --concurrency 10 --start-offset-seconds 3 --wait-for-start-ms 60000`。结果 `ok=true`，报告目录 `orchestrations/lottery-regression/artifacts/reports/20260525_182359`；活动别名：普通 `n26254893`、二次权重 `w26257238`、小库存 `s26259523`；总耗时 `484.11s`。前端回归默认 viewport `1440x1000`，最终验证 URL `https://stg-www.weex.tech/zh-CN/events/draw/n26254893`；前端用例 `PASS 23 / FAIL 0 / SKIPPED 0`，后管阶段均通过（奖品/报名模板/任务/活动上下线链路通过，最终停留 `/activities/lottery`）。
