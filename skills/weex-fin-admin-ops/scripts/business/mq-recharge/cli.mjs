@@ -12,6 +12,7 @@ export function parseMqRechargeArgs(argv, env = process.env) {
     status: "9",
     timeoutMs: "45000",
     dryRun: false,
+    visible: false,
     confirmSend: false,
   };
   for (let index = 0; index < argv.length; index += 1) {
@@ -26,6 +27,7 @@ export function parseMqRechargeArgs(argv, env = process.env) {
     else if (value === "--status") args.status = argv[++index] || "";
     else if (value === "--timeout-ms") args.timeoutMs = argv[++index] || "";
     else if (value === "--dry-run") args.dryRun = true;
+    else if (value === "--visible") args.visible = true;
     else if (value === "--confirm-send") args.confirmSend = true;
     else if (value === "--help" || value === "-h") args.help = true;
   }
@@ -36,6 +38,7 @@ export function mqRechargeHelp() {
   return `Usage:
   node scripts/mq-recharge-callback-send.mjs --dry-run --uid <uid> --amount <amount>
   node scripts/mq-recharge-callback-send.mjs --uid <uid> --amount <amount> --confirm-send
+  node scripts/mq-recharge-callback-send.mjs --uid <uid> --amount <amount> --confirm-send --visible
 
 Sends one recharge MQ callback message through the Kafka UI page for topic flink.exchange.spot_capital_order_info.
 By default the script uses the verified staging Kafka UI URL and generates a unique message id automatically.`;

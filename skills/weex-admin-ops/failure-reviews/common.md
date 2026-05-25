@@ -90,6 +90,16 @@
 - 关联文件：`scripts/lib/browser.mjs`、`references/login.md`。
 - 后续处理：新登录脚本必须复用公共登录 helper。
 
+## 2026-05-25 100+ manifest 全量中后管奖品阶段超时
+- 业务线：抽奖回归 / 后管奖品管理。
+- 场景：执行 `node orchestrations/lottery-regression/scripts/lottery-regression-dispatcher.mjs --all`。
+- 失败表现：`create_regression_prizes` 子命令 `create-regression-prizes-fast-api.mjs` 在 `300000ms` 内未返回，导致 `PM-01`-`PM-07` 失败，依赖奖品集的活动配置、活动列表和上下线 case 被跳过。
+- 失败原因：单独运行 `create-regression-prizes-fast-api.mjs` 只耗时约 `16s` 并通过，说明脚本本身不是稳定超时；根因是 100+ 调度器同时启动后管主回归和未传活动别名的前端主回归，两个入口都会使用同一个后管账号创建/上线活动，造成同账号后管登录态互相干扰。
+- 解决方式：`orchestrations/lottery-regression/scripts/lottery-regression-dispatcher.mjs` 已为会使用后管登录态的入口标记 `ADMIN_SESSION` 资源锁；调度器允许无依赖入口并发，但同一时刻只运行一个占用 `ADMIN_SESSION` 的入口。
+- 验证结果：单跑 `PM-01`-`PM-07` 得到 `PASS 7`；重跑 100+ manifest 时 `create_regression_prizes` 耗时约 `14.7s` 且通过，原 7 个 fail 已消除。
+- 关联流程或脚本：`orchestrations/lottery-regression/scripts/lottery-regression-dispatcher.mjs`、`skills/weex-admin-ops/scripts/create-regression-prizes-fast-api.mjs`。
+- 后续处理：已吸收到固定调度流程；后续不要让两个后管登录态写入口并发执行。
+
 ## 2026-05-06 Element UI 下拉旧浮层干扰
 - 业务线：通用组件。
 - 场景：连续操作多个 Element UI 单选或多选下拉。

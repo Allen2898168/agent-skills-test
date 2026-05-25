@@ -1,0 +1,24 @@
+version: 1
+id: FE-81
+name: 活动开始后未报名显示立即报名
+deps: []
+
+includes:
+  - ../flows/activity-online.yml
+
+steps:
+  - id: fe81_readonly_state
+    run: node
+    whenSet: [activityAlias]
+    args:
+      - skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs
+      - --phase
+      - readonly
+      - --activity-alias
+      - "{{activityAlias}}"
+      - --save-screenshot
+      - --screenshot-path
+      - "{{screenshotDir}}/FE-81_readonly.png"
+    assert:
+      - path: page.mainButtonState
+        equals: 立即报名

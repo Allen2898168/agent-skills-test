@@ -7,6 +7,7 @@ Use this file as the table of contents for operation playbooks. Keep full workfl
 - Activity management: `activity-management.md`
 - Activity management lottery: `activity-management-lottery.md`
 - Activity management lottery frontend rules: `activity-management-lottery-frontend.md`
+- Activity management lottery row actions and cache: `activity-management-lottery-row-actions.md`
 - Activity management lottery templates: `activity-management-lottery-templates.md`
 - Activity common module: `activity-common-module.md`
 - Activity guide template: `activity-guide-template.md`
@@ -36,6 +37,7 @@ Use this file as the table of contents for operation playbooks. Keep full workfl
 | --- | --- | --- | --- | --- |
 | Login and open offline user manage | `offline-user-manage.md` | candidate | 2026-05-04 | Opens `/activities/offline/userManage` after login. |
 | Lottery activity search and draft creation | `activity-management-lottery.md` | verified | 2026-05-19 | Validates `活动列表 / 转盘抽奖` search filters and creates a draft by visible browser workflow; action cache now supports visible UI creation and dry-run planning. |
+| Lottery activity row actions and cache | `activity-management-lottery-row-actions.md` | verified | 2026-05-25 | Stores row-action evidence, failure-avoidance rules, and cache commands split from the main lottery activity playbook. |
 | Lottery admin main regression orchestration | `activity-management-lottery-templates.md` | candidate | 2026-05-21 | First-stage orchestration script chains stable prize, register-template, roulette-task, draft-create, and online steps for admin main regression. |
 | Lottery frontend signup-state rules | `activity-management-lottery-frontend.md` | verified | 2026-05-19 | Stores the verified frontend alias URL, signup requirement, and main-button state transitions for lottery activities. |
 | Lottery regression activity templates | `activity-management-lottery-templates.md` | verified | 2026-05-19 | Stores the authoritative `普通回归` / `二次权重专项` / `小库存专项` template definitions and runtime rules. |

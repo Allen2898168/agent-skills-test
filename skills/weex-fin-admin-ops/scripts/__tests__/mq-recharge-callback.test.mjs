@@ -1,13 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { matchAction } from "../cache/matcher.mjs";
 import { commandFor } from "../cache/command.mjs";
 
-const skillRoot = path.resolve(
-  "/Users/jonathan/Documents/Codex/2026-05-05/https-github-com-allen2898168-agent-skills/agent-skills-test/skills/weex-fin-admin-ops"
-);
+const skillRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
 test("matcher routes explicit uid recharge request to mq callback action", () => {
   const manifest = {

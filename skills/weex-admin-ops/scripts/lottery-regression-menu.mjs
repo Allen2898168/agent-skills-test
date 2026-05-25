@@ -1,10 +1,13 @@
 #!/usr/bin/env node
-import { printJson } from "./lib/cli.mjs";
-import { loadLotteryRegressionManifest, buildScenarioMenu } from "./lib/lottery-regression-manifest.mjs";
+import { printJson } from "../../../orchestrations/lottery-regression/lib/cli.mjs";
+import {
+  loadLotteryRegressionManifest,
+  buildScenarioMenu,
+} from "../../../orchestrations/lottery-regression/lib/lottery-regression-manifest.mjs";
 
 function usage() {
   return `Usage:
-  node skills/weex-admin-ops/scripts/lottery-regression-menu.mjs
+  node orchestrations/lottery-regression/scripts/lottery-regression-dispatcher.mjs --menu
 
 Prints the current lottery regression scenario menu grouped by lane and annotated with executable status.`;
 }

@@ -1,5 +1,15 @@
 # FIN Admin 通用失败复盘
 
+## 2026-05-25 MQ 回调脚本未先打开 Produce 面板导致 ACE editor 不存在
+
+- 业务线：MQ recharge callback（Kafka UI）。
+- 场景：执行 `mq_recharge_callback_send`（通过 `run-cached-action.mjs`），按 UID/amount 发送充值 MQ 回调。
+- 失败表现：脚本报错 `ace.edit can't find div #key`，MQ 消息未发送；抽奖回归阶段 `draw count after MQ refresh` 仍为 `0`。
+- 失败原因：Kafka UI 页面需先点击一次 `Produce Message` 打开编辑面板，`#key/#content/#headers` 的 ACE editor 才会挂载；旧脚本直接 `ace.edit("key")` 导致找不到节点。
+- 解决方式：脚本固定为 `点击 Produce Message -> 等待 #content -> 写入 key/content/headers -> 点击 Produce Message 提交`。
+- 验证结果：修复后 `mq_recharge_callback_send --confirm-send` 可稳定进入编辑面板并提交。
+- 关联流程或脚本：`scripts/mq-recharge-callback-send.mjs`、`scripts/business/mq-recharge/flow.mjs`、`references/operations/mq-recharge.md`、`references/action-cache.md`。
+
 ## 2026-05-08 FIN dry-run 缺少 CDP 页面目标
 - 业务线：FIN Admin 脚本运行。
 - 场景：迁移 FIN skill-local `.env.local` 后，执行 `finance-airdrop-reward-grant.mjs --dry-run` 验证非写入路径。

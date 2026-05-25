@@ -28,7 +28,7 @@ The action cache is the first execution layer for workflows that have already be
 | `delete_register_templates_by_operator` | `scripts/delete-register-templates-by-operator.mjs` | candidate | Dry-run and delete activity registration templates by exact `最近编辑人`; destructive execution requires `--confirm-delete`; invisible deletion and visible/invisible dry-run verified on 2026-05-06. |
 | `create_guide_templates` | `scripts/create-guide-templates.mjs` | candidate | Create activity guide-flow templates for verified activity-type/frequency/step combinations; visible and invisible modes verified on 2026-05-06. |
 | `verify_guide_template_row_actions` | `scripts/guide-template-row-actions.mjs` | candidate | Create a temporary activity guide template, verify `查看` / `修改` / `复制` / `删除`, and delete the temporary records; visible and invisible modes verified on 2026-05-06. |
-| `lottery_admin_main_regression` | `scripts/lottery-admin-main-regression.mjs` | candidate | Run the first-stage lottery admin main regression orchestration by chaining prize, register-template, roulette-task, activity-draft, and online steps; dry-run verified on 2026-05-21. |
+| `lottery_admin_main_regression` | `scripts/lottery-admin-main-regression.mjs` | candidate | Run the lottery admin regression orchestration. Headless mode uses API fast paths for backend fixture creation, activity status flow, and row-action equivalents; visible mode keeps real UI writes. |
 | `create_lottery_activity_draft` | `scripts/create-lottery-activity-draft.mjs` | candidate | Create a draft `活动列表 / 转盘抽奖` activity through the verified real-UI workflow, with configurable time and lottery style. |
 | `online_lottery_activity` | `scripts/online-lottery-activity.mjs` | candidate | Put a draft `活动列表 / 转盘抽奖` activity online through the verified list-row confirmation flow. |
 
@@ -123,9 +123,11 @@ For lottery activity online:
 For lottery admin main regression orchestration:
 - use `--action lottery_admin_main_regression` for explicit execution;
 - `--dry-run` prints the staged plan, covered case IDs, and child commands without writing data;
-- current first-stage implementation chains prize creation, registration-template creation, roulette-task creation, lottery draft creation, and online action;
+- headless mode defaults to `headless_api`: prize creation/search, prize row actions, registration-template creation/search/row actions, roulette-task creation, lottery draft creation, list checks, online, copy/delete-equivalent, and offline use API calls with list/detail verification;
+- visible mode still uses real UI writes for state-changing operations;
 - optional parameters include `--title-prefix`, `--alias-prefix`, `--uid`, `--country`, and `--visible`;
-- the script currently reports phase-level results and covered case IDs from `docs/workflows/lottery-regression-manifest.json`;
+- the script reports phase-level results and covered case IDs from `docs/workflows/lottery-regression-manifest.json`;
+- latest headless API validation: 2026-05-25, `55 PASS / 0 FAIL / 0 SKIPPED`, report `orchestrations/lottery-regression/artifacts/reports/20260525_163530_api_opt/admin.json`;
 - natural language such as `帮我跑一轮转盘抽奖后管主回归自动化` should match this action.
 
 ## Cache Graduation Rules

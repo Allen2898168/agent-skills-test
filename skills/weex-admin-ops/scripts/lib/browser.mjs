@@ -50,6 +50,10 @@ async function loginToPath(page, config, path) {
     await clickLoginButton(page);
     lastLoginResponse = await loginResponse;
   }
+  if (lastLoginResponse) {
+    const promoted = await promoteLoginTokenToCookie(page, lastLoginResponse, path);
+    if (promoted) return;
+  }
   await page.waitForURL(url => !url.toString().includes("/login"), { timeout: 18000 }).catch(() => {});
   await sleep(3000);
   if (page.url().includes("/login")) {
@@ -173,6 +177,18 @@ async function promoteLoginTokenToCookie(page, response, path) {
     secure: currentUrl.protocol === "https:",
     sameSite: "Lax",
   }]);
+  await page.evaluate(value => {
+    try {
+      const raw = String(value);
+      const bearer = raw.startsWith("Bearer ") ? raw : `Bearer ${raw}`;
+      for (const key of ["token", "Token", "Admin-Token", "admin-token", "authorization", "Authorization"]) {
+        const normalizedKey = String(key).toLowerCase();
+        const storedValue = normalizedKey.includes("authorization") ? bearer : raw;
+        window.localStorage?.setItem?.(key, storedValue);
+        window.sessionStorage?.setItem?.(key, storedValue);
+      }
+    } catch {}
+  }, String(token)).catch(() => {});
   await page.goto(`${currentUrl.origin}${path}`, { waitUntil: "domcontentloaded" });
   await sleep(2000);
   return !page.url().includes("/login");

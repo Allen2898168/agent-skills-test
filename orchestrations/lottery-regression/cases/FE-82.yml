@@ -1,0 +1,28 @@
+version: 1
+id: FE-82
+name: 点击立即报名后切换为抽奖状态
+deps: [FE-81]
+
+includes:
+  - ../flows/activity-online.yml
+
+steps:
+  - id: fe82_signup
+    run: node
+    whenSet: [activityAlias]
+    args:
+      - skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs
+      - --phase
+      - signup
+      - --activity-alias
+      - "{{activityAlias}}"
+      - --save-screenshot
+      - --screenshot-path
+      - "{{screenshotDir}}/FE-82_signup.png"
+    assert:
+      - path: ok
+        equals: true
+      - path: signup.done
+        equals: true
+      - path: signup.finalState
+        equals: 抽奖

@@ -1,5 +1,28 @@
 # 转盘 Kafka 回调任务失败复盘
 
+## 2026-05-25 MQ 充值回调发送成功但抽奖次数仍为 0
+
+- 日期：2026-05-25
+- 页面/流程：转盘活动页（STG）报名后，通过 FIN 动作缓存 `mq_recharge_callback_send` 发送充值回调，再回活动页验证 `可用抽奖次数`。
+- 失败表现：回调脚本返回 `ok=true`、Kafka produce HTTP 200 且 messageId 可在列表中命中；但活动页刷新并等待 5 秒后 `drawCount` 仍为 `0`，未进入可抽奖状态，导致单抽用例无法继续。
+- 可能原因：回调消息已送达但任务计数/抽奖次数生成存在延迟；或该活动绑定的“充值任务”与回调 bizType/bizSubType 不匹配；或需要额外条件（例如活动报名/任务完成回查接口轮询）才能刷新次数。
+- 临时处理：把“次数变更”为必须断言；当 `drawCount` 未增长时，不要继续执行抽奖动作。可手动延长等待并轮询 `raffle/frequency` 或 `taskCompletions`（以真实网络响应为准），确认是否存在延迟完成。
+- 验证信息：活动别名 `lf25085715`，账号 `8186595891@weex.com` / UID `8186595891`，amount `1000`。
+- 关联流程或脚本：前端 `scripts/lottery-frontend-main-flow.mjs`（`recharge/full` 阶段）、FIN `scripts/run-cached-action.mjs --action mq_recharge_callback_send`。
+
+## 2026-05-25 100+ manifest 重跑时单抽接口返回系统繁忙
+
+- 日期：2026-05-25
+- 页面/流程：100+ manifest 全量入口中，前端 normal 活动完成报名和 MQ 充值后执行 `frontend_single_draw`。
+- 失败表现：活动别名 `lf25154530`，充值后抽奖次数刷新到 `110`；点击单抽后产生一次抽奖请求，但接口返回业务 `code=50000`、`msg=系统繁忙，请稍后再试！`，未展示奖品弹窗，次数未扣减。
+- 失败原因：当前证据指向抽奖接口服务端瞬时失败，不是奖品阶段超时修复引入的问题；本轮未继续改前端抽奖重试策略，避免把服务端失败误判为通过。
+- 临时处理：保持单抽失败为真实失败；后续如要降低环境抖动，可对 `50000` 做短间隔重试，但必须确保只在未扣减次数、未产生中奖记录时重试。
+- 验证信息：100+ manifest 重跑中后管 `PM-01`-`PM-07` 已通过，前端 `frontend_single_draw` 下 `FE-32`-`FE-35` 失败，奖励记录阶段被跳过。
+- 补充复现：`node orchestrations/lottery-regression/scripts/run-full-headless.mjs`（报告目录 `orchestrations/lottery-regression/artifacts/reports/20260525_180119`）中 normal 活动别名 `n24894463` 同样在单抽阶段返回 `code=50000`，导致 `FE-32`-`FE-35` 失败、奖励记录阶段跳过。
+- 补充复现：`node orchestrations/lottery-regression/scripts/run-full-headless.mjs`（报告目录 `orchestrations/lottery-regression/artifacts/reports/20260525_184100`）中 normal 活动别名 `n27275652` 同样在单抽阶段返回 `code=50000`，导致 `FE-32`-`FE-35` 失败、奖励记录阶段跳过。
+- 关联流程或脚本：`orchestrations/lottery-regression/scripts/lottery-frontend-main-regression.mjs`、`skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs`。
+- 后续处理状态：未吸收到固定流程；下一步如处理前端剩余失败，应先补安全重试或定位服务端 `50000` 原因。
+
 ## Kafka UI 提交按钮视口外导致普通点击失败
 
 - 日期：2026-05-13

@@ -8,6 +8,7 @@
 
 ## Project Context
 - 本项目用于 WEEX 活动后台管理页面、WEEX FIN Admin 财务后台和 WEEX 前端页面的操作自动化、测试验证和流程沉淀。
+- 跨活动后台、FIN Admin 和前端的组合回归编排统一放在 `orchestrations/`；单个 skill 只保留本域业务能力和必要的兼容入口。
 - 活动后台默认目标环境是 staging：`https://stg-activity.weex.tech`。
 - FIN Admin 财务后台 staging web host 是：`https://stg-admin-web-fin.weex.tech`。
 - 后台业务复杂，所有操作必须以“可复现流程、明确前置条件、明确结果验证”为核心。
@@ -55,6 +56,7 @@
 - 活动管理后台相关操作优先使用项目内 `skills/weex-admin-ops/`，它是活动后台团队协作的权威版本。
 - FIN Admin / 财务管理后台相关操作优先使用项目内 `skills/weex-fin-admin-ops/`，它是财务后台团队协作的权威版本。
 - 前端页面打开、点击、表单操作、页面检查、响应式检查、截图证据、console/network 验证和前端流程沉淀，优先使用项目内 `skills/weex-frontend-ops/`，它是前端页面操作与检查的权威版本。
+- 跨多个 skill 的回归场景选择、依赖排序、阶段调度和结果聚合，优先使用 `orchestrations/<workflow>/`；不得把跨域总调度新增到某个单一业务 skill。
 - 本机 `$CODEX_HOME/skills/weex-admin-ops` 只是可选安装副本；如果缺失，先读取项目内 skill。
 - 本机 `$CODEX_HOME/skills/weex-fin-admin-ops` 只是可选安装副本；如果缺失，先读取项目内 skill。
 - 本机 `$CODEX_HOME/skills/weex-frontend-ops` 只是可选安装副本；如果缺失，先读取项目内 skill。
@@ -72,6 +74,7 @@
 - FIN Admin 业务动作脚本、动作缓存脚本和 skill 维护脚本必须放在 `skills/weex-fin-admin-ops/scripts/`；根目录 `scripts/` 不作为 skill 复用的必需目录。
 - 前端页面动作脚本、动作缓存脚本和 skill 维护脚本必须放在 `skills/weex-frontend-ops/scripts/`；根目录 `scripts/` 不作为 skill 复用的必需目录。
 - 活动管理后台、FIN Admin 和前端页面的 skill、脚本、动作缓存、失败复盘和 references 必须分开维护；不要把 FIN Admin 财务链路写入 `weex-admin-ops`。
+- 跨 skill 复用优先通过 CLI/JSON 合约调用；不得从一个 skill 直接 import 另一个 skill 的 `scripts/lib/`、`scripts/business/` 等内部 helper。确需共享的无业务归属 helper 应抽到 `tools/lib/` 或对应 `orchestrations/` 公共模块。
 - 如果一次任务跨活动管理后台和 FIN Admin，必须先说明分别使用哪个 skill，并分别遵守对应的登录、确认、验证和沉淀规则。
 
 ## Execution Principles

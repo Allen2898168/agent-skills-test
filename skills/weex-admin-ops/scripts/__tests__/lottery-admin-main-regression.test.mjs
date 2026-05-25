@@ -1,14 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { matchAction } from "../cache/matcher.mjs";
 import { commandFor } from "../cache/command.mjs";
 import { buildPlan } from "../lottery-admin-main-regression.mjs";
 
-const skillRoot = path.resolve(
-  "/Users/jonathan/Documents/Codex/2026-05-05/https-github-com-allen2898168-agent-skills/agent-skills-test/skills/weex-admin-ops"
-);
+const skillRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
 test("matcher routes admin main regression query to lottery_admin_main_regression", () => {
   const manifest = {
@@ -75,14 +74,14 @@ test("buildPlan expands register template coverage into create, search, and row-
   assert.ok(createPhase, "create_register_templates phase should exist");
   assert.deepEqual(createPhase.caseIds, ["RT-03", "RT-04", "RT-05", "RT-06"]);
   assert.deepEqual(createPhase.commands.slice(0, 5), [
-    ["skills/weex-admin-ops/scripts/create-register-templates.mjs", "--signup-modes", "auto", "--name-prefix", "自动化报名模板"],
-    ["skills/weex-admin-ops/scripts/create-register-templates.mjs", "--signup-modes", "manual", "--name-prefix", "自动化报名模板"],
-    ["skills/weex-admin-ops/scripts/create-register-templates.mjs", "--signup-modes", "team", "--name-prefix", "自动化报名模板", "--min-team", "2"],
-    ["skills/weex-admin-ops/scripts/create-register-templates.mjs", "--signup-modes", "auto_manual", "--name-prefix", "自动化报名模板"],
-    ["skills/weex-admin-ops/scripts/create-register-templates.mjs", "--signup-modes", "auto", "--platform-scopes", "channel_invite,natural,non_active,mixed,fake_money", "--name-prefix", "自动化报名模板"],
+    ["skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs", "--signup-modes", "auto", "--name-prefix", "自动化报名模板"],
+    ["skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs", "--signup-modes", "manual", "--name-prefix", "自动化报名模板"],
+    ["skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs", "--signup-modes", "team", "--name-prefix", "自动化报名模板", "--min-team", "2"],
+    ["skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs", "--signup-modes", "auto_manual", "--name-prefix", "自动化报名模板"],
+    ["skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs", "--signup-modes", "auto", "--platform-scopes", "channel_invite,natural,non_active,mixed,fake_money", "--name-prefix", "自动化报名模板"],
   ]);
   assert.deepEqual(createPhase.commands[5].slice(0, 6), [
-    "skills/weex-admin-ops/scripts/create-register-templates.mjs",
+    "skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs",
     "--signup-modes",
     "auto",
     "--platform-scopes",
@@ -104,7 +103,7 @@ test("buildPlan expands register template coverage into create, search, and row-
   ]);
   assert.deepEqual(rowActionPhase.caseIds, ["RT-07", "RT-08", "RT-09"]);
   assert.deepEqual(rowActionPhase.commands, [
-    ["skills/weex-admin-ops/scripts/register-template-row-actions.mjs", "--name-prefix", "操作列临时模板"],
+    ["skills/weex-admin-ops/scripts/register-template-row-actions-fast-api.mjs", "--name-prefix", "操作列临时模板"],
   ]);
 });
 
@@ -119,7 +118,7 @@ test("buildPlan includes dedicated task-condition phase", () => {
   const phase = plan.phases.find(item => item.phaseId === "create_roulette_condition_tasks");
   assert.deepEqual(phase.caseIds, ["TM-08"]);
   assert.deepEqual(phase.commands, [
-    ["skills/weex-admin-ops/scripts/create-roulette-condition-tasks.mjs", "--conditions", "kol,contract,spot,recharge"],
+    ["skills/weex-admin-ops/scripts/create-roulette-condition-tasks-fast-api.mjs", "--conditions", "kol,contract,spot,recharge"],
   ]);
 });
 
@@ -128,15 +127,19 @@ test("buildPlan includes dedicated reward-mode task phase", () => {
   const phase = plan.phases.find(item => item.phaseId === "create_roulette_reward_mode_tasks");
   assert.deepEqual(phase.caseIds, ["TM-10", "TM-11"]);
   assert.deepEqual(phase.commands, [
-    ["skills/weex-admin-ops/scripts/create-roulette-reward-mode-tasks.mjs", "--modes", "limited,rights"],
+    ["skills/weex-admin-ops/scripts/create-roulette-reward-mode-tasks-fast-api.mjs", "--modes", "limited,rights"],
   ]);
 });
 
-test("buildPlan runs draft creation in headless real UI mode by default", () => {
+test("buildPlan runs draft creation through headless API by default", () => {
   const plan = buildPlan({ visible: false });
   const phase = plan.phases.find(item => item.phaseId === "create_lottery_activity_draft");
   assert.ok(phase, "create_lottery_activity_draft phase should exist");
-  assert.equal(phase.commands[0].includes("--headless-ui"), true);
+  assert.deepEqual(phase.commands[0].slice(0, 3), [
+    "skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs",
+    "--action",
+    "create-draft",
+  ]);
 });
 
 test("buildPlan phase metadata keeps dependency ordering for filtered execution", () => {
@@ -157,15 +160,18 @@ test("buildPlan includes activity list verification phases around draft and onli
   assert.deepEqual(offlinePhase.caseIds, ["ST-02"]);
   assert.deepEqual(offlinePhase.dependsOn, ["online_lottery_activity"]);
   assert.deepEqual(offlinePhase.commands, [
-    ["skills/weex-admin-ops/scripts/offline-lottery-activity.mjs", "--activity-alias", "<created-alias>"],
+    ["skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs", "--action", "offline", "--activity-alias", "<created-alias>"],
   ]);
 });
 
 test("buildPlan collapses regression prize creation into one command plus row actions", () => {
   const plan = buildPlan({ visible: false });
-  const phase = plan.phases.find(item => item.phaseId === "create_prizes");
-  assert.deepEqual(phase.commands, [
-    ["skills/weex-admin-ops/scripts/create-regression-prizes.mjs"],
-    ["skills/weex-admin-ops/scripts/prize-row-actions.mjs", "--category", "赠金", "--subtype", "赠金", "--count", "1", "--name-prefix", "操作列临时奖品", "--alias-prefix", "prize_row_action_temp"],
+  const createPhase = plan.phases.find(item => item.phaseId === "create_regression_prizes");
+  const rowActionPhase = plan.phases.find(item => item.phaseId === "prize_row_actions");
+  assert.deepEqual(createPhase.commands, [
+    ["skills/weex-admin-ops/scripts/create-regression-prizes-fast-api.mjs"],
+  ]);
+  assert.deepEqual(rowActionPhase.commands, [
+    ["skills/weex-admin-ops/scripts/prize-row-actions-fast-api.mjs", "--category", "赠金", "--subtype", "赠金", "--count", "1", "--name-prefix", "操作列临时奖品", "--alias-prefix", "prize_row_action_temp"],
   ]);
 });

@@ -209,3 +209,13 @@
 - 验证结果：重试创建并上线活动 ID `9098`，标题 `三任务转盘`，别名 `lottery-3tasks-5min-20260513141842`；详情回查 `status=ONLINE`、`stage=NOT_START`、`isPreApply=0`，任务包含充值 `4744`、现货 `4874`、合约 `4873`。
 - 关联流程：`skills/weex-admin-ops/scripts/strict-lottery-visible-attempt.mjs`、`skills/weex-admin-ops/scripts/create-lottery-activity-draft.mjs`、`活动列表 / 转盘抽奖 / 新增 / 活动任务信息 / 上线`。
 - 后续处理：已吸收到脚本参数和 operation/action-cache 文档；后续同类多任务活动必须走多任务逐个落行校验。
+
+## 2026-05-25 后管主回归创建活动开始时间被判定为“已过期”
+
+- 业务线：活动列表 / 转盘抽奖 / 新增（headless UI）。
+- 场景：执行 `lottery-admin-main-regression` 创建“后管主回归”草稿活动，传入 `--start/--end`。
+- 失败表现：`POST /prod-api/activity/config` 返回 HTTP 200 但业务 `code=500`，`msg=开始时间不可小于现在时间`，导致后续列表验证/上下线阶段全部被跳过。
+- 失败原因：回归调度里把“上海时区时间窗口”误按 UTC 字段格式化，导致传入的 `startTime` 在后端时区解释下落到过去。
+- 解决方式：时间窗口改为“按真实当前时间戳 + offset 计算”，再用 `Asia/Shanghai` 直接格式化字符串；确保开始时间永远在未来（默认 +30 分钟）。
+- 验证结果：修复后使用同链路创建活动不再命中该后端校验。
+- 关联流程或脚本：`skills/weex-admin-ops/scripts/lottery-admin-main-regression.mjs`、`skills/weex-admin-ops/scripts/create-lottery-activity-draft.mjs`。

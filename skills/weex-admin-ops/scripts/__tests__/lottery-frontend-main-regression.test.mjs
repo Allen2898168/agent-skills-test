@@ -38,6 +38,7 @@ test("buildPlan skips activity creation when an existing alias is provided and s
     "frontend_single_draw",
     "frontend_reward_record",
   ]);
+  assert.ok(plan.phases.every(item => item.commands[0].includes("skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs")));
   assert.ok(plan.phases.every(item => item.commands[0].includes("ln12345678")));
 });
 

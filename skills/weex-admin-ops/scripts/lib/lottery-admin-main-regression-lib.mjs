@@ -105,13 +105,11 @@ export function evaluateAdminMainCase(caseEntry, phaseResult) {
     return buildCaseResult(caseEntry, phaseResult.phaseId, passed ? "PASS" : "FAIL", payload);
   }
   if (caseEntry.caseId === "AC-08") {
-    const taskCount = Array.isArray(verifyFirst.taskRequirement)
-      ? verifyFirst.taskRequirement.length
-      : Array.isArray(verifyFirst.taskConfig)
-        ? verifyFirst.taskConfig.length
-        : Array.isArray(verifyFirst.taskConfigIds)
-          ? verifyFirst.taskConfigIds.length
-          : 0;
+    const taskCount = Math.max(
+      Array.isArray(verifyFirst.taskRequirement) ? verifyFirst.taskRequirement.length : 0,
+      Array.isArray(verifyFirst.taskConfig) ? verifyFirst.taskConfig.length : 0,
+      Array.isArray(verifyFirst.taskConfigIds) ? verifyFirst.taskConfigIds.length : 0,
+    );
     const passed = taskCount > 0;
     return buildCaseResult(caseEntry, phaseResult.phaseId, passed ? "PASS" : "FAIL", payload);
   }

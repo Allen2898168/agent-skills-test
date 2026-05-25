@@ -58,7 +58,7 @@ test("dispatcher builds frontend main regression command for partial frontend sc
   });
   const frontendExecution = executions.find(item => item.entrypoint === "lottery_frontend_main_regression");
   assert.ok(frontendExecution);
-  assert.ok(frontendExecution.commandArgs[0].endsWith("scripts/lottery-frontend-main-regression.mjs"));
+  assert.ok(frontendExecution.commandArgs[0].endsWith("orchestrations/lottery-regression/scripts/lottery-frontend-main-regression.mjs"));
   const caseIdsFlagIndex = frontendExecution.commandArgs.indexOf("--case-ids");
   assert.ok(caseIdsFlagIndex >= 0);
   const automationCaseIds = collectAutomationCaseIdsForScenarios(selection.selectedScenarios);
@@ -67,6 +67,23 @@ test("dispatcher builds frontend main regression command for partial frontend sc
   assert.equal(frontendExecution.commandArgs[frontendExecution.commandArgs.indexOf("--recharge-amount") + 1], "2000");
   assert.equal(frontendExecution.commandArgs[frontendExecution.commandArgs.indexOf("--wait-for-start-ms") + 1], "900000");
   assert.ok(frontendExecution.commandArgs.includes("--visible"));
+  assert.deepEqual(frontendExecution.resources, []);
+});
+
+test("dispatcher marks admin-session entrypoints to avoid concurrent admin logins", () => {
+  const manifest = loadLotteryRegressionManifest();
+  const selection = resolveScenarioSelection("后管回归, 报名链路", manifest);
+  const executions = buildEntrypointCommands(selection.selectedScenarios, {
+    visible: false,
+    dryRun: false,
+    adminConcurrency: 1,
+  });
+  const adminExecution = executions.find(item => item.entrypoint === "lottery_admin_main_regression");
+  const frontendExecution = executions.find(item => item.entrypoint === "lottery_frontend_main_regression");
+  assert.ok(adminExecution);
+  assert.ok(frontendExecution);
+  assert.deepEqual(adminExecution.resources, ["ADMIN_SESSION"]);
+  assert.deepEqual(frontendExecution.resources, ["ADMIN_SESSION"]);
 });
 
 test("frontend scenario automation list includes newly wired state and draw interaction cases", () => {
