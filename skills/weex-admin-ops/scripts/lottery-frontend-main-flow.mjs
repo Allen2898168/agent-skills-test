@@ -3,10 +3,17 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { pathsFrom } from "./lib/runtime.mjs";
 import { parseFlags, printJson } from "./lib/cli.mjs";
+import {
+  appendMidsceneSummary,
+  buildMidsceneReportName,
+  createMidsceneRecorder,
+} from "./lib/midscene.mjs";
+import { buildRechargeRefreshState } from "./lib/lottery-frontend-recharge.mjs";
 import { loadFrontendEnv } from "../../weex-frontend-ops/scripts/lib/env.mjs";
 import { launchBrowser } from "../../weex-frontend-ops/scripts/lib/browser.mjs";
 import { resolveFrontendAccount } from "../../weex-frontend-ops/scripts/lib/account-config.mjs";
 import { buildFrontendAuthSession } from "../../weex-frontend-ops/scripts/lib/login-tool-adapter.mjs";
+import { installFrontendGatewayAuth } from "../../weex-frontend-ops/scripts/lib/frontend-gateway-auth.mjs";
 import { openLoginStatePage } from "../../weex-frontend-ops/scripts/business/auth-pages.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
@@ -21,6 +28,7 @@ Phases:
   --phase signup
   --phase recharge
   --phase draw
+  --phase five_draw
   --phase reward_record
 `;
 }
@@ -314,6 +322,35 @@ async function waitForActivityStart(page, activityUrl, timeoutMs) {
   return await detectMainButtonState(page);
 }
 
+async function waitForRechargeRefresh(page, activityUrl, accountUrl, activityAlias, network, countBefore, options = {}) {
+  const attempts = Number(options.attempts || 4);
+  const waitMs = Number(options.waitMs || 4000);
+  let pageState = await stabilizeInitialDrawPageState(page, activityAlias);
+  let progress = buildRechargeRefreshState({
+    countBefore,
+    pageDrawCount: pageState.drawCount,
+    frequency: network.frequency,
+    taskCompletions: network.taskCompletions,
+  });
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    if (progress.ok) return { pageState, progress, attemptsUsed: attempt - 1 };
+    logFlowProgress("recharge", `waiting refresh round ${attempt}/${attempts}; pageCount=${progress.pageCount ?? "null"} frequencyCount=${progress.frequencyCount ?? "null"} taskStatus=${progress.completedTaskStatus || "none"}`);
+    await openLoginStatePage(page, accountUrl);
+    await page.goto(activityUrl, { waitUntil: "domcontentloaded", timeout: 90000 });
+    await page.waitForTimeout(waitMs);
+    await page.reload({ waitUntil: "domcontentloaded", timeout: 90000 }).catch(() => {});
+    await page.waitForTimeout(waitMs);
+    pageState = await stabilizeInitialDrawPageState(page, activityAlias);
+    progress = buildRechargeRefreshState({
+      countBefore,
+      pageDrawCount: pageState.drawCount,
+      frequency: network.frequency,
+      taskCompletions: network.taskCompletions,
+    });
+  }
+  return { pageState, progress, attemptsUsed: attempts };
+}
+
 async function ensureSignup(page, activityUrl, network) {
   const initialState = await readMainButtonState(page);
   logFlowProgress("signup", `initial main button state: ${initialState || "unknown"}`);
@@ -388,6 +425,24 @@ async function performSingleDraw(page, network) {
   });
   await page.waitForTimeout(10000);
   const popupVisible = await page.getByText("恭喜你").first().isVisible().catch(() => false);
+  const popupRewardSummary = popupVisible
+    ? await page.evaluate(() => {
+        const visible = element => !!element && element.getClientRects().length
+          && getComputedStyle(element).display !== "none"
+          && getComputedStyle(element).visibility !== "hidden";
+        const dialog = [...document.querySelectorAll('[class*="dialog"], .el-dialog, [role="dialog"]')]
+          .filter(visible)
+          .find(element => (element.innerText || "").includes("恭喜你"));
+        const text = (dialog?.innerText || "").split("\n").map(item => item.trim()).filter(Boolean);
+        const lines = text.filter(item => ![
+          "恭喜你",
+          "知道了",
+          "关闭",
+          "确认",
+        ].includes(item) && !/^(抽奖|立即报名|我的奖品)$/.test(item));
+        return lines.slice(0, 3).join(" ").trim();
+      }).catch(() => "")
+    : "";
   const afterText = await page.locator("body").innerText().catch(() => "");
   const countAfter = parseCount(afterText);
   const luckDraws = Array.isArray(network?.luckDraws) ? network.luckDraws : [];
@@ -400,23 +455,177 @@ async function performSingleDraw(page, network) {
       || ""
   );
   const apiSuccess = apiCode === "00000";
+  if (popupVisible) {
+    await page.keyboard.press("Escape").catch(() => {});
+    await page.waitForTimeout(1200);
+  }
+  const buttonRestoredAfterDraw = await page.locator("button").filter({ hasText: /抽奖/ }).first().isVisible().catch(() => false);
   return {
     requestObserved: apiSuccess || popupVisible || (countBefore != null && countAfter != null && countBefore - countAfter === 1),
     requestSent: Boolean(latestLuckDraw),
     buttonVisibleBefore,
     buttonDisabledDuringDraw: busySnapshot.busy,
+    buttonRestoredAfterDraw,
     duplicateClickBlocked: secondClickBlocked || requestCountDelta <= 1,
     requestCountDelta,
     apiSuccess,
     apiCode,
     apiMessage,
     popupVisible,
+    popupRewardSummary,
     countBefore,
     countAfter,
   };
 }
 
-async function openRewardRecord(page) {
+async function readRewardPopup(page) {
+  const popupVisible = await page.getByText("恭喜你").first().isVisible().catch(() => false);
+  if (!popupVisible) {
+    return { popupVisible: false, popupRewardSummary: "", popupRewardCount: 0 };
+  }
+  const popupData = await page.evaluate(() => {
+    const visible = element => !!element && element.getClientRects().length
+      && getComputedStyle(element).display !== "none"
+      && getComputedStyle(element).visibility !== "hidden";
+    const dialog = [...document.querySelectorAll('[class*="dialog"], .el-dialog, [role="dialog"]')]
+      .filter(visible)
+      .find(element => (element.innerText || "").includes("恭喜你"));
+    const text = (dialog?.innerText || "").split("\n").map(item => item.trim()).filter(Boolean);
+    const lines = text.filter(item => ![
+      "恭喜你",
+      "知道了",
+      "关闭",
+      "确认",
+    ].includes(item) && !/^(抽奖|立即报名|我的奖品)$/.test(item));
+    return {
+      popupRewardSummary: lines.slice(0, 5).join(" ").trim(),
+      popupRewardCount: lines.length,
+    };
+  }).catch(() => ({ popupRewardSummary: "", popupRewardCount: 0 }));
+  return {
+    popupVisible,
+    popupRewardSummary: popupData.popupRewardSummary || "",
+    popupRewardCount: Number(popupData.popupRewardCount || 0),
+  };
+}
+
+async function performFiveDraw(page, network) {
+  const beforeText = await page.locator("body").innerText().catch(() => "");
+  const countBefore = parseCount(beforeText);
+  const luckDrawCountBefore = Array.isArray(network?.luckDraws) ? network.luckDraws.length : 0;
+  let button = page.locator("button").filter({ hasText: "抽奖 × 5" }).first();
+  if (!(await button.isVisible().catch(() => false))) {
+    button = page.getByText("抽奖 × 5", { exact: true }).first();
+  }
+  if (!(await button.isVisible().catch(() => false))) {
+    button = page.locator("button").filter({ hasText: /抽奖\s*[xX×]\s*5/ }).first();
+  }
+  if (!(await button.isVisible().catch(() => false))) {
+    return {
+      requestObserved: false,
+      requestSent: false,
+      buttonVisibleBefore: false,
+      buttonDisabledDuringDraw: false,
+      duplicateClickBlocked: false,
+      requestCountDelta: 0,
+      apiSuccess: false,
+      apiCode: "",
+      apiMessage: "",
+      popupVisible: false,
+      popupRewardSummary: "",
+      popupRewardCount: 0,
+      countBefore,
+      countAfter: countBefore,
+    };
+  }
+  const buttonVisibleBefore = true;
+  await waitBeforeClick(page);
+  await button.click({ timeout: 5000 }).catch(async () => {
+    await button.click({ force: true, timeout: 5000 }).catch(() => {});
+  });
+  const busySnapshot = await sampleButtonBusyState(page, button);
+  let secondClickBlocked = false;
+  await button.click({ timeout: 1000 }).catch(() => {
+    secondClickBlocked = true;
+  });
+  await page.waitForTimeout(10000);
+  const popup = await readRewardPopup(page);
+  const afterText = await page.locator("body").innerText().catch(() => "");
+  const countAfter = parseCount(afterText);
+  const luckDraws = Array.isArray(network?.luckDraws) ? network.luckDraws : [];
+  const requestCountDelta = Math.max(0, luckDraws.length - luckDrawCountBefore);
+  const latestLuckDraw = luckDraws.slice(luckDrawCountBefore).at(-1) || luckDraws.at(-1) || null;
+  const apiCode = latestLuckDraw?.body?.code ? String(latestLuckDraw.body.code) : "";
+  const apiMessage = String(
+    latestLuckDraw?.body?.msg
+      || latestLuckDraw?.body?.message
+      || ""
+  );
+  const apiSuccess = apiCode === "00000";
+  if (popup.popupVisible) {
+    await page.keyboard.press("Escape").catch(() => {});
+    await page.waitForTimeout(1200);
+  }
+  const buttonRestoredAfterDraw = await page.locator("button").filter({ hasText: /抽奖/ }).first().isVisible().catch(() => false);
+  return {
+    requestObserved: apiSuccess || popup.popupVisible || (countBefore != null && countAfter != null && countBefore - countAfter === 5),
+    requestSent: Boolean(latestLuckDraw),
+    buttonVisibleBefore,
+    buttonDisabledDuringDraw: busySnapshot.busy,
+    buttonRestoredAfterDraw,
+    duplicateClickBlocked: secondClickBlocked || requestCountDelta <= 1,
+    requestCountDelta,
+    apiSuccess,
+    apiCode,
+    apiMessage,
+    popupVisible: popup.popupVisible,
+    popupRewardSummary: popup.popupRewardSummary,
+    popupRewardCount: popup.popupRewardCount,
+    countBefore,
+    countAfter,
+  };
+}
+
+function extractCurrentActivityRewardSlice(lines, activityTitle) {
+  const normalizedTitle = String(activityTitle || "").trim();
+  if (!normalizedTitle) {
+    return {
+      currentActivityLines: [],
+      currentActivityRewardSummary: "",
+      currentActivityHasRewardRow: false,
+      currentActivityReadableRewardValue: false,
+      currentActivityDataLineCount: 0,
+    };
+  }
+  const matchingIndex = lines.findIndex(item => item === normalizedTitle || item.includes(normalizedTitle));
+  if (matchingIndex < 0) {
+    return {
+      currentActivityLines: [],
+      currentActivityRewardSummary: "",
+      currentActivityHasRewardRow: false,
+      currentActivityReadableRewardValue: false,
+      currentActivityDataLineCount: 0,
+    };
+  }
+  const nextTitleIndex = lines.findIndex((item, index) => (
+    index > matchingIndex
+    && item !== normalizedTitle
+    && /[\u4e00-\u9fa5A-Za-z0-9].*/.test(item)
+    && (item.includes("前端主回归") || item.includes("联动标题") || item.includes("自动化"))
+  ));
+  const sliceEnd = nextTitleIndex > matchingIndex ? nextTitleIndex : Math.min(lines.length, matchingIndex + 5);
+  const currentActivityLines = lines.slice(matchingIndex, sliceEnd);
+  const currentActivityDataLines = currentActivityLines.slice(1);
+  return {
+    currentActivityLines,
+    currentActivityRewardSummary: currentActivityDataLines.slice(0, 2).join(" ").trim(),
+    currentActivityHasRewardRow: currentActivityDataLines.length >= 3,
+    currentActivityReadableRewardValue: currentActivityDataLines.some(item => /[A-Za-z\u4e00-\u9fa5]{2,}|\d+(?:\.\d+)?/.test(item)),
+    currentActivityDataLineCount: currentActivityDataLines.length,
+  };
+}
+
+async function openRewardRecord(page, pageState = {}) {
   if (await page.getByText("恭喜你").first().isVisible().catch(() => false)) {
     await page.keyboard.press("Escape").catch(() => {});
     await page.waitForTimeout(1500);
@@ -443,8 +652,30 @@ async function openRewardRecord(page) {
     "备注",
     "我的奖品",
   ].includes(item));
+  const firstRewardSummary = dataLines.slice(0, 2).join(" ").trim();
   const hasRewardRow = dialogVisible && fieldHeaders.length >= 4 && dataLines.length >= 4;
   const hasReadableRewardValue = dataLines.some(item => /[A-Za-z\u4e00-\u9fa5]{2,}|\d+(?:\.\d+)?/.test(item));
+  const emptyStateText = lines.find(item => ["暂无数据", "暂无记录", "No Data"].includes(item)) || "";
+  const emptyStateVisible = dialogVisible && Boolean(emptyStateText);
+  const currentActivity = extractCurrentActivityRewardSlice(lines, pageState.activityTitle || "");
+  let closeAttempted = false;
+  let closed = false;
+  let pageRecoveredAfterClose = false;
+  if (dialogVisible) {
+    closeAttempted = true;
+    const closeButton = page.locator(".el-dialog__headerbtn, .el-dialog__close").first();
+    if (await closeButton.isVisible().catch(() => false)) {
+      await closeButton.click({ force: true, timeout: 5000 }).catch(() => {});
+    } else {
+      await page.keyboard.press("Escape").catch(() => {});
+    }
+    await page.waitForTimeout(1200);
+    closed = !(await page.getByText("奖励记录").first().isVisible().catch(() => false));
+    pageRecoveredAfterClose = closed && (
+      await page.getByText("我的奖品").first().isVisible().catch(() => false)
+      || await page.locator("button").filter({ hasText: /抽奖/ }).first().isVisible().catch(() => false)
+    );
+  }
   return {
     opened,
     dialogVisible,
@@ -453,6 +684,18 @@ async function openRewardRecord(page) {
     hasRewardRow,
     hasReadableRewardValue,
     dataLineCount: dataLines.length,
+    firstRewardSummary,
+    currentActivityTitle: pageState.activityTitle || "",
+    currentActivityLines: currentActivity.currentActivityLines,
+    currentActivityRewardSummary: currentActivity.currentActivityRewardSummary,
+    currentActivityHasRewardRow: currentActivity.currentActivityHasRewardRow,
+    currentActivityReadableRewardValue: currentActivity.currentActivityReadableRewardValue,
+    currentActivityDataLineCount: currentActivity.currentActivityDataLineCount,
+    emptyStateVisible,
+    emptyStateText,
+    closeAttempted,
+    closed,
+    pageRecoveredAfterClose,
   };
 }
 
@@ -498,7 +741,12 @@ async function main() {
     visible: args.visible,
     disableWebSecurity: true,
   });
-  const network = { applyOk: false, applyStatusTrue: false, luckDraws: [] };
+  const midscene = await createMidsceneRecorder(page, {
+    reportName: buildMidsceneReportName(["lottery-frontend", args.phase, args.activityAlias]),
+    groupName: "WEEX Lottery Frontend Regression",
+    groupDescription: `frontend phase: ${args.phase}`,
+  });
+  const network = { applyOk: false, applyStatusTrue: false, luckDraws: [], taskCompletions: null, frequency: null };
   page.on("response", async response => {
     const url = response.url();
     if (url.includes("/v1/activity/general/apply?") || url.endsWith("/v1/activity/general/apply")) {
@@ -524,16 +772,33 @@ async function main() {
         network.luckDraws.push({ status: response.status(), url, body: null });
       }
     }
+    if (url.includes("/v1/activity/general/taskCompletions?")) {
+      try { network.taskCompletions = await response.json(); } catch {}
+    }
+    if (url.includes("/v1/activity/general/raffle/frequency?")) {
+      try { network.frequency = await response.json(); } catch {}
+    }
   });
 
   try {
+    const emitResult = async (payload, stream = process.stdout) => {
+      await midscene.record(`phase:${args.phase}`, JSON.stringify({
+        ok: payload?.ok,
+        phase: payload?.phase,
+        activityAlias: args.activityAlias,
+      }, null, 2)).catch(() => {});
+      const midsceneReportPath = await midscene.finalize();
+      printJson(appendMidsceneSummary(payload, midsceneReportPath), stream);
+    };
     logFlowProgress(args.phase, `prepare auth session for activity ${args.activityAlias}`);
     await context.addCookies([cookie]);
+    await installFrontendGatewayAuth(context, auth.tokens.accessToken, { referer: activityUrl });
     await openLoginStatePage(page, accountUrl);
     await page.goto(activityUrl, { waitUntil: "domcontentloaded", timeout: 90000 });
+    await midscene.record("打开活动页", activityUrl);
     let pageState = await stabilizeInitialDrawPageState(page, args.activityAlias);
     if (pageState.guestVisible) {
-      printJson({
+      await emitResult({
         ok: false,
         error: "frontend draw page still showed guest state after cookie login",
         account: { alias: account.alias, username: account.username, uid },
@@ -549,7 +814,7 @@ async function main() {
     }
 
     if (args.phase === "readonly") {
-      printJson({
+      await emitResult({
         ok: pageState.opened && !pageState.guestVisible && !pageState.loginFormVisible,
         phase: args.phase,
         account: { alias: account.alias, username: account.username, uid },
@@ -566,7 +831,7 @@ async function main() {
     let mqRecharge = { ok: false, sent: false, uid, amount: args.rechargeAmount, countBefore, countAfter: countBefore };
 
     if (args.phase === "signup") {
-      printJson({
+      await emitResult({
         ok: pageState.opened && signup.done,
         phase: args.phase,
         account: { alias: account.alias, username: account.username, uid },
@@ -590,19 +855,26 @@ async function main() {
         "--confirm-send",
       ]);
       logFlowProgress(args.phase, "MQ callback sent, refreshing activity page");
-      await page.goto(activityUrl, { waitUntil: "domcontentloaded", timeout: 90000 });
-      logFlowProgress(args.phase, "waiting 5s for task status / draw count refresh");
-      await page.waitForTimeout(5000);
-      refreshedState = await stabilizeInitialDrawPageState(page, args.activityAlias);
+      const refresh = await waitForRechargeRefresh(page, activityUrl, accountUrl, args.activityAlias, network, countBefore, {
+        attempts: 4,
+        waitMs: 4000,
+      });
+      refreshedState = refresh.pageState;
       mqRecharge = {
-        ok: mqResult.exitCode === 0 && mqResult.payload?.ok !== false,
+        ok: mqResult.exitCode === 0 && mqResult.payload?.ok !== false && refresh.progress.ok,
         sent: true,
         uid,
         amount: args.rechargeAmount,
-        countBefore,
-        countAfter: refreshedState.drawCount ?? countBefore,
+        countBefore: refresh.progress.countBefore,
+        countAfter: refresh.progress.countAfter,
+        pageCount: refresh.progress.pageCount,
+        frequencyCount: refresh.progress.frequencyCount,
+        completedTaskId: refresh.progress.completedTaskId,
+        completedTaskType: refresh.progress.completedTaskType,
+        completedTaskStatus: refresh.progress.completedTaskStatus,
+        refreshAttempts: refresh.attemptsUsed,
       };
-      logFlowProgress(args.phase, `draw count after MQ refresh: ${mqRecharge.countAfter}`);
+      logFlowProgress(args.phase, `draw count after MQ refresh: ${mqRecharge.countAfter}; frequencyCount=${mqRecharge.frequencyCount ?? "null"} taskId=${mqRecharge.completedTaskId ?? "none"} taskStatus=${mqRecharge.completedTaskStatus || "none"}`);
     } else if (countBefore >= 1) {
       mqRecharge.ok = true;
       mqRecharge.sent = false;
@@ -610,7 +882,7 @@ async function main() {
     }
 
     if (args.phase === "recharge") {
-      printJson({
+      await emitResult({
         ok: pageState.opened && signup.done && mqRecharge.ok,
         phase: args.phase,
         account: { alias: account.alias, username: account.username, uid },
@@ -632,13 +904,25 @@ async function main() {
       countBefore: refreshedState.drawCount ?? countBefore,
       countAfter: refreshedState.drawCount ?? countBefore,
     };
+    let fiveDraw = {
+      requestObserved: false,
+      requestSent: false,
+      apiSuccess: false,
+      apiCode: "",
+      apiMessage: "",
+      popupVisible: false,
+      popupRewardSummary: "",
+      popupRewardCount: 0,
+      countBefore: refreshedState.drawCount ?? countBefore,
+      countAfter: refreshedState.drawCount ?? countBefore,
+    };
 
-    if (args.phase !== "reward_record") {
+    if (args.phase === "draw") {
       draw = await performSingleDraw(page, network);
     }
 
     if (args.phase === "draw") {
-      printJson({
+      await emitResult({
         ok: pageState.opened && signup.done && draw.apiSuccess,
         phase: args.phase,
         account: { alias: account.alias, username: account.username, uid },
@@ -651,11 +935,27 @@ async function main() {
       return pageState.opened && signup.done && draw.apiSuccess ? 0 : 1;
     }
 
+    if (args.phase === "five_draw") {
+      fiveDraw = await performFiveDraw(page, network);
+      const fiveDrawOk = pageState.opened && signup.done && fiveDraw.requestObserved;
+      await emitResult({
+        ok: fiveDrawOk,
+        phase: args.phase,
+        account: { alias: account.alias, username: account.username, uid },
+        page: pageState,
+        signup,
+        mqRecharge,
+        fiveDraw,
+        failedResponses: failedResponses.slice(0, 20),
+      });
+      return fiveDrawOk ? 0 : 1;
+    }
+
     await page.waitForTimeout(5000);
-    const rewardRecord = await openRewardRecord(page);
+    const rewardRecord = await openRewardRecord(page, pageState);
 
     if (args.phase === "reward_record") {
-      printJson({
+      await emitResult({
         ok: pageState.opened && rewardRecord.opened && rewardRecord.dialogVisible,
         phase: args.phase,
         account: { alias: account.alias, username: account.username, uid },
@@ -668,7 +968,7 @@ async function main() {
       return pageState.opened && rewardRecord.opened && rewardRecord.dialogVisible ? 0 : 1;
     }
 
-    printJson({
+    await emitResult({
       ok: pageState.opened && signup.done && mqRecharge.ok,
       phase: args.phase,
       account: { alias: account.alias, username: account.username, uid },

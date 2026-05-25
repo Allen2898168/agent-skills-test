@@ -2,7 +2,7 @@
 import path from 'node:path';
 import { resolveFrontendAccount } from './lib/account-config.mjs';
 import { boolEnv, loadFrontendEnv, repoRoot } from './lib/env.mjs';
-import { buildFrontendAuthCookie } from './lib/login-tool-adapter.mjs';
+import { buildFrontendAuthSession } from './lib/login-tool-adapter.mjs';
 
 function parseArgs(argv) {
   const args = { dryRun: false, visible: null, screenshot: false };
@@ -78,7 +78,7 @@ if (args.dryRun) {
 }
 
 const account = resolveFrontendAccount(args.account);
-const cookie = await buildFrontendAuthCookie({
+const auth = await buildFrontendAuthSession({
   username: account.username,
   password: account.password,
   targetUrl
@@ -88,13 +88,15 @@ const [{ captureAuthEvidence, openLoginStatePage }, { launchBrowser }] = await P
   import('./business/auth-pages.mjs'),
   import('./lib/browser.mjs')
 ]);
+const { installFrontendGatewayAuth } = await import('./lib/frontend-gateway-auth.mjs');
 const { browser, context, page, failedResponses } = await launchBrowser({
   visible,
   disableWebSecurity: true
 });
 
 try {
-  await context.addCookies([cookie]);
+  await context.addCookies([auth.cookie]);
+  await installFrontendGatewayAuth(context, auth.tokens.accessToken, { referer: targetUrl });
   await openLoginStatePage(page, targetUrl);
   const evidence = await captureAuthEvidence(page, screenshot, failedResponses, { saveScreenshot });
   const passed = evidence.tokenCookiePresent

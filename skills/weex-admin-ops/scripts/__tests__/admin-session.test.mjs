@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   isExpiredSessionPromptText,
+  resolveAdminRestorePath,
   shouldRestoreAdminSession,
 } from "../lib/admin-session.mjs";
 
@@ -29,4 +30,15 @@ test("shouldRestoreAdminSession returns false for normal business page without e
     currentUrl: "https://stg-activity.weex.tech/activities/lottery",
     dialogText: "",
   }), false);
+});
+
+test("resolveAdminRestorePath preserves the current business page path", () => {
+  assert.equal(
+    resolveAdminRestorePath("https://stg-activity.weex.tech/activities/lottery/add?from=regression"),
+    "/activities/lottery/add?from=regression",
+  );
+});
+
+test("resolveAdminRestorePath falls back when URL is not parseable", () => {
+  assert.equal(resolveAdminRestorePath("not-a-url", "/activities/lottery"), "/activities/lottery");
 });

@@ -1,4 +1,4 @@
-import { shouldRestoreAdminSession } from "./admin-session.mjs";
+import { resolveAdminRestorePath, shouldRestoreAdminSession } from "./admin-session.mjs";
 
 export async function sleep(ms) {
   await new Promise(resolve => setTimeout(resolve, ms));
@@ -67,6 +67,11 @@ export async function ensureAdminSession(page, config, path) {
   if (!shouldRestoreAdminSession({ currentUrl: page.url(), dialogText })) return false;
   await loginToPath(page, config, path);
   return true;
+}
+
+export async function ensureAdminSessionForCurrentPage(page, config, fallbackPath = "/") {
+  const restorePath = resolveAdminRestorePath(page.url(), fallbackPath);
+  return ensureAdminSession(page, config, restorePath);
 }
 
 async function waitForOrdinaryCaptchaHidden(page, timeout) {

@@ -1,12 +1,16 @@
 #!/usr/bin/env node
 import fs from "node:fs";
-import { ensureAdminSession, loginToPrizePage } from "./lib/browser.mjs";
+import { ensureAdminSession, ensureAdminSessionForCurrentPage, loginToPrizePage } from "./lib/browser.mjs";
 import { timestamp } from "./lib/cli.mjs";
 import {
   isLotteryDraftCreateSuccessful,
   shouldSearchLotteryListAfterSubmit,
 } from "./lib/lottery-draft-verification.mjs";
 import { adminConfig, assertAdminConfig, loadLocalEnv, loadPlaywright, pathsFrom } from "./lib/runtime.mjs";
+import {
+  buildMidsceneReportName,
+  createMidsceneRecorder,
+} from "./lib/midscene.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
 loadLocalEnv(repoRoot);
@@ -33,7 +37,7 @@ const activityTaskLabel = process.env.LOTTERY_ACTIVITY_TASK_LABEL || "";
 const activityTaskLabels = parseList(process.env.LOTTERY_ACTIVITY_TASK_LABELS).length
   ? parseList(process.env.LOTTERY_ACTIVITY_TASK_LABELS)
   : [activityTaskLabel || "4998-自动化转盘首充100_20260514332054", "4997-自动化转盘现货100_20260514332054", "4996-自动化转盘合约100_20260514332054", "5102-自动化测试 - 非首次充值"];
-const enablePreApply = process.env.LOTTERY_PREAPPLY !== "0";
+const enablePreApply = process.env.LOTTERY_PREAPPLY === "1";
 const lotteryStyle = process.env.LOTTERY_STYLE || "圆形转盘";
 const shareCopy = process.env.LOTTERY_SHARE_COPY || "严格 UI 分享活动文案";
 const agentShareCopy = process.env.LOTTERY_AGENT_SHARE_COPY || "严格 UI 代理分享文案";
@@ -111,6 +115,11 @@ const existingPage = config.useExistingChrome
   ? context.pages().find(item => /\/activities\/lottery(\/add)?/.test(item.url()))
   : null;
 const page = existingPage || await context.newPage({ viewport: { width: 1440, height: 1000 } });
+const midscene = await createMidsceneRecorder(page, {
+  reportName: buildMidsceneReportName(["strict-lottery-visible-attempt", alias]),
+  groupName: "WEEX Lottery Admin Regression",
+  groupDescription: "严格UI新建转盘抽奖活动",
+});
 let authHeader = "";
 page.on("response", async response => {
   if (response.url().includes("/prod-api/common/upload")) evidence.uploads += 1;
@@ -283,23 +292,93 @@ async function fillLabel(label, value, nth = 0) {
 }
 
 async function fillDateLabel(label, value, nth = 0) {
-  const item = await formItem(label, nth);
-  if (!(await item.count())) throw new Error(`form item missing: ${label}`);
-  await item.scrollIntoViewIfNeeded({ timeout: 5000 });
-  const input = item.locator("input:not([type=radio]):not([type=checkbox])").first();
-  await input.waitFor({ state: "visible", timeout: 7000 }).catch(() => {});
-  await input.click({ force: true, timeout: 7000 });
-  await page.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A").catch(() => {});
-  await page.keyboard.type(String(value), { delay: 8 }).catch(async () => {
-    await input.fill(String(value), { timeout: 7000 });
-  });
-  await input.evaluate(element => {
-    element.dispatchEvent(new Event("input", { bubbles: true }));
-    element.dispatchEvent(new Event("change", { bubbles: true }));
-    element.blur();
-  }).catch(() => {});
-  await page.keyboard.press("Tab").catch(() => {});
-  await wait(200);
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const item = await formItem(label, nth);
+    if (!(await item.count())) throw new Error(`form item missing: ${label}`);
+    await item.scrollIntoViewIfNeeded({ timeout: 5000 });
+    const input = item.locator("input:not([type=radio]):not([type=checkbox])").first();
+    await input.waitFor({ state: "visible", timeout: 7000 }).catch(() => {});
+    const bound = await page.evaluate(({ label, value, nth }) => {
+      const visible = element => !!element && element.getClientRects().length
+        && getComputedStyle(element).display !== "none"
+        && getComputedStyle(element).visibility !== "hidden";
+      const items = [...document.querySelectorAll(".el-form-item")]
+        .filter(visible)
+        .filter(item => item.querySelector(".el-form-item__label")?.innerText?.trim().includes(label));
+      const item = items[nth];
+      if (!item) return null;
+      item.scrollIntoView({ block: "center", inline: "nearest" });
+      const editor = [...item.querySelectorAll(".el-date-editor")].filter(visible)[0];
+      const input = [...item.querySelectorAll("input:not([type=radio]):not([type=checkbox])")].filter(visible)[0];
+      if (editor?.__vue__) {
+        const vm = editor.__vue__;
+        vm.emitInput?.(value);
+        vm.emitChange?.(value);
+        vm.$emit?.("input", value);
+        vm.$emit?.("change", value);
+        vm.userInput = null;
+      }
+      if (input) {
+        const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+        setter?.call(input, String(value));
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+        input.blur();
+      }
+      return {
+        inputValue: input?.value || "",
+        editorValue: editor?.__vue__?.value ?? null,
+        editorDisplayValue: editor?.__vue__?.displayValue ?? null,
+      };
+    }, { label, value: String(value), nth }).catch(() => null);
+    await wait(250);
+    const current = await page.evaluate(({ label, nth }) => {
+      const visible = element => !!element && element.getClientRects().length
+        && getComputedStyle(element).display !== "none"
+        && getComputedStyle(element).visibility !== "hidden";
+      const items = [...document.querySelectorAll(".el-form-item")]
+        .filter(visible)
+        .filter(item => item.querySelector(".el-form-item__label")?.innerText?.trim().includes(label));
+      const item = items[nth];
+      if (!item) return null;
+      const editor = [...item.querySelectorAll(".el-date-editor")].filter(visible)[0];
+      const input = [...item.querySelectorAll("input:not([type=radio]):not([type=checkbox])")].filter(visible)[0];
+      return {
+        inputValue: input?.value || "",
+        editorValue: editor?.__vue__?.value ?? null,
+        editorDisplayValue: editor?.__vue__?.displayValue ?? null,
+      };
+    }, { label, nth }).catch(() => null);
+    const normalizedValue = String(value);
+    const isBound = [
+      bound?.inputValue,
+      bound?.editorValue,
+      bound?.editorDisplayValue,
+      current?.inputValue,
+      current?.editorValue,
+      current?.editorDisplayValue,
+    ].some(entry => String(entry || "") === normalizedValue);
+    if (isBound) {
+      await page.keyboard.press("Tab").catch(() => {});
+      await wait(200);
+      return;
+    }
+    await input.click({ force: true, timeout: 7000 }).catch(() => {});
+    await page.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A").catch(() => {});
+    await page.keyboard.type(normalizedValue, { delay: 8 }).catch(async () => {
+      await input.fill(normalizedValue, { timeout: 7000 }).catch(() => {});
+    });
+    await input.evaluate(element => {
+      element.dispatchEvent(new Event("input", { bubbles: true }));
+      element.dispatchEvent(new Event("change", { bubbles: true }));
+      element.blur();
+    }).catch(() => {});
+    await page.keyboard.press("Tab").catch(() => {});
+    await wait(250);
+    const fallbackValue = await input.inputValue().catch(() => "");
+    if (String(fallbackValue || "") === normalizedValue) return;
+  }
+  throw new Error(`date label not bound: ${label}=${value}`);
 }
 
 async function fillRich(label, value, nth = 0) {
@@ -421,6 +500,16 @@ async function fetchActivityConfigDetail(detailId, authHeader, attempts = 5) {
 async function uploadLabel(label, nth = 0) {
   const item = await formItem(label, nth);
   if (!(await item.count())) throw new Error(`form item missing: ${label}`);
+  await item.scrollIntoViewIfNeeded({ timeout: 5000 });
+  await item.locator("input[type=file]").first().setInputFiles(config.imagePath);
+  await wait(650);
+}
+
+async function uploadLabelAfterSection(sectionText, label, nth = 0) {
+  const item = page.locator(
+    `xpath=(//*[contains(normalize-space(.), "${sectionText}")]/following::div[contains(@class,'el-form-item')][.//label[contains(normalize-space(.), "${label}")]])[${nth + 1}]`,
+  ).first();
+  if (!(await item.count())) throw new Error(`section form item missing: ${sectionText} -> ${label}`);
   await item.scrollIntoViewIfNeeded({ timeout: 5000 });
   await item.locator("input[type=file]").first().setInputFiles(config.imagePath);
   await wait(650);
@@ -941,8 +1030,8 @@ async function fillCalendar() {
   await wait(700);
   await selectLabel("所属一级筛选标签", null, 0, 0).catch(() => {});
   await selectLabel("所属二级筛选标签", null, 0, 0).catch(() => {});
-  await uploadLabel("配图", 0).catch(() => {});
-  await uploadLabel("小图标", 0).catch(() => {});
+  await uploadLabelAfterSection("活动日历", "配图", 0).catch(() => {});
+  await uploadLabelAfterSection("活动日历", "小图标", 0).catch(() => {});
   await selectLabel("所属分区", null, 0, 0).catch(() => {});
   await wait(600);
 }
@@ -950,24 +1039,42 @@ async function fillCalendar() {
 try {
   console.log(JSON.stringify({ step: "start", title, alias, configuredActivityStartTime, configuredActivityEndTime, lotteryStyle }));
   await openLotteryViaMenu();
+  await midscene.record("打开活动列表", `${title}\n${alias}`).catch(() => {});
   await clickButton("新增");
   await page.waitForURL(/\/activities\/lottery\/add/, { timeout: 15000 });
   await wait(3000);
+  if (await ensureAdminSessionForCurrentPage(page, config, "/activities/lottery/add")) {
+    await page.waitForURL(/\/activities\/lottery\/add/, { timeout: 15000 }).catch(() => {});
+    await wait(2500);
+  }
 
   console.log(JSON.stringify({ step: "basic" }));
   await clickRadio("配置类型", "正式活动");
+  console.log(JSON.stringify({ step: "basic_config_type_done" }));
   await fillLabel("负责人", ownerLabel);
+  console.log(JSON.stringify({ step: "basic_owner_done" }));
   await selectLabel("类别配置", "通用");
+  console.log(JSON.stringify({ step: "basic_category_done" }));
   await selectLabel("流程引导配置", guideTemplateLabel || null, 0, 0);
+  console.log(JSON.stringify({ step: "basic_guide_done" }));
   await clickRadio("是否为平台活动", platformActivity);
+  console.log(JSON.stringify({ step: "basic_platform_done" }));
   await fillLabel("活动标题", title, 0);
+  console.log(JSON.stringify({ step: "basic_title_done" }));
   await fillLabel("活动副标题", subTitle, 0);
+  console.log(JSON.stringify({ step: "basic_subtitle_done" }));
   await selectRegistrationTemplate(registrationTemplateLabel);
+  console.log(JSON.stringify({ step: "basic_registration_template_done" }));
   for (const label of ["WEB头图上传", "H5头图上传", "web分享图上传", "H5分享图片上传", "社媒活动预览图上传"]) await uploadLabel(label, 0);
+  console.log(JSON.stringify({ step: "basic_uploads_done" }));
   await fillLabel("分享活动文案", shareCopy, 0);
+  console.log(JSON.stringify({ step: "basic_share_copy_done" }));
   await fillLabel("代理分享文案", agentShareCopy, 0);
+  console.log(JSON.stringify({ step: "basic_agent_share_copy_done" }));
   await fillRich("活动规则", activityRules, 0);
+  console.log(JSON.stringify({ step: "basic_rules_done" }));
   await fillLabel("活动别名配置", alias);
+  console.log(JSON.stringify({ step: "basic_alias_done" }));
   if (enablePreApply) {
     await ensurePreApplySupport();
     await selectLabel("预报名模版", null, 0, 0);
@@ -976,9 +1083,13 @@ try {
   } else {
     await clickRadio("是否支持预报名", "不支持");
   }
+  console.log(JSON.stringify({ step: "basic_preapply_done", enabled: enablePreApply }));
   await clickRadio("是否显示活动日历入口", "是");
+  console.log(JSON.stringify({ step: "basic_calendar_entry_done" }));
   await selectLabel("抽奖样式", lotteryStyle).catch(() => {});
+  console.log(JSON.stringify({ step: "basic_style_done" }));
   if (!(await readApplyConfigId())) await selectRegistrationTemplate(registrationTemplateLabel);
+  console.log(JSON.stringify({ step: "basic_apply_config_verified" }));
 
   console.log(JSON.stringify({ step: "prizes" }));
   await fillPrizeRows();
@@ -1187,6 +1298,14 @@ try {
     await wait(1500);
   }
   const ok = isLotteryDraftCreateSuccessful({ createBody, verify });
+  await midscene.record("创建结果", JSON.stringify({
+    ok,
+    title,
+    alias,
+    createCode: createBody?.code || null,
+    verifyTotal: verify?.total || 0,
+  }, null, 2)).catch(() => {});
+  const midsceneReportPath = await midscene.finalize();
   console.log(JSON.stringify({
     ok,
     title,
@@ -1207,6 +1326,7 @@ try {
     verifyFirst: verifyDetail?.data || verifyListItem,
     verifyListFirst: verifyListItem,
     skippedUiSearchAfterSubmit: !shouldSearchList,
+    midsceneReportPath,
     uploads: evidence.uploads,
     activityResponses: evidence.activityResponses,
   }, null, 2));
@@ -1224,7 +1344,9 @@ try {
       .filter(Boolean);
     return { formErrors: formErrors.slice(0, 80), messages: messages.slice(0, 20) };
   }).catch(() => []);
-  console.error(JSON.stringify({ ok: false, error: error.message, url: page.url(), title, alias, errors, uploads: evidence.uploads, activityResponses: evidence.activityResponses }, null, 2));
+  await midscene.record("创建失败", error.message).catch(() => {});
+  const midsceneReportPath = await midscene.finalize();
+  console.error(JSON.stringify({ ok: false, error: error.message, url: page.url(), title, alias, midsceneReportPath, errors, uploads: evidence.uploads, activityResponses: evidence.activityResponses }, null, 2));
   if (keepOpenOnError && !headlessMode) {
     console.error(JSON.stringify({ debug: true, message: "browser kept open on error for manual inspection", url: page.url(), alias }, null, 2));
     await wait(30 * 60 * 1000).catch(() => {});
