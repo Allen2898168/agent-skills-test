@@ -9,11 +9,34 @@ export function accountUrlFor(targetUrl) {
   return process.env.WEEX_FRONTEND_ACCOUNT_URL || new URL('/zh-CN/account', targetUrl).href;
 }
 
+async function gotoWithRetries(page, url, options, { attempts = 3, delayMs = 1500 } = {}) {
+  let lastError = null;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      await page.goto(url, options);
+      return;
+    } catch (error) {
+      lastError = error;
+      const message = String(error?.message || '');
+      const retryable = [
+        'net::ERR_NAME_NOT_RESOLVED',
+        'net::ERR_CONNECTION_TIMED_OUT',
+        'net::ERR_TIMED_OUT',
+        'net::ERR_NETWORK_CHANGED',
+        'Navigation timeout',
+      ].some((token) => message.includes(token));
+      if (!retryable || attempt >= attempts) throw error;
+      await page.waitForTimeout(delayMs);
+    }
+  }
+  throw lastError || new Error(`Failed to navigate: ${url}`);
+}
+
 export async function openLoginStatePage(page, targetUrl) {
-  await page.goto(homeUrlFor(targetUrl), { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await gotoWithRetries(page, homeUrlFor(targetUrl), { waitUntil: 'domcontentloaded', timeout: 60000 });
   await page.waitForTimeout(5000);
 
-  await page.goto(accountUrlFor(targetUrl), {
+  await gotoWithRetries(page, accountUrlFor(targetUrl), {
     waitUntil: 'domcontentloaded',
     timeout: 60000
   });
@@ -21,9 +44,9 @@ export async function openLoginStatePage(page, targetUrl) {
 
   const body = await page.evaluate(() => document.body.innerText || document.body.textContent || '');
   if (/登录\s*邮箱\/手机号|还没有账户|请输入邮箱|Log\s*in|Sign\s*up/i.test(body)) {
-    await page.goto(homeUrlFor(targetUrl), { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await gotoWithRetries(page, homeUrlFor(targetUrl), { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(4000);
-    await page.goto(accountUrlFor(targetUrl), {
+    await gotoWithRetries(page, accountUrlFor(targetUrl), {
       waitUntil: 'domcontentloaded',
       timeout: 60000
     });

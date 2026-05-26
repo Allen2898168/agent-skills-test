@@ -6,6 +6,7 @@ function buildPlan(args, payload) {
     kafkaUrl: args.kafkaUrl,
     uid: args.uid,
     amount: String(args.amount),
+    mode: args.visible ? "visible" : "headless",
     payload,
     assertions: [
       "Kafka messages produce API returns HTTP 200",
@@ -24,7 +25,10 @@ function assertSent(result) {
 }
 
 async function sendMqRecharge(args, payload) {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({
+    headless: !args.visible,
+    slowMo: args.visible ? 80 : 0,
+  });
   const page = await browser.newPage({ viewport: { width: 1800, height: 1200 } });
   const requestLog = { request: null, response: null };
   page.on("request", (request) => {
@@ -41,27 +45,39 @@ async function sendMqRecharge(args, payload) {
   });
   try {
     await page.goto(args.kafkaUrl, { waitUntil: "domcontentloaded", timeout: Number(args.timeoutMs) });
-    await page.waitForTimeout(1500);
+    const openButton = page.getByRole("button", { name: /Produce Message/i }).first();
+    await openButton.waitFor({ timeout: Number(args.timeoutMs) });
+    await openButton.click();
+    await page.locator("#content").waitFor({ timeout: Number(args.timeoutMs) });
     const content = JSON.stringify(payload, null, 2);
     await page.evaluate((input) => {
       const setEditor = (id, value) => {
-        const editor = window.ace.edit(id);
+        const root = document.getElementById(id);
+        if (!root) throw new Error(`ace root #${id} not found`);
+        const editor = window.ace.edit(root);
         editor.setValue(value, -1);
         return editor.getValue();
       };
       setEditor("key", "");
       setEditor("content", input);
       setEditor("headers", "{}");
-      const form = document.querySelector("form");
-      const button = form && [...form.querySelectorAll("button")].find((item) => /Produce Message/.test(item.innerText || item.textContent || ""));
-      if (!button) throw new Error("produce button not found");
-      button.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
     }, content);
+    const submitButton = page.getByRole("button", { name: /Produce Message/i }).last();
+    await submitButton.scrollIntoViewIfNeeded();
+    await submitButton.click();
     await page.waitForTimeout(2500);
     const successText = await page.getByText("Message successfully sent").first().isVisible().catch(() => false);
     await page.reload({ waitUntil: "domcontentloaded", timeout: Number(args.timeoutMs) });
     await page.waitForTimeout(2500);
-    const foundMessageId = await page.evaluate((messageId) => document.body.innerText.includes(String(messageId)), payload.after.id);
+    const deadline = Date.now() + 20_000;
+    let foundMessageId = false;
+    while (!foundMessageId && Date.now() < deadline) {
+      foundMessageId = await page
+        .evaluate((messageId) => document.documentElement.textContent?.includes(String(messageId)) ?? false, payload.after.id)
+        .catch(() => false);
+      if (foundMessageId) break;
+      await page.waitForTimeout(1000);
+    }
     return {
       finalUrl: page.url(),
       request: requestLog.request,

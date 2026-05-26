@@ -1,0 +1,18 @@
+version: 1
+id: flow.frontend_readonly
+
+steps:
+  - id: frontend_readonly
+    run: node
+    whenSet: [activityAlias]
+    args:
+      - skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs
+      - --phase
+      - readonly
+      - --activity-alias
+      - "{{activityAlias}}"
+    capture:
+      pageMainButtonState: page.mainButtonState
+      pageDrawCount: page.drawCount
+      pageUrl: page.url
+

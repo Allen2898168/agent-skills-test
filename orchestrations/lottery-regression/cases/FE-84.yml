@@ -1,0 +1,32 @@
+version: 1
+id: FE-84
+name: 充值任务-报名后发送MQ回调
+deps: [FE-82]
+
+includes:
+  - ../flows/activity-online.yml
+
+steps:
+  - id: fe84_recharge_prepare
+    run: node
+    whenSet: [activityAlias]
+    args:
+      - skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs
+      - --phase
+      - recharge
+      - --activity-alias
+      - "{{activityAlias}}"
+      - --recharge-amount
+      - "{{rechargeAmount}}"
+      - --save-screenshot
+      - --screenshot-path
+      - "{{screenshotDir}}/FE-84_recharge.png"
+    assert:
+      - path: ok
+        equals: true
+      - path: mqRecharge.ok
+        equals: true
+      - path: mqRecharge.sent
+        equals: true
+      - path: mqRecharge.countAfter
+        gte: 1

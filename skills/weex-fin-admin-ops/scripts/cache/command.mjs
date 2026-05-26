@@ -57,6 +57,7 @@ export function commandFor(match, args, skillRoot) {
     if (params.messageId) commandArgs.push("--message-id", String(params.messageId));
     if (params.kafkaUrl) commandArgs.push("--kafka-url", String(params.kafkaUrl));
     if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+    if (args.visible || params.visible) commandArgs.push("--visible");
     if (args.confirmSend || params.confirmSend) commandArgs.push("--confirm-send");
     return { script, commandArgs };
   }

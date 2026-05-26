@@ -1,0 +1,33 @@
+version: 1
+id: flow.activity_online
+
+steps:
+  - id: admin_create_activity
+    run: node
+    whenUnset: [activityAlias]
+    args:
+      - skills/weex-admin-ops/scripts/create-lottery-activity-draft.mjs
+      - --headless-ui
+      - --title-prefix
+      - 前端主回归
+      - --alias-prefix
+      - lf
+      - --style
+      - 圆形转盘
+      - --no-preapply
+    capture:
+      activityAlias: alias
+
+  - id: admin_online_activity
+    run: node
+    whenSet: [activityAlias]
+    whenUnset: [activityOnline]
+    args:
+      - skills/weex-admin-ops/scripts/online-lottery-activity.mjs
+      - --activity-alias
+      - "{{activityAlias}}"
+    assert:
+      - path: ok
+        equals: true
+    capture:
+      activityOnline: ok

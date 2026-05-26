@@ -41,8 +41,9 @@ export function buildLotteryDraftPlan(args = {}) {
   const subtitle = args.subtitle || "严格 UI 复杂配置副标题";
   const aliasPrefix = args.aliasPrefix || "lt";
   const alias = args.aliasExact || buildShortLotteryAlias(aliasPrefix, stamp);
-  const start = args.start || "2026-06-10 00:00:00";
-  const end = args.end || "2026-06-30 23:59:59";
+  const defaultWindow = buildDefaultActivityWindow();
+  const start = args.start || defaultWindow.start;
+  const end = args.end || defaultWindow.end;
   const writeEnabled = Boolean(args.visible && !args.dryRun);
   return {
     timestamp: stamp,
@@ -92,4 +93,34 @@ export function buildLotteryDraftPlan(args = {}) {
       "多任务活动可通过 --activity-task-labels 或 LOTTERY_ACTIVITY_TASK_LABELS 传入，分隔符支持 | 或逗号。",
     ],
   };
+}
+
+function buildDefaultActivityWindow() {
+  const now = new Date();
+  const start = new Date(now.getTime() + 4 * 60 * 1000);
+  const end = new Date(start.getTime() + 30 * 24 * 60 * 60 * 1000);
+  return {
+    start: formatDateTimeInTimeZone(start, "Asia/Shanghai"),
+    end: formatDateTimeInTimeZone(end, "Asia/Shanghai"),
+  };
+}
+
+function formatDateTimeInTimeZone(date, timeZone) {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+  const parts = Object.fromEntries(
+    formatter
+      .formatToParts(date)
+      .filter(part => part.type !== "literal")
+      .map(part => [part.type, part.value]),
+  );
+  return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}:${parts.second}`;
 }

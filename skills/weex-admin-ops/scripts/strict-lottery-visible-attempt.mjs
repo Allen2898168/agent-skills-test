@@ -169,12 +169,20 @@ function resolveActivityWindow() {
     };
   }
   const now = new Date();
-  const start = new Date(now.getTime() + 2 * 60 * 1000);
+  const start = new Date(now.getTime() + 4 * 60 * 1000);
   const end = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
   return {
     start: formatUtc8DateTime(start),
     end: formatUtc8DateTime(end),
   };
+}
+
+function parseUtc8DateTime(value) {
+  const text = String(value || "").trim();
+  const match = text.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})$/);
+  if (!match) return Number.NaN;
+  const [, y, m, d, hh, mm, ss] = match;
+  return Date.parse(`${y}-${m}-${d}T${hh}:${mm}:${ss}+08:00`);
 }
 async function formItem(label, nth = 0) {
   return page
@@ -379,6 +387,33 @@ async function fillDateLabel(label, value, nth = 0) {
     if (String(fallbackValue || "") === normalizedValue) return;
   }
   throw new Error(`date label not bound: ${label}=${value}`);
+}
+
+async function fillDateLabelWithinOffsetRange(label, { minOffsetMinutes = 3, maxOffsetMinutes = 5 } = {}) {
+  const startedAt = Date.now();
+  const offsets = [];
+  for (let offset = minOffsetMinutes; offset <= maxOffsetMinutes; offset += 1) offsets.push(offset);
+  let best = null;
+
+  for (const offsetMinutes of offsets) {
+    const candidate = new Date(Date.now() + offsetMinutes * 60 * 1000);
+    candidate.setSeconds(0, 0);
+    const desired = formatUtc8DateTime(candidate);
+    await fillDateLabel(label, desired);
+    const actualValue = await formItem(label).then(item => item.locator("input").first().inputValue()).catch(() => "");
+    const actualEpoch = parseUtc8DateTime(actualValue);
+    const diffMinutes = Number.isFinite(actualEpoch)
+      ? (actualEpoch - Date.now()) / 60000
+      : Number.NaN;
+    const within = Number.isFinite(diffMinutes)
+      && diffMinutes >= minOffsetMinutes - 0.35
+      && diffMinutes <= maxOffsetMinutes + 0.35;
+    if (!best || (Number.isFinite(diffMinutes) && diffMinutes >= minOffsetMinutes - 0.35 && diffMinutes < (best.diffMinutes ?? Number.POSITIVE_INFINITY))) {
+      best = { desired, actualValue, diffMinutes };
+    }
+    if (within) return { ...best, chosen: true, startedAt };
+  }
+  return { ...(best || { desired: "", actualValue: "", diffMinutes: Number.NaN }), chosen: false, startedAt };
 }
 
 async function fillRich(label, value, nth = 0) {
@@ -1125,7 +1160,11 @@ try {
 
   console.log(JSON.stringify({ step: "activity_time" }));
   const activityWindow = resolveActivityWindow();
-  await fillDateLabel("活动开始时间", activityWindow.start);
+  if (configuredActivityStartTime) {
+    await fillDateLabel("活动开始时间", activityWindow.start);
+  } else {
+    await fillDateLabelWithinOffsetRange("活动开始时间", { minOffsetMinutes: 3, maxOffsetMinutes: 5 });
+  }
   await fillDateLabel("活动结束时间", activityWindow.end);
 
   console.log(JSON.stringify({ step: "submit" }));

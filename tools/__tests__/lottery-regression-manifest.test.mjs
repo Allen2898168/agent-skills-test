@@ -2,8 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const repoRoot = "/Users/jonathan/Documents/Codex/2026-05-05/https-github-com-allen2898168-agent-skills/agent-skills-test";
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const manifestPath = path.join(repoRoot, "docs/workflows/lottery-regression-manifest.json");
 
 function readManifest() {

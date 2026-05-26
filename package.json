@@ -9,9 +9,11 @@
     "configure:env": "node tools/configure-skill-env.mjs",
     "check:frontend": "node skills/weex-frontend-ops/scripts/maintenance/validate-knowledge-structure.mjs",
     "check:fin": "node skills/weex-fin-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs",
-    "check:admin": "node skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs"
+    "check:admin": "node skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs",
+    "check:orchestration": "node --test skills/weex-admin-ops/scripts/__tests__/lottery-regression-dispatcher.test.mjs skills/weex-admin-ops/scripts/__tests__/lottery-frontend-main-regression.test.mjs"
   },
   "dependencies": {
-    "playwright": "^1.59.1"
+    "playwright": "^1.59.1",
+    "yaml": "^2.9.0"
   }
 }

@@ -127,6 +127,20 @@ async function run() {
     }
   });
 
+  function scrubPayload(payload) {
+    if (!payload || typeof payload !== "object") return payload;
+    const cloned = JSON.parse(JSON.stringify(payload));
+    const walk = (obj) => {
+      if (!obj || typeof obj !== "object") return;
+      for (const [key, value] of Object.entries(obj)) {
+        if (value && typeof value === "object") walk(value);
+        if (/code|captcha|google|totp/i.test(key)) obj[key] = "<REDACTED>";
+      }
+    };
+    walk(cloned);
+    return cloned;
+  }
+
   try {
     await openLotteryViaMenu(page, config);
     const rowText = await searchTarget(page, config, target);
@@ -138,6 +152,15 @@ async function run() {
     const onlineResponse = await onlinePromise;
     let onlineBody = null;
     try { onlineBody = await onlineResponse?.json(); } catch {}
+    let onlineRequestBody = null;
+    try {
+      onlineRequestBody = onlineResponse?.request()?.postDataJSON?.();
+    } catch {
+      try {
+        const raw = onlineResponse?.request()?.postData?.();
+        onlineRequestBody = raw ? JSON.parse(raw) : null;
+      } catch {}
+    }
     await sleep(1500);
 
     let verify = null;
@@ -169,6 +192,12 @@ async function run() {
       confirmText,
       onlineStatus: onlineResponse?.status?.(),
       onlineBody,
+      onlineRequest: onlineRequestBody
+        ? {
+            keys: Object.keys(onlineRequestBody || {}),
+            body: scrubPayload(onlineRequestBody),
+          }
+        : null,
       verifyItem,
       finalUrl: page.url(),
     });

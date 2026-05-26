@@ -1,4 +1,4 @@
-import { sleep } from "../../lib/browser.mjs";
+import { loginToRegisterPage, sleep } from "../../lib/browser.mjs";
 import {
   clearCheckedByLabel,
   clickButton,
@@ -82,12 +82,20 @@ async function createOneTemplate(page, config, spec) {
 async function openRegisterPage(page, config) {
   await page.goto(`${config.baseUrl}/activity/register`, { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
+  if (page.url().includes("/login")) {
+    await loginToRegisterPage(page, config);
+    await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
+  }
   await page.locator('button:has-text("新增")').first().waitFor({ state: "visible", timeout: 15000 });
 }
 
 async function searchRegisterTemplate(page, config, name) {
   await page.goto(`${config.baseUrl}/activity/register`, { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
+  if (page.url().includes("/login")) {
+    await loginToRegisterPage(page, config);
+    await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
+  }
   const listPromise = page.waitForResponse(response => (
     response.url().includes("/prod-api/activity/apply/list") && response.request().method() === "GET"
   ), { timeout: 12000 }).catch(() => null);

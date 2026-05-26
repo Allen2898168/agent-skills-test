@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import path from "node:path";
-import { spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
+import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parseFlags, printJson, readJson } from "./lib/cli.mjs";
 import { loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
@@ -23,6 +24,11 @@ Options:
   --uid <uid>             uid used by agent/user participant-scope task defaults
   --country <text>        country used by country participant-scope task default
   --case-ids <csv>        limit execution/reporting to selected regression case ids
+  --concurrency <n>       max parallel phases without dependencies (default 10)
+  --command-timeout-ms <n>
+                        per child command timeout in milliseconds (default 300000)
+  --report-path <path>   write the full JSON report to this path (recommended for full runs)
+  --compact              print only compact summary JSON to stdout/stderr
   --visible               run child browser workflows in headed mode
   --dry-run               print the planned phases without writing data
   --help                  show this message
@@ -30,9 +36,13 @@ Options:
 }
 
 function parseArgs() {
-  const args = parseFlags(process.argv.slice(2), { booleans: ["--visible", "--dry-run"] });
+  const args = parseFlags(process.argv.slice(2), { booleans: ["--visible", "--dry-run", "--compact"] });
   args.visible = Boolean(args.visible);
   args.dryRun = Boolean(args.dryRun);
+  args.concurrency = Math.max(1, Math.min(10, Number(args.concurrency || 10)));
+  args.commandTimeoutMs = Math.max(30000, Number(args.commandTimeoutMs || 300000));
+  args.reportPath = args.reportPath ? String(args.reportPath) : "";
+  args.compact = Boolean(args.compact);
   args.caseIds = String(args.caseIds || "")
     .split(",")
     .map(item => item.trim())
@@ -42,21 +52,15 @@ function parseArgs() {
 
 function buildTimeWindow() {
   const now = new Date();
-  const shanghaiNow = pseudoDateInTimeZone(now, "Asia/Shanghai");
-  const start = new Date(shanghaiNow.getTime() + 30 * 60 * 1000);
+  const start = new Date(now.getTime() + 30 * 60 * 1000);
   const end = new Date(start.getTime() + 365 * 24 * 60 * 60 * 1000);
   return {
-    start: formatDateTime(start),
-    end: formatDateTime(end),
+    start: formatDateTimeInTimeZone(start, "Asia/Shanghai"),
+    end: formatDateTimeInTimeZone(end, "Asia/Shanghai"),
   };
 }
 
-function formatDateTime(value) {
-  const pad = number => String(number).padStart(2, "0");
-  return `${value.getUTCFullYear()}-${pad(value.getUTCMonth() + 1)}-${pad(value.getUTCDate())} ${pad(value.getUTCHours())}:${pad(value.getUTCMinutes())}:${pad(value.getUTCSeconds())}`;
-}
-
-function pseudoDateInTimeZone(date, timeZone) {
+function formatDateTimeInTimeZone(date, timeZone) {
   const formatter = new Intl.DateTimeFormat("en-CA", {
     timeZone,
     year: "numeric",
@@ -73,30 +77,33 @@ function pseudoDateInTimeZone(date, timeZone) {
       .filter(part => part.type !== "literal")
       .map(part => [part.type, part.value]),
   );
-  return new Date(Date.UTC(
-    Number(parts.year),
-    Number(parts.month) - 1,
-    Number(parts.day),
-    Number(parts.hour),
-    Number(parts.minute),
-    Number(parts.second),
-  ));
+  return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}:${parts.second}`;
 }
 
 export function buildPlan(args) {
   const timeWindow = buildTimeWindow();
+  const useFastApi = !args.visible;
+  const script = (fastApiScript, uiScript) => useFastApi ? fastApiScript : uiScript;
   return {
     actionId: "lottery_admin_main_regression",
-    mode: args.visible ? "visible_browser" : "headless_ui",
+    mode: args.visible ? "visible_browser" : "headless_api",
     phases: [
       {
-        phaseId: "create_prizes",
+        phaseId: "create_regression_prizes",
         dependsOn: [],
         description: "Create stable admin regression prizes.",
-        caseIds: ["PM-01", "PM-02", "PM-03", "PM-04", "PM-05", "PM-06", "PM-07", "PM-08", "PM-09", "PM-10", "PM-11"],
+        caseIds: ["PM-01", "PM-02", "PM-03", "PM-04", "PM-05", "PM-06", "PM-07"],
         commands: [
-          ["skills/weex-admin-ops/scripts/create-regression-prizes.mjs"],
-          ["skills/weex-admin-ops/scripts/prize-row-actions.mjs", "--category", "赠金", "--subtype", "赠金", "--count", "1", "--name-prefix", "操作列临时奖品", "--alias-prefix", "prize_row_action_temp"]
+          [script("skills/weex-admin-ops/scripts/create-regression-prizes-fast-api.mjs", "skills/weex-admin-ops/scripts/create-regression-prizes.mjs")],
+        ]
+      },
+      {
+        phaseId: "prize_row_actions",
+        dependsOn: ["create_regression_prizes"],
+        description: "Verify prize row actions view/modify/copy/delete by creating a temporary prize and performing operations.",
+        caseIds: ["PM-08", "PM-09", "PM-10", "PM-11"],
+        commands: [
+          [script("skills/weex-admin-ops/scripts/prize-row-actions-fast-api.mjs", "skills/weex-admin-ops/scripts/prize-row-actions.mjs"), "--category", "赠金", "--subtype", "赠金", "--count", "1", "--name-prefix", "操作列临时奖品", "--alias-prefix", "prize_row_action_temp"]
         ]
       },
       {
@@ -105,12 +112,12 @@ export function buildPlan(args) {
         description: "Create stable registration templates for admin regression.",
         caseIds: ["RT-03", "RT-04", "RT-05", "RT-06"],
         commands: [
-          ["skills/weex-admin-ops/scripts/create-register-templates.mjs", "--signup-modes", "auto", "--name-prefix", "自动化报名模板"],
-          ["skills/weex-admin-ops/scripts/create-register-templates.mjs", "--signup-modes", "manual", "--name-prefix", "自动化报名模板"],
-          ["skills/weex-admin-ops/scripts/create-register-templates.mjs", "--signup-modes", "team", "--name-prefix", "自动化报名模板", "--min-team", "2"],
-          ["skills/weex-admin-ops/scripts/create-register-templates.mjs", "--signup-modes", "auto_manual", "--name-prefix", "自动化报名模板"],
-          ["skills/weex-admin-ops/scripts/create-register-templates.mjs", "--signup-modes", "auto", "--platform-scopes", "channel_invite,natural,non_active,mixed,fake_money", "--name-prefix", "自动化报名模板"],
-          ["skills/weex-admin-ops/scripts/create-register-templates.mjs", "--signup-modes", "auto", "--platform-scopes", "non_active", "--register-start", timeWindow.start, "--register-end", timeWindow.end, "--name-prefix", "自动化报名模板"]
+          [script("skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs", "skills/weex-admin-ops/scripts/create-register-templates.mjs"), "--signup-modes", "auto", "--name-prefix", "自动化报名模板"],
+          [script("skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs", "skills/weex-admin-ops/scripts/create-register-templates.mjs"), "--signup-modes", "manual", "--name-prefix", "自动化报名模板"],
+          [script("skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs", "skills/weex-admin-ops/scripts/create-register-templates.mjs"), "--signup-modes", "team", "--name-prefix", "自动化报名模板", "--min-team", "2"],
+          [script("skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs", "skills/weex-admin-ops/scripts/create-register-templates.mjs"), "--signup-modes", "auto_manual", "--name-prefix", "自动化报名模板"],
+          [script("skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs", "skills/weex-admin-ops/scripts/create-register-templates.mjs"), "--signup-modes", "auto", "--platform-scopes", "channel_invite,natural,non_active,mixed,fake_money", "--name-prefix", "自动化报名模板"],
+          [script("skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs", "skills/weex-admin-ops/scripts/create-register-templates.mjs"), "--signup-modes", "auto", "--platform-scopes", "non_active", "--register-start", timeWindow.start, "--register-end", timeWindow.end, "--name-prefix", "自动化报名模板"]
         ]
       },
       {
@@ -128,7 +135,7 @@ export function buildPlan(args) {
         description: "Verify registration template row actions view/modify/delete.",
         caseIds: ["RT-07", "RT-08", "RT-09"],
         commands: [
-          ["skills/weex-admin-ops/scripts/register-template-row-actions.mjs", "--name-prefix", "操作列临时模板"]
+          [script("skills/weex-admin-ops/scripts/register-template-row-actions-fast-api.mjs", "skills/weex-admin-ops/scripts/register-template-row-actions.mjs"), "--name-prefix", "操作列临时模板"]
         ]
       },
       {
@@ -137,7 +144,7 @@ export function buildPlan(args) {
         description: "Create roulette tasks for representative participant scopes.",
         caseIds: ["TM-01", "TM-02", "TM-03", "TM-04", "TM-05", "TM-06", "TM-07", "TM-09"],
         commands: [
-          ["skills/weex-admin-ops/scripts/create-roulette-participant-scope-tasks.mjs", "--scopes", "all,vip,newuser,nocharge,olduser,agent,user,country", "--uid", String(args.uid || "9881271952"), "--country", String(args.country || "中国"), "--reward-max", "100"]
+          [script("skills/weex-admin-ops/scripts/create-roulette-participant-scope-tasks-fast-api.mjs", "skills/weex-admin-ops/scripts/create-roulette-participant-scope-tasks.mjs"), "--scopes", "all,vip,newuser,nocharge,olduser,agent,user,country", "--uid", String(args.uid || "9881271952"), "--country", String(args.country || "中国"), "--reward-max", "100"]
         ]
       },
       {
@@ -146,7 +153,7 @@ export function buildPlan(args) {
         description: "Create roulette tasks for representative task-condition branches.",
         caseIds: ["TM-08"],
         commands: [
-          ["skills/weex-admin-ops/scripts/create-roulette-condition-tasks.mjs", "--conditions", "kol,contract,spot,recharge"]
+          [script("skills/weex-admin-ops/scripts/create-roulette-condition-tasks-fast-api.mjs", "skills/weex-admin-ops/scripts/create-roulette-condition-tasks.mjs"), "--conditions", "kol,contract,spot,recharge"]
         ]
       },
       {
@@ -155,30 +162,38 @@ export function buildPlan(args) {
         description: "Create roulette tasks for limited and normal+rights reward modes.",
         caseIds: ["TM-10", "TM-11"],
         commands: [
-          ["skills/weex-admin-ops/scripts/create-roulette-reward-mode-tasks.mjs", "--modes", "limited,rights"]
+          [script("skills/weex-admin-ops/scripts/create-roulette-reward-mode-tasks-fast-api.mjs", "skills/weex-admin-ops/scripts/create-roulette-reward-mode-tasks.mjs"), "--modes", "limited,rights"]
         ]
       },
       {
         phaseId: "create_lottery_activity_draft",
-        dependsOn: [],
+        dependsOn: [
+          "create_regression_prizes",
+          "create_register_templates",
+          "create_roulette_tasks",
+          "create_roulette_condition_tasks",
+          "create_roulette_reward_mode_tasks",
+        ],
         description: "Create the main regression lottery draft with the verified template chain.",
         caseIds: ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05", "AC-06", "AC-07", "AC-08", "AC-09", "AC-10", "AC-11", "AC-12", "AC-13"],
         commands: [
-          [
-            "skills/weex-admin-ops/scripts/create-lottery-activity-draft.mjs",
-            "--headless-ui",
-            "--title-prefix",
-            String(args.titlePrefix || "后管主回归"),
-            "--alias-prefix",
-            String(args.aliasPrefix || "ln"),
-            "--start",
-            timeWindow.start,
-            "--end",
-            timeWindow.end,
-            "--style",
-            "圆形转盘",
-            "--no-preapply"
-          ]
+          useFastApi
+            ? ["skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs", "--action", "create-draft", "--title-prefix", String(args.titlePrefix || "后管主回归"), "--alias-prefix", String(args.aliasPrefix || "ln")]
+            : [
+              "skills/weex-admin-ops/scripts/create-lottery-activity-draft.mjs",
+              "--headless-ui",
+              "--title-prefix",
+              String(args.titlePrefix || "后管主回归"),
+              "--alias-prefix",
+              String(args.aliasPrefix || "ln"),
+              "--start",
+              timeWindow.start,
+              "--end",
+              timeWindow.end,
+              "--style",
+              "圆形转盘",
+              "--no-preapply"
+            ]
         ]
       },
       {
@@ -187,7 +202,7 @@ export function buildPlan(args) {
         description: "Verify draft activity list search filters and draft-row action visibility.",
         caseIds: ["AL-01", "AL-02", "AL-03", "AL-04", "AL-05", "AL-06"],
         commands: [
-          ["skills/weex-admin-ops/scripts/lottery-activity-list-draft-checks.mjs", "--activity-alias", "<created-alias>"]
+          [script("skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs", "skills/weex-admin-ops/scripts/lottery-activity-list-draft-checks.mjs"), ...(useFastApi ? ["--action", "draft-checks"] : []), "--activity-alias", "<created-alias>"]
         ]
       },
       {
@@ -196,7 +211,7 @@ export function buildPlan(args) {
         description: "Put the created draft online.",
         caseIds: ["ST-01"],
         commands: [
-          ["skills/weex-admin-ops/scripts/online-lottery-activity.mjs", "--activity-alias", "<created-alias>"]
+          [script("skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs", "skills/weex-admin-ops/scripts/online-lottery-activity.mjs"), ...(useFastApi ? ["--action", "online"] : []), "--activity-alias", "<created-alias>"]
         ]
       },
       {
@@ -205,7 +220,7 @@ export function buildPlan(args) {
         description: "Verify online activity row actions and copied draft creation from the list.",
         caseIds: ["AL-07", "AC-15", "ST-03"],
         commands: [
-          ["skills/weex-admin-ops/scripts/lottery-activity-list-online-checks.mjs", "--activity-alias", "<created-alias>"]
+          [script("skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs", "skills/weex-admin-ops/scripts/lottery-activity-list-online-checks.mjs"), ...(useFastApi ? ["--action", "online-checks"] : []), "--activity-alias", "<created-alias>"]
         ]
       },
       {
@@ -214,7 +229,7 @@ export function buildPlan(args) {
         description: "Take the created online activity offline after copy and draft-delete checks pass.",
         caseIds: ["ST-02"],
         commands: [
-          ["skills/weex-admin-ops/scripts/offline-lottery-activity.mjs", "--activity-alias", "<created-alias>"]
+          [script("skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs", "skills/weex-admin-ops/scripts/offline-lottery-activity.mjs"), ...(useFastApi ? ["--action", "offline"] : []), "--activity-alias", "<created-alias>"]
         ]
       }
     ]
@@ -237,20 +252,51 @@ function parseLastJson(text) {
 }
 
 function runNodeJson(commandArgs) {
-  const result = spawnSync(process.execPath, commandArgs, {
-    cwd: repoRoot,
-    env: process.env,
-    encoding: "utf8",
-    maxBuffer: 20 * 1024 * 1024,
+  return new Promise(resolve => {
+    const child = spawn(process.execPath, commandArgs, {
+      cwd: repoRoot,
+      env: process.env,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let killedByTimeout = false;
+    const timeoutMs = Math.max(0, Number(commandArgs?.timeoutMs || 0));
+    const timer = timeoutMs > 0
+      ? setTimeout(() => {
+          killedByTimeout = true;
+          child.kill("SIGTERM");
+          setTimeout(() => child.kill("SIGKILL"), 2000).unref();
+        }, timeoutMs)
+      : null;
+    let stdout = "";
+    let stderr = "";
+    child.stdout.on("data", chunk => {
+      stdout += chunk.toString();
+    });
+    child.stderr.on("data", chunk => {
+      stderr += chunk.toString();
+    });
+    child.on("error", error => {
+      if (timer) clearTimeout(timer);
+      const nextStderr = `${stderr}${error.message}\n`;
+      resolve({
+        exitCode: 1,
+        stdout,
+        stderr: nextStderr,
+        payload: parseLastJson(stdout) || parseLastJson(nextStderr),
+      });
+    });
+    child.on("close", code => {
+      if (timer) clearTimeout(timer);
+      resolve({
+        exitCode: killedByTimeout ? 124 : (code ?? 1),
+        stdout,
+        stderr,
+        payload: killedByTimeout
+          ? { ok: false, error: `Command timeout after ${timeoutMs}ms` }
+          : (parseLastJson(stdout) || parseLastJson(stderr)),
+      });
+    });
   });
-  const stdoutJson = parseLastJson(result.stdout);
-  const stderrJson = parseLastJson(result.stderr);
-  return {
-    exitCode: result.status ?? 1,
-    stdout: result.stdout || "",
-    stderr: result.stderr || "",
-    payload: stdoutJson || stderrJson,
-  };
 }
 
 function applyMode(command, args) {
@@ -418,40 +464,33 @@ async function run() {
   let createdActivity = { activityId: "", activityAlias: "" };
   let hadPhaseFailure = false;
 
-  for (const phase of plan.phases) {
-    const unmetDependencies = (phase.dependsOn || []).filter(dependency => {
-      const dependencyPhase = phaseResults.find(item => item.phaseId === dependency);
-      return !dependencyPhase || !dependencyPhase.ok;
-    });
-    if (unmetDependencies.length) {
-      continue;
-    }
-    if (phase.phaseId === "online_lottery_activity" && !createdActivity.activityAlias && !createdActivity.activityId) {
-      hadPhaseFailure = true;
-      phaseResults.push({
-        phaseId: phase.phaseId,
-        description: phase.description,
-        caseIds: phase.caseIds,
-        cases: phase.caseEntries,
-        commands: [],
-        ok: false,
-        payload: { ok: false, error: "Missing created activity target from previous phase." },
-        childResults: [],
-      });
-      continue;
-    }
+  const phaseById = new Map(plan.phases.map(phase => [phase.phaseId, phase]));
+  const pending = new Set(plan.phases.map(phase => phase.phaseId));
+  const finished = new Map();
+  const running = new Map();
+
+  const resolveUnmetDependencies = phase => (phase.dependsOn || []).filter(dependency => {
+    const dependencyPhase = finished.get(dependency);
+    return !dependencyPhase || !dependencyPhase.ok;
+  });
+
+  async function runPhase(phase) {
     const commandArgsList = resolvePhaseCommands(phase, args, createdActivity);
     const childResults = [];
     let phaseOk = true;
     let phasePayload = null;
     for (const commandArgs of commandArgsList) {
-      const result = runNodeJson(commandArgs);
+      const startedAt = Date.now();
+      process.stderr.write(`{"step":"admin_phase","phaseId":"${phase.phaseId}","status":"START"}\n`);
+      const result = await runNodeJson(Object.assign([...commandArgs], { timeoutMs: args.commandTimeoutMs }));
+      const childOk = result.exitCode === 0 && result.payload?.ok !== false;
+      process.stderr.write(`{"step":"admin_phase","phaseId":"${phase.phaseId}","status":"DONE","ok":${childOk ? "true" : "false"},"durationMs":${Date.now() - startedAt}}\n`);
       childResults.push({
         command: [process.execPath, ...commandArgs],
-        ok: result.exitCode === 0 && result.payload?.ok !== false,
+        ok: childOk,
         payload: result.payload,
       });
-      if (!childResults[childResults.length - 1].ok) {
+      if (!childOk) {
         phaseOk = false;
         phasePayload = result.payload;
         break;
@@ -461,7 +500,7 @@ async function run() {
         createdActivity = resolveActivityTarget(result.payload);
       }
     }
-    const phaseSummary = {
+    return {
       phaseId: phase.phaseId,
       description: phase.description,
       caseIds: phase.caseIds,
@@ -471,16 +510,76 @@ async function run() {
       payload: phasePayload,
       childResults,
     };
-    phaseResults.push(phaseSummary);
+  }
 
-    if (!phaseSummary.ok) {
-      hadPhaseFailure = true;
+  while (pending.size) {
+    let madeProgress = false;
+
+    for (const phaseId of [...pending]) {
+      const phase = phaseById.get(phaseId);
+      if (!phase) {
+        pending.delete(phaseId);
+        continue;
+      }
+      const blockedByFailedDependency = (phase.dependsOn || []).some(dependency => {
+        const dependencyPhase = finished.get(dependency);
+        return dependencyPhase && !dependencyPhase.ok;
+      });
+      if (blockedByFailedDependency) {
+        pending.delete(phaseId);
+      }
     }
+
+    for (const phaseId of [...pending]) {
+      if (running.size >= args.concurrency) break;
+      const phase = phaseById.get(phaseId);
+      if (!phase) continue;
+      const unmetDependencies = resolveUnmetDependencies(phase);
+      if (unmetDependencies.length) continue;
+      if (phase.phaseId === "online_lottery_activity" && !createdActivity.activityAlias && !createdActivity.activityId) {
+        const failed = {
+          phaseId: phase.phaseId,
+          description: phase.description,
+          caseIds: phase.caseIds,
+          cases: phase.caseEntries,
+          commands: [],
+          ok: false,
+          payload: { ok: false, error: "Missing created activity target from previous phase." },
+          childResults: [],
+        };
+        pending.delete(phaseId);
+        finished.set(phaseId, failed);
+        phaseResults.push(failed);
+        hadPhaseFailure = true;
+        madeProgress = true;
+        continue;
+      }
+      pending.delete(phaseId);
+      madeProgress = true;
+      const promise = runPhase(phase).then(summary => {
+        finished.set(phaseId, summary);
+        phaseResults.push(summary);
+        if (!summary.ok) hadPhaseFailure = true;
+        running.delete(phaseId);
+      });
+      running.set(phaseId, promise);
+    }
+
+    if (!running.size) {
+      if (!madeProgress) break;
+      continue;
+    }
+
+    await Promise.race(running.values());
+  }
+
+  if (running.size) {
+    await Promise.all(running.values());
   }
 
   const caseResults = buildRegressionCaseResults(plan, phaseResults);
   const reportPhaseResults = compactPhaseResults(phaseResults);
-  printJson({
+  const fullReport = {
     ok: !hadPhaseFailure,
     actionId: plan.actionId,
     mode: plan.mode,
@@ -488,7 +587,30 @@ async function run() {
     createdActivity,
     phaseResults: reportPhaseResults,
     caseResults,
-  }, hadPhaseFailure ? process.stderr : process.stdout);
+  };
+  if (args.reportPath) {
+    try {
+      fs.mkdirSync(path.dirname(args.reportPath), { recursive: true });
+      fs.writeFileSync(args.reportPath, JSON.stringify(fullReport, null, 2));
+    } catch (error) {
+      process.stderr.write(`{"step":"report_write","ok":false,"error":"${String(error.message || error)}"}\n`);
+    }
+  }
+  const compact = {
+    ok: !hadPhaseFailure,
+    actionId: plan.actionId,
+    mode: plan.mode,
+    selectedCaseCount: (plan.selectedCaseIds || []).length,
+    createdActivity,
+    phaseStatus: reportPhaseResults.map(item => ({ phaseId: item.phaseId, ok: item.ok })),
+    caseStatusCounts: caseResults.reduce((acc, item) => {
+      acc[item.status] = (acc[item.status] || 0) + 1;
+      return acc;
+    }, {}),
+    reportPath: args.reportPath || "",
+  };
+  const output = args.compact || args.reportPath ? compact : fullReport;
+  printJson(output, hadPhaseFailure ? process.stderr : process.stdout);
   return hadPhaseFailure ? 1 : 0;
 }
 

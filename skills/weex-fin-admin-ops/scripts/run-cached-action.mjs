@@ -49,6 +49,7 @@ Options:
   --audit-remark <x>   FIN airdrop approval remark
   --message-id <id>    MQ recharge callback unique message id override
   --kafka-url <url>    MQ recharge callback Kafka UI URL override
+  --visible            Run Kafka UI MQ callback send in headed browser mode
   --confirm-create     Required by finance_airdrop_reward_grant for actual creation
   --confirm-approve    Required by finance_airdrop_reward_grant for actual approval
   --confirm-send       Required by mq_recharge_callback_send for real message send
@@ -63,7 +64,7 @@ Options:
 }
 
 function parseCacheArgs() {
-  const parsed = parseFlags(process.argv.slice(2), { booleans: ["--list", "--dry-run", "--confirm-create", "--confirm-approve", "--confirm-send", "--confirm-register", "--confirm-recharge", "--confirm-transfer", "--confirm-create-account", "--confirm-order", "--skip-grant-dry-run", "--allow-unverified-transfer-chain", "--save-secrets"] });
+  const parsed = parseFlags(process.argv.slice(2), { booleans: ["--list", "--dry-run", "--visible", "--confirm-create", "--confirm-approve", "--confirm-send", "--confirm-register", "--confirm-recharge", "--confirm-transfer", "--confirm-create-account", "--confirm-order", "--skip-grant-dry-run", "--allow-unverified-transfer-chain", "--save-secrets"] });
   const passthrough = {};
   for (const [key, value] of Object.entries(parsed)) {
     if (!["help", "list", "dryRun", "query", "action"].includes(key)) passthrough[key] = value;

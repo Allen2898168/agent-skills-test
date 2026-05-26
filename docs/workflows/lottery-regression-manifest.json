@@ -213,6 +213,28 @@
       "preconditions": ["NORMAL_ACTIVITY_ONLINE", "REWARD_RECORD_DELAY_READY"]
     },
     {
+      "scenarioId": "frontend_interaction_basic",
+      "groupId": "frontend",
+      "title": "按钮与交互态",
+      "status": "planned",
+      "selectionAliases": ["按钮交互", "交互态", "按钮与交互态"],
+      "description": "按钮点击与弹窗关闭等交互校验。",
+      "caseIds": ["FE-30", "FE-31"],
+      "allowInAll": false,
+      "preconditions": ["NORMAL_ACTIVITY_ONLINE", "FRONTEND_SESSION"]
+    },
+    {
+      "scenarioId": "frontend_responsive_ui",
+      "groupId": "frontend",
+      "title": "响应式与兼容性UI",
+      "status": "planned",
+      "selectionAliases": ["响应式", "兼容性", "响应式与兼容性UI"],
+      "description": "移动端/H5 适配相关用例。",
+      "caseIds": ["FE-68", "FE-69", "FE-70", "FE-71", "FE-72"],
+      "allowInAll": false,
+      "preconditions": ["RESPONSIVE_VIEWPORT_READY"]
+    },
+    {
       "scenarioId": "frontend_exception_ui",
       "groupId": "frontend",
       "title": "异常提示与容错 UI",

@@ -243,5 +243,5 @@
 - 失败原因：问题不在 cookie 本身，而在“cookie 注入后首个页面就直开抽奖页”的路径不稳定。Playwright 隔离浏览器下，抽奖页首开可能没有完成前端会话预热，导致业务页退化为游客态；仅凭 token cookie 存在或 `我的奖品` 入口可见，不能认定 `FRONTEND_SESSION` 成立。
 - 解决方式：固定使用恢复后的稳定路径：注入 `WEEX_TOKEN_COOKIE_STAGING` -> 打开 `https://stg-www.weex.tech/zh-CN` -> 打开 `https://stg-www.weex.tech/zh-CN/account` -> 再进入目标活动页。`/zh-CN/account` 作为登录成功的权威检查页；脚本仍保留游客态识别，防止把 `注册` 主按钮误判成已登录态。
 - 验证结果：2026-05-24 已按该稳定路径恢复。`frontend-login-cookie.mjs` 可稳定打开 `/zh-CN/account` 并返回 `ok=true`；`lottery-frontend-main-flow.mjs --phase readonly --activity-alias lfd3040` 也已返回 `ok=true`，能识别 `抽奖` / `抽奖×5` 等已登录活动态信号。
-- 关联流程或脚本：`skills/weex-admin-ops/scripts/lottery-frontend-main-flow.mjs`、`skills/weex-admin-ops/scripts/lib/lottery-frontend-preconditions.mjs`、`skills/weex-frontend-ops/scripts/frontend-login-cookie.mjs`。
+- 关联流程或脚本：`skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs`、`orchestrations/lottery-regression/lib/lottery-frontend-preconditions.mjs`、`skills/weex-frontend-ops/scripts/frontend-login-cookie.mjs`。
 - 后续处理状态：该问题已不再作为“前端登录态不可用”的 P0 阻塞项保留；当前剩余阻塞已转移到“新活动自动创建并上线后再跑 fresh 场景”的链路。
