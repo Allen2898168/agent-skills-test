@@ -3,6 +3,7 @@ import path from "node:path";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { parseFlags, printJson } from "../lib/cli.mjs";
+import { parseLastJson } from "../../../tools/lib/parse-last-json.mjs";
 import {
   buildScenarioMenu,
   collectAutomationCaseIdsForScenarios,
@@ -60,20 +61,6 @@ function parseArgs() {
   args.weightActivityAlias = String(args.weightActivityAlias || "");
   args.stockActivityAlias = String(args.stockActivityAlias || "");
   return args;
-}
-
-function parseLastJson(text) {
-  const source = String(text || "").trim();
-  if (!source) return null;
-  let last = null;
-  for (let index = 0; index < source.length; index += 1) {
-    if (source[index] !== "{") continue;
-    const candidate = source.slice(index);
-    try {
-      last = JSON.parse(candidate);
-    } catch {}
-  }
-  return last;
 }
 
 function runChild(commandArgs) {

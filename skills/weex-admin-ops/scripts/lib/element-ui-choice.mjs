@@ -1,5 +1,5 @@
 import { sleep } from "../browser.mjs";
-import { formItem } from "./common.mjs";
+import { formItem } from "./element-ui-common.mjs";
 
 export async function clickChoiceByLabel(page, label, choice, type = "checkbox", required = true) {
   let clicked = await tryClickChoice(page, label, choice, type);

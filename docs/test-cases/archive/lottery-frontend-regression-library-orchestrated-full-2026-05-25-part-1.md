@@ -105,7 +105,6 @@ Lines: 1-200 of 261.
 | 16 | FE-51 | P1 | 奖励记录空数据态展示正常 | `NORMAL_ACTIVITY_ONLINE` | 只读 | 否 | `FE-48` |
 | 17 | FE-55 | P1 | 弹窗关闭后页面状态正常 | `NORMAL_ACTIVITY_ONLINE` | 只读交互 | 否 | `FE-48` |
 | 18 | FE-73 | P0 | 后管活动标题改动后前端展示正确 | `NORMAL_ACTIVITY_ONLINE` | 只读联动 | 否 | - |
-| 19 | FE-74 | P1 | 后管副标题改动后前端展示正确 | `NORMAL_ACTIVITY_ONLINE` | 只读联动 | 否 | - |
 | 20 | FE-75 | P1 | 后管多语言配置后前端切语言展示正确 | `NORMAL_ACTIVITY_ONLINE` | 只读联动 | 否 | - |
 | 21 | FE-76 | P1 | 后管 FAQ 配置后前端展示正确 | `NORMAL_ACTIVITY_ONLINE` | 只读联动 | 否 | - |
 | 22 | FE-77 | P1 | 后管奖池配置后前端奖品展示正确 | `NORMAL_ACTIVITY_ONLINE` | 只读联动 | 否 | - |

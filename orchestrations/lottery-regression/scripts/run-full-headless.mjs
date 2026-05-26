@@ -229,16 +229,6 @@ async function run() {
     return 0;
   }
 
-  const check = await step("first_run_check_all", async () => {
-    const child = await runChild(["tools/first-run-check.mjs", "--skill", "all"], { label: "first_run_check" });
-    const payload = parseJsonSafely(child.stdout) || parseJsonSafely(child.stderr);
-    return { ok: Boolean(payload?.ok), payload };
-  });
-  if (!check.ok) {
-    printJson({ ok: false, error: "first-run-check failed", timings, totalDurationMs: now() - startedAt }, process.stderr);
-    return 2;
-  }
-
   const manifest = loadLotteryRegressionManifest();
   const selectionInput = args.selection || "全部";
   const selection = resolveScenarioSelection(selectionInput === "full" ? "全部" : selectionInput, manifest);
@@ -249,6 +239,49 @@ async function run() {
 
   const requiredFrontendParts = detectRequiredFrontendParts(selection.selectedScenarios);
   const shouldPrepareActivities = requiredFrontendParts.length > 0;
+
+  const skillsToCheck = (() => {
+    const set = new Set();
+    const scenarios = selection.selectedScenarios || [];
+    const hasEntrypoint = id => scenarios.some(item => String(item?.entrypoint || "") === id);
+    const hasPrecondition = prefix => scenarios.some(item => (item?.preconditions || []).some(p => String(p || "").startsWith(prefix)));
+
+    if (shouldPrepareActivities || hasEntrypoint("lottery_admin_main_regression") || hasPrecondition("ADMIN_")) set.add("admin");
+    if (hasEntrypoint("lottery_frontend_main_regression")) set.add("frontend");
+    if (hasPrecondition("FIN_") || hasEntrypoint("fin")) set.add("fin");
+
+    if (!set.size) set.add("admin");
+    return Array.from(set.values());
+  })();
+
+  const checkResults = {};
+  let checkOk = true;
+  for (const skill of skillsToCheck) {
+    const check = await step(`first_run_check_${skill}`, async () => {
+      const child = await runChild(["tools/first-run-check.mjs", "--skill", String(skill)], { label: `first_run_check_${skill}` });
+      const payload = parseJsonSafely(child.stdout) || parseJsonSafely(child.stderr);
+      return { ok: Boolean(payload?.ok), payload };
+    });
+    checkResults[skill] = check;
+    if (!check.ok) {
+      checkOk = false;
+      break;
+    }
+  }
+  if (!checkOk) {
+    printJson({
+      ok: false,
+      error: "first-run-check failed",
+      requiredSkills: skillsToCheck,
+      checks: Object.fromEntries(Object.entries(checkResults).map(([key, value]) => ([
+        key,
+        { ok: Boolean(value?.ok), payload: value?.payload || null },
+      ]))),
+      timings,
+      totalDurationMs: now() - startedAt,
+    }, process.stderr);
+    return 2;
+  }
 
   const prepared = shouldPrepareActivities
     ? await step("prepare_activities_batch", async () => {

@@ -4,9 +4,9 @@ This directory contains the minimal WEEX frontend login runtime used by `skills/
 
 Included files:
 
-- `lib/weex-login.mjs`
-- `lib/weex-auth-cookie.mjs`
-- `lib/http.mjs`
+- `weex-login.mjs`
+- `weex-auth-cookie.mjs`
+- `http.mjs`
 
 The copy is intentionally small and self-contained. `http.mjs` uses Node's built-in `fetch`, so this skill does not require the external `/Users/gabriel/Downloads/weexpr/loginTool` checkout or its `node_modules`.
 

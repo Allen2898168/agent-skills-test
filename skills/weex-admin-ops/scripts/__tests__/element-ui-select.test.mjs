@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { selectPlaceholder } from "../lib/element-ui/select.mjs";
+import { selectPlaceholder } from "../lib/element-ui-select.mjs";
 
 test("selectPlaceholder waits for visible dropdown before selecting option", async () => {
   const calls = [];

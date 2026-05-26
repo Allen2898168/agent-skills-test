@@ -1,13 +1,52 @@
 #!/usr/bin/env node
 import path from "node:path";
 import fs from "node:fs";
-import { spawnSync } from "node:child_process";
+import { runNodeJson } from "../../../tools/lib/run-node-json.mjs";
 import { fileURLToPath } from "node:url";
 import { loadFrontendEnv } from "./lib/env.mjs";
 import { launchBrowser } from "./lib/browser.mjs";
 import { resolveFrontendAccount } from "./lib/account-config.mjs";
 import { buildFrontendAuthSession } from "./lib/login-tool-adapter.mjs";
 import { openLoginStatePage } from "./business/auth-pages.mjs";
+import {
+  closeRewardRecordDialog,
+  detectCalendarTab,
+  detectDrawButtonVariant,
+  detectFaqSection,
+  detectGuestState,
+  detectHorizontalOverflow,
+  detectMainButtonState,
+  detectMainVisual,
+  detectPageError,
+  deepFindPrizeArrayLength,
+  ensureSignup,
+  extractCountdownToken,
+  extractPageState,
+  extractPopupPrizeTextFromPayload,
+  findLikelyActivityTitle,
+  hasUsableInitialState,
+  measureLivePageSignals,
+  normalizeComparableText,
+  normalizeCompactText,
+  openRewardRecord,
+  parseCount,
+  performSingleDraw,
+  readCountdownWidgetText,
+  readMainButtonState,
+  readOptionalJsonFile,
+  readPopupPrizeText,
+  readPrizeCount,
+  readRulesText,
+  readSubtitleText,
+  readVisibleButtons,
+  removeLocalePrefixFromUrl,
+  resolveArtifactPath,
+  sampleButtonBusyState,
+  stabilizeInitialDrawPageState,
+  waitBeforeClick,
+  waitForActivityStart,
+  waitForActivityStartWithSession,
+} from "./lib/lottery-frontend-main-flow-helpers.mjs";
 
 const currentFile = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(currentFile), "../../..");
@@ -19,10 +58,17 @@ function usage() {
 
 Phases:
   --phase readonly
+  --phase guest
+  --phase prestart
   --phase signup
   --phase recharge
   --phase draw
   --phase reward_record
+
+Optional:
+  --admin-snapshot-path <path>  admin snapshot json path for consistency checks (readonly only)
+  --assert-case-ids <csv>       limit which readonly case assertions affect ok/result
+  --draw-payload-path <path>    draw phase json payload path for FE-56 consistency check (reward_record only)
 `;
 }
 
@@ -68,8 +114,15 @@ function parseArgs() {
     rechargeAmount: String(args.rechargeAmount || "1000"),
     waitForStartMs: Number(args.waitForStartMs || 720000),
     timeoutMs: Number(args.timeoutMs || 90000),
+    holdMs: Number(args.holdMs || 0),
     saveScreenshot: Boolean(args.saveScreenshot),
     screenshotPath: String(args.screenshotPath || ""),
+    adminSnapshotPath: String(args.adminSnapshotPath || ""),
+    drawPayloadPath: String(args.drawPayloadPath || ""),
+    assertCaseIds: String(args.assertCaseIds || "")
+      .split(",")
+      .map(item => item.trim())
+      .filter(Boolean),
   };
 }
 
@@ -77,455 +130,9 @@ function logFlowProgress(phase, message) {
   process.stderr.write(`[frontend-flow:${phase}] ${message}\n`);
 }
 
-function parseLastJson(text) {
-  const source = String(text || "").trim();
-  if (!source) return null;
-  const lines = source.split("\n");
-  for (let index = lines.length - 1; index >= 0; index -= 1) {
-    const line = lines[index].trimStart();
-    if (!line.startsWith("{") && !line.startsWith("[")) continue;
-    const candidate = lines.slice(index).join("\n").trim();
-    try {
-      return JSON.parse(candidate);
-    } catch {}
-  }
-  return null;
-}
-
-function runNodeJson(commandArgs) {
-  const result = spawnSync(process.execPath, commandArgs, {
-    cwd: repoRoot,
-    env: process.env,
-    encoding: "utf8",
-    maxBuffer: 20 * 1024 * 1024,
-  });
-  return {
-    exitCode: result.status ?? 1,
-    payload: parseLastJson(result.stdout) || parseLastJson(result.stderr),
-  };
-}
-
-function parseCount(text) {
-  const match = String(text || "").match(/(?:可用抽奖次数|可用次数|可抽奖次数|剩余抽奖次数)\s*[：:]?\s*(\d+)/);
-  return match ? Number(match[1]) : null;
-}
-
-function resolveArtifactPath(repoRootPath, value) {
-  const trimmed = String(value || "").trim();
-  if (!trimmed) return "";
-  if (path.isAbsolute(trimmed)) return trimmed;
-  return path.resolve(repoRootPath, trimmed);
-}
-
-async function waitBeforeClick(page, delayMs = 2000) {
-  await page.waitForTimeout(delayMs);
-}
-
-async function readVisibleButtons(page) {
-  return page.locator("button").evaluateAll(nodes => (
-    nodes
-      .map(node => (node.innerText || "").trim())
-      .filter(Boolean)
-      .slice(0, 12)
-  )).catch(() => []);
-}
-
-function detectGuestState(bodyText, buttons) {
-  const body = String(bodyText || "");
-  const texts = new Set((buttons || []).map(item => String(item || "").trim()).filter(Boolean));
-  if (texts.has("注册")) return true;
-  if (body.includes("立即注册，领$10,000+ 迎新礼包")) return true;
-  if (body.includes("登录\n注册")) return true;
-  return false;
-}
-
-function extractCountdownToken(text) {
-  const source = String(text || "");
-  const localized = source.match(/(距离(?:结束|开始|报名结束)：\s*\d+\s*天:\d+\s*时:\d+\s*分:\d+\s*秒)/);
-  if (localized) return localized[1].replace(/\s+/g, "");
-  const withDays = source.match(/(\d{1,4}\s*天\s*\d{1,2}:\d{2}:\d{2})/);
-  if (withDays) return withDays[1].replace(/\s+/g, "");
-  const hhmmss = source.match(/(\d{1,2}:\d{2}:\d{2})/);
-  if (hhmmss) return hhmmss[1];
-  return "";
-}
-
-function detectPageError(bodyText) {
-  const source = String(bodyText || "");
-  return ["活动不存在", "加载失败", "网络异常", "系统繁忙", "页面异常"].some(item => source.includes(item));
-}
-
-function findLikelyActivityTitle(bodyText) {
-  const lines = String(bodyText || "")
-    .split("\n")
-    .map(item => item.trim())
-    .filter(Boolean);
-  return lines.find(line => (
-    line.length >= 4
-    && line.length <= 40
-    && !line.includes("抽奖次数")
-    && !line.includes("奖励记录")
-    && !line.includes("我的奖品")
-    && !line.includes("立即报名")
-    && !line.includes("抽奖")
-    && !line.includes("登录")
-    && !line.includes("注册")
-  )) || "";
-}
-
-async function readCountdownWidgetText(page) {
-  const fromCountdownBox = await page.locator("[class*='index_countDown__']").first().evaluate(node => (
-    (node.textContent || "").trim()
-  )).catch(() => "");
-  if (fromCountdownBox) return fromCountdownBox;
-  return page.locator("text=/距离结束|距离开始|距离报名结束/").first().evaluate(node => (
-    (node.parentElement?.textContent || node.textContent || "").trim()
-  )).catch(() => "");
-}
-
-async function detectDrawButtonVariant(page, buttons = []) {
-  const candidates = [
-    { texts: ["抽奖 × 5", "抽奖x5", "抽奖X5"], state: "抽奖×5" },
-    { texts: ["抽奖 × 1", "抽奖x1", "抽奖X1"], state: "抽奖×1" },
-    { texts: ["抽奖"], state: "抽奖" },
-  ];
-  const compactButtons = buttons.map(item => String(item || "").replace(/\s+/g, ""));
-  for (const candidate of candidates) {
-    for (const text of candidate.texts) {
-      const compactText = text.replace(/\s+/g, "");
-      if (compactButtons.some(item => item.includes(compactText))) return candidate.state;
-      if (await page.getByText(text, { exact: true }).first().isVisible().catch(() => false)) return candidate.state;
-    }
-  }
-  return "";
-}
-
-async function measureLivePageSignals(page, bodyText) {
-  const titleFromActivityHeader = await page.locator("[class*='index_title1__']").first().innerText().catch(() => "");
-  const headingTexts = await page.locator("main h1, main h2, main [role='heading']").evaluateAll(nodes => (
-    nodes.map(node => (node.textContent || "").trim()).filter(Boolean)
-  )).catch(() => []);
-  const activityTitle = String(titleFromActivityHeader || "").trim()
-    || headingTexts.find(item => item.length >= 2 && item.length <= 40)
-    || findLikelyActivityTitle(bodyText);
-  const countdownFromWidgetBefore = await readCountdownWidgetText(page);
-  const countdownTextBefore = extractCountdownToken(countdownFromWidgetBefore || bodyText);
-  await page.waitForTimeout(2200);
-  const nextBodyText = await page.locator("body").innerText().catch(() => bodyText);
-  const countdownFromWidgetAfter = await readCountdownWidgetText(page);
-  const countdownTextAfter = extractCountdownToken(countdownFromWidgetAfter || nextBodyText);
-  return {
-    activityTitle,
-    activityTitleVisible: Boolean(activityTitle),
-    countdownText: countdownTextAfter || countdownTextBefore,
-    countdownVisible: Boolean(countdownTextBefore || countdownTextAfter),
-    countdownTicking: Boolean(countdownTextBefore && countdownTextAfter && countdownTextBefore !== countdownTextAfter),
-    pageErrorVisible: detectPageError(nextBodyText),
-    bodyText: nextBodyText,
-  };
-}
-
-function hasUsableInitialState(state) {
-  return Boolean(
-    state.mainButtonState
-    || state.drawButtonVariant
-    || state.myPrizeVisible
-    || state.activityTitleVisible
-    || state.countdownVisible
-    || state.bodySnippet
-    || state.buttons.length > 1
-  );
-}
-
-async function extractPageState(page, activityAlias, options = {}) {
-  let bodyText = await page.locator("body").innerText().catch(() => "");
-  const buttons = await readVisibleButtons(page);
-  const drawButtonVariant = await detectDrawButtonVariant(page, buttons);
-  const state = await detectMainButtonState(page, drawButtonVariant);
-  let visualState = {
-    activityTitle: "",
-    activityTitleVisible: false,
-    countdownText: "",
-    countdownVisible: false,
-    countdownTicking: false,
-    pageErrorVisible: detectPageError(bodyText),
-    bodyText,
-  };
-  if (options.measureLiveSignals) {
-    visualState = await measureLivePageSignals(page, bodyText);
-    bodyText = visualState.bodyText;
-  }
-  return {
-    activityAlias,
-    url: page.url(),
-    urlMatchesAlias: page.url().includes(`/events/draw/${activityAlias}`),
-    opened: page.url().includes("/events/draw/"),
-    loginFormVisible: await page.getByText("登录").first().isVisible().catch(() => false),
-    myPrizeVisible: await page.getByText("我的奖品").first().isVisible().catch(() => false),
-    mainButtonState: state,
-    drawButtonVariant,
-    drawCount: parseCount(bodyText),
-    guestVisible: detectGuestState(bodyText, buttons),
-    activityTitle: visualState.activityTitle,
-    activityTitleVisible: visualState.activityTitleVisible,
-    countdownText: visualState.countdownText,
-    countdownVisible: visualState.countdownVisible,
-    countdownTicking: visualState.countdownTicking,
-    pageErrorVisible: visualState.pageErrorVisible,
-    buttons,
-    bodySnippet: bodyText.slice(0, 800),
-  };
-}
-
-async function detectMainButtonState(page, drawButtonVariant = "") {
-  const candidates = [
-    { text: "即将开始", state: "即将开始" },
-    { text: "立即报名", state: "立即报名" },
-  ];
-  for (const candidate of candidates) {
-    if (await page.getByText(candidate.text, { exact: true }).first().isVisible().catch(() => false)) return candidate.state;
-  }
-  if (drawButtonVariant) return "抽奖";
-  return "";
-}
-
-async function readMainButtonState(page) {
-  const buttons = await readVisibleButtons(page);
-  const drawButtonVariant = await detectDrawButtonVariant(page, buttons);
-  return detectMainButtonState(page, drawButtonVariant);
-}
-
-async function sampleButtonBusyState(page, button, windowMs = 1800, intervalMs = 120) {
-  const deadline = Date.now() + windowMs;
-  let observedDisabled = false;
-  let observedBusyClass = false;
-  let observedBusyText = false;
-  while (Date.now() < deadline) {
-    const snapshot = await button.evaluate(node => {
-      const className = String(node.className || "");
-      const text = String(node.textContent || "").replace(/\s+/g, "");
-      const style = globalThis.getComputedStyle ? globalThis.getComputedStyle(node) : null;
-      return {
-        disabled: Boolean(
-          node.disabled
-          || node.getAttribute("disabled") != null
-          || node.getAttribute("aria-disabled") === "true"
-        ),
-        busyClass: /disabled|loading|pending|forbid|is-disabled/i.test(className)
-          || style?.pointerEvents === "none",
-        busyText: /抽奖中|加载中|请稍后/.test(text),
-      };
-    }).catch(() => ({ disabled: false, busyClass: false, busyText: false }));
-    observedDisabled = observedDisabled || snapshot.disabled;
-    observedBusyClass = observedBusyClass || snapshot.busyClass;
-    observedBusyText = observedBusyText || snapshot.busyText;
-    if (observedDisabled || observedBusyClass || observedBusyText) break;
-    await page.waitForTimeout(intervalMs);
-  }
-  return {
-    observedDisabled,
-    observedBusyClass,
-    observedBusyText,
-    busy: observedDisabled || observedBusyClass || observedBusyText,
-  };
-}
-
-async function stabilizeInitialDrawPageState(page, activityAlias, attempts = 3, delayMs = 3000) {
-  let state = await extractPageState(page, activityAlias);
-  for (let attempt = 0; attempt < attempts; attempt += 1) {
-    if (!state.guestVisible && hasUsableInitialState(state)) {
-      return await extractPageState(page, activityAlias, { measureLiveSignals: true });
-    }
-    await page.waitForTimeout(delayMs);
-    state = await extractPageState(page, activityAlias);
-  }
-  return await extractPageState(page, activityAlias, { measureLiveSignals: true });
-}
-
-async function waitForActivityStart(page, activityUrl, timeoutMs) {
-  return await waitForActivityStartWithSession(page, { activityUrl }, timeoutMs);
-}
-
-async function waitForActivityStartWithSession(page, { activityUrl, activityAlias = "", accountUrl = "", cookie = null } = {}, timeoutMs) {
-  const startedAt = Date.now();
-  let lastReloadAt = 0;
-  let reloginAttempted = false;
-  while (Date.now() - startedAt < timeoutMs) {
-    const snapshot = activityAlias
-      ? await extractPageState(page, activityAlias, { measureLiveSignals: true }).catch(() => null)
-      : null;
-    const mainButtonState = snapshot?.mainButtonState || await readMainButtonState(page);
-    if (mainButtonState && mainButtonState !== "即将开始") return mainButtonState;
-
-    const guestVisible = Boolean(snapshot?.guestVisible);
-    const loginFormVisible = Boolean(snapshot?.loginFormVisible);
-    if (guestVisible || loginFormVisible) {
-      if (!reloginAttempted && cookie && accountUrl) {
-        reloginAttempted = true;
-        logFlowProgress("wait_start", "guest/login state detected while waiting start; re-injecting cookie and reopening account page once");
-        await page.context().addCookies([cookie]).catch(() => {});
-        await openLoginStatePage(page, accountUrl).catch(() => {});
-        await page.goto(activityUrl, { waitUntil: "domcontentloaded", timeout: 90000 }).catch(() => {});
-        continue;
-      }
-      throw new Error("frontend draw page entered guest/login state while waiting for activity start");
-    }
-
-    if (snapshot?.countdownTicking) {
-      await page.waitForTimeout(2000);
-      continue;
-    }
-
-    await page.waitForTimeout(5000);
-    if (!lastReloadAt || Date.now() - lastReloadAt >= 30000) {
-      lastReloadAt = Date.now();
-      logFlowProgress("wait_start", `still waiting for activity start, elapsed=${Math.floor((Date.now() - startedAt) / 1000)}s (reload)`);
-      await page.goto(activityUrl, { waitUntil: "domcontentloaded", timeout: 90000 }).catch(() => {});
-    }
-  }
-  return await readMainButtonState(page);
-}
-
-async function ensureSignup(page, activityUrl, network) {
-  const initialState = await readMainButtonState(page);
-  logFlowProgress("signup", `initial main button state: ${initialState || "unknown"}`);
-  if (initialState === "即将开始") {
-    return {
-      initialState,
-      finalState: initialState,
-      reopenedState: initialState,
-      done: false,
-    };
-  }
-  if (initialState === "立即报名") {
-    const button = page.getByText("立即报名", { exact: true }).first();
-    logFlowProgress("signup", "clicking 立即报名");
-    await waitBeforeClick(page);
-    await button.click({ force: true, timeout: 5000 }).catch(() => {});
-    await page.waitForTimeout(1500);
-  }
-  const finalState = await readMainButtonState(page);
-  logFlowProgress("signup", `state after signup action: ${finalState || "unknown"}`);
-  await page.goto(activityUrl, { waitUntil: "domcontentloaded", timeout: 90000 });
-  await page.waitForTimeout(1500);
-  const reopenedState = await readMainButtonState(page);
-  logFlowProgress("signup", `state after reopen: ${reopenedState || "unknown"}`);
-  return {
-    initialState,
-    finalState,
-    reopenedState,
-    done: network.applyOk || network.applyStatusTrue || finalState === "抽奖" || reopenedState === "抽奖",
-  };
-}
-
-async function performSingleDraw(page, network) {
-  const beforeText = await page.locator("body").innerText().catch(() => "");
-  const countBefore = parseCount(beforeText);
-  const luckDrawCountBefore = Array.isArray(network?.luckDraws) ? network.luckDraws.length : 0;
-  let button = page.locator("button").filter({ hasText: "抽奖 × 1" }).first();
-  if (!(await button.isVisible().catch(() => false))) {
-    button = page.getByText("抽奖 × 1", { exact: true }).first();
-  }
-  if (!(await button.isVisible().catch(() => false))) {
-    button = page.locator("button").filter({ hasText: /^抽奖$/ }).first();
-  }
-  if (!(await button.isVisible().catch(() => false))) {
-    button = page.getByText("抽奖", { exact: true }).first();
-  }
-  if (!(await button.isVisible().catch(() => false))) {
-    return {
-      requestObserved: false,
-      requestSent: false,
-      buttonVisibleBefore: false,
-      buttonDisabledDuringDraw: false,
-      duplicateClickBlocked: false,
-      requestCountDelta: 0,
-      apiSuccess: false,
-      apiCode: "",
-      apiMessage: "",
-      popupVisible: false,
-      countBefore,
-      countAfter: countBefore,
-    };
-  }
-  const buttonVisibleBefore = true;
-  await waitBeforeClick(page);
-  await button.click({ timeout: 5000 }).catch(async () => {
-    await button.click({ force: true, timeout: 5000 }).catch(() => {});
-  });
-  const busySnapshot = await sampleButtonBusyState(page, button);
-  let secondClickBlocked = false;
-  await button.click({ timeout: 1000 }).catch(() => {
-    secondClickBlocked = true;
-  });
-  await page.waitForTimeout(10000);
-  const popupVisible = await page.getByText("恭喜你").first().isVisible().catch(() => false);
-  const afterText = await page.locator("body").innerText().catch(() => "");
-  const countAfter = parseCount(afterText);
-  const luckDraws = Array.isArray(network?.luckDraws) ? network.luckDraws : [];
-  const requestCountDelta = Math.max(0, luckDraws.length - luckDrawCountBefore);
-  const latestLuckDraw = luckDraws.slice(luckDrawCountBefore).at(-1) || luckDraws.at(-1) || null;
-  const apiCode = latestLuckDraw?.body?.code ? String(latestLuckDraw.body.code) : "";
-  const apiMessage = String(
-    latestLuckDraw?.body?.msg
-      || latestLuckDraw?.body?.message
-      || ""
-  );
-  const apiSuccess = apiCode === "00000";
-  return {
-    requestObserved: apiSuccess || popupVisible || (countBefore != null && countAfter != null && countBefore - countAfter === 1),
-    requestSent: Boolean(latestLuckDraw),
-    buttonVisibleBefore,
-    buttonDisabledDuringDraw: busySnapshot.busy,
-    duplicateClickBlocked: secondClickBlocked || requestCountDelta <= 1,
-    requestCountDelta,
-    apiSuccess,
-    apiCode,
-    apiMessage,
-    popupVisible,
-    countBefore,
-    countAfter,
-  };
-}
-
-async function openRewardRecord(page) {
-  if (await page.getByText("恭喜你").first().isVisible().catch(() => false)) {
-    await page.keyboard.press("Escape").catch(() => {});
-    await page.waitForTimeout(1500);
-  }
-  const trigger = page.getByText("我的奖品", { exact: true }).last();
-  const opened = await trigger.isVisible().catch(() => false);
-  if (opened) {
-    await waitBeforeClick(page);
-    await trigger.click({ force: true, timeout: 5000 }).catch(() => {});
-  }
-  await page.waitForTimeout(3000);
-  const dialogVisible = await page.getByText("奖励记录").first().isVisible({ timeout: 15000 }).catch(() => false);
-  const bodyText = dialogVisible ? await page.locator("body").innerText().catch(() => "") : "";
-  const fieldHeaders = ["活动名称", "奖励金额", "获奖时间", "备注"].filter(item => bodyText.includes(item));
-  const lines = bodyText
-    .split("\n")
-    .map(item => item.trim())
-    .filter(Boolean);
-  const dataLines = lines.filter(item => ![
-    "奖励记录",
-    "活动名称",
-    "奖励金额",
-    "获奖时间",
-    "备注",
-    "我的奖品",
-  ].includes(item));
-  const hasRewardRow = dialogVisible && fieldHeaders.length >= 4 && dataLines.length >= 4;
-  const hasReadableRewardValue = dataLines.some(item => /[A-Za-z\u4e00-\u9fa5]{2,}|\d+(?:\.\d+)?/.test(item));
-  return {
-    opened,
-    dialogVisible,
-    fieldHeaders,
-    hasActivityTitle: bodyText.includes("前端主回归"),
-    hasRewardRow,
-    hasReadableRewardValue,
-    dataLineCount: dataLines.length,
-  };
+function runSkillNodeJson(commandArgs) {
+  const result = runNodeJson(commandArgs, { cwd: repoRoot, env: process.env });
+  return { exitCode: result.exitCode, payload: result.payload };
 }
 
 async function main() {
@@ -537,10 +144,10 @@ async function main() {
   if (!args.activityAlias) throw new Error("--activity-alias is required");
 
   loadFrontendEnv();
-  const account = resolveFrontendAccount(args.accountAlias);
   const activityHost = process.env.WEEX_FRONTEND_ACTIVITY_HOST || "https://stg-www.weex.tech";
   const activityUrl = `${activityHost.replace(/\/+$/, "")}/zh-CN/events/draw/${args.activityAlias}`;
   const accountUrl = process.env.WEEX_FRONTEND_ACCOUNT_URL || `${activityHost.replace(/\/+$/, "")}/zh-CN/account`;
+  const account = resolveFrontendAccount(args.accountAlias);
 
   if (args.dryRun) {
     printJson({
@@ -557,19 +164,11 @@ async function main() {
     return 0;
   }
 
-  const auth = await buildFrontendAuthSession({
-    username: account.username,
-    password: account.password,
-    targetUrl: activityUrl,
-    timeoutMs: args.timeoutMs,
-  });
-  const uid = String(auth.tokens.userId || "");
-  let cookie = auth.cookie;
-
   const { browser, context, page, failedResponses } = await launchBrowser({
     visible: args.visible,
     disableWebSecurity: true,
   });
+  const extraContextsToClose = [];
   const network = { applyOk: false, applyStatusTrue: false, luckDraws: [], frequency: null };
   page.on("response", async response => {
     const url = response.url();
@@ -605,9 +204,33 @@ async function main() {
   });
 
   try {
+    if (args.phase === "guest") {
+      await page.goto(activityUrl, { waitUntil: "domcontentloaded", timeout: 90000 });
+      const pageState = await extractPageState(page, args.activityAlias, { measureLiveSignals: true, includeConsistencySignals: false });
+      const guestOk = Boolean(pageState.opened && (pageState.guestVisible || pageState.loginFormVisible));
+      printJson({
+        ok: guestOk,
+        phase: args.phase,
+        page: pageState,
+        failedResponses: failedResponses.slice(0, 20),
+      });
+      return guestOk ? 0 : 1;
+    }
+
+    const auth = await buildFrontendAuthSession({
+      username: account.username,
+      password: account.password,
+      targetUrl: activityUrl,
+      timeoutMs: args.timeoutMs,
+    });
+    const uid = String(auth.tokens.userId || "");
+    let cookie = auth.cookie;
+
     logFlowProgress(args.phase, `prepare auth session for activity ${args.activityAlias}`);
     await context.addCookies([cookie]);
-    await openLoginStatePage(page, accountUrl);
+    if (!args.visible) {
+      await openLoginStatePage(page, accountUrl);
+    }
     await page.goto(activityUrl, { waitUntil: "domcontentloaded", timeout: 90000 });
     let pageState = await stabilizeInitialDrawPageState(page, args.activityAlias);
     if (pageState.guestVisible) {
@@ -621,11 +244,19 @@ async function main() {
       cookie = retryAuth.cookie;
       await context.clearCookies().catch(() => {});
       await context.addCookies([cookie]);
-      await openLoginStatePage(page, accountUrl);
+      if (!args.visible) {
+        await openLoginStatePage(page, accountUrl);
+      }
       await page.goto(activityUrl, { waitUntil: "domcontentloaded", timeout: 90000 });
       pageState = await stabilizeInitialDrawPageState(page, args.activityAlias);
     }
     if (pageState.guestVisible) {
+      if (args.visible) {
+        logFlowProgress(args.phase, "guest state detected in visible mode, warming up account page then reopening activity once");
+        await openLoginStatePage(page, accountUrl).catch(() => {});
+        await page.goto(activityUrl, { waitUntil: "domcontentloaded", timeout: 90000 }).catch(() => {});
+        pageState = await stabilizeInitialDrawPageState(page, args.activityAlias);
+      }
       printJson({
         ok: false,
         error: "frontend draw page still showed guest state after cookie login",
@@ -635,7 +266,7 @@ async function main() {
       });
       return 1;
     }
-    if (pageState.mainButtonState === "即将开始") {
+    if (pageState.mainButtonState === "即将开始" && args.phase !== "prestart") {
       logFlowProgress(args.phase, `activity not started yet, waiting up to ${Math.floor(args.waitForStartMs / 1000)}s`);
       pageState.mainButtonState = await waitForActivityStartWithSession(page, {
         activityUrl,
@@ -643,10 +274,147 @@ async function main() {
         accountUrl,
         cookie,
       }, args.waitForStartMs);
-      pageState = await extractPageState(page, args.activityAlias, { measureLiveSignals: true });
+      pageState = await extractPageState(page, args.activityAlias, { measureLiveSignals: true, includeConsistencySignals: args.phase === "readonly" });
+    }
+
+    if (args.phase === "prestart") {
+      pageState = await extractPageState(page, args.activityAlias, { measureLiveSignals: true, includeConsistencySignals: false });
+      const ok = Boolean(pageState.opened && pageState.mainButtonState === "即将开始" && !pageState.guestVisible && !pageState.loginFormVisible);
+      printJson({
+        ok,
+        phase: args.phase,
+        account: { alias: account.alias, username: account.username, uid },
+        page: pageState,
+        failedResponses: failedResponses.slice(0, 20),
+      });
+      return ok ? 0 : 1;
     }
 
     if (args.phase === "readonly") {
+      pageState = await extractPageState(page, args.activityAlias, { measureLiveSignals: true, includeConsistencySignals: true });
+      const expectedSnapshotPath = args.adminSnapshotPath
+        ? resolveArtifactPath(repoRoot, args.adminSnapshotPath)
+        : "";
+      const expectedSnapshot = expectedSnapshotPath
+        ? (() => {
+          try {
+            return JSON.parse(fs.readFileSync(expectedSnapshotPath, "utf8"));
+          } catch {
+            return null;
+          }
+        })()
+        : null;
+      if (expectedSnapshotPath && !expectedSnapshot) {
+        printJson({
+          ok: false,
+          error: "failed to read admin snapshot json",
+          phase: args.phase,
+          adminSnapshotPath: expectedSnapshotPath,
+          account: { alias: account.alias, username: account.username, uid },
+          page: pageState,
+          failedResponses: failedResponses.slice(0, 20),
+        });
+        return 1;
+      }
+
+      const fullBodyText = await page.locator("body").innerText().catch(() => "");
+      const expectedTitle = normalizeComparableText(expectedSnapshot?.title || "");
+      const expectedSubtitle = normalizeComparableText(expectedSnapshot?.subtitle || "");
+      const expectedRules = normalizeComparableText(expectedSnapshot?.rules || "");
+      const expectedPrizeCount = Number(expectedSnapshot?.prizeCount ?? NaN);
+
+      const titleMatched = expectedTitle
+        ? normalizeComparableText(pageState.activityTitle) === expectedTitle
+        : true;
+      const subtitleMatched = expectedSubtitle
+        ? (
+          normalizeCompactText(pageState.activitySubtitle).includes(normalizeCompactText(expectedSubtitle))
+          || normalizeCompactText(fullBodyText).includes(normalizeCompactText(expectedSubtitle))
+        )
+        : true;
+      const rulesMatched = expectedRules
+        ? normalizeCompactText(fullBodyText).includes(normalizeCompactText(expectedRules))
+        : true;
+      const prizeCountMatched = Number.isFinite(expectedPrizeCount) && expectedPrizeCount >= 0 && typeof pageState.prizeCount === "number"
+        ? pageState.prizeCount === expectedPrizeCount
+        : true;
+
+      const prizeAreaOk = Boolean(
+        pageState.prizeAreaVisible
+        || (typeof pageState.prizeCount === "number" && pageState.prizeCount > 0)
+      );
+      const basicModulesVisible = Boolean(
+        pageState.activityTitleVisible
+        && pageState.countdownVisible
+        && prizeAreaOk
+        && (pageState.mainButtonState || pageState.drawButtonVariant)
+      );
+
+      const asserted = args.assertCaseIds || [];
+
+      const needsLanguageSwitch = asserted.includes("FE-75");
+      const languageSwitch = needsLanguageSwitch
+        ? (() => ({
+          zhUrl: activityUrl,
+          enUrl: removeLocalePrefixFromUrl(activityUrl),
+          zhTitle: pageState.activityTitle || "",
+          enTitle: "",
+          enFinalUrl: "",
+          enHtmlLang: "",
+          switched: false,
+        }))()
+        : null;
+      if (languageSwitch) {
+        const enContext = await browser.newContext({ viewport: { width: 1440, height: 1000 }, locale: "en-US" });
+        const enPage = await enContext.newPage();
+        try {
+          await enContext.addCookies([cookie]);
+          await enPage.goto(languageSwitch.enUrl, { waitUntil: "domcontentloaded", timeout: 90000 }).catch(() => {});
+          await enPage.waitForTimeout(2500);
+          const englishState = await extractPageState(enPage, args.activityAlias, { measureLiveSignals: true, includeConsistencySignals: false }).catch(() => null);
+          languageSwitch.enTitle = englishState?.activityTitle || "";
+          languageSwitch.enFinalUrl = enPage.url();
+          languageSwitch.enHtmlLang = await enPage.evaluate(() => String(document.documentElement?.lang || "")).catch(() => "");
+          const urlLooksEnglish = languageSwitch.enFinalUrl && !languageSwitch.enFinalUrl.includes("/zh-CN/");
+          const langLooksEnglish = languageSwitch.enHtmlLang.toLowerCase().startsWith("en");
+          const titleChanged = Boolean(languageSwitch.enTitle && normalizeComparableText(languageSwitch.enTitle) !== normalizeComparableText(languageSwitch.zhTitle));
+          languageSwitch.switched = Boolean(urlLooksEnglish && (langLooksEnglish || titleChanged));
+        } finally {
+          if (args.visible) {
+            extraContextsToClose.push(enContext);
+          } else {
+            await enContext.close().catch(() => {});
+          }
+        }
+      }
+
+      const faq = asserted.includes("FE-76") ? await detectFaqSection(page) : null;
+      const calendarTab = asserted.includes("FE-78") ? await detectCalendarTab(page) : null;
+
+      const readonlyCasePass = {
+        "FE-79": Boolean(pageState.opened && pageState.urlMatchesAlias),
+        "FE-01": Boolean(pageState.opened && !pageState.loginFormVisible),
+        "FE-02": Boolean(pageState.mainVisualVisible),
+        "FE-03": Boolean(titleMatched),
+        "FE-04": Boolean(subtitleMatched),
+        "FE-05": Boolean(rulesMatched),
+        "FE-06": Boolean(prizeAreaOk && prizeCountMatched),
+        "FE-07": Boolean(pageState.myPrizeVisible),
+        "FE-08": Boolean(basicModulesVisible && !pageState.horizontalOverflow),
+        "FE-75": languageSwitch ? Boolean(languageSwitch.switched) : true,
+        "FE-76": faq ? Boolean(faq.found) : true,
+        "FE-77": Boolean(prizeAreaOk && prizeCountMatched),
+        "FE-78": calendarTab ? Boolean(calendarTab.found) : true,
+        "FE-17": Boolean(!pageState.loginFormVisible && !pageState.guestVisible && ["立即报名", "抽奖", "抽奖×1", "抽奖×5"].includes(String(pageState.mainButtonState || pageState.drawButtonVariant || "").trim())),
+        "FE-19": Boolean(pageState.activityTitleVisible && pageState.countdownVisible && pageState.countdownTicking && !pageState.pageErrorVisible),
+      };
+
+      const assertionOk = asserted.length
+        ? asserted.every(caseId => readonlyCasePass[caseId] !== false)
+        : true;
+
+      const loginOk = pageState.opened && !pageState.guestVisible && !pageState.loginFormVisible;
+
       const screenshotPath = args.saveScreenshot && args.screenshotPath
         ? resolveArtifactPath(repoRoot, args.screenshotPath)
         : "";
@@ -655,14 +423,33 @@ async function main() {
         await page.screenshot({ path: screenshotPath, fullPage: true }).catch(() => {});
       }
       printJson({
-        ok: pageState.opened && !pageState.guestVisible && !pageState.loginFormVisible,
+        ok: loginOk,
         phase: args.phase,
+        assertCaseIds: asserted,
         account: { alias: account.alias, username: account.username, uid },
         page: pageState,
+        adminSnapshotPath: expectedSnapshotPath || null,
+        expected: expectedSnapshot,
+        consistency: {
+          titleMatched,
+          subtitleMatched,
+          rulesMatched,
+          prizeCountMatched,
+          expectedPrizeCount: Number.isFinite(expectedPrizeCount) ? expectedPrizeCount : null,
+          detectedPrizeCount: typeof pageState.prizeCount === "number" ? pageState.prizeCount : null,
+          basicModulesVisible,
+        },
+        assertionOk,
+        linkageReadonly: {
+          languageSwitch,
+          faq,
+          calendarTab,
+        },
+        readonlyCasePass,
         screenshotPath: screenshotPath || null,
         failedResponses: failedResponses.slice(0, 20),
       });
-      return pageState.opened && !pageState.guestVisible && !pageState.loginFormVisible ? 0 : 1;
+      return loginOk ? 0 : 1;
     }
 
     const signup = await ensureSignup(page, activityUrl, network);
@@ -693,7 +480,7 @@ async function main() {
 
     if (countBefore < 1 && ["recharge", "full"].includes(args.phase)) {
       logFlowProgress(args.phase, `sending MQ recharge callback uid=${uid} amount=${args.rechargeAmount}`);
-      const mqResult = runNodeJson([
+      const mqResult = runSkillNodeJson([
         path.join(repoRoot, "skills/weex-fin-admin-ops/scripts/run-cached-action.mjs"),
         "--action",
         "mq_recharge_callback_send",
@@ -764,6 +551,16 @@ async function main() {
     }
 
     if (args.phase === "draw") {
+      const latestLuckDraw = Array.isArray(network?.luckDraws) ? network.luckDraws.at(-1) : null;
+      draw.popupPrizeText = await readPopupPrizeText(page, latestLuckDraw?.body);
+      if (draw.popupVisible) {
+        await page.keyboard.press("Escape").catch(() => {});
+        await page.waitForTimeout(1500);
+      }
+      let drawButton = page.getByText("抽奖", { exact: true }).first();
+      if (!(await drawButton.isVisible().catch(() => false))) drawButton = page.locator("button").filter({ hasText: /^抽奖/ }).first();
+      const restoredSnapshot = await sampleButtonBusyState(page, drawButton, 1600, 120).catch(() => ({ busy: false }));
+      draw.buttonRestoredAfterDraw = Boolean(!restoredSnapshot.busy);
       const screenshotPath = args.saveScreenshot && args.screenshotPath
         ? resolveArtifactPath(repoRoot, args.screenshotPath)
         : "";
@@ -796,6 +593,16 @@ async function main() {
         fs.mkdirSync(path.dirname(screenshotPath), { recursive: true });
         await page.screenshot({ path: screenshotPath, fullPage: true }).catch(() => {});
       }
+      const expectedDrawPayload = args.drawPayloadPath ? readOptionalJsonFile(args.drawPayloadPath) : null;
+      const expectedPopupPrizeText = expectedDrawPayload ? extractPopupPrizeTextFromPayload(expectedDrawPayload) : "";
+      const prizeMatchesPopup = expectedPopupPrizeText
+        ? expectedPopupPrizeText
+          .split(/\s+/)
+          .map(item => item.trim())
+          .filter(Boolean)
+          .every(token => normalizeCompactText(rewardRecord.latestRewardText).includes(normalizeCompactText(token)))
+        : false;
+      const closedOk = await closeRewardRecordDialog(page);
       printJson({
         ok: pageState.opened && rewardRecord.opened && rewardRecord.dialogVisible,
         phase: args.phase,
@@ -803,7 +610,12 @@ async function main() {
         page: pageState,
         signup,
         mqRecharge,
-        rewardRecord,
+        rewardRecord: {
+          ...rewardRecord,
+          expectedPopupPrizeText,
+          prizeMatchesPopup,
+          closedOk,
+        },
         screenshotPath: screenshotPath || null,
         failedResponses: failedResponses.slice(0, 20),
       });
@@ -824,6 +636,13 @@ async function main() {
     });
     return pageState.opened && signup.done && mqRecharge.ok ? 0 : 1;
   } finally {
+    if (args.visible && args.holdMs > 0) {
+      logFlowProgress(args.phase, `holding browser for ${Math.floor(args.holdMs / 1000)}s...`);
+      await page.waitForTimeout(args.holdMs).catch(() => {});
+    }
+    for (const extraContext of extraContextsToClose) {
+      await extraContext.close().catch(() => {});
+    }
     await browser.close().catch(() => {});
   }
 }

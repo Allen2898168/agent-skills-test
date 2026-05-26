@@ -8,7 +8,7 @@ import {
   tableRows,
   visibleRowIndexByText,
 } from "../../lib/element-ui.mjs";
-import { dialog } from "../../lib/element-ui/common.mjs";
+import { dialog } from "../../lib/element-ui-common.mjs";
 import { createPrizes } from "./create.mjs";
 import { copyPrizeById, searchPrizeByAlias, searchPrizeById, rowToPrize } from "./copy.mjs";
 

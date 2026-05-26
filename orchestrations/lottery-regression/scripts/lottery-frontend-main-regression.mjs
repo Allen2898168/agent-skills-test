@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 import path from "node:path";
-import { spawnSync } from "node:child_process";
+import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parseFlags, printJson, readJson } from "../lib/cli.mjs";
 import {
   buildFrontendRegressionCaseResults,
   resolvePhaseCommands,
 } from "../lib/lottery-frontend-main-regression-lib.mjs";
+import { runNodeJson } from "../../../tools/lib/run-node-json.mjs";
 
 const currentFile = fileURLToPath(import.meta.url);
 const orchestrationRoot = path.resolve(path.dirname(currentFile), "..");
@@ -75,23 +76,26 @@ function parseArgs() {
 
 export function buildPlan(args) {
   const phases = [];
+  const needsPrestartChecks = Array.isArray(args.caseIds) && (args.caseIds.includes("FE-18") || args.caseIds.includes("FE-80"));
+  const needsGuestChecks = Array.isArray(args.caseIds) && args.caseIds.includes("FE-16");
   if (!args.activityAlias) {
-    const createModeArgs = args.visible ? [] : ["--headless-ui"];
     phases.push({
       phaseId: "create_lottery_activity_draft",
       dependsOn: [],
       description: "Create an online-capable lottery activity for frontend regression.",
       caseIds: [],
       commands: [[
-        "skills/weex-admin-ops/scripts/create-lottery-activity-draft.mjs",
-        ...createModeArgs,
+        "skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs",
+        "--action",
+        "create-draft",
         "--title-prefix",
         String(args.titlePrefix || "前端主回归"),
         "--alias-prefix",
         String(args.aliasPrefix || "lf"),
-        "--style",
-        "圆形转盘",
-        "--no-preapply",
+        "--start-offset-seconds",
+        String(args.startOffsetSeconds || "30"),
+        "--end-days",
+        String(args.endDays || "30"),
       ]],
     });
     phases.push({
@@ -100,25 +104,106 @@ export function buildPlan(args) {
       description: "Put the created frontend regression activity online.",
       caseIds: [],
       commands: [[
-        "skills/weex-admin-ops/scripts/online-lottery-activity.mjs",
+        "skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs",
+        "--action",
+        "online",
         "--activity-alias",
         "<created-alias>",
       ]],
     });
+    if (needsPrestartChecks) {
+      phases.push({
+        phaseId: "create_lottery_activity_draft_prestart",
+        dependsOn: [],
+        description: "Create an online lottery activity that stays in not-started state for prestart assertions.",
+        caseIds: [],
+        commands: [[
+          "skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs",
+          "--action",
+          "create-draft",
+          "--title-prefix",
+          String(args.titlePrefixPrestart || "未开始态回归"),
+          "--alias-prefix",
+          String(args.aliasPrefixPrestart || "lp"),
+          "--start-offset-seconds",
+          String(args.startOffsetSecondsPrestart || "1800"),
+          "--end-days",
+          String(args.endDays || "30"),
+        ]],
+      });
+      phases.push({
+        phaseId: "online_lottery_activity_prestart",
+        dependsOn: ["create_lottery_activity_draft_prestart"],
+        description: "Put the prestart regression activity online (not started yet).",
+        caseIds: [],
+        commands: [[
+          "skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs",
+          "--action",
+          "online",
+          "--activity-alias",
+          "<prestart-alias>",
+        ]],
+      });
+    }
   }
   const baseDependsOn = args.activityAlias ? [] : ["online_lottery_activity"];
   const activityAliasToken = args.activityAlias ? String(args.activityAlias) : "<created-alias>";
   phases.push({
-    phaseId: "frontend_readonly_checks",
+    phaseId: "admin_activity_snapshot",
     dependsOn: baseDependsOn,
+    description: "Fetch admin snapshot for frontend consistency assertions.",
+    caseIds: [],
+    commands: [[
+      "skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs",
+      "--action",
+      "snapshot",
+      "--activity-alias",
+      activityAliasToken,
+    ]],
+  });
+  if (needsGuestChecks) {
+    phases.push({
+      phaseId: "frontend_guest_checks",
+      dependsOn: ["admin_activity_snapshot"],
+      description: "Open the draw page without login and assert guest state.",
+      caseIds: ["FE-16"],
+      commands: [[
+        "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+        "--phase",
+        "guest",
+        "--activity-alias",
+        activityAliasToken,
+      ]],
+    });
+  }
+  if (needsPrestartChecks && !args.activityAlias) {
+    phases.push({
+      phaseId: "frontend_prestart_checks",
+      dependsOn: ["online_lottery_activity_prestart"],
+      description: "Open the not-started activity page and assert prestart UI state.",
+      caseIds: ["FE-18", "FE-80"],
+      commands: [[
+        "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+        "--phase",
+        "prestart",
+        "--activity-alias",
+        "<prestart-alias>",
+      ]],
+    });
+  }
+  phases.push({
+    phaseId: "frontend_readonly_checks",
+    dependsOn: ["admin_activity_snapshot"],
     description: "Open the draw page and verify readonly logged-in frontend signals.",
-    caseIds: ["FE-79", "FE-01", "FE-07", "FE-17", "FE-19"],
+    caseIds: ["FE-79", "FE-01", "FE-02", "FE-03", "FE-05", "FE-06", "FE-07", "FE-08", "FE-17", "FE-19"],
     commands: [[
       "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
       "--phase",
       "readonly",
       "--activity-alias",
       activityAliasToken,
+      "--admin-snapshot-path",
+      "<admin-snapshot-path>",
       "--wait-for-start-ms",
       String(args.waitForStartMs || "720000"),
     ]],
@@ -134,6 +219,34 @@ export function buildPlan(args) {
       "signup",
       "--activity-alias",
       activityAliasToken,
+      "--wait-for-start-ms",
+      String(args.waitForStartMs || "720000"),
+    ]],
+  });
+  phases.push({
+    phaseId: "frontend_backend_linkage",
+    dependsOn: ["frontend_signup_flow"],
+    description: "Mutate admin config and verify frontend reflects the changes.",
+    caseIds: ["FE-73"],
+    commands: [[
+      "skills/weex-admin-ops/scripts/lottery-frontend-backend-linkage-basic.mjs",
+      "--activity-alias",
+      activityAliasToken,
+    ]],
+  });
+  phases.push({
+    phaseId: "frontend_backend_linkage_readonly",
+    dependsOn: ["frontend_signup_flow"],
+    description: "Verify frontend linkage display via URL locale switch and page sections.",
+    caseIds: ["FE-75", "FE-76", "FE-77", "FE-78"],
+    commands: [[
+      "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+      "--phase",
+      "readonly",
+      "--activity-alias",
+      activityAliasToken,
+      "--admin-snapshot-path",
+      "<admin-snapshot-path>",
       "--wait-for-start-ms",
       String(args.waitForStartMs || "720000"),
     ]],
@@ -159,7 +272,7 @@ export function buildPlan(args) {
     phaseId: "frontend_single_draw",
     dependsOn: ["frontend_recharge_prepare"],
     description: "Run the single-draw transaction checks.",
-    caseIds: ["FE-24", "FE-26", "FE-28", "FE-32", "FE-33", "FE-34", "FE-35"],
+    caseIds: ["FE-24", "FE-26", "FE-27", "FE-28", "FE-32", "FE-33", "FE-34", "FE-35"],
     commands: [[
       "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
       "--phase",
@@ -174,13 +287,15 @@ export function buildPlan(args) {
     phaseId: "frontend_reward_record",
     dependsOn: ["frontend_readonly_checks"],
     description: "Open reward record after the single draw and assert fields.",
-    caseIds: ["FE-36", "FE-37", "FE-48", "FE-49", "FE-50"],
+    caseIds: ["FE-36", "FE-37", "FE-48", "FE-49", "FE-50", "FE-55", "FE-56"],
     commands: [[
       "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
       "--phase",
       "reward_record",
       "--activity-alias",
       activityAliasToken,
+      "--draw-payload-path",
+      "<draw-payload-path>",
       "--wait-for-start-ms",
       String(args.waitForStartMs || "720000"),
     ]],
@@ -236,21 +351,6 @@ export function resolveFrontendExecutionSelection(args, manifest = readJson(mani
   };
 }
 
-function parseLastJson(text) {
-  const source = String(text || "").trim();
-  if (!source) return null;
-  const lines = source.split("\n");
-  for (let index = lines.length - 1; index >= 0; index -= 1) {
-    const line = lines[index].trimStart();
-    if (!line.startsWith("{") && !line.startsWith("[")) continue;
-    const candidate = lines.slice(index).join("\n").trim();
-    try {
-      return JSON.parse(candidate);
-    } catch {}
-  }
-  return null;
-}
-
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -259,19 +359,14 @@ function now() {
   return Date.now();
 }
 
-function runNodeJson(commandArgs) {
+function runOrchestrationNodeJson(commandArgs) {
   const startedAt = now();
-  const result = spawnSync(process.execPath, commandArgs, {
-    cwd: repoRoot,
-    env: process.env,
-    encoding: "utf8",
-    maxBuffer: 20 * 1024 * 1024,
-  });
+  const result = runNodeJson(commandArgs, { cwd: repoRoot, env: process.env });
   return {
-    exitCode: result.status ?? 1,
+    exitCode: result.exitCode,
     stdout: result.stdout || "",
     stderr: result.stderr || "",
-    payload: parseLastJson(result.stdout) || parseLastJson(result.stderr),
+    payload: result.payload,
     durationMs: now() - startedAt,
   };
 }
@@ -394,6 +489,10 @@ export async function run() {
     activityAlias: plan.executionSelection?.effectiveActivityAlias
       ? String(plan.executionSelection.effectiveActivityAlias)
       : "",
+    adminSnapshotPath: "",
+    prestartActivityId: "",
+    prestartActivityAlias: "",
+    drawPayloadPath: "",
   };
   let hadPhaseFailure = false;
   const timings = [];
@@ -413,7 +512,17 @@ export async function run() {
       continue;
     }
     const phaseStartedAt = now();
-    const commandArgsList = resolvePhaseCommands(phase, args, createdActivity);
+    let commandArgsList = resolvePhaseCommands(phase, args, createdActivity);
+    if (Array.isArray(phase.caseIds) && phase.caseIds.length) {
+      commandArgsList = commandArgsList.map(commandArgs => {
+        if (!Array.isArray(commandArgs) || !commandArgs.includes("skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs")) return commandArgs;
+        const phaseIndex = commandArgs.indexOf("--phase");
+        if (phaseIndex === -1) return commandArgs;
+        const phaseValue = String(commandArgs[phaseIndex + 1] || "");
+        if (phaseValue !== "readonly") return commandArgs;
+        return [...commandArgs, "--assert-case-ids", phase.caseIds.join(",")];
+      });
+    }
     const childResults = [];
     let phaseOk = true;
     let phasePayload = null;
@@ -427,7 +536,7 @@ export async function run() {
           attempt: attempt + 1,
           totalAttempts: 2,
         });
-        const result = runNodeJson(commandArgs);
+        const result = runOrchestrationNodeJson(commandArgs);
         child = {
           command: [process.execPath, ...commandArgs],
           ok: result.exitCode === 0 && result.payload?.ok !== false,
@@ -459,11 +568,49 @@ export async function run() {
         break;
       }
       phasePayload = child.payload;
+      if (phase.phaseId === "admin_activity_snapshot") {
+        const snapshot = child.payload?.snapshot || null;
+        if (snapshot && typeof snapshot === "object") {
+          const dir = path.join(orchestrationRoot, "artifacts", "tmp");
+          fs.mkdirSync(dir, { recursive: true });
+          const safeAlias = String(createdActivity.activityAlias || child.payload?.alias || "").replace(/[^a-zA-Z0-9_-]+/g, "").slice(0, 24);
+          const fileName = `admin-snapshot-${safeAlias || Date.now()}.json`;
+          const snapshotPath = path.join(dir, fileName);
+          try {
+            fs.writeFileSync(snapshotPath, JSON.stringify(snapshot, null, 2));
+            createdActivity.adminSnapshotPath = snapshotPath;
+            if (child.payload) child.payload.adminSnapshotPath = snapshotPath;
+          } catch {}
+        }
+        createdActivity = { ...createdActivity, ...resolveActivityTarget(child.payload, createdActivity.activityAlias) };
+      }
       if (phase.phaseId === "create_lottery_activity_draft") {
-        createdActivity = resolveActivityTarget(child.payload, createdActivity.activityAlias);
+        createdActivity = { ...createdActivity, ...resolveActivityTarget(child.payload, createdActivity.activityAlias) };
+      }
+      if (phase.phaseId === "create_lottery_activity_draft_prestart") {
+        const target = resolveActivityTarget(child.payload, "");
+        createdActivity.prestartActivityId = target.activityId;
+        createdActivity.prestartActivityAlias = target.activityAlias;
       }
       if (phase.phaseId.startsWith("frontend_")) {
-        createdActivity = resolveActivityTarget(child.payload, createdActivity.activityAlias);
+        createdActivity = { ...createdActivity, ...resolveActivityTarget(child.payload, createdActivity.activityAlias) };
+      }
+      if (phase.phaseId === "frontend_single_draw") {
+        const drawPayload = child.payload && typeof child.payload === "object"
+          ? child.payload
+          : null;
+        if (drawPayload?.draw) {
+          const dir = path.join(orchestrationRoot, "artifacts", "tmp");
+          fs.mkdirSync(dir, { recursive: true });
+          const safeAlias = String(createdActivity.activityAlias || drawPayload?.page?.activityAlias || "").replace(/[^a-zA-Z0-9_-]+/g, "").slice(0, 24);
+          const fileName = `draw-payload-${safeAlias || Date.now()}.json`;
+          const drawPath = path.join(dir, fileName);
+          try {
+            fs.writeFileSync(drawPath, JSON.stringify(drawPayload, null, 2));
+            createdActivity.drawPayloadPath = drawPath;
+            if (child.payload) child.payload.drawPayloadPath = drawPath;
+          } catch {}
+        }
       }
     }
     const phaseDurationMs = now() - phaseStartedAt;
@@ -489,9 +636,11 @@ export async function run() {
   }
 
   const caseResults = buildFrontendRegressionCaseResults(plan, phaseResults);
+  const hasFailedCase = caseResults.some(item => String(item.status || "").toUpperCase() === "FAIL");
   const totalDurationMs = now() - startedAt;
+  const overallOk = !hadPhaseFailure && !hasFailedCase;
   printJson({
-    ok: !hadPhaseFailure,
+    ok: overallOk,
     actionId: plan.actionId,
     mode: plan.mode,
     requestedCaseIds: plan.requestedCaseIds || [],
@@ -504,8 +653,8 @@ export async function run() {
     },
     phaseResults,
     caseResults,
-  }, hadPhaseFailure ? process.stderr : process.stdout);
-  return hadPhaseFailure ? 1 : 0;
+  }, overallOk ? process.stdout : process.stderr);
+  return overallOk ? 0 : 1;
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === currentFile) {

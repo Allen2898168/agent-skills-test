@@ -1,5 +1,5 @@
 import { sleep } from "../browser.mjs";
-import { dialog, dialogByText, formItem } from "./common.mjs";
+import { dialog, dialogByText, formItem } from "./element-ui-common.mjs";
 
 export async function clickVisibleDialogText(page, text) {
   const d = await dialog(page);

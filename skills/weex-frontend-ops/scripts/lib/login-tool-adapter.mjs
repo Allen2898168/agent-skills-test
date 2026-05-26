@@ -41,13 +41,13 @@ export async function withFrontendLoginRetry(run, options = {}) {
 
 export function resolveLoginToolDir() {
   for (const dir of candidateLoginToolDirs()) {
-    const loginModule = path.join(dir, 'lib', 'weex-login.mjs');
-    const cookieModule = path.join(dir, 'lib', 'weex-auth-cookie.mjs');
+    const loginModule = path.join(dir, 'weex-login.mjs');
+    const cookieModule = path.join(dir, 'weex-auth-cookie.mjs');
     if (fs.existsSync(loginModule) && fs.existsSync(cookieModule)) {
       return { dir, loginModule, cookieModule };
     }
   }
-  throw new Error(`loginTool not found. Expected bundled copy at ${bundledLoginToolDir}, or set WEEX_FRONTEND_LOGIN_TOOL_DIR to a checkout containing lib/weex-login.mjs and lib/weex-auth-cookie.mjs.`);
+  throw new Error(`loginTool not found. Expected bundled copy at ${bundledLoginToolDir}, or set WEEX_FRONTEND_LOGIN_TOOL_DIR to a checkout containing weex-login.mjs and weex-auth-cookie.mjs.`);
 }
 
 export async function buildFrontendAuthCookie({ username, password, targetUrl, timeoutMs = 60000 }) {

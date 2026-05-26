@@ -9,9 +9,9 @@
 ## 已完成
 
 - 前端 `loginTool` 依赖已内置到 `skills/weex-frontend-ops/vendor/loginTool/`。
-  - `lib/weex-login.mjs`
-  - `lib/weex-auth-cookie.mjs`
-  - `lib/http.mjs`
+  - `weex-login.mjs`
+  - `weex-auth-cookie.mjs`
+  - `http.mjs`
 - `login-tool-adapter.mjs` 默认使用内置 `vendor/loginTool`，`WEEX_FRONTEND_LOGIN_TOOL_DIR` 仅作为可选覆盖。
 - 内置 `http.mjs` 使用 Node 原生 `fetch`，不依赖外部 `node_modules`。
 - 新增项目根 `package.json` / `package-lock.json`，登记 `playwright`。

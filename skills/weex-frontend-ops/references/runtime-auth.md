@@ -17,7 +17,7 @@ This file defines how WEEX frontend credentials are supplied at runtime.
 - `WEEX_FRONTEND_ENV`: target environment, for example `stg`.
 - `WEEX_FRONTEND_URL`: frontend login entry URL.
 - `WEEX_FRONTEND_ACCOUNT_URL`: account overview URL used to verify login state.
-- `WEEX_FRONTEND_LOGIN_TOOL_DIR`: optional local loginTool override containing `lib/weex-login.mjs` and `lib/weex-auth-cookie.mjs`. Leave unset to use the bundled copy at `skills/weex-frontend-ops/vendor/loginTool`.
+- `WEEX_FRONTEND_LOGIN_TOOL_DIR`: optional local loginTool override containing `weex-login.mjs` and `weex-auth-cookie.mjs`. Leave unset to use the bundled copy at `skills/weex-frontend-ops/vendor/loginTool`.
 - `WEEX_FRONTEND_LOGIN_GATEWAY_BASE_URL`: optional login API base, defaults to `https://stg-gateway.weex.tech`.
 - `WEEX_FRONTEND_ASSET_GATEWAY_BASE_URL`: optional asset API base, defaults to `https://stg-gateway2.weex.tech`.
 - `WEEX_FRONTEND_COMMON_PASSWORD`: common password used when an account has no dedicated password.

@@ -4,6 +4,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import YAML from "yaml";
+import { parseLastJson } from "../../../tools/lib/parse-last-json.mjs";
 
 const currentFile = fileURLToPath(import.meta.url);
 const orchestrationRoot = path.resolve(path.dirname(currentFile), "..");
@@ -49,21 +50,6 @@ function readYamlFile(filePath) {
 
 function resolveCasePath(caseId) {
   return path.join(casesRoot, `${caseId}.yml`);
-}
-
-function parseLastJson(text) {
-  const source = String(text || "").trim();
-  if (!source) return null;
-  const lines = source.split("\n");
-  for (let index = lines.length - 1; index >= 0; index -= 1) {
-    const line = lines[index].trimStart();
-    if (!line.startsWith("{") && !line.startsWith("[")) continue;
-    const candidate = lines.slice(index).join("\n").trim();
-    try {
-      return JSON.parse(candidate);
-    } catch {}
-  }
-  return null;
 }
 
 function getByPath(value, pathText) {

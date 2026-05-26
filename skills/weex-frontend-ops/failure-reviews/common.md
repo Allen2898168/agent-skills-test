@@ -147,7 +147,7 @@
 - 失败原因：`login-tool-adapter.mjs` 默认 fallback 到 `/Users/gabriel/Downloads/weexpr/loginTool`，这是个人机器路径，未随项目提交。
 - 解决方式：已将最小 `loginTool` 运行时复制到 `skills/weex-frontend-ops/vendor/loginTool`，默认优先使用 skill 内置副本；`WEEX_FRONTEND_LOGIN_TOOL_DIR` 仅保留为可选覆盖。内置 `http.mjs` 改用 Node 原生 `fetch`，不再依赖外部 `node_modules`。
 - 验证结果：`check-auth-config.mjs` 在无外部路径覆盖时可发现内置 `loginTool`；相关脚本语法检查通过。
-- 关联流程或脚本：`scripts/lib/login-tool-adapter.mjs`、`vendor/loginTool/lib/weex-login.mjs`、`vendor/loginTool/lib/weex-auth-cookie.mjs`、`vendor/loginTool/lib/http.mjs`。
+- 关联流程或脚本：`scripts/lib/login-tool-adapter.mjs`、`vendor/loginTool/weex-login.mjs`、`vendor/loginTool/weex-auth-cookie.mjs`、`vendor/loginTool/http.mjs`。
 - 后续处理状态：固定路径已生效；后续新增外部工具必须放入对应 skill 或明确改为可选依赖。
 
 ## Playwright 依赖缺失导致前端/后管浏览器脚本不可运行

@@ -17,7 +17,7 @@
 - 失败原因：Element UI 表格主内容列和右侧固定操作列分属不同 DOM 行；固定操作列行不包含模板名称，且页面可能同时存在隐藏副本。
 - 解决方式：更新公共表格 helper，先在可见主表行中按业务文本定位行序号，再到可见右侧固定操作列同序号行内点击可见按钮。临时 ID `79` 已通过页面 `删除` 按钮和二次确认弹窗清理。
 - 验证结果：修正后无浏览器模式临时 ID `80`、复制 ID `81` 完成查看、修改、复制、删除并清理；可见浏览器模式临时 ID `82`、复制 ID `83` 完成同样验证并清理。
-- 关联流程或脚本：`scripts/guide-template-row-actions.mjs`；公共 helper `scripts/lib/element-ui/table.mjs`。
+- 关联流程或脚本：`scripts/guide-template-row-actions.mjs`；公共 helper `scripts/lib/element-ui-table.mjs`。
 - 后续处理：其他 Element UI 固定操作列表格应复用公共 `clickRowActionByText`，避免直接使用 raw `button:has-text(...)`。
 
 ## 2026-05-06 活动流程引导配置复制按钮无确认弹窗

@@ -1,5 +1,5 @@
 import { sleep } from "../browser.mjs";
-import { formItem, formItemInDialog, setNativeInputValue } from "./common.mjs";
+import { formItem, formItemInDialog, setNativeInputValue } from "./element-ui-common.mjs";
 
 export async function fillLabel(page, label, value, required = true) {
   try {

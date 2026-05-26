@@ -27,7 +27,7 @@
 - 失败原因：查看弹窗中的模板名称是 disabled/input 值，不一定出现在 `innerText` 中；页面还可能存在其他可见 `.el-dialog`，按最后一个可见弹窗取标题会误命中非业务弹窗。
 - 解决方式：查看断言改为同时检查详情接口响应 `code=200`、业务弹窗标题 `用户报名管理（查看）`，以及详情响应体中的模板名称；业务弹窗应按标题文本定位，不按最后一个可见 `.el-dialog`。
 - 验证结果：使用标题定位后，临时报名模板 ID `2773` 的查看、修改、删除确认和删除后搜索回查均通过。
-- 关联文件：`scripts/lib/element-ui/common.mjs`、`references/operations/activity-register-management.md`。
+- 关联文件：`scripts/lib/element-ui-common.mjs`、`references/operations/activity-register-management.md`。
 - 后续处理：已补充标题定位型 dialog helper，并在 `register-template-row-actions.mjs` 中验证可见和不可见模式通过；后续操作列脚本应复用该 helper，避免复用最后可见弹窗策略。
 
 ## 2026-05-06 操作列自然语言缓存误命中

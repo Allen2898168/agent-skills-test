@@ -46,6 +46,31 @@ async function detailById(api, id) {
   return detail.body.data;
 }
 
+function firstNonEmptyString(value) {
+  const normalized = String(value ?? "").trim();
+  return normalized ? normalized : "";
+}
+
+function pickStringField(item, keys) {
+  for (const key of keys) {
+    if (!item || typeof item !== "object") continue;
+    if (!(key in item)) continue;
+    const hit = firstNonEmptyString(item[key]);
+    if (hit) return hit;
+  }
+  return "";
+}
+
+function pickI18nRecord(detail, preferredLangs = []) {
+  const i18n = Array.isArray(detail?.activityConfigI18n) ? detail.activityConfigI18n : [];
+  if (!i18n.length) return null;
+  for (const lang of preferredLangs) {
+    const hit = i18n.find(item => String(item?.lang || "").toLowerCase() === String(lang || "").toLowerCase());
+    if (hit) return hit;
+  }
+  return i18n[0] || null;
+}
+
 async function resolveTarget(api, args) {
   if (args.activityId) {
     const detail = await detailById(api, args.activityId);
@@ -60,11 +85,16 @@ async function resolveTarget(api, args) {
 }
 
 function summarizeActivityDetail(item) {
+  const resolvedTitle = pickStringField(item, ["title", "activityTitle", "name"]);
+  const resolvedSubtitle = pickStringField(item, ["subTitle", "subtitle", "sub_title", "activitySubTitle"]);
+  const resolvedRules = pickStringField(item, ["rules", "activityRules", "activityRule", "rule", "ruleText", "ruleDesc", "activityRuleDesc"]);
   return {
     id: item.id || item.activityId || "",
     activityId: item.activityId || item.id || "",
     showUrl: item.showUrl || "",
-    title: item.title || "",
+    title: resolvedTitle,
+    subTitle: resolvedSubtitle,
+    rules: resolvedRules,
     status: item.status || "",
     stage: item.stage || "",
     startTime: item.startTime || "",
@@ -73,6 +103,36 @@ function summarizeActivityDetail(item) {
     taskConfig: Array.isArray(item.taskConfig) ? item.taskConfig.map(record => ({ id: record.id, taskType: record.taskType })) : [],
     taskRequirement: Array.isArray(item.taskRequirement) ? item.taskRequirement.map(record => ({ id: record.id, taskType: record.taskType })) : [],
     taskConfigIds: Array.isArray(item.taskConfigIds) ? item.taskConfigIds : [],
+  };
+}
+
+async function snapshot(api, args) {
+  const target = await resolveTarget(api, args);
+  const item = target.detail || {};
+  const detail = summarizeActivityDetail(item);
+  const i18n = pickI18nRecord(item, ["zh_CN", "zh-cn", "zh_CN".toLowerCase()]);
+  const i18nTitle = pickStringField(i18n, ["title", "activityTitle", "name"]);
+  const i18nSubtitle = pickStringField(i18n, ["subTitle", "subtitle", "sub_title", "activitySubTitle"]);
+  const i18nRules = pickStringField(i18n, ["rules", "activityRules", "activityRule", "rule", "ruleText", "ruleDesc", "activityRuleDesc"]);
+  return {
+    ok: true,
+    mode: "headless_api",
+    finalUrl: "/activities/lottery",
+    target: { activityId: target.id, activityAlias: target.alias },
+    activityId: target.id,
+    alias: target.alias,
+    snapshot: {
+      title: firstNonEmptyString(i18nTitle || detail.title),
+      subtitle: firstNonEmptyString(i18nSubtitle || detail.subTitle),
+      rules: firstNonEmptyString(i18nRules || detail.rules),
+      prizeCount: Array.isArray(detail.prize) ? detail.prize.length : 0,
+    },
+    snapshotMeta: {
+      i18nLangUsed: i18n?.lang || null,
+      i18nAvailableLangs: Array.isArray(item?.activityConfigI18n)
+        ? item.activityConfigI18n.map(record => String(record?.lang || "")).filter(Boolean)
+        : [],
+    },
   };
 }
 
@@ -208,7 +268,7 @@ async function offline(api, args, config) {
 async function run() {
   const args = parseArgs();
   if (args.help) {
-    process.stdout.write("Usage: node skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs --action create-draft|draft-checks|online|online-checks|offline [--activity-alias alias]\n");
+    process.stdout.write("Usage: node skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs --action snapshot|create-draft|draft-checks|online|online-checks|offline [--activity-alias alias]\n");
     return 0;
   }
   loadLocalEnv(repoRoot);
@@ -222,7 +282,7 @@ async function run() {
   const startedAt = Date.now();
   const api = await createAdminApiSession({ chromium, config });
   try {
-    const handlers = { "create-draft": createDraft, "draft-checks": draftChecks, online, "online-checks": onlineChecks, offline };
+    const handlers = { snapshot, "create-draft": createDraft, "draft-checks": draftChecks, online, "online-checks": onlineChecks, offline };
     const handler = handlers[String(args.action)];
     if (!handler) throw new Error(`Unsupported --action: ${args.action}`);
     const payload = await handler(api, args, config);

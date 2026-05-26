@@ -5,6 +5,7 @@ import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parseFlags, printJson, readJson } from "./lib/cli.mjs";
 import { loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
+import { parseLastJson } from "../../../tools/lib/parse-last-json.mjs";
 import {
   buildRegressionCaseResults,
   resolvePhaseCommands,
@@ -126,7 +127,7 @@ export function buildPlan(args) {
         description: "Verify registration template search by name and template id.",
         caseIds: ["RT-01", "RT-02"],
         commands: [
-          ["skills/weex-admin-ops/scripts/register-template-search-checks.mjs", "--name-prefix", "自动化报名模板"]
+          [script("skills/weex-admin-ops/scripts/register-template-search-checks-fast-api.mjs", "skills/weex-admin-ops/scripts/register-template-search-checks.mjs"), "--name-prefix", "自动化报名模板"]
         ]
       },
       {
@@ -234,21 +235,6 @@ export function buildPlan(args) {
       }
     ]
   };
-}
-
-function parseLastJson(text) {
-  const source = String(text || "").trim();
-  if (!source) return null;
-  const lines = source.split("\n");
-  for (let index = lines.length - 1; index >= 0; index -= 1) {
-    const line = lines[index].trimStart();
-    if (!line.startsWith("{") && !line.startsWith("[")) continue;
-    const candidate = lines.slice(index).join("\n").trim();
-    try {
-      return JSON.parse(candidate);
-    } catch {}
-  }
-  return null;
 }
 
 function runNodeJson(commandArgs) {

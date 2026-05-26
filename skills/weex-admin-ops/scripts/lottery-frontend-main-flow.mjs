@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import path from "node:path";
-import { spawnSync } from "node:child_process";
+import { runNodeJson } from "../../../tools/lib/run-node-json.mjs";
 import { pathsFrom } from "./lib/runtime.mjs";
 import { parseFlags, printJson } from "./lib/cli.mjs";
 import {
@@ -52,32 +52,9 @@ function logFlowProgress(phase, message) {
   process.stderr.write(`[frontend-flow:${phase}] ${message}\n`);
 }
 
-function parseLastJson(text) {
-  const source = String(text || "").trim();
-  if (!source) return null;
-  const lines = source.split("\n");
-  for (let index = lines.length - 1; index >= 0; index -= 1) {
-    const line = lines[index].trimStart();
-    if (!line.startsWith("{") && !line.startsWith("[")) continue;
-    const candidate = lines.slice(index).join("\n").trim();
-    try {
-      return JSON.parse(candidate);
-    } catch {}
-  }
-  return null;
-}
-
-function runNodeJson(commandArgs) {
-  const result = spawnSync(process.execPath, commandArgs, {
-    cwd: repoRoot,
-    env: process.env,
-    encoding: "utf8",
-    maxBuffer: 20 * 1024 * 1024,
-  });
-  return {
-    exitCode: result.status ?? 1,
-    payload: parseLastJson(result.stdout) || parseLastJson(result.stderr),
-  };
+function runSkillNodeJson(commandArgs) {
+  const result = runNodeJson(commandArgs, { cwd: repoRoot, env: process.env });
+  return { exitCode: result.exitCode, payload: result.payload };
 }
 
 function parseCount(text) {
@@ -844,7 +821,7 @@ async function main() {
 
     if (countBefore < 1 && ["recharge", "full"].includes(args.phase)) {
       logFlowProgress(args.phase, `sending MQ recharge callback uid=${uid} amount=${args.rechargeAmount}`);
-      const mqResult = runNodeJson([
+      const mqResult = runSkillNodeJson([
         path.join(repoRoot, "skills/weex-fin-admin-ops/scripts/run-cached-action.mjs"),
         "--action",
         "mq_recharge_callback_send",

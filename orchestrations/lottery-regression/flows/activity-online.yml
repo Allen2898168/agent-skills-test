@@ -6,15 +6,15 @@ steps:
     run: node
     whenUnset: [activityAlias]
     args:
-      - skills/weex-admin-ops/scripts/create-lottery-activity-draft.mjs
-      - --headless-ui
+      - skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs
+      - --action
+      - create-draft
       - --title-prefix
       - 前端主回归
       - --alias-prefix
       - lf
-      - --style
-      - 圆形转盘
-      - --no-preapply
+      - --start-offset-seconds
+      - "30"
     capture:
       activityAlias: alias
 
@@ -23,7 +23,9 @@ steps:
     whenSet: [activityAlias]
     whenUnset: [activityOnline]
     args:
-      - skills/weex-admin-ops/scripts/online-lottery-activity.mjs
+      - skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs
+      - --action
+      - online
       - --activity-alias
       - "{{activityAlias}}"
     assert:

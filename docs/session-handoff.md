@@ -6,7 +6,7 @@
 - 活动后台权威 skill：`skills/weex-admin-ops/`，默认 staging：`https://stg-activity.weex.tech`。
 - FIN Admin 权威 skill：`skills/weex-fin-admin-ops/`，默认 staging：`https://stg-admin-web-fin.weex.tech`。
 - 前端权威 skill：`skills/weex-frontend-ops/`，目标 URL 按用户输入或 `references/routes.md`。
-- 最近更新时间：2026-05-25。
+- 最近更新时间：2026-05-26。
 - 历史交接索引：`docs/session-handoffs/README.md`。
 
 ## 必读入口
@@ -20,6 +20,62 @@
 - 三个失败复盘入口：`skills/weex-admin-ops/FAILURES.md`、`skills/weex-fin-admin-ops/FAILURES.md`、`skills/weex-frontend-ops/FAILURES.md`。
 
 ## 最近完成
+
+- 2026-05-26 执行抽奖回归（headless_full, selection=全部）：
+  - 汇总：PASS 82 / FAIL 10 / SKIPPED 0（后管 55/55 PASS；前端 27 PASS / 10 FAIL）。
+  - 前端活动别名：normal=`n08883453`（URL `https://stg-www.weex.tech/zh-CN/events/draw/n08883453`）。
+  - FAIL：`FE-73/FE-75/FE-76`（联动展示断言失败，见 `skills/weex-frontend-ops/failure-reviews/draw-ui.md`），`FE-36/FE-37/FE-48/FE-49/FE-50/FE-55/FE-56`（`repoRoot is not defined`，已补充到 `skills/weex-frontend-ops/failure-reviews/lottery-regression.md`）。
+  - 报告：`orchestrations/lottery-regression/artifacts/reports/20260526_172109/summary.json`，并已生成 `case-results.md` / `case-results.tsv` 供按用例查看。
+
+- 2026-05-26 已沉淀“抽奖回归标准执行策略”：全量只跑一次、失败只记录与汇总、输出完成后等待用户确认（`ok`）再进行失败重试或其他方案；见 `orchestrations/lottery-regression/README.md`。
+
+- 2026-05-26 执行抽奖回归（headless_full, selection=全部）：
+  - 汇总：PASS 67 / FAIL 4 / SKIPPED 21（后管 55/55 PASS；前端 12 PASS / 4 FAIL / 21 SKIPPED）。
+  - 报告：`orchestrations/lottery-regression/artifacts/reports/20260526_170823/summary.json`（活动别名 normal=`n08119754`）。
+  - FAIL：`FE-81/FE-82/FE-83/FE-22`（原因：`logFlowProgress is not defined`，报名/充值阶段脚本报错导致阻塞）。
+  - 运行期改动：`orchestrations/lottery-regression/scripts/run-full-headless.mjs` 改为按 selection 只检查必需 skill（避免 FIN 登录态未就绪时阻塞不涉及 FIN 的抽奖回归）。
+  - 修复：`skills/weex-frontend-ops/scripts/lib/lottery-frontend-main-flow-helpers.mjs` 补齐 `logFlowProgress(...)`，并记录到 `skills/weex-frontend-ops/failure-reviews/lottery-regression.md`（待用户确认后重跑失败 selection 复验）。
+
+- 2026-05-26 执行抽奖回归（selection=全部）二次全量：
+  - 汇总：PASS 89 / FAIL 5 / SKIPPED 9。
+  - FAIL：`FE-18/FE-80`（`frontend_prestart_checks`，`page.goto https://stg-www.weex.tech/zh-CN` 60s 超时，疑似前端首页偶发慢/不可达）、`FE-73/FE-75/FE-76`（历史联动断言失败）。
+  - 稳定性修复：`skills/weex-frontend-ops/scripts/business/auth-pages.mjs` 将 `openLoginStatePage` 改为“先直达 account，再必要时回 home 重试”，并把 `Timeout ... exceeded` 纳入可重试；导航 timeout 提升到 90s。
+  - 复验：重跑 selection=`登录态 / 活动态 / 次数态,报名链路` 后 `FE-18/FE-80` 均恢复 `PASS`。
+  - 报告：`orchestrations/lottery-regression/artifacts/reports/20260526_132759/case-results.md` 与 `orchestrations/lottery-regression/artifacts/reports/20260526_132759/case-results.tsv`。
+  - 日志：`orchestrations/lottery-regression/artifacts/tmp/last-dispatcher-run.log`、`orchestrations/lottery-regression/artifacts/tmp/rerun-prestart-signup.log`。
+
+- 2026-05-26 执行抽奖回归（selection=全部）：
+  - 汇总：PASS 91 / FAIL 3 / SKIPPED 9（SKIPPED 为 manifest 已登记但未接自动化入口）。
+  - FAIL：`FE-73`（标题联动可见断言失败）、`FE-75`（切语言断言失败）、`FE-76`（FAQ 断言失败）。
+  - 本次新增接入并验证：`FE-16/FE-18/FE-80/FE-27/FE-55/FE-56` 均 `PASS`。
+  - SKIPPED（未接自动化）：`AC-14`、`FE-20`、`FE-23`、`FE-38`、`FE-39`、`FE-51`、`FE-52`、`FE-53`、`FE-54`。
+  - 报告：`orchestrations/lottery-regression/artifacts/reports/20260526_150338/case-results.md` 与 `orchestrations/lottery-regression/artifacts/reports/20260526_150338/case-results.tsv`。
+  - 失败复盘：已补充 `skills/weex-frontend-ops/failure-reviews/draw-ui.md`（FE-73）。
+
+- 2026-05-26 按业务口径从抽奖回归移除“副标题”用例：`FE-04`（基础副标题）已从 `docs/workflows/lottery-regression-manifest.json`、`orchestrations/lottery-regression/scripts/lottery-frontend-main-regression.mjs` 的执行清单移除；副标题不再作为回归断言项。
+
+- 2026-05-26 后管无头链路继续 API 化并验证：
+  - `orchestrations/lottery-regression/scripts/lottery-frontend-main-regression.mjs` 的“创建草稿+上线活动”已切到 `skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs --action create-draft/online`（不再走 `create-lottery-activity-draft.mjs` / `online-lottery-activity.mjs` UI 链路）。
+  - `skills/weex-admin-ops/scripts/register-template-search-checks-fast-api.mjs` 新增，用 API 完成 `RT-01/RT-02` 搜索校验；`skills/weex-admin-ops/scripts/lottery-admin-main-regression.mjs` 已改为 headless 优先使用该脚本，headless 下不再包含 UI 搜索脚本。
+  - 抽奖全量无头回归验证：报告目录 `orchestrations/lottery-regression/artifacts/reports/20260526_131218`，耗时 `717.75s`，后管 `55/55 PASS`，前端 `33` 用例中 `30 PASS / 3 FAIL`（当前 FAIL 为 `FE-75/FE-76` 及一次 `FE-73` 缓存导致的误报，已通过 URL cache-bust 重试策略修复）。
+
+- 2026-05-26 定位并修复抽奖回归联动阶段误失败：
+  - `FE-73`：`skills/weex-admin-ops/scripts/lottery-frontend-backend-linkage-basic.mjs` 因漏写 `await loadPlaywright()` 导致脚本秒退（exitCode=1）；已修复为 `await loadPlaywright()`。
+  - `FE-03`：后管快照应优先取 `activityConfigI18n.zh_CN.title/subTitle`（前端标题展示使用 i18n 字段），已更新 `skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs` 的 `snapshot` 取值逻辑（缺失再回退根字段）。
+  - `FE-75/FE-76/FE-78`：前端只读探测增强（语言切换用独立 `en-US` context；FAQ 排除全站 footer 防误判；活动日历 tab 放宽 fixed/offsetParent 影响），但当前仍存在：`/events/draw/<alias>` 会重定向回 `/zh-CN/...`、活动副标题与后管不一致（见 `skills/weex-frontend-ops/failure-reviews/draw-ui.md`）。
+
+- 2026-05-26 验证后管登录态与联动改配置均可走接口（无头模式尽量不走 UI）：
+  - 后管接口登录：`GET /prod-api/captchaImage`（确认 `captchaEnabled=false`）→ `POST /prod-api/login`（携带 `totp`）拿到 `Bearer token`。
+  - `skills/weex-admin-ops/scripts/lib/admin-api.mjs` 的 `createAdminApiSession` 已改为“优先接口登录，失败再回退 UI 抓 header”。
+  - 联动用例后管改标题/副标题：`skills/weex-admin-ops/scripts/lottery-frontend-backend-linkage-basic.mjs` 已改为 `PUT /prod-api/activity/config` 更新（含 `activityConfigI18n.zh_CN`），并默认自动恢复原值。验证：标题可回显；副标题存在于页面数据但未在副标题位渲染（用例继续 FAIL 告警）。
+
+- 2026-05-26 接入联动展示只读用例到自动化：`FE-75/FE-76/FE-77/FE-78` 已挂到 `lottery_frontend_main_regression` 的 `frontend_backend_linkage_readonly` 阶段（不改后管配置；按 URL 语言前缀切换验证多语言、在 `main` 区域探测 FAQ、奖池与活动日历入口信号）。
+
+- 2026-05-26 接入联动展示用例到自动化：`FE-73` 已挂到 `lottery_frontend_main_regression` 的 `frontend_backend_linkage` 阶段（调用 `skills/weex-admin-ops/scripts/lottery-frontend-backend-linkage-basic.mjs` 后管修改标题并验证前端回显）。执行该阶段会改动活动配置（staging）。
+
+- 2026-05-26 接入前端页面基础展示用例到自动化：`FE-02/FE-03/FE-04/FE-05/FE-06/FE-08` 已纳入 `frontend_readonly_checks`（通过后管 `snapshot` 拉取 title/subtitle/rules/prizeCount，与前端只读页采集做一致性比对）。manifest 已更新 `frontend_page_basic.automationCaseIds` 覆盖 `FE-01`-`FE-08`；本次验证活动别名 `lf26084942`，前端 URL `https://stg-www.weex.tech/zh-CN/events/draw/lf26084942`，结果：`FE-02 PASS / FE-03 PASS / FE-04 FAIL / FE-05 PASS / FE-06 PASS / FE-08 PASS`（`FE-04` 副标题与后管 `subtitle="严格 UI 复杂配置副标题"` 不一致，前端展示为 `自动化测试 - 实物_20260525134927`）。
+
+- 2026-05-26 执行抽奖全量无头回归（selection=全部）：`node orchestrations/lottery-regression/scripts/run-full-headless.mjs --selection "全部" --admin-concurrency 1 --concurrency 10 --start-offset-seconds 3 --wait-for-start-ms 60000`。结果 `ok=true`，报告目录 `orchestrations/lottery-regression/artifacts/reports/20260526_093300`；活动别名：普通 `n80798172`；用例汇总 `PASS 78 / FAIL 0 / SKIPPED 0`（后管 `55/55`、前端 `23/23`）；总耗时 `494.86s`；前端验证 URL `https://stg-www.weex.tech/zh-CN/events/draw/n80798172`，默认 viewport `desktop 1440x1000`。
 
 - 2026-05-25 执行抽奖全量无头回归（selection=全部）：`node orchestrations/lottery-regression/scripts/run-full-headless.mjs --selection "全部" --admin-concurrency 1 --concurrency 10 --start-offset-seconds 3 --wait-for-start-ms 60000`。结果 `ok=false`，报告目录 `orchestrations/lottery-regression/artifacts/reports/20260525_191737`；活动别名：普通 `n29471800`、二次权重 `w29474212`、小库存 `s29476492`；用例汇总 `PASS 69 / FAIL 4 / SKIPPED 5`（后管 `55/55` 全通过；前端 `PASS 14 / FAIL 4 / SKIPPED 5`）；前端失败集中在单抽阶段：`FE-32`-`FE-35` 抽奖接口返回 `code=50000 / 系统繁忙，请稍后再试！`，导致奖励记录阶段 `FE-36`/`FE-37`/`FE-48`/`FE-49`/`FE-50` 跳过；前端验证 URL `https://stg-www.weex.tech/zh-CN/events/draw/n29471800`，默认 viewport `desktop 1440x1000`。
 

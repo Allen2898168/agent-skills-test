@@ -1,5 +1,5 @@
 import { sleep } from "../browser.mjs";
-import { dialog, formItem } from "./common.mjs";
+import { dialog, formItem } from "./element-ui-common.mjs";
 
 export async function selectPlaceholder(page, placeholder, option) {
   const d = await dialog(page);

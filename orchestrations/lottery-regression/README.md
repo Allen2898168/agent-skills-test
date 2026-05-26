@@ -25,3 +25,14 @@ node orchestrations/lottery-regression/scripts/lottery-regression-dispatcher.mjs
 node orchestrations/lottery-regression/scripts/lottery-regression-dispatcher.mjs --selection "报名链路, 单抽主流程" --dry-run
 node orchestrations/lottery-regression/scripts/lottery-frontend-main-regression.mjs --activity-alias <alias> --dry-run
 ```
+
+## Execution Standard (Team Default)
+
+- Run full regression once, then report results only (no auto-retry / no auto-fix).
+- After reporting, ask the user whether to:
+  - retry failed cases/scenarios,
+  - adjust timeouts / rerun in visible mode,
+  - or accept failures and stop.
+
+中文约定：
+- 全量只跑一次；失败只记录与汇总；全部输出后等待用户说 `ok` 再做失败重试或其他方案。

@@ -14,8 +14,10 @@
 
 - `failure-reviews/README.md`：目录结构、写入规范和复盘模板。
 - `failure-reviews/common.md`：浏览器、环境、登录态、渲染、网络、截图、selector、缓存匹配等通用失败。
+- `failure-reviews/draw-ui.md`：转盘活动页 UI 展示、字段一致性与基础布局相关失败。
 - `failure-reviews/draw-contract.md`：转盘合约交易任务、页面下单/平仓、活动任务统计相关失败。
 - `failure-reviews/draw-kafka.md`：转盘活动通过 Kafka 回调完成任务时的 Kafka UI、登录态重试和任务回查问题。
+- `failure-reviews/lottery-regression.md`：抽奖回归编排与前端回归脚本相关失败（以回归为入口的阻塞类问题）。
 
 ## 当前已知高频问题摘要
 

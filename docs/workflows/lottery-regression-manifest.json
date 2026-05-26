@@ -132,8 +132,8 @@
       "status": "partial",
       "selectionAliases": ["页面基础展示"],
       "description": "前端落地页基础 UI 与信息展示。首批已接活动页打开与我的奖品入口可见性。",
-      "caseIds": ["FE-01", "FE-02", "FE-03", "FE-04", "FE-05", "FE-06", "FE-07", "FE-08"],
-      "automationCaseIds": ["FE-01", "FE-07"],
+      "caseIds": ["FE-01", "FE-02", "FE-03", "FE-05", "FE-06", "FE-07", "FE-08"],
+      "automationCaseIds": ["FE-01", "FE-02", "FE-03", "FE-05", "FE-06", "FE-07", "FE-08"],
       "entrypoint": "lottery_frontend_main_regression",
       "allowInAll": true,
       "preconditions": ["NORMAL_ACTIVITY_ONLINE", "FRONTEND_SESSION"]
@@ -157,7 +157,7 @@
       "selectionAliases": ["登录态", "活动态", "次数态", "登录态 / 活动态 / 次数态"],
       "description": "登录状态、活动状态、抽奖次数状态展示。首批已接已登录态、活动进行中与次数大于0。",
       "caseIds": ["FE-16", "FE-17", "FE-18", "FE-19", "FE-20", "FE-21", "FE-22", "FE-23"],
-      "automationCaseIds": ["FE-17", "FE-19", "FE-21", "FE-22"],
+      "automationCaseIds": ["FE-16", "FE-17", "FE-18", "FE-19", "FE-21", "FE-22"],
       "entrypoint": "lottery_frontend_main_regression",
       "allowInAll": true,
       "preconditions": ["NORMAL_ACTIVITY_ONLINE", "FRONTEND_SESSION"]
@@ -170,7 +170,7 @@
       "selectionAliases": ["报名链路", "报名"],
       "description": "活动别名访问、立即报名、报名成功后切换抽奖态。首批已接报名主链路。",
       "caseIds": ["FE-79", "FE-80", "FE-81", "FE-82", "FE-83"],
-      "automationCaseIds": ["FE-79", "FE-81", "FE-82", "FE-83"],
+      "automationCaseIds": ["FE-79", "FE-80", "FE-81", "FE-82", "FE-83"],
       "entrypoint": "lottery_frontend_main_regression",
       "allowInAll": true,
       "preconditions": ["NORMAL_ACTIVITY_ONLINE", "FRONTEND_SESSION"]
@@ -183,7 +183,7 @@
       "selectionAliases": ["单抽主流程", "单抽"],
       "description": "单抽请求、成功弹窗、扣次、奖励记录回查。首批已接单抽请求、成功弹窗与扣次。",
       "caseIds": ["FE-24", "FE-26", "FE-27", "FE-28", "FE-32", "FE-33", "FE-34", "FE-35", "FE-36", "FE-37", "FE-38", "FE-39"],
-      "automationCaseIds": ["FE-24", "FE-26", "FE-28", "FE-32", "FE-33", "FE-34", "FE-35", "FE-36", "FE-37"],
+      "automationCaseIds": ["FE-24", "FE-26", "FE-27", "FE-28", "FE-32", "FE-33", "FE-34", "FE-35", "FE-36", "FE-37"],
       "entrypoint": "lottery_frontend_main_regression",
       "allowInAll": true,
       "preconditions": ["NORMAL_ACTIVITY_SIGNED_UP", "NORMAL_ACTIVITY_DRAW_GE1", "REWARD_RECORD_DELAY_READY"]
@@ -207,7 +207,7 @@
       "selectionAliases": ["我的奖品", "奖励记录", "我的奖品 / 奖励记录"],
       "description": "我的奖品入口和奖励记录弹窗回查。首批已接入口、弹窗与基础字段。",
       "caseIds": ["FE-48", "FE-49", "FE-50", "FE-51", "FE-52", "FE-53", "FE-54", "FE-55", "FE-56"],
-      "automationCaseIds": ["FE-48", "FE-49", "FE-50"],
+      "automationCaseIds": ["FE-48", "FE-49", "FE-50", "FE-55", "FE-56"],
       "entrypoint": "lottery_frontend_main_regression",
       "allowInAll": true,
       "preconditions": ["NORMAL_ACTIVITY_ONLINE", "REWARD_RECORD_DELAY_READY"]
@@ -252,8 +252,8 @@
       "status": "partial",
       "selectionAliases": ["前后端联动展示", "联动展示"],
       "description": "后管变更前端回显，以及充值 MQ 联动。首批已接充值 MQ 联动。",
-      "caseIds": ["FE-73", "FE-74", "FE-75", "FE-76", "FE-77", "FE-78", "FE-84"],
-      "automationCaseIds": ["FE-84"],
+      "caseIds": ["FE-73", "FE-75", "FE-76", "FE-77", "FE-78", "FE-84"],
+      "automationCaseIds": ["FE-73", "FE-75", "FE-76", "FE-77", "FE-78", "FE-84"],
       "entrypoint": "lottery_frontend_main_regression",
       "allowInAll": true,
       "preconditions": ["NORMAL_ACTIVITY_ONLINE", "NORMAL_ACTIVITY_SIGNED_UP"]
@@ -656,7 +656,7 @@
     { "caseId": "FE-53", "caseName": "奖励记录时间筛选可操作", "module": "我的奖品/奖励记录", "priority": "P1", "packId": "frontend_reward_record", "scenarioKey": "REWARD_RECORD_DELAY_READY" },
     { "caseId": "FE-54", "caseName": "奖励记录滚动展示正常", "module": "我的奖品/奖励记录", "priority": "P1", "packId": "frontend_reward_record", "scenarioKey": "REWARD_RECORD_DELAY_READY" },
     { "caseId": "FE-55", "caseName": "弹窗关闭后页面状态正常", "module": "我的奖品/奖励记录", "priority": "P1", "packId": "frontend_reward_record", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
-    { "caseId": "FE-56", "caseName": "奖品弹窗与奖励记录结果一致", "module": "我的奖品/奖励记录", "priority": "P1", "packId": "frontend_reward_record", "scenarioKey": "REWARD_RECORD_DELAY_READY" },
+    { "caseId": "FE-56", "caseName": "奖品弹窗与奖励记录结果一致", "module": "我的奖品/奖励记录", "priority": "P1", "packId": "frontend_reward_record", "scenarioKey": "REWARD_RECORD_DELAY_READY", "dependsOnCaseIds": ["FE-32"] },
 
     { "caseId": "FE-57", "caseName": "小库存模板下五连抽库存不足提示正确", "module": "异常提示与容错UI", "priority": "P0", "packId": "frontend_low_stock", "scenarioKey": "LOW_STOCK_ACTIVITY_DRAW_GT5" },
     { "caseId": "FE-58", "caseName": "抽奖失败提示展示正常", "module": "异常提示与容错UI", "priority": "P1", "packId": "frontend_exception_ui", "scenarioKey": "ERROR_INJECTION_READY" },
@@ -678,7 +678,6 @@
     { "caseId": "FE-72", "caseName": "长文案或长奖品名不破版", "module": "响应式与兼容性UI", "priority": "P1", "packId": "frontend_responsive_ui", "scenarioKey": "RESPONSIVE_VIEWPORT_READY" },
 
     { "caseId": "FE-73", "caseName": "后管活动标题改动后前端展示正确", "module": "前后端联动展示", "priority": "P0", "packId": "frontend_backend_linkage", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
-    { "caseId": "FE-74", "caseName": "后管副标题改动后前端展示正确", "module": "前后端联动展示", "priority": "P1", "packId": "frontend_backend_linkage", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
     { "caseId": "FE-75", "caseName": "后管多语言配置后前端切语言展示正确", "module": "前后端联动展示", "priority": "P1", "packId": "frontend_backend_linkage", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
     { "caseId": "FE-76", "caseName": "后管FAQ配置后前端展示正确", "module": "前后端联动展示", "priority": "P1", "packId": "frontend_backend_linkage", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
     { "caseId": "FE-77", "caseName": "后管奖池配置后前端奖品展示正确", "module": "前后端联动展示", "priority": "P1", "packId": "frontend_backend_linkage", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },

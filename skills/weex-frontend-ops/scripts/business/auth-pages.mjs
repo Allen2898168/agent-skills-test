@@ -24,6 +24,8 @@ async function gotoWithRetries(page, url, options, { attempts = 3, delayMs = 150
         'net::ERR_TIMED_OUT',
         'net::ERR_NETWORK_CHANGED',
         'Navigation timeout',
+        'page.goto: Timeout',
+        'Timeout',
       ].some((token) => message.includes(token));
       if (!retryable || attempt >= attempts) throw error;
       await page.waitForTimeout(delayMs);
@@ -33,22 +35,18 @@ async function gotoWithRetries(page, url, options, { attempts = 3, delayMs = 150
 }
 
 export async function openLoginStatePage(page, targetUrl) {
-  await gotoWithRetries(page, homeUrlFor(targetUrl), { waitUntil: 'domcontentloaded', timeout: 60000 });
-  await page.waitForTimeout(5000);
-
-  await gotoWithRetries(page, accountUrlFor(targetUrl), {
-    waitUntil: 'domcontentloaded',
-    timeout: 60000
-  });
-  await page.waitForTimeout(8000);
+  const homeUrl = homeUrlFor(targetUrl);
+  const accountUrl = accountUrlFor(targetUrl);
+  await gotoWithRetries(page, accountUrl, { waitUntil: 'domcontentloaded', timeout: 90000 });
+  await page.waitForTimeout(6000);
 
   const body = await page.evaluate(() => document.body.innerText || document.body.textContent || '');
   if (/登录\s*邮箱\/手机号|还没有账户|请输入邮箱|Log\s*in|Sign\s*up/i.test(body)) {
-    await gotoWithRetries(page, homeUrlFor(targetUrl), { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await gotoWithRetries(page, homeUrl, { waitUntil: 'domcontentloaded', timeout: 90000 });
     await page.waitForTimeout(4000);
-    await gotoWithRetries(page, accountUrlFor(targetUrl), {
+    await gotoWithRetries(page, accountUrl, {
       waitUntil: 'domcontentloaded',
-      timeout: 60000
+      timeout: 90000
     });
     await page.waitForTimeout(8000);
   }
