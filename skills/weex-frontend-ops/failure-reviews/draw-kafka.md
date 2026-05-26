@@ -10,6 +10,16 @@
 - 验证信息：活动别名 `lf25085715`，账号 `8186595891@weex.com` / UID `8186595891`，amount `1000`。
 - 关联流程或脚本：前端 `scripts/lottery-frontend-main-flow.mjs`（`recharge/full` 阶段）、FIN `scripts/run-cached-action.mjs --action mq_recharge_callback_send`。
 
+## 2026-05-25 轮询抽奖次数时页面偶发变为未登录（guest）
+
+- 日期：2026-05-25
+- 页面/流程：转盘活动页（STG）报名后执行 `frontend_recharge_prepare`，发送 MQ 回调后轮询抽奖次数刷新。
+- 失败表现：轮询过程中页面偶发进入 guest/未登录态（非显式登出），导致抽奖次数读取不稳定；需要重注入 cookie 并重开账号页后继续轮询。
+- 临时处理：保持“未登录态检测 -> 重注入 cookie -> 重开页面”的自动恢复；若连续多次仍进入 guest，应优先检查前端域名跳转、cookie 作用域和当前账号登录态是否过期。
+- 验证信息：报告目录 `orchestrations/lottery-regression/artifacts/reports/20260525_191737`，活动别名 `n29471800`；轮询中触发 5 次 guest 检测后恢复，最终 `drawCount` 刷新到 `110`。
+- 关联流程或脚本：`skills/weex-frontend-ops/scripts/business/draw-kafka/flow.mjs`、`skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs`。
+- 后续处理状态：已吸收到固定流程（当前链路内置最多 5 次重注入与重开重试）；如仍频繁出现，建议补充更细的网络证据（以真实网络响应为准）定位登录态丢失原因。
+
 ## 2026-05-25 100+ manifest 重跑时单抽接口返回系统繁忙
 
 - 日期：2026-05-25
@@ -20,6 +30,7 @@
 - 验证信息：100+ manifest 重跑中后管 `PM-01`-`PM-07` 已通过，前端 `frontend_single_draw` 下 `FE-32`-`FE-35` 失败，奖励记录阶段被跳过。
 - 补充复现：`node orchestrations/lottery-regression/scripts/run-full-headless.mjs`（报告目录 `orchestrations/lottery-regression/artifacts/reports/20260525_180119`）中 normal 活动别名 `n24894463` 同样在单抽阶段返回 `code=50000`，导致 `FE-32`-`FE-35` 失败、奖励记录阶段跳过。
 - 补充复现：`node orchestrations/lottery-regression/scripts/run-full-headless.mjs`（报告目录 `orchestrations/lottery-regression/artifacts/reports/20260525_184100`）中 normal 活动别名 `n27275652` 同样在单抽阶段返回 `code=50000`，导致 `FE-32`-`FE-35` 失败、奖励记录阶段跳过。
+- 补充复现：`node orchestrations/lottery-regression/scripts/run-full-headless.mjs --selection "全部"`（报告目录 `orchestrations/lottery-regression/artifacts/reports/20260525_191737`）中 normal 活动别名 `n29471800` 同样在单抽阶段返回 `code=50000`，导致 `FE-32`-`FE-35` 失败、奖励记录阶段跳过。
 - 关联流程或脚本：`orchestrations/lottery-regression/scripts/lottery-frontend-main-regression.mjs`、`skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs`。
 - 后续处理状态：未吸收到固定流程；下一步如处理前端剩余失败，应先补安全重试或定位服务端 `50000` 原因。
 

@@ -21,6 +21,8 @@
 
 ## 最近完成
 
+- 2026-05-25 执行抽奖全量无头回归（selection=全部）：`node orchestrations/lottery-regression/scripts/run-full-headless.mjs --selection "全部" --admin-concurrency 1 --concurrency 10 --start-offset-seconds 3 --wait-for-start-ms 60000`。结果 `ok=false`，报告目录 `orchestrations/lottery-regression/artifacts/reports/20260525_191737`；活动别名：普通 `n29471800`、二次权重 `w29474212`、小库存 `s29476492`；用例汇总 `PASS 69 / FAIL 4 / SKIPPED 5`（后管 `55/55` 全通过；前端 `PASS 14 / FAIL 4 / SKIPPED 5`）；前端失败集中在单抽阶段：`FE-32`-`FE-35` 抽奖接口返回 `code=50000 / 系统繁忙，请稍后再试！`，导致奖励记录阶段 `FE-36`/`FE-37`/`FE-48`/`FE-49`/`FE-50` 跳过；前端验证 URL `https://stg-www.weex.tech/zh-CN/events/draw/n29471800`，默认 viewport `desktop 1440x1000`。
+
 - 2026-05-25 执行抽奖全量无头回归（selection=全部）：`node orchestrations/lottery-regression/scripts/run-full-headless.mjs --selection "全部" --admin-concurrency 1 --concurrency 10 --start-offset-seconds 3 --wait-for-start-ms 60000`。结果 `ok=true`，报告目录 `orchestrations/lottery-regression/artifacts/reports/20260525_190116`；活动别名：普通 `n28494119`、二次权重 `w28496675`、小库存 `s28498991`；用例汇总 `PASS 78 / FAIL 0 / SKIPPED 0`（后管 `55/55`、前端 `23/23`）；总耗时 `571.98s`；前端验证 URL `https://stg-www.weex.tech/zh-CN/events/draw/n28494119`，默认 viewport `1440x1000`。
 
 - 2026-05-25 修复 `run-full-headless.mjs` 汇总统计只显示前端 `caseResults`、忽略后管用例的问题：后管脚本 `--compact` 输出不含 `phaseResults/caseResults`，导致 `summary.json` 的 `caseSummary.byEntrypoint.admin.total=0`。现改为优先读取 `--report-path` 生成的 `admin.json`（含 `caseResults`）再统计，后续汇总应为后管 `55` + 前端 `23` = `78` 条自动化用例。

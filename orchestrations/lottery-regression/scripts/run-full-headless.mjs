@@ -120,6 +120,8 @@ async function prepareActivitiesBatch({ startOffsetSeconds }) {
   const script = "skills/weex-admin-ops/scripts/create-online-lottery-activities-batch-fast-api.mjs";
   const args = [
     script,
+    "--parts",
+    "normal,weight,stock",
     "--normal-template-alias", "lf25085715",
     "--weight-template-alias", "lw25121831",
     "--stock-template-alias", "ls25122120",
@@ -128,6 +130,34 @@ async function prepareActivitiesBatch({ startOffsetSeconds }) {
   const result = await runChild(args, { label: "prepare_activities_batch" });
   const payload = parseJsonSafely(result.stdout) || parseJsonSafely(result.stderr);
   return { ...result, payload };
+}
+
+function detectRequiredFrontendParts(selectedScenarios = []) {
+  const required = new Set();
+  const hasFrontendEntrypoint = scenario => String(scenario?.entrypoint || "") === "lottery_frontend_main_regression";
+  const isWeightScenario = scenario => (scenario?.preconditions || []).some(item => (
+    item === "WEIGHT_ACTIVITY_ONLINE" || item === "WEIGHT_ACTIVITY_DRAW_GE3"
+  ));
+  const isStockScenario = scenario => (scenario?.preconditions || []).some(item => (
+    item === "LOW_STOCK_ACTIVITY_ONLINE" || item === "LOW_STOCK_ACTIVITY_DRAW_GT5"
+  ));
+  for (const scenario of selectedScenarios) {
+    if (!hasFrontendEntrypoint(scenario)) continue;
+    if (isWeightScenario(scenario)) required.add("weight");
+    else if (isStockScenario(scenario)) required.add("stock");
+    else required.add("normal");
+  }
+  return Array.from(required.values()).sort();
+}
+
+function buildPrepareBatchArgs({ startOffsetSeconds, parts }) {
+  const script = "skills/weex-admin-ops/scripts/create-online-lottery-activities-batch-fast-api.mjs";
+  const partSet = new Set(parts || []);
+  const args = [script, "--parts", (parts || []).join(","), "--start-offset-seconds", String(startOffsetSeconds)];
+  if (partSet.has("normal")) args.push("--normal-template-alias", "lf25085715");
+  if (partSet.has("weight")) args.push("--weight-template-alias", "lw25121831");
+  if (partSet.has("stock")) args.push("--stock-template-alias", "ls25122120");
+  return args;
 }
 
 async function run() {
@@ -209,26 +239,6 @@ async function run() {
     return 2;
   }
 
-  const prepared = await step("prepare_activities_batch", async () => {
-    const result = await prepareActivitiesBatch({ startOffsetSeconds: args.startOffsetSeconds });
-    return { ok: result.ok && result.payload?.ok !== false, payload: result.payload };
-  });
-  if (!prepared.ok) {
-    printJson({ ok: false, error: "prepare activities batch failed", timings, totalDurationMs: now() - startedAt }, process.stderr);
-    return 1;
-  }
-
-  const aliases = prepared.payload?.aliases || {};
-  const normalAlias = String(aliases.normal || "");
-  const weightAlias = String(aliases.weight || "");
-  const stockAlias = String(aliases.stock || "");
-  if (!normalAlias || !weightAlias || !stockAlias) {
-    printJson({ ok: false, error: "missing activity aliases from batch prepare", aliases, timings, totalDurationMs: now() - startedAt }, process.stderr);
-    return 1;
-  }
-
-  fs.mkdirSync(reportRoot, { recursive: true });
-
   const manifest = loadLotteryRegressionManifest();
   const selectionInput = args.selection || "全部";
   const selection = resolveScenarioSelection(selectionInput === "full" ? "全部" : selectionInput, manifest);
@@ -236,6 +246,39 @@ async function run() {
     printJson({ ok: false, error: "unresolved selection tokens", selection, timings, totalDurationMs: now() - startedAt }, process.stderr);
     return 2;
   }
+
+  const requiredFrontendParts = detectRequiredFrontendParts(selection.selectedScenarios);
+  const shouldPrepareActivities = requiredFrontendParts.length > 0;
+
+  const prepared = shouldPrepareActivities
+    ? await step("prepare_activities_batch", async () => {
+      const commandArgs = buildPrepareBatchArgs({ startOffsetSeconds: args.startOffsetSeconds, parts: requiredFrontendParts });
+      const result = await runChild(commandArgs, { label: "prepare_activities_batch" });
+      const payload = parseJsonSafely(result.stdout) || parseJsonSafely(result.stderr);
+      return { ok: result.ok && payload?.ok !== false, payload };
+    })
+    : { ok: true, payload: { ok: true, aliases: {} } };
+  if (!prepared.ok) {
+    printJson({ ok: false, error: "prepare activities batch failed", requiredFrontendParts, timings, totalDurationMs: now() - startedAt }, process.stderr);
+    return 1;
+  }
+
+  const aliases = prepared.payload?.aliases || {};
+  const normalAlias = String(aliases.normal || "");
+  const weightAlias = String(aliases.weight || "");
+  const stockAlias = String(aliases.stock || "");
+  const missingRequired = requiredFrontendParts.filter(part => {
+    if (part === "normal") return !normalAlias;
+    if (part === "weight") return !weightAlias;
+    if (part === "stock") return !stockAlias;
+    return true;
+  });
+  if (missingRequired.length) {
+    printJson({ ok: false, error: "missing required activity aliases from batch prepare", requiredFrontendParts, missingRequired, aliases, timings, totalDurationMs: now() - startedAt }, process.stderr);
+    return 1;
+  }
+
+  fs.mkdirSync(reportRoot, { recursive: true });
 
   const baseArgsForBuild = {
     all: selection.mode === "all",

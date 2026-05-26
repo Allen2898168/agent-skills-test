@@ -10,6 +10,7 @@ function usage() {
   node skills/weex-admin-ops/scripts/create-online-lottery-activities-batch-fast-api.mjs --start-offset-seconds 3
 
 Options:
+  --parts <csv>                optional, create selected parts: normal,weight,stock (default: normal,weight,stock)
   --normal-template-alias <alias> required, 普通回归模板活动 showUrl
   --weight-template-alias <alias> required, 二次权重模板活动 showUrl
   --stock-template-alias <alias>  required, 小库存模板活动 showUrl
@@ -23,9 +24,19 @@ Options:
 function parseArgs() {
   const args = parseFlags(process.argv.slice(2), { booleans: ["--dry-run"] });
   if (args.help) return args;
-  if (!args.normalTemplateAlias) throw new Error("--normal-template-alias is required");
-  if (!args.weightTemplateAlias) throw new Error("--weight-template-alias is required");
-  if (!args.stockTemplateAlias) throw new Error("--stock-template-alias is required");
+  const parts = String(args.parts || "normal,weight,stock")
+    .split(",")
+    .map(item => item.trim())
+    .filter(Boolean);
+  const allowed = new Set(["normal", "weight", "stock"]);
+  for (const part of parts) {
+    if (!allowed.has(part)) throw new Error(`--parts contains unsupported value: ${part}`);
+  }
+  args.parts = parts;
+  const partSet = new Set(parts);
+  if (partSet.has("normal") && !args.normalTemplateAlias) throw new Error("--normal-template-alias is required when parts includes normal");
+  if (partSet.has("weight") && !args.weightTemplateAlias) throw new Error("--weight-template-alias is required when parts includes weight");
+  if (partSet.has("stock") && !args.stockTemplateAlias) throw new Error("--stock-template-alias is required when parts includes stock");
   return args;
 }
 
@@ -236,13 +247,15 @@ async function main() {
   const startOffsetSeconds = Math.max(3, Number(args.startOffsetSeconds || 3));
   const endDays = Math.max(1, Number(args.endDays || 30));
 
+  const partSet = new Set(args.parts || ["normal", "weight", "stock"]);
   const plan = {
+    parts: args.parts,
     startOffsetSeconds,
     endDays,
     templates: {
-      normal: String(args.normalTemplateAlias),
-      weight: String(args.weightTemplateAlias),
-      stock: String(args.stockTemplateAlias),
+      normal: args.normalTemplateAlias ? String(args.normalTemplateAlias) : "",
+      weight: args.weightTemplateAlias ? String(args.weightTemplateAlias) : "",
+      stock: args.stockTemplateAlias ? String(args.stockTemplateAlias) : "",
     },
   };
 
@@ -267,41 +280,55 @@ async function main() {
 
     const results = {};
     process.stderr.write(`{"step":"batch_prepare","status":"START"}\n`);
-    results.normal = await createAndOnlineFromTemplate(page, authHeader, config, {
-      templateAlias: String(args.normalTemplateAlias),
-      aliasPrefix: "n",
-      titlePrefix: "N",
-      startOffsetSeconds,
-      endDays,
-    });
-    process.stderr.write(`{"step":"batch_prepare","part":"normal","ok":${results.normal.ok ? "true" : "false"},"alias":"${results.normal.created?.alias || ""}"}\n`);
+    if (partSet.has("normal")) {
+      results.normal = await createAndOnlineFromTemplate(page, authHeader, config, {
+        templateAlias: String(args.normalTemplateAlias),
+        aliasPrefix: "n",
+        titlePrefix: "N",
+        startOffsetSeconds,
+        endDays,
+      });
+      process.stderr.write(`{"step":"batch_prepare","part":"normal","ok":${results.normal.ok ? "true" : "false"},"alias":"${results.normal.created?.alias || ""}"}\n`);
+    } else {
+      results.normal = null;
+    }
 
-    results.weight = await createAndOnlineFromTemplate(page, authHeader, config, {
-      templateAlias: String(args.weightTemplateAlias),
-      aliasPrefix: "w",
-      titlePrefix: "W",
-      startOffsetSeconds,
-      endDays,
-    });
-    process.stderr.write(`{"step":"batch_prepare","part":"weight","ok":${results.weight.ok ? "true" : "false"},"alias":"${results.weight.created?.alias || ""}"}\n`);
+    if (partSet.has("weight")) {
+      results.weight = await createAndOnlineFromTemplate(page, authHeader, config, {
+        templateAlias: String(args.weightTemplateAlias),
+        aliasPrefix: "w",
+        titlePrefix: "W",
+        startOffsetSeconds,
+        endDays,
+      });
+      process.stderr.write(`{"step":"batch_prepare","part":"weight","ok":${results.weight.ok ? "true" : "false"},"alias":"${results.weight.created?.alias || ""}"}\n`);
+    } else {
+      results.weight = null;
+    }
 
-    results.stock = await createAndOnlineFromTemplate(page, authHeader, config, {
-      templateAlias: String(args.stockTemplateAlias),
-      aliasPrefix: "s",
-      titlePrefix: "S",
-      startOffsetSeconds,
-      endDays,
-    });
-    process.stderr.write(`{"step":"batch_prepare","part":"stock","ok":${results.stock.ok ? "true" : "false"},"alias":"${results.stock.created?.alias || ""}"}\n`);
+    if (partSet.has("stock")) {
+      results.stock = await createAndOnlineFromTemplate(page, authHeader, config, {
+        templateAlias: String(args.stockTemplateAlias),
+        aliasPrefix: "s",
+        titlePrefix: "S",
+        startOffsetSeconds,
+        endDays,
+      });
+      process.stderr.write(`{"step":"batch_prepare","part":"stock","ok":${results.stock.ok ? "true" : "false"},"alias":"${results.stock.created?.alias || ""}"}\n`);
+    } else {
+      results.stock = null;
+    }
 
-    const ok = Boolean(results.normal.ok && results.weight.ok && results.stock.ok);
+    const ok = ["normal", "weight", "stock"]
+      .filter(part => partSet.has(part))
+      .every(part => results[part]?.ok !== false);
     printJson({
       ok,
       plan,
       aliases: {
-        normal: results.normal.created?.alias || "",
-        weight: results.weight.created?.alias || "",
-        stock: results.stock.created?.alias || "",
+        normal: results.normal?.created?.alias || "",
+        weight: results.weight?.created?.alias || "",
+        stock: results.stock?.created?.alias || "",
       },
       results,
       totalDurationMs: Date.now() - batchStartedAt,
