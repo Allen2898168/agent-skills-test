@@ -187,6 +187,20 @@
       "fallback": "Run API scripts directly: lottery-admin-main-regression.mjs and lottery-activity-fast-api.mjs."
     },
     {
+      "id": "configure_newbie_activity",
+      "status": "candidate",
+      "script": "scripts/newbie-config-wizard-api.mjs",
+      "description": "Newbie activity(BEGINNER_TASK) config wizard (headless_api): prints supported modules/fields + one-shot JSON reply template; execution requires a filled spec with high-risk confirmations set to true.",
+      "domains": ["活动列表", "新手活动"],
+      "intentKeywords": ["配置", "创建", "新增", "全配置", "上线", "下线", "删除"],
+      "objectKeywords": ["新手活动", "活动列表", "BEGINNER_TASK"],
+      "defaultMode": "invisible",
+      "verifiedModes": ["dry_run"],
+      "lastVerifiedAt": "2026-05-28",
+      "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
+      "fallback": "Run API scripts directly: newbie-activity-fast-api.mjs."
+    },
+    {
       "id": "create_lottery_activity_draft",
       "status": "candidate",
       "script": "scripts/lottery-activity-fast-api.mjs",

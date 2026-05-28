@@ -38,6 +38,7 @@ function scoreAction(action, query) {
   if (action.id === "create_guide_templates" && /活动.*引导.*配置|引导.*流程.*配置|流程.*引导.*配置|活动流程引导配置/.test(query)) score += 8;
   if (action.id === "verify_guide_template_row_actions" && /活动.*引导.*配置|引导.*流程.*配置|流程.*引导.*配置|活动流程引导配置/.test(query) && query.includes("操作列")) score += 12;
   if (action.id === "configure_lottery_activity" && /转盘抽奖|抽奖活动/.test(query) && /配置|创建|新增|上线|下线/.test(query)) score += 20;
+  if (action.id === "configure_newbie_activity" && /新手活动|BEGINNER_TASK/.test(query) && /配置|创建|新增|全配置|上线|下线|删除/.test(query)) score += 20;
   if (action.id === "create_lottery_activity_draft" && /活动列表/.test(query) && /转盘抽奖/.test(query) && /新增|创建|草稿|配置|走一下|尝试/.test(query)) score += 14;
   if (action.id === "create_lottery_activity_draft" && /转盘抽奖.{0,8}活动|活动.{0,8}转盘抽奖/.test(query) && /新增|创建|生成|草稿|配置|全配置|权重配置|走一下|尝试/.test(query)) score += 14;
   if (action.id === "lottery_admin_main_regression" && /转盘抽奖/.test(query) && /后管|后台|活动后台/.test(query) && /主回归|回归/.test(query)) score += 18;

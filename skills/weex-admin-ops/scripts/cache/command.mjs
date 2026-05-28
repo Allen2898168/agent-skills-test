@@ -3,6 +3,7 @@ import path from "node:path";
 export function commandFor(match, args, skillRoot) {
   if (match.action.id === "lottery_admin_main_regression") return lotteryAdminMainRegressionCommand(match, args, skillRoot);
   if (match.action.id === "configure_lottery_activity") return configureLotteryActivityCommand(match, args, skillRoot);
+  if (match.action.id === "configure_newbie_activity") return configureNewbieActivityCommand(match, args, skillRoot);
   if (match.action.id === "copy_prize_by_id") return copyPrizeCommand(match, args, skillRoot);
   if (match.action.id === "create_roulette_participant_scope_tasks") return rouletteParticipantScopeCommand(match, args, skillRoot);
   if (match.action.id === "create_register_templates") return registerTemplateCommand(match, args, skillRoot);
@@ -70,6 +71,26 @@ function configureLotteryActivityCommand(match, args, skillRoot) {
   if (params.raffleStyle) commandArgs.push("--raffle-style", String(params.raffleStyle));
   if (params.uid) commandArgs.push("--uid", String(params.uid));
   if (params.country) commandArgs.push("--country", String(params.country));
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureNewbieActivityCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (params.preset) commandArgs.push("--preset", String(params.preset));
+  if (params.templateAlias) commandArgs.push("--template-alias", String(params.templateAlias));
+  if (params.templateId) commandArgs.push("--template-id", String(params.templateId));
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
   if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
   if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
   if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");

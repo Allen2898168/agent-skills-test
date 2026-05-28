@@ -53,6 +53,8 @@ Options:
   --max-attempts <n>  Max attempts for verify_activity_tasks_complex_all_types when uniqueness conflicts occur
   --spec-file <path>  One-shot lottery spec file for configure_lottery_activity
   --spec-json <json>  One-shot lottery spec JSON for configure_lottery_activity
+  --template-id <id>  Newbie full-config template activityId
+  --template-alias <x> Newbie full-config template showUrl
   --title-exact <x>   Exact title for create_lottery_activity_draft
   --title-prefix <x>  Title prefix for create_lottery_activity_draft dry-run plan
   --subtitle <x>      Exact subtitle for create_lottery_activity_draft

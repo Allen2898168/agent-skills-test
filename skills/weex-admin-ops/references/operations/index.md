@@ -6,6 +6,7 @@ Use this file as the table of contents for operation playbooks. Keep full workfl
 
 - Activity management: `activity-management.md`
 - Activity management lottery: `activity-management-lottery.md`
+- Activity management newbie (BEGINNER_TASK): `activity-management-newbie.md`
 - Activity management lottery frontend rules: `activity-management-lottery-frontend.md`
 - Activity management lottery row actions and cache: `activity-management-lottery-row-actions.md`
 - Activity management lottery templates: `activity-management-lottery-templates.md`
