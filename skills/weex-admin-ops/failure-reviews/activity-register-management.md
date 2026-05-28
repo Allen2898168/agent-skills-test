@@ -50,3 +50,12 @@
 - 关联流程：活动用户报名管理批量删除。
 - 关联文件：`scripts/delete-register-templates-by-operator.mjs`、`references/operations/activity-register-management-bulk-delete.md`。
 - 后续处理：如果需要删除 ID `2729`，必须先确认活动 `8990,8993` 的处理方式，再解除引用或调整活动配置后重试。
+
+## 2026-05-28 报名模板一旦被活动使用即无法清理（即使活动已删除）
+- 业务线：活动用户报名管理。
+- 场景：无头 API 创建转盘抽奖活动并显式绑定新建报名模板（applyConfigId），随后删除该活动并尝试删除报名模板。
+- 失败表现：`DELETE /prod-api/activity/apply/<id>` 返回 HTTP 200 但业务 `code=500`，提示 `该报名模版已经被(<activityId>)使用`；即使活动已通过 `/prod-api/activity/lottery/delete` 删除且列表回查不存在，报名模板仍无法删除。
+- 失败原因：后端对报名模板的“已被使用”判定可能包含历史引用或异步清理延迟，导致无法作为“临时依赖”实现完全清理。
+- 解决方式：默认全链路回归/全配置创建时**复用已存在的稳定报名模板**（例如模板自带 `applyConfigId`），避免为“可清理验证”创建新报名模板；若必须新建报名模板，视为持久化资产，不在 cleanup 阶段强删。
+- 验证结果：改用复用模板 `applyConfigId=2729` 后，转盘抽奖“显式绑定依赖（奖品/任务）创建→验证→删除”可全清理；仅跳过报名模板删除。
+- 关联文件：`scripts/create-lottery-full-config-explicit-deps-fast-api.mjs`。

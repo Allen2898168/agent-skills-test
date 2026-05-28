@@ -22,6 +22,11 @@
 
 ## 最近完成
 
+- 2026-05-28 补齐后管无头 API“全配置”缺口（仅 activity-web 域）：
+  - 新增多语言模板无头 API：`skills/weex-admin-ops/scripts/multilanguage-template-fast-api.mjs`（create/detail/delete 验证通过，templateType=1 新手活动）。
+  - 新增资源位信息卡片无头 API：`skills/weex-admin-ops/scripts/resource-card-fast-api.mjs`（create/detail/delete 验证通过；注意 activityType 使用字符串枚举 `BEGINNER_TASK`）。
+  - 转盘抽奖全配置显式绑定依赖：`skills/weex-admin-ops/scripts/create-lottery-full-config-explicit-deps-fast-api.mjs`（奖品/任务显式绑定 + 活动创建/回查/删除通过；报名模板默认复用模板自带 applyConfigId 以确保可清理）。
+
 - 2026-05-26 通过接口批量补齐奖品子类型模板（非 UI 操作）：
   - 脚本：`skills/weex-admin-ops/scripts/create-all-prize-subtypes-api.mjs`（命名：`<prizeType>-<prizeSubType>`）。
   - 校验：按 `prizeAlias` 回查 16/16 均存在（`GIFT_CASH/PHYSICAL/VIRTUAL` 全子类型；默认不批量创建 DROP 币种 coinId 子类型）。
