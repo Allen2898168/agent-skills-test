@@ -127,6 +127,20 @@
       "fallback": "Run task verification by visible browser workflow if API creation fails, then refine the minimal-safe payload per type."
     },
     {
+      "id": "verify_activity_tasks_complex_all_types",
+      "status": "candidate",
+      "script": "scripts/verify-activity-tasks-complex-all-types-fast-api.mjs",
+      "description": "For each activity type, pick the most complex template among the first N tasks, clone and create it, verify by list/detail, then delete it (headless_api).",
+      "domains": ["活动通用模块管理", "活动任务管理"],
+      "intentKeywords": ["验证", "测试", "最复杂", "复杂配置", "全类型"],
+      "objectKeywords": ["活动任务", "任务管理", "活动任务管理"],
+      "defaultMode": "invisible",
+      "verifiedModes": ["dry_run"],
+      "lastVerifiedAt": "2026-05-28",
+      "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
+      "fallback": "If a complex clone fails due to uniqueness bindings, switch to another complex template or fall back to visible UI for that type."
+    },
+    {
       "id": "create_guide_templates",
       "status": "candidate",
       "script": "scripts/create-guide-templates-fast-api.mjs",

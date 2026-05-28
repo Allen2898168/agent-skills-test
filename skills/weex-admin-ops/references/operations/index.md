@@ -13,6 +13,7 @@ Use this file as the table of contents for operation playbooks. Keep full workfl
 - Activity guide template: `activity-guide-template.md`
 - Activity task management: `activity-task-management.md`
 - Activity task management all types: `activity-task-management-all-types.md`
+- Activity task management all types complex: `activity-task-management-all-types-complex.md`
 - Activity task create common: `activity-task-create-common.md`
 - Activity task search: `activity-task-search.md`
 - Activity task roulette reward modes: `activity-task-roulette-reward-modes.md`

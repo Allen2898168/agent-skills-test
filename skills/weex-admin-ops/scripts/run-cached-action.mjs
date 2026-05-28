@@ -49,6 +49,8 @@ Options:
   --confirm           Required by configure_lottery_activity to execute presets
   --types <csv>       Types for verify_activity_tasks_all_types (e.g. LOTTERY,GUESS)
   --page-size <n>     Page size for verify_activity_tasks_all_types template search
+  --candidates <n>    Candidates for verify_activity_tasks_complex_all_types detail scoring
+  --max-attempts <n>  Max attempts for verify_activity_tasks_complex_all_types when uniqueness conflicts occur
   --spec-file <path>  One-shot lottery spec file for configure_lottery_activity
   --spec-json <json>  One-shot lottery spec JSON for configure_lottery_activity
   --title-exact <x>   Exact title for create_lottery_activity_draft

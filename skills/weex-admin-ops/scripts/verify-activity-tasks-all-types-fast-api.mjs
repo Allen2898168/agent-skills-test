@@ -198,10 +198,10 @@ async function run() {
 
   loadLocalEnv(repoRoot);
   const config = adminConfig(repoRoot);
-  if (!args.dryRun) assertAdminLoginConfig(config);
+  assertAdminLoginConfig(config);
   const startedAt = Date.now();
 
-  const api = await createAdminApiSession({ config, requireApiLogin: !args.dryRun });
+  const api = await createAdminApiSession({ config, requireApiLogin: true });
   try {
     const templateCandidates = [];
     for (const type of selected) {
