@@ -6,6 +6,7 @@ export async function createAdminApiSession({ chromium, config }) {
     const authHeader = apiLogin.authorization;
     return {
       mode: "headless_api_login",
+      authorization: authHeader,
       close: async () => {},
       get: path => apiRequestNode(config.baseUrl, authHeader, "GET", path),
       post: (path, body) => apiRequestNode(config.baseUrl, authHeader, "POST", path, body),
@@ -34,6 +35,7 @@ export async function createAdminApiSession({ chromium, config }) {
   if (!authHeader) throw new Error("Failed to capture admin Authorization header");
   return {
     page,
+    authorization: authHeader,
     close: async () => {
       await context.close().catch(() => {});
       await browser.close().catch(() => {});

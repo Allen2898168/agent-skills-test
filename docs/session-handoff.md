@@ -21,6 +21,16 @@
 
 ## 最近完成
 
+- 2026-05-26 通过接口批量补齐奖品子类型模板（非 UI 操作）：
+  - 脚本：`skills/weex-admin-ops/scripts/create-all-prize-subtypes-api.mjs`（命名：`<prizeType>-<prizeSubType>`）。
+  - 校验：按 `prizeAlias` 回查 16/16 均存在（`GIFT_CASH/PHYSICAL/VIRTUAL` 全子类型；默认不批量创建 DROP 币种 coinId 子类型）。
+
+- 2026-05-26 通过接口为大富翁世界杯（activityType=23）批量配置限时任务 9 条：
+  - 时间：2026-05-26 00:00:00 ~ 2026-06-30 23:59:59；timeType 分 `DURING/AFTER`（判定开始时间拆分）。
+  - 内容：报名/注册/充值（奖励=骰子 `1040`）+ 合约里程碑基础/进阶（奖励=积分 `1036`，下单方式全选）。
+  - 脚本：`skills/weex-admin-ops/scripts/create-monopoly-worldcup-limitedtime-tasks-api.mjs`（创建/补齐）、`skills/weex-admin-ops/scripts/verify-monopoly-worldcup-limitedtime-tasks-api.mjs`（回查校验）。
+  - 任务 ID：5938~5942、5944~5947（共 9 条）。
+
 - 2026-05-26 执行抽奖回归（headless_full, selection=全部）：
   - 汇总：PASS 82 / FAIL 10 / SKIPPED 0（后管 55/55 PASS；前端 27 PASS / 10 FAIL）。
   - 前端活动别名：normal=`n08883453`（URL `https://stg-www.weex.tech/zh-CN/events/draw/n08883453`）。
