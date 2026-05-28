@@ -31,6 +31,15 @@
     - 新手活动批量绑定多语言模板：`skills/weex-admin-ops/scripts/batch-bind-i18n-template-fast-api.mjs`（snapshot 只读验证通过）。
     - 资源位信息卡片支持“显式 payload（不靠 clone）+ update/copy”：`skills/weex-admin-ops/scripts/resource-card-fast-api.mjs`（新增 action create/update/copy/wizard）。
     - NL/action-cache 覆盖检查工具：`tools/admin-coverage-check.mjs`；并已把新 action 接入 `skills/weex-admin-ops/scripts/action-cache.json` + `scripts/cache/*`（dry-run 命中通过）。
+  - 2026-05-28 创建并直接上线 1 个“全量全配置”转盘抽奖活动（2mins 后开始）：
+    - 创建：`node skills/weex-admin-ops/scripts/create-lottery-full-config-explicit-deps-fast-api.mjs --confirm-create --start-offset-seconds 120 --end-days 30 --title-prefix 转盘全配 --alias-prefix lx`
+    - 结果：activityId=`9670`，alias=`lx95121358`，start=`2026-05-29 03:07:21`，end=`2026-06-28 03:07:21`，创建后状态=Draft。
+    - 上线：`node skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs --action online --activity-alias lx95121358`，验证 status=ONLINE、stage=NOT_START。
+  - 2026-05-28 创建并直接上线 1 个“合约交易量 1U + DOGE 仓位空投奖品全量”的转盘抽奖活动（2mins 后开始）：
+    - 执行：`node skills/weex-admin-ops/scripts/create-lottery-contract-doge-position-airdrop-fast-api.mjs --required-volume 1 --confirm-create`
+    - 结果：activityId=`9671`，alias=`dg95746560`，start=`2026-05-29 03:17:46`，end=`2026-06-28 03:17:46`
+    - 依赖：taskId=`6037`（合约交易量≥1U），prizeId=`1089`（VIRTUAL/POSITION_AIRDROP，coin=DOGE），applyConfigId=`2729`
+    - 验证：status=ONLINE、stage=NOT_START、prizeCount=8、taskConfigCount=1
 
 - 2026-05-26 通过接口批量补齐奖品子类型模板（非 UI 操作）：
   - 脚本：`skills/weex-admin-ops/scripts/create-all-prize-subtypes-api.mjs`（命名：`<prizeType>-<prizeSubType>`）。

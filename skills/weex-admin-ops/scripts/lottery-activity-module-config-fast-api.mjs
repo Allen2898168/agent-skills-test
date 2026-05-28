@@ -4,6 +4,11 @@ import path from "node:path";
 import { parseFlags, printJson } from "./lib/cli.mjs";
 import { adminConfig, assertAdminLoginConfig, loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
 import { createAdminApiSession, firstRow } from "./lib/admin-api.mjs";
+import {
+  ensureActivityWebDir,
+  extractLotteryRaffleStyles,
+  resolveOptionValue,
+} from "./lib/activity-web-mappings.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
 
@@ -116,7 +121,7 @@ function summarize(item) {
   };
 }
 
-function applyModulesToDetail(current, modules) {
+function applyModulesToDetail(current, modules, raffleStyleOptions) {
   const patched = JSON.parse(JSON.stringify(current || {}));
   const m = modules || {};
 
@@ -150,7 +155,7 @@ function applyModulesToDetail(current, modules) {
   }
 
   if (m.style && typeof m.style === "object") {
-    if ("raffleStyle" in m.style) patched.raffleStyle = m.style.raffleStyle;
+    if ("raffleStyle" in m.style) patched.raffleStyle = resolveOptionValue(m.style.raffleStyle, raffleStyleOptions);
   }
 
   // array/object modules: if provided, replace wholesale to keep "自由配置" 简洁明确
@@ -201,10 +206,13 @@ async function update(api, args, config) {
   const spec = loadSpec(args);
   if (!spec) throw new Error("spec is required: provide --spec-file or --spec-json");
   requireConfirmations(spec, args);
+  const activityWebDir = ensureActivityWebDir(repoRoot);
+  const raffleStyleCatalog = extractLotteryRaffleStyles(activityWebDir);
+  const raffleStyleOptions = raffleStyleCatalog.styles || [];
 
   const target = await resolveTarget(api, args);
   const before = await detail(api, target.id);
-  const patched = applyModulesToDetail(before, spec.modules);
+  const patched = applyModulesToDetail(before, spec.modules, raffleStyleOptions);
 
   const plan = {
     action: "update",
@@ -245,18 +253,22 @@ async function run() {
   const config = adminConfig(repoRoot);
 
   if (args.wizard) {
+    const activityWebDir = ensureActivityWebDir(repoRoot);
+    const raffleStyleCatalog = extractLotteryRaffleStyles(activityWebDir);
     printJson({
       ok: true,
       dryRun: true,
       wizard: {
         domain: "活动列表 / 转盘抽奖(LOTTERY) 模块级自由配置（API）",
+        raffleStyleOptions: raffleStyleCatalog.styles,
+        sources: { raffleStyleOptionsFrom: raffleStyleCatalog.filePath },
         supportedModules: ["base", "style", "tasks", "prize", "prizeWeight", "colorTag", "dailyLimit", "probability", "i18n", "faq", "calendar", "preApply"],
         oneShotReplyTemplate: {
           confirm: false,
           confirmations: { moduleWrites: false },
           modules: {
             base: { title: "", showUrl: "", startTime: "", endTime: "", applyConfigId: null },
-            style: { raffleStyle: "CIRCLE" },
+            style: { raffleStyle: String(raffleStyleCatalog.styles?.[0]?.value || "CIRCLE") },
             tasks: { taskConfig: [], showBeginnerTaskConfig: [] },
             prize: { prize: [] },
             prizeWeight: { prizeWeightConfig: {}, prizeWeight: [] },

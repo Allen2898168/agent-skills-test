@@ -5,6 +5,14 @@ import { fileURLToPath } from "node:url";
 import { parseFlags, printJson, readJson } from "./lib/cli.mjs";
 import { commandFor } from "./cache/command.mjs";
 import { matchAction } from "./cache/matcher.mjs";
+import {
+  decorateCsvValues,
+  decorateValue,
+  ensureActivityWebDir,
+  extractActivityTaskListTypes,
+  extractLotteryRaffleStyles,
+  resolveOptionValue,
+} from "./lib/activity-web-mappings.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -90,6 +98,30 @@ function runMatchedCommand(commandArgs) {
   return result.status ?? 1;
 }
 
+function decorateCommand(command) {
+  const activityWebDir = ensureActivityWebDir(executionRoot);
+  const raffleStyles = extractLotteryRaffleStyles(activityWebDir).styles || [];
+  const activityTypes = extractActivityTaskListTypes(activityWebDir).options || [];
+  const out = [...command];
+  for (let i = 0; i < out.length - 1; i += 1) {
+    const flag = out[i];
+    const next = out[i + 1];
+    if (flag === "--raffle-style") {
+      out[i + 1] = decorateValue(resolveOptionValue(next, raffleStyles), raffleStyles);
+      continue;
+    }
+    if (flag === "--activity-type") {
+      out[i + 1] = decorateValue(resolveOptionValue(next, activityTypes), activityTypes);
+      continue;
+    }
+    if (flag === "--activity-types") {
+      out[i + 1] = decorateCsvValues(next, activityTypes);
+      continue;
+    }
+  }
+  return out;
+}
+
 function main() {
   const args = parseCacheArgs();
   if (args.help) {
@@ -104,7 +136,14 @@ function main() {
   const match = matchAction(manifest, args);
   const { commandArgs } = commandFor(match, args, skillRoot);
   if (args.dryRun) {
-    printJson({ ok: true, cachedAction: match.action.id, score: match.score, command: [process.execPath, ...commandArgs] });
+    const command = [process.execPath, ...commandArgs];
+    printJson({
+      ok: true,
+      cachedAction: match.action.id,
+      score: match.score,
+      command,
+      displayCommand: decorateCommand(command),
+    });
     return 0;
   }
   return runMatchedCommand(commandArgs);

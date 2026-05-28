@@ -4,6 +4,7 @@ import path from "node:path";
 import { parseFlags, printJson } from "./lib/cli.mjs";
 import { adminConfig, assertAdminLoginConfig, loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
 import { createAdminApiSession, firstRow } from "./lib/admin-api.mjs";
+import { ensureActivityWebDir, extractActivityTaskListTypes } from "./lib/activity-web-mappings.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
 
@@ -259,12 +260,20 @@ async function run() {
   const config = adminConfig(repoRoot);
 
   if (args.wizard) {
+    const activityWebDir = ensureActivityWebDir(repoRoot);
+    const activityTypeCatalog = extractActivityTaskListTypes(activityWebDir);
     printJson({
       ok: true,
       dryRun: true,
       wizard: {
         domain: "活动列表 / 新手活动(BEGINNER_TASK) 模块级自由配置（API）",
+        activityTypeOptions: activityTypeCatalog.options,
+        sources: { activityTypeOptionsFrom: activityTypeCatalog.filePath },
         supportedModules: ["base", "userApply", "tasks", "resourceCard", "i18n", "faq"],
+        taskModeOptions: [
+          { label: "自定义任务", value: "custom" },
+          { label: "任务包", value: "taskPackage" },
+        ],
         oneShotReplyTemplate: {
           confirm: false,
           confirmations: { moduleWrites: false },

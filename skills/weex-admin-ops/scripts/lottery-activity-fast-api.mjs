@@ -2,6 +2,7 @@
 import { parseFlags, printJson } from "./lib/cli.mjs";
 import { adminConfig, assertAdminLoginConfig, loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
 import { buildSuffix, createAdminApiSession, firstRow, stripCloneFields } from "./lib/admin-api.mjs";
+import { ensureActivityWebDir, extractLotteryRaffleStyles, resolveOptionValue } from "./lib/activity-web-mappings.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
 
@@ -338,6 +339,11 @@ async function run() {
   if (args.help) {
     process.stdout.write("Usage: node skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs --action snapshot|inspect-template|create-draft|draft-checks|online|online-checks|offline [--activity-alias alias]\n");
     return 0;
+  }
+  if (args.raffleStyle) {
+    const activityWebDir = ensureActivityWebDir(repoRoot);
+    const styles = extractLotteryRaffleStyles(activityWebDir).styles || [];
+    args.raffleStyle = resolveOptionValue(args.raffleStyle, styles);
   }
   loadLocalEnv(repoRoot);
   const config = adminConfig(repoRoot);

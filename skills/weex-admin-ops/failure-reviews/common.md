@@ -169,3 +169,12 @@
 - 验证结果：使用绝对源路径重新复制后，独立目录中的结构校验、奖品 dry-run、动作缓存 dry-run 和默认图片路径检查均通过。
 - 关联文件：``。
 - 后续处理：后续 standalone 验证命令不要依赖调用时的当前目录。
+
+## 2026-05-28 新增脚本语法错误导致子进程执行失败
+- 业务线：转盘抽奖/无头 API 脚本。
+- 场景：执行 `create-lottery-contract-doge-position-airdrop-fast-api.mjs` 创建“DOGE 仓位空投奖品”依赖。
+- 失败表现：子脚本 `create-position-airdrop-prize-fast-api.mjs` 在启动阶段报 `SyntaxError: Unexpected token ','`，父编排只显示 `unknown`。
+- 失败原因：`String(baseUrl).replace(/\\/+$/, "")` 的正则字面量写错，导致 JS 解析把 `/` 提前当作正则结束符。
+- 解决方式：改为 `String(baseUrl).replace(/\/+$/, "")`（去掉多余反斜杠），恢复正常解析。
+- 验证结果：`create-position-airdrop-prize-fast-api.mjs --dry-run` 通过；后续编排创建+上线验证通过。
+- 关联文件：`scripts/create-position-airdrop-prize-fast-api.mjs`、`scripts/create-lottery-contract-doge-position-airdrop-fast-api.mjs`。

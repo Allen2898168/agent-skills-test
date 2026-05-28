@@ -4,6 +4,7 @@ import path from "node:path";
 import { parseFlags, printJson, timestamp } from "./lib/cli.mjs";
 import { adminConfig, assertAdminLoginConfig, loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
 import { createAdminApiSession, firstRow } from "./lib/admin-api.mjs";
+import { ensureActivityWebDir, extractActivityTaskListTypes, resolveOptionValue } from "./lib/activity-web-mappings.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
 
@@ -118,6 +119,12 @@ function wizardSpec() {
       },
     },
   };
+}
+
+function normalizeResourceCardPayload(payload, activityTypeOptions) {
+  if (!payload || typeof payload !== "object") return payload;
+  if ("activityType" in payload) payload.activityType = resolveOptionValue(payload.activityType, activityTypeOptions);
+  return payload;
 }
 
 async function listAll(api, activityType) {
@@ -252,8 +259,18 @@ async function run() {
     process.stdout.write(usage());
     return 0;
   }
+  const activityWebDir = ensureActivityWebDir(repoRoot);
+  const activityTypeCatalog = extractActivityTaskListTypes(activityWebDir);
+  const activityTypeOptions = activityTypeCatalog.options || [];
   if (args.wizard) {
-    printJson({ ok: true, mode: "headless_api", wizard: true, specTemplates: wizardSpec() });
+    printJson({
+      ok: true,
+      mode: "headless_api",
+      wizard: true,
+      activityTypeOptions,
+      sources: { activityTypeOptionsFrom: activityTypeCatalog.filePath },
+      specTemplates: wizardSpec(),
+    });
     return 0;
   }
   if (!args.action) throw new Error("--action is required");
@@ -279,7 +296,7 @@ async function run() {
     if (args.action === "create") {
       const spec = readSpec(args);
       requireConfirmations(spec, args);
-      const payload = spec?.payload;
+      const payload = normalizeResourceCardPayload(spec?.payload, activityTypeOptions);
       if (!payload || typeof payload !== "object") throw new Error("spec.payload must be an object");
       const created = await createByPayload(api, payload);
       printJson({
@@ -295,7 +312,7 @@ async function run() {
     if (args.action === "update") {
       const spec = readSpec(args);
       requireConfirmations(spec, args);
-      const payload = spec?.payload;
+      const payload = normalizeResourceCardPayload(spec?.payload, activityTypeOptions);
       if (!payload || typeof payload !== "object") throw new Error("spec.payload must be an object");
       const updated = await updateByPayload(api, payload);
       printJson({
