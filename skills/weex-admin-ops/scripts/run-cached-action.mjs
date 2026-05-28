@@ -46,6 +46,9 @@ Options:
   --steps <csv>      Step counts for create_guide_templates, 1-3
   --operator <name>   Recent editor/operator for delete_register_templates_by_operator
   --confirm-delete    Required by delete_register_templates_by_operator for actual deletion
+  --confirm           Required by configure_lottery_activity to execute presets
+  --spec-file <path>  One-shot lottery spec file for configure_lottery_activity
+  --spec-json <json>  One-shot lottery spec JSON for configure_lottery_activity
   --title-exact <x>   Exact title for create_lottery_activity_draft
   --title-prefix <x>  Title prefix for create_lottery_activity_draft dry-run plan
   --subtitle <x>      Exact subtitle for create_lottery_activity_draft
@@ -64,7 +67,7 @@ Options:
 }
 
 function parseCacheArgs() {
-  const parsed = parseFlags(process.argv.slice(2), { booleans: ["--list", "--visible", "--dry-run", "--country-first", "--confirm-delete", "--no-preapply"] });
+  const parsed = parseFlags(process.argv.slice(2), { booleans: ["--list", "--visible", "--dry-run", "--country-first", "--confirm-delete", "--confirm", "--no-preapply"] });
   const passthrough = {};
   for (const [key, value] of Object.entries(parsed)) {
     if (!["help", "list", "visible", "dryRun", "query", "action"].includes(key)) passthrough[key] = value;

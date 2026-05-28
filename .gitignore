@@ -4,3 +4,4 @@ generated/
 **/.env.local
 orchestrations/**/artifacts/
 skills/**/artifacts/
+activity-web/

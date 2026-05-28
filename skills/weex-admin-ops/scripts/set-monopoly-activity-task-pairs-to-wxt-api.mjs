@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { parseFlags, printJson } from "./lib/cli.mjs";
-import { adminConfig, assertAdminLoginConfig, loadLocalEnv, loadPlaywright, pathsFrom } from "./lib/runtime.mjs";
+import { adminConfig, assertAdminLoginConfig, loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
 import { createAdminApiSession } from "./lib/admin-api.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
@@ -210,8 +210,7 @@ async function run() {
   loadLocalEnv(repoRoot);
   const config = adminConfig(repoRoot);
   assertAdminLoginConfig(config);
-  const { chromium } = loadPlaywright();
-  const session = await createAdminApiSession({ chromium, config });
+  const session = await createAdminApiSession({ config, requireApiLogin: true });
 
   try {
     const detail = await getActivityDetail(session, args.activityId);

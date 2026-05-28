@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { parseFlags, printJson } from "./lib/cli.mjs";
-import { adminConfig, assertAdminConfig, loadLocalEnv, loadPlaywright, pathsFrom } from "./lib/runtime.mjs";
+import { adminConfig, assertAdminLoginConfig, loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
 import { buildPrizePlan } from "./business/prize-management/plan.mjs";
 import { createAdminApiSession, firstRow, stripCloneFields } from "./lib/admin-api.mjs";
 
@@ -52,10 +52,9 @@ async function run() {
     printJson({ ok: true, dryRun: true, mode: "headless_api", plan });
     return 0;
   }
-  assertAdminConfig(config);
-  const { chromium } = loadPlaywright();
+  assertAdminLoginConfig(config);
   const startedAt = Date.now();
-  const api = await createAdminApiSession({ chromium, config });
+  const api = await createAdminApiSession({ config, requireApiLogin: true });
   try {
     const created = [];
     const results = [];

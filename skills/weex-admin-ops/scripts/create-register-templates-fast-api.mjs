@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { parseFlags, printJson } from "./lib/cli.mjs";
-import { adminConfig, assertAdminConfig, loadLocalEnv, loadPlaywright, pathsFrom } from "./lib/runtime.mjs";
+import { adminConfig, assertAdminLoginConfig, loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
 import { buildRegisterTemplatePlan, registerPermissionCatalog, registerPlatformScopeCatalog, registerRestrictScopeCatalog, registerSignupModeCatalog } from "./business/activity-register-management/plan.mjs";
 import { buildSuffix, createAdminApiSession, firstRow, stripCloneFields } from "./lib/admin-api.mjs";
 
@@ -78,10 +78,9 @@ async function run() {
     });
     return 0;
   }
-  assertAdminConfig(config);
-  const { chromium } = loadPlaywright();
+  assertAdminLoginConfig(config);
   const startedAt = Date.now();
-  const api = await createAdminApiSession({ chromium, config });
+  const api = await createAdminApiSession({ config, requireApiLogin: true });
   try {
     const ts = buildSuffix();
     const created = [];

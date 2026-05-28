@@ -13,6 +13,7 @@
 
 - 项目规范：`AGENTS.md`。
 - 当前首次检查：`node tools/first-run-check.mjs --skill <admin|fin|frontend|all>`。
+- 后管无头 API preflight：`node tools/admin-preflight.mjs`（会拉取 `activity-web` 最新并做无头链路审计/API surface 校验）。
 - 对话配置写入：`node tools/configure-skill-env.mjs --skill <admin|fin|frontend> --from-stdin`。
 - 后管 skill：`skills/weex-admin-ops/SKILL.md`。
 - FIN Admin skill：`skills/weex-fin-admin-ops/SKILL.md`。

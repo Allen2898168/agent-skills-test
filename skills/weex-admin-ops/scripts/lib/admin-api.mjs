@@ -1,6 +1,6 @@
 import { loginToPrizePage, sleep } from "./browser.mjs";
 
-export async function createAdminApiSession({ chromium, config }) {
+export async function createAdminApiSession({ chromium, config, requireApiLogin = false } = {}) {
   const apiLogin = await tryLoginByApi(config).catch(() => ({ ok: false, reason: "exception" }));
   if (apiLogin?.ok && apiLogin.authorization) {
     const authHeader = apiLogin.authorization;
@@ -13,6 +13,13 @@ export async function createAdminApiSession({ chromium, config }) {
       put: (path, body) => apiRequestNode(config.baseUrl, authHeader, "PUT", path, body),
       delete: path => apiRequestNode(config.baseUrl, authHeader, "DELETE", path),
     };
+  }
+
+  if (requireApiLogin) {
+    throw new Error(`Admin API login failed: ${apiLogin?.reason || "unknown"}`);
+  }
+  if (!chromium) {
+    throw new Error("createAdminApiSession requires chromium when API login is unavailable");
   }
 
   const browser = await chromium.launch({

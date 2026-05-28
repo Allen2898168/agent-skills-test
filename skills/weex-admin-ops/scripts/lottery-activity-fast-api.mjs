@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { parseFlags, printJson } from "./lib/cli.mjs";
-import { adminConfig, assertAdminConfig, loadLocalEnv, loadPlaywright, pathsFrom } from "./lib/runtime.mjs";
+import { adminConfig, assertAdminLoginConfig, loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
 import { buildSuffix, createAdminApiSession, firstRow, stripCloneFields } from "./lib/admin-api.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
@@ -95,6 +95,7 @@ function summarizeActivityDetail(item) {
     title: resolvedTitle,
     subTitle: resolvedSubtitle,
     rules: resolvedRules,
+    raffleStyle: item.raffleStyle || "",
     status: item.status || "",
     stage: item.stage || "",
     startTime: item.startTime || "",
@@ -125,6 +126,7 @@ async function snapshot(api, args) {
       title: firstNonEmptyString(i18nTitle || detail.title),
       subtitle: firstNonEmptyString(i18nSubtitle || detail.subTitle),
       rules: firstNonEmptyString(i18nRules || detail.rules),
+      raffleStyle: detail.raffleStyle || "",
       prizeCount: Array.isArray(detail.prize) ? detail.prize.length : 0,
     },
     snapshotMeta: {
@@ -149,6 +151,7 @@ async function createDraft(api, args) {
   const payload = stripCloneFields(template);
   payload.title = title;
   payload.showUrl = alias;
+  if (args.raffleStyle && "raffleStyle" in payload) payload.raffleStyle = String(args.raffleStyle);
   if ("startTime" in payload) payload.startTime = window.start;
   if ("endTime" in payload) payload.endTime = window.end;
   if (Array.isArray(payload.periods) && payload.periods[0]) {
@@ -168,9 +171,74 @@ async function createDraft(api, args) {
     activityId: String(id),
     alias,
     title,
+    raffleStyle: String(verifyFirst.raffleStyle || ""),
     createBody: { code: created.body.code, msg: created.body.msg || "" },
     verifyTotal: 1,
     verifyFirst,
+  };
+}
+
+function sortedKeys(value) {
+  if (!value || typeof value !== "object") return [];
+  return Object.keys(value).sort();
+}
+
+function summarizeArrayShape(value) {
+  if (!Array.isArray(value)) return { ok: false, count: 0, itemKeys: [] };
+  return { ok: true, count: value.length, itemKeys: sortedKeys(value[0] || {}) };
+}
+
+async function inspectTemplate(api, args) {
+  const target = await resolveTarget(api, args);
+  const detail = target.detail || {};
+  const baseHints = {};
+  for (const key of [
+    "configType",
+    "activityOwner",
+    "channelCategory",
+    "guideTemplateId",
+    "periods",
+    "title",
+    "subTitle",
+    "startTime",
+    "endTime",
+    "applyConfigId",
+    "webBannerUrl",
+    "appBannerUrl",
+    "webShareUrl",
+    "appShareUrl",
+    "shareContent",
+    "agentShareContent",
+    "intro",
+    "periodValidity",
+  ]) {
+    if (key in detail) baseHints[key] = detail[key];
+  }
+  return {
+    ok: true,
+    mode: "headless_api",
+    finalUrl: "/activities/lottery",
+    target: { activityId: target.id, activityAlias: target.alias },
+    activityId: target.id,
+    alias: target.alias,
+    topLevelKeys: sortedKeys(detail),
+    moduleKeyHints: {
+      base: { keys: sortedKeys(baseHints), sample: baseHints },
+      style: { raffleStyle: detail.raffleStyle || "" },
+      prize: summarizeArrayShape(detail.prize),
+      prizeLimited: summarizeArrayShape(detail.prizeLimited),
+      prizeWeight: summarizeArrayShape(detail.prizeWeight),
+      taskConfig: summarizeArrayShape(detail.taskConfig),
+      showBeginnerTaskConfig: detail.showBeginnerTaskConfig ?? null,
+      activityConfigI18n: summarizeArrayShape(detail.activityConfigI18n),
+      questions: summarizeArrayShape(detail.questions),
+      prizeWeightConfig: detail.prizeWeightConfig ? { ok: true, keys: sortedKeys(detail.prizeWeightConfig) } : { ok: false, keys: [] },
+      prizeColorTagWeightConfig: detail.prizeColorTagWeightConfig ? { ok: true, keys: sortedKeys(detail.prizeColorTagWeightConfig) } : { ok: false, keys: [] },
+      calendar: {
+        syncCalendarFlag: detail.syncCalendarFlag ?? null,
+        syncCalendarDto: detail.syncCalendarDto ? { ok: true, keys: sortedKeys(detail.syncCalendarDto) } : { ok: false, keys: [] },
+      },
+    },
   };
 }
 
@@ -268,7 +336,7 @@ async function offline(api, args, config) {
 async function run() {
   const args = parseArgs();
   if (args.help) {
-    process.stdout.write("Usage: node skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs --action snapshot|create-draft|draft-checks|online|online-checks|offline [--activity-alias alias]\n");
+    process.stdout.write("Usage: node skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs --action snapshot|inspect-template|create-draft|draft-checks|online|online-checks|offline [--activity-alias alias]\n");
     return 0;
   }
   loadLocalEnv(repoRoot);
@@ -277,12 +345,11 @@ async function run() {
     printJson({ ok: true, dryRun: true, mode: "headless_api", args });
     return 0;
   }
-  assertAdminConfig(config);
-  const { chromium } = loadPlaywright();
+  assertAdminLoginConfig(config);
   const startedAt = Date.now();
-  const api = await createAdminApiSession({ chromium, config });
+  const api = await createAdminApiSession({ config, requireApiLogin: true });
   try {
-    const handlers = { snapshot, "create-draft": createDraft, "draft-checks": draftChecks, online, "online-checks": onlineChecks, offline };
+    const handlers = { snapshot, "inspect-template": inspectTemplate, "create-draft": createDraft, "draft-checks": draftChecks, online, "online-checks": onlineChecks, offline };
     const handler = handlers[String(args.action)];
     if (!handler) throw new Error(`Unsupported --action: ${args.action}`);
     const payload = await handler(api, args, config);

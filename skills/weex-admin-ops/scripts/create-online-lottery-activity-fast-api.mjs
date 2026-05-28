@@ -1,11 +1,8 @@
 #!/usr/bin/env node
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { adminConfig, assertAdminConfig, loadLocalEnv, loadPlaywright, pathsFrom } from "./lib/runtime.mjs";
 import { parseFlags, printJson } from "./lib/cli.mjs";
-import { loginToPrizePage, sleep } from "./lib/browser.mjs";
+import { adminConfig, assertAdminLoginConfig, loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
+import { createAdminApiSession, firstRow, stripCloneFields } from "./lib/admin-api.mjs";
 
-const currentFile = fileURLToPath(import.meta.url);
 const { repoRoot } = pathsFrom(import.meta.url);
 
 function usage() {
@@ -28,6 +25,7 @@ function parseArgs() {
   const args = parseFlags(process.argv.slice(2), { booleans: ["--dry-run"] });
   if (args.help) return args;
   if (!args.templateAlias) throw new Error("--template-alias is required");
+  args.dryRun = Boolean(args.dryRun);
   return args;
 }
 
@@ -55,8 +53,6 @@ function computeActivityWindow({ startOffsetSeconds, endDays }) {
   const start = new Date(Date.now() + startOffsetSeconds * 1000);
   const end = new Date(start.getTime() + endDays * 24 * 60 * 60 * 1000);
   return {
-    start,
-    end,
     startText: formatDateTimeInTimeZone(start, "Asia/Shanghai"),
     endText: formatDateTimeInTimeZone(end, "Asia/Shanghai"),
   };
@@ -101,97 +97,54 @@ function scrubOnlinePayload(payload) {
   return cloned;
 }
 
-async function ensureAuthHeader(page, config) {
-  let authHeader = "";
-  page.on("request", request => {
-    if (request.url().includes("/prod-api/activity/config/list")) {
-      authHeader = request.headers().authorization || authHeader;
-    }
-  });
-  await page.goto(`${config.baseUrl}/activities/lottery`, { waitUntil: "domcontentloaded" });
-  await sleep(1200);
-  await page.locator("button:visible").filter({ hasText: "查询" }).first().click().catch(() => {});
-  await sleep(1200);
-  if (!authHeader) throw new Error("Failed to capture Authorization header from /prod-api/activity/config/list");
-  return authHeader;
+async function listByAlias(api, alias) {
+  const res = await api.get(`/prod-api/activity/config/list?pageNum=1&pageSize=10&type=LOTTERY&showUrl=${encodeURIComponent(alias)}`);
+  if (res.status >= 400) throw new Error(`list HTTP ${res.status}`);
+  if (Number(res.body?.code) !== 200) throw new Error(`list failed: ${JSON.stringify({ code: res.body?.code, msg: res.body?.msg || res.body?.message || "" })}`);
+  return firstRow(res);
 }
 
-async function apiListByAlias(page, authHeader, alias) {
-  return page.evaluate(async ({ authHeader, alias }) => {
-    const response = await fetch(`/prod-api/activity/config/list?pageNum=1&pageSize=10&type=LOTTERY&showUrl=${encodeURIComponent(alias)}`, {
-      headers: { Authorization: authHeader },
-      credentials: "include",
-    });
-    return { status: response.status, body: await response.json().catch(() => null) };
-  }, { authHeader, alias });
+async function detailById(api, id) {
+  const res = await api.get(`/prod-api/activity/config/${encodeURIComponent(id)}`);
+  if (res.status >= 400) throw new Error(`detail HTTP ${res.status}`);
+  if (Number(res.body?.code) !== 200 || !res.body?.data) throw new Error(`detail failed: ${JSON.stringify({ id, code: res.body?.code, msg: res.body?.msg || res.body?.message || "" })}`);
+  return res.body.data;
 }
 
-async function apiDetailById(page, authHeader, id) {
-  return page.evaluate(async ({ authHeader, id }) => {
-    const response = await fetch(`/prod-api/activity/config/${encodeURIComponent(id)}`, {
-      headers: { Authorization: authHeader },
-      credentials: "include",
-    });
-    return { status: response.status, body: await response.json().catch(() => null) };
-  }, { authHeader, id });
-}
-
-async function apiCreate(page, authHeader, payload) {
-  return page.evaluate(async ({ authHeader, payload }) => {
-    const response = await fetch("/prod-api/activity/config", {
-      method: "POST",
-      headers: {
-        Authorization: authHeader,
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(payload),
-    });
-    return { status: response.status, body: await response.json().catch(() => null) };
-  }, { authHeader, payload });
-}
-
-async function apiOnline(page, authHeader, payload) {
-  return page.evaluate(async ({ authHeader, payload }) => {
-    const response = await fetch("/prod-api/activity/lottery/online", {
-      method: "POST",
-      headers: {
-        Authorization: authHeader,
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(payload),
-    });
-    return { status: response.status, body: await response.json().catch(() => null) };
-  }, { authHeader, payload });
+async function createByPayload(api, payload) {
+  const res = await api.post("/prod-api/activity/config", payload);
+  if (res.status >= 400) throw new Error(`create HTTP ${res.status}`);
+  if (Number(res.body?.code) !== 200) throw new Error(`create failed: ${JSON.stringify({ code: res.body?.code, msg: res.body?.msg || res.body?.message || "" })}`);
+  return res.body;
 }
 
 function buildOnlinePayloadCandidates({ activityId, googleCode }) {
   const id = String(activityId || "");
   const idNumber = Number(activityId);
   const code = String(googleCode || "");
-  const base = {
-    activityId: id,
-    id,
-    totp: code,
-    verifyCode: code,
-    googleCode: code,
-    googleAuthCode: code,
-    captcha: code,
-    code,
-  };
   const candidates = [
     { name: "activityId+totp", payload: { activityId: idNumber, totp: code } },
     { name: "activityId+verifyCode", payload: { activityId: id, verifyCode: code } },
     { name: "activityId+googleCode", payload: { activityId: id, googleCode: code } },
     { name: "activityId+googleAuthCode", payload: { activityId: id, googleAuthCode: code } },
     { name: "id+googleCode", payload: { id, googleCode: code } },
-    { name: "allFields", payload: base },
   ];
   return candidates.filter(item => id && code);
 }
 
-async function main() {
+async function online(api, config, activityId) {
+  const candidates = buildOnlinePayloadCandidates({ activityId, googleCode: config.googleCode });
+  if (!candidates.length) throw new Error("online payload candidates empty");
+  let last = null;
+  for (const item of candidates) {
+    const res = await api.post("/prod-api/activity/lottery/online", item.payload);
+    last = { name: item.name, status: res.status, body: res.body };
+    if (Number(res.body?.code) === 200) return { ok: true, tried: candidates.map(v => v.name), chosen: item.name, last: { name: item.name, status: res.status, body: scrubOnlinePayload(res.body) } };
+  }
+  return { ok: false, tried: candidates.map(v => v.name), chosen: "", last: last ? { ...last, body: scrubOnlinePayload(last.body) } : null };
+}
+
+async function run() {
   const args = parseArgs();
   if (args.help) {
     process.stdout.write(usage());
@@ -200,7 +153,7 @@ async function main() {
 
   loadLocalEnv(repoRoot);
   const config = adminConfig(repoRoot);
-  assertAdminConfig(config);
+  assertAdminLoginConfig(config);
 
   const templateAlias = String(args.templateAlias || "");
   const aliasPrefix = String(args.aliasPrefix || "api");
@@ -210,43 +163,28 @@ async function main() {
   const stamp = String(Date.now()).slice(-8);
   const nextAlias = buildShortAlias(aliasPrefix, stamp, 10);
   const nextTitle = `${titlePrefix}${new Date().toISOString().slice(0, 19).replace("T", "")}`;
-  const initialWindow = computeActivityWindow({ startOffsetSeconds, endDays });
+  const window = computeActivityWindow({ startOffsetSeconds, endDays });
 
   const plan = {
     templateAlias,
-    next: { alias: nextAlias, title: nextTitle, start: initialWindow.startText, end: initialWindow.endText },
-    risk: "This script performs staging write operations by direct API calls. Online payload keys are tried with best-effort candidates; if backend changes, it may fail.",
+    next: { alias: nextAlias, title: nextTitle, start: window.startText, end: window.endText },
+    mode: "headless_api",
   };
   if (args.dryRun) {
     printJson({ ok: true, dryRun: true, plan });
     return 0;
   }
 
-  const { chromium } = loadPlaywright();
-  const browser = await chromium.launch({
-    headless: true,
-    executablePath: config.chromePath,
-    args: ["--window-size=1440,1000"],
-  });
-  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
-  const page = await context.newPage();
-
+  const startedAt = Date.now();
+  const api = await createAdminApiSession({ config, requireApiLogin: true });
   try {
-    await loginToPrizePage(page, config);
-    await sleep(800);
-    const authHeader = await ensureAuthHeader(page, config);
-
-    const templateList = await apiListByAlias(page, authHeader, templateAlias);
-    const templateRow = templateList.body?.rows?.[0] || templateList.body?.data?.[0] || null;
+    const templateRow = await listByAlias(api, templateAlias);
     if (!templateRow) throw new Error(`Template alias not found: ${templateAlias}`);
     const templateId = String(templateRow.activityId || templateRow.id || "");
     if (!templateId) throw new Error(`Template id missing for alias: ${templateAlias}`);
-    const templateDetail = await apiDetailById(page, authHeader, templateId);
-    const templatePayload = templateDetail.body?.data || null;
-    if (!templatePayload) throw new Error(`Template detail missing for id: ${templateId}`);
+    const templateDetail = await detailById(api, templateId);
 
-    const window = computeActivityWindow({ startOffsetSeconds, endDays });
-    const createPayload = stripServerFields(templatePayload);
+    const createPayload = stripServerFields(templateDetail);
     createPayload.title = nextTitle;
     createPayload.showUrl = nextAlias;
     if ("startTime" in createPayload) createPayload.startTime = window.startText;
@@ -256,63 +194,36 @@ async function main() {
       if ("endTime" in createPayload.periods[0]) createPayload.periods[0].endTime = window.endText;
     }
 
-    const createResult = await apiCreate(page, authHeader, createPayload);
-    const createdOk = createResult.body?.code === 200;
-    if (!createdOk) {
-      printJson({
-        ok: false,
-        step: "create",
-        plan,
-        template: { alias: templateAlias, id: templateId },
-        createStatus: createResult.status,
-        createBody: createResult.body,
-      }, process.stderr);
-      return 1;
-    }
-
-    const createdList = await apiListByAlias(page, authHeader, nextAlias);
-    const createdRow = createdList.body?.rows?.[0] || createdList.body?.data?.[0] || null;
+    await createByPayload(api, createPayload);
+    const createdRow = await listByAlias(api, nextAlias);
     const createdId = String(createdRow?.activityId || createdRow?.id || "");
     if (!createdId) throw new Error(`Created id not found for alias: ${nextAlias}`);
 
-    const onlineCandidates = buildOnlinePayloadCandidates({ activityId: createdId, googleCode: config.googleCode });
-    let onlineResult = null;
-    let onlineChosen = null;
-    for (const candidate of onlineCandidates) {
-      onlineChosen = candidate.name;
-      onlineResult = await apiOnline(page, authHeader, candidate.payload);
-      if (onlineResult.body?.code === 200) break;
-    }
-    const onlineOk = onlineResult?.body?.code === 200;
+    const onlineResult = await online(api, config, createdId);
+    const verifyAfter = await detailById(api, createdId);
+    const verifyOnline = String(verifyAfter?.status || "").toUpperCase() === "ONLINE";
 
-    const verifyAfter = await apiDetailById(page, authHeader, createdId);
-    const verifyItem = verifyAfter.body?.data || null;
-    const verifyOnline = String(verifyItem?.status || "").toUpperCase() === "ONLINE";
-
+    const ok = Boolean(onlineResult.ok && verifyOnline);
     printJson({
-      ok: onlineOk && verifyOnline,
+      ok,
+      mode: "headless_api",
       plan,
       template: { alias: templateAlias, id: templateId },
       created: { alias: nextAlias, id: createdId, start: window.startText, end: window.endText },
-      createStatus: createResult.status,
-      createBody: createResult.body,
-      onlineAttempt: onlineChosen,
-      onlineStatus: onlineResult?.status ?? null,
-      onlineBody: onlineResult?.body ?? null,
-      onlinePayload: scrubOnlinePayload(onlineCandidates.find(item => item.name === onlineChosen)?.payload || null),
-      verifyStatus: verifyAfter.status,
-      verifyItem: verifyItem ? { status: verifyItem.status, stage: verifyItem.stage } : null,
-      finalUrl: page.url(),
-    }, onlineOk ? process.stdout : process.stderr);
-    return onlineOk ? 0 : 1;
+      online: onlineResult,
+      verify: { status: verifyAfter?.status || "", stage: verifyAfter?.stage || "" },
+      durationMs: Date.now() - startedAt,
+    }, ok ? process.stdout : process.stderr);
+    return ok ? 0 : 1;
   } finally {
-    await browser.close().catch(() => {});
+    await api.close?.().catch(() => {});
   }
 }
 
 try {
-  process.exitCode = await main();
+  process.exitCode = await run();
 } catch (error) {
-  printJson({ ok: false, error: error.message }, process.stderr);
+  printJson({ ok: false, mode: "headless_api", error: error.message }, process.stderr);
   process.exitCode = 1;
 }
+

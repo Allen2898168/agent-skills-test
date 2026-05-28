@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-05-11",
+  "updatedAt": "2026-05-28",
   "actions": [
     {
       "id": "lottery_admin_main_regression",
@@ -20,7 +20,7 @@
     {
       "id": "create_prizes",
       "status": "candidate",
-      "script": "scripts/create-prizes.mjs",
+      "script": "scripts/create-prizes-fast-api.mjs",
       "description": "Create one or more prize records from known prize-management defaults.",
       "domains": ["活动通用模块管理", "奖品管理"],
       "intentKeywords": ["创建", "新增", "生成"],
@@ -34,7 +34,7 @@
     {
       "id": "copy_prize_by_id",
       "status": "candidate",
-      "script": "scripts/copy-prize.mjs",
+      "script": "scripts/copy-prize-fast-api.mjs",
       "description": "Copy one prize record by prize ID and verify the copied row.",
       "domains": ["活动通用模块管理", "奖品管理"],
       "intentKeywords": ["复制"],
@@ -47,7 +47,7 @@
     {
       "id": "create_roulette_participant_scope_tasks",
       "status": "candidate",
-      "script": "scripts/create-roulette-participant-scope-tasks.mjs",
+      "script": "scripts/create-roulette-participant-scope-tasks-fast-api.mjs",
       "description": "Create roulette activity tasks by participant scope with the validated single-reward defaults.",
       "domains": ["活动通用模块管理", "活动任务管理", "转盘抽奖"],
       "intentKeywords": ["创建", "新增", "生成"],
@@ -64,7 +64,7 @@
     {
       "id": "create_register_templates",
       "status": "candidate",
-      "script": "scripts/create-register-templates.mjs",
+      "script": "scripts/create-register-templates-fast-api.mjs",
       "description": "Create activity user registration templates with selected signup modes, all-platform defaults, and specified agent/user platform restriction branches.",
       "domains": ["活动通用模块管理", "活动用户报名管理"],
       "intentKeywords": ["创建", "新增", "生成"],
@@ -84,7 +84,7 @@
     {
       "id": "verify_register_template_row_actions",
       "status": "candidate",
-      "script": "scripts/register-template-row-actions.mjs",
+      "script": "scripts/register-template-row-actions-fast-api.mjs",
       "description": "Create a temporary registration template, verify row actions 查看/修改/删除, and delete the temporary record.",
       "domains": ["活动通用模块管理", "活动用户报名管理"],
       "intentKeywords": ["验证", "走", "测试", "尝试"],
@@ -99,7 +99,7 @@
     {
       "id": "delete_register_templates_by_operator",
       "status": "candidate",
-      "script": "scripts/delete-register-templates-by-operator.mjs",
+      "script": "scripts/delete-register-templates-by-operator-fast-api.mjs",
       "description": "Dry-run and delete activity registration templates whose exact recent editor/operator matches the requested operator.",
       "domains": ["活动通用模块管理", "活动用户报名管理"],
       "intentKeywords": ["删除", "清理", "批量删除"],
@@ -115,7 +115,7 @@
     {
       "id": "create_guide_templates",
       "status": "candidate",
-      "script": "scripts/create-guide-templates.mjs",
+      "script": "scripts/create-guide-templates-fast-api.mjs",
       "description": "Create activity guide-flow templates for the verified activity-type/frequency/step combinations.",
       "domains": ["活动通用模块管理", "活动流程引导配置"],
       "intentKeywords": ["创建", "新增", "生成", "尝试"],
@@ -132,7 +132,7 @@
     {
       "id": "verify_guide_template_row_actions",
       "status": "candidate",
-      "script": "scripts/guide-template-row-actions.mjs",
+      "script": "scripts/guide-template-row-actions-fast-api.mjs",
       "description": "Create a temporary activity guide template, verify row actions 查看/修改/复制/删除, and delete the temporary records.",
       "domains": ["活动通用模块管理", "活动流程引导配置"],
       "intentKeywords": ["验证", "走", "测试", "尝试"],
@@ -145,31 +145,45 @@
       "fallback": "Use the activity guide-template row-action browser workflow and update Element UI table/dialog helpers if fixed-column or dialog visibility changes."
     },
     {
+      "id": "configure_lottery_activity",
+      "status": "candidate",
+      "script": "scripts/lottery-config-wizard-api.mjs",
+      "description": "Lottery config wizard (headless_api): first prints supported modules/types + one-shot JSON reply template; execution requires a filled spec (spec-file/spec-json) with high-risk confirmations set to true.",
+      "domains": ["活动列表", "转盘抽奖"],
+      "intentKeywords": ["配置", "创建", "新增", "上线", "下线"],
+      "objectKeywords": ["转盘抽奖", "抽奖活动", "活动列表"],
+      "defaultMode": "invisible",
+      "verifiedModes": ["dry_run"],
+      "lastVerifiedAt": "2026-05-28",
+      "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
+      "fallback": "Run API scripts directly: lottery-admin-main-regression.mjs and lottery-activity-fast-api.mjs."
+    },
+    {
       "id": "create_lottery_activity_draft",
       "status": "candidate",
-      "script": "scripts/create-lottery-activity-draft.mjs",
-      "description": "Create a draft 活动列表 / 转盘抽奖 activity through the verified real-UI workflow (visible or headless-ui), with configurable title/alias, activity time, pre-apply toggle, lottery style, and one or more activity task labels.",
+      "script": "scripts/lottery-activity-fast-api.mjs",
+      "description": "Create a draft 活动列表 / 转盘抽奖 activity in headless_api mode by cloning a verified template and overriding title/alias/time (optional raffleStyle). Visible mode falls back to the real-UI workflow.",
       "domains": ["活动列表", "转盘抽奖"],
       "intentKeywords": ["创建", "新增", "生成", "尝试", "走一下", "配置"],
       "objectKeywords": ["转盘抽奖", "活动列表", "草稿", "活动"],
       "supportedStyles": ["圆形转盘", "飞镖转盘", "彩蛋", "环形跑马灯", "足球射门"],
       "defaultMode": "invisible",
-      "verifiedModes": ["visible_browser", "headless_ui"],
+      "verifiedModes": ["headless_api", "visible_browser"],
       "lastVerifiedAt": "2026-05-14",
       "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
-      "fallback": "Use the documented lottery real-UI workflow in references/operations/activity-management-lottery.md. Actual writes support --visible and --headless-ui; for online verification, continue with the list row action 上线."
+      "fallback": "Use the documented lottery real-UI workflow in references/operations/activity-management-lottery.md when visible mode is required."
     },
     {
       "id": "online_lottery_activity",
       "status": "candidate",
-      "script": "scripts/online-lottery-activity.mjs",
-      "description": "Put a draft lottery activity online through the verified list-row UI confirmation flow.",
+      "script": "scripts/lottery-activity-fast-api.mjs",
+      "description": "Put a draft lottery activity online in headless_api mode (requires TOTP/googleCode). Visible mode falls back to list-row UI confirmation.",
       "domains": ["活动列表", "转盘抽奖"],
       "intentKeywords": ["上线", "发布", "启用"],
       "objectKeywords": ["转盘抽奖", "抽奖活动", "活动"],
       "requiredParams": ["activityAlias or activityId"],
       "defaultMode": "invisible",
-      "verifiedModes": ["visible_browser", "headless_ui"],
+      "verifiedModes": ["headless_api", "visible_browser"],
       "lastVerifiedAt": "2026-05-14",
       "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
       "fallback": "Use the list row action 上线, fill the verification input in the confirmation dialog, and require POST /prod-api/activity/lottery/online business code=200 plus status ONLINE."

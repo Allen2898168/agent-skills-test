@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { parseFlags, printJson } from "./lib/cli.mjs";
-import { adminConfig, assertAdminConfig, loadLocalEnv, loadPlaywright, pathsFrom } from "./lib/runtime.mjs";
-import { loginToPrizePage, sleep } from "./lib/browser.mjs";
+import { adminConfig, assertAdminLoginConfig, loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
+import { createAdminApiSession, firstRow, stripCloneFields } from "./lib/admin-api.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
 
@@ -24,6 +24,7 @@ Options:
 function parseArgs() {
   const args = parseFlags(process.argv.slice(2), { booleans: ["--dry-run"] });
   if (args.help) return args;
+  args.dryRun = Boolean(args.dryRun);
   const parts = String(args.parts || "normal,weight,stock")
     .split(",")
     .map(item => item.trim())
@@ -99,141 +100,111 @@ function stripServerFields(payload) {
   return cloned;
 }
 
-async function ensureAuthHeader(page, config) {
-  let authHeader = "";
-  page.on("request", request => {
-    if (request.url().includes("/prod-api/activity/config/list")) {
-      authHeader = request.headers().authorization || authHeader;
+function scrubOnlinePayload(payload) {
+  if (!payload || typeof payload !== "object") return payload;
+  const cloned = JSON.parse(JSON.stringify(payload));
+  const redact = (obj) => {
+    if (!obj || typeof obj !== "object") return;
+    for (const [key, value] of Object.entries(obj)) {
+      if (value && typeof value === "object") redact(value);
+      if (/code|captcha|google|totp/i.test(key)) obj[key] = "<REDACTED>";
     }
-  });
-  await page.goto(`${config.baseUrl}/activities/lottery`, { waitUntil: "domcontentloaded" });
-  await sleep(1200);
-  await page.locator("button:visible").filter({ hasText: "查询" }).first().click().catch(() => {});
-  await sleep(1200);
-  if (!authHeader) throw new Error("Failed to capture Authorization header from /prod-api/activity/config/list");
-  return authHeader;
+  };
+  redact(cloned);
+  return cloned;
 }
 
-async function apiListByAlias(page, authHeader, alias) {
-  return page.evaluate(async ({ authHeader, alias }) => {
-    const response = await fetch(`/prod-api/activity/config/list?pageNum=1&pageSize=10&type=LOTTERY&showUrl=${encodeURIComponent(alias)}`, {
-      headers: { Authorization: authHeader },
-      credentials: "include",
-    });
-    return { status: response.status, body: await response.json().catch(() => null) };
-  }, { authHeader, alias });
+async function listByAlias(api, alias) {
+  const res = await api.get(`/prod-api/activity/config/list?pageNum=1&pageSize=10&type=LOTTERY&showUrl=${encodeURIComponent(alias)}`);
+  if (res.status >= 400) throw new Error(`list HTTP ${res.status}`);
+  if (Number(res.body?.code) !== 200) throw new Error(`list failed: ${JSON.stringify({ code: res.body?.code, msg: res.body?.msg || res.body?.message || "" })}`);
+  return firstRow(res);
 }
 
-async function apiDetailById(page, authHeader, id) {
-  return page.evaluate(async ({ authHeader, id }) => {
-    const response = await fetch(`/prod-api/activity/config/${encodeURIComponent(id)}`, {
-      headers: { Authorization: authHeader },
-      credentials: "include",
-    });
-    return { status: response.status, body: await response.json().catch(() => null) };
-  }, { authHeader, id });
+async function detailById(api, id) {
+  const res = await api.get(`/prod-api/activity/config/${encodeURIComponent(id)}`);
+  if (res.status >= 400) throw new Error(`detail HTTP ${res.status}`);
+  if (Number(res.body?.code) !== 200 || !res.body?.data) throw new Error(`detail failed: ${JSON.stringify({ id, code: res.body?.code, msg: res.body?.msg || res.body?.message || "" })}`);
+  return res.body.data;
 }
 
-async function apiCreate(page, authHeader, payload) {
-  return page.evaluate(async ({ authHeader, payload }) => {
-    const response = await fetch("/prod-api/activity/config", {
-      method: "POST",
-      headers: {
-        Authorization: authHeader,
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(payload),
-    });
-    return { status: response.status, body: await response.json().catch(() => null) };
-  }, { authHeader, payload });
+async function createByPayload(api, payload) {
+  const res = await api.post("/prod-api/activity/config", payload);
+  if (res.status >= 400) throw new Error(`create HTTP ${res.status}`);
+  if (Number(res.body?.code) !== 200) throw new Error(`create failed: ${JSON.stringify({ code: res.body?.code, msg: res.body?.msg || res.body?.message || "" })}`);
+  return res.body;
 }
 
-async function apiOnline(page, authHeader, { activityId, totp }) {
-  return page.evaluate(async ({ authHeader, activityId, totp }) => {
-    const response = await fetch("/prod-api/activity/lottery/online", {
-      method: "POST",
-      headers: {
-        Authorization: authHeader,
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ activityId, totp }),
-    });
-    return { status: response.status, body: await response.json().catch(() => null) };
-  }, { authHeader, activityId, totp });
+function buildOnlinePayloadCandidates({ activityId, googleCode }) {
+  const id = String(activityId || "");
+  const idNumber = Number(activityId);
+  const code = String(googleCode || "");
+  const candidates = [
+    { name: "activityId+totp", payload: { activityId: idNumber, totp: code } },
+    { name: "activityId+verifyCode", payload: { activityId: id, verifyCode: code } },
+    { name: "activityId+googleCode", payload: { activityId: id, googleCode: code } },
+    { name: "activityId+googleAuthCode", payload: { activityId: id, googleAuthCode: code } },
+    { name: "id+googleCode", payload: { id, googleCode: code } },
+  ];
+  return candidates.filter(item => id && code);
 }
 
-async function createAndOnlineFromTemplate(page, authHeader, config, { templateAlias, aliasPrefix, titlePrefix, startOffsetSeconds, endDays }) {
+async function online(api, config, activityId) {
+  const candidates = buildOnlinePayloadCandidates({ activityId, googleCode: config.googleCode });
+  if (!candidates.length) throw new Error("online payload candidates empty");
+  let last = null;
+  for (const item of candidates) {
+    const res = await api.post("/prod-api/activity/lottery/online", item.payload);
+    last = { name: item.name, status: res.status, body: res.body };
+    if (Number(res.body?.code) === 200) return { ok: true, tried: candidates.map(v => v.name), chosen: item.name, last: { name: item.name, status: res.status, body: scrubOnlinePayload(res.body) } };
+  }
+  return { ok: false, tried: candidates.map(v => v.name), chosen: "", last: last ? { ...last, body: scrubOnlinePayload(last.body) } : null };
+}
+
+async function createAndOnlineFromTemplate(api, config, { templateAlias, aliasPrefix, titlePrefix, startOffsetSeconds, endDays }) {
   const startedAt = Date.now();
-  const templateList = await apiListByAlias(page, authHeader, templateAlias);
-  const templateRow = templateList.body?.rows?.[0] || templateList.body?.data?.[0] || null;
+  const stamp = String(Date.now()).slice(-8);
+  const nextAlias = buildShortAlias(aliasPrefix, stamp, 10);
+  const nextTitle = buildShortTitle(titlePrefix);
+  const window = computeActivityWindow({ startOffsetSeconds, endDays });
+
+  const templateRow = await listByAlias(api, templateAlias);
   if (!templateRow) throw new Error(`Template alias not found: ${templateAlias}`);
   const templateId = String(templateRow.activityId || templateRow.id || "");
   if (!templateId) throw new Error(`Template id missing for alias: ${templateAlias}`);
-  const templateDetail = await apiDetailById(page, authHeader, templateId);
-  const templatePayload = templateDetail.body?.data || null;
-  if (!templatePayload) throw new Error(`Template detail missing for id: ${templateId}`);
+  const templateDetail = await detailById(api, templateId);
 
-  let nextAlias = "";
-  let nextTitle = "";
-  let window = null;
-  let createResult = null;
-  let createdRow = null;
-  let createdId = 0;
-  for (let attempt = 1; attempt <= 3; attempt += 1) {
-    const stamp = String(Date.now() + attempt).slice(-8);
-    nextAlias = buildShortAlias(aliasPrefix, stamp, 10);
-    nextTitle = buildShortTitle(titlePrefix);
-    window = computeActivityWindow({ startOffsetSeconds, endDays });
-    const createPayload = stripServerFields(templatePayload);
-    createPayload.title = nextTitle;
-    createPayload.showUrl = nextAlias;
-    if ("startTime" in createPayload) createPayload.startTime = window.startText;
-    if ("endTime" in createPayload) createPayload.endTime = window.endText;
-    if (createPayload.periods && Array.isArray(createPayload.periods) && createPayload.periods[0]) {
-      if ("startTime" in createPayload.periods[0]) createPayload.periods[0].startTime = window.startText;
-      if ("endTime" in createPayload.periods[0]) createPayload.periods[0].endTime = window.endText;
-    }
-    createResult = await apiCreate(page, authHeader, createPayload);
-    const createdList = await apiListByAlias(page, authHeader, nextAlias);
-    createdRow = createdList.body?.rows?.[0] || createdList.body?.data?.[0] || null;
-    createdId = Number(createdRow?.activityId || createdRow?.id || 0);
-    if (createResult.body?.code === 200 || createdId) break;
-    process.stderr.write(`{"step":"batch_prepare_retry","templateAlias":"${templateAlias}","attempt":${attempt},"httpStatus":${createResult.status},"businessCode":${createResult.body?.code || null}}\n`);
-    await sleep(1500 * attempt);
+  const createPayload = stripServerFields(templateDetail);
+  createPayload.title = nextTitle;
+  createPayload.showUrl = nextAlias;
+  if ("startTime" in createPayload) createPayload.startTime = window.startText;
+  if ("endTime" in createPayload) createPayload.endTime = window.endText;
+  if (createPayload.periods && Array.isArray(createPayload.periods) && createPayload.periods[0]) {
+    if ("startTime" in createPayload.periods[0]) createPayload.periods[0].startTime = window.startText;
+    if ("endTime" in createPayload.periods[0]) createPayload.periods[0].endTime = window.endText;
   }
-  if (createResult?.body?.code !== 200 && !createdId) {
-    return {
-      ok: false,
-      step: "create",
-      template: { alias: templateAlias, id: templateId },
-      createStatus: createResult?.status || null,
-      createBody: createResult?.body || null,
-      durationMs: Date.now() - startedAt,
-    };
-  }
+
+  await createByPayload(api, createPayload);
+  const createdRow = await listByAlias(api, nextAlias);
+  const createdId = String(createdRow?.activityId || createdRow?.id || "");
   if (!createdId) throw new Error(`Created id not found for alias: ${nextAlias}`);
 
-  const onlineResult = await apiOnline(page, authHeader, { activityId: createdId, totp: String(config.googleCode || "") });
-  const onlineOk = onlineResult.body?.code === 200;
-  const verifyAfter = await apiDetailById(page, authHeader, String(createdId));
-  const verifyItem = verifyAfter.body?.data || null;
-  const verifyOnline = String(verifyItem?.status || "").toUpperCase() === "ONLINE";
+  const onlineResult = await online(api, config, createdId);
+  const verifyAfter = await detailById(api, createdId);
+  const verifyOnline = String(verifyAfter?.status || "").toUpperCase() === "ONLINE";
+  const ok = Boolean(onlineResult.ok && verifyOnline);
 
   return {
-    ok: onlineOk && verifyOnline,
+    ok,
     template: { alias: templateAlias, id: templateId },
     created: { alias: nextAlias, id: createdId, start: window.startText, end: window.endText },
-    createStatus: createResult.status,
-    onlineStatus: onlineResult.status,
-    onlineBody: onlineResult.body,
-    verifyItem: verifyItem ? { status: verifyItem.status, stage: verifyItem.stage } : null,
+    online: onlineResult,
+    verify: verifyAfter ? { status: verifyAfter.status, stage: verifyAfter.stage } : null,
     durationMs: Date.now() - startedAt,
   };
 }
 
-async function main() {
+async function run() {
   const args = parseArgs();
   if (args.help) {
     process.stdout.write(usage());
@@ -242,12 +213,12 @@ async function main() {
 
   loadLocalEnv(repoRoot);
   const config = adminConfig(repoRoot);
-  assertAdminConfig(config);
+  assertAdminLoginConfig(config);
 
   const startOffsetSeconds = Math.max(3, Number(args.startOffsetSeconds || 3));
   const endDays = Math.max(1, Number(args.endDays || 30));
-
   const partSet = new Set(args.parts || ["normal", "weight", "stock"]);
+
   const plan = {
     parts: args.parts,
     startOffsetSeconds,
@@ -257,6 +228,7 @@ async function main() {
       weight: args.weightTemplateAlias ? String(args.weightTemplateAlias) : "",
       stock: args.stockTemplateAlias ? String(args.stockTemplateAlias) : "",
     },
+    mode: "headless_api",
   };
 
   if (args.dryRun) {
@@ -264,57 +236,42 @@ async function main() {
     return 0;
   }
 
-  const { chromium } = loadPlaywright();
-  const browser = await chromium.launch({
-    headless: true,
-    executablePath: config.chromePath,
-    args: ["--window-size=1440,1000"],
-  });
-  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
-  const page = await context.newPage();
-
   const batchStartedAt = Date.now();
+  const api = await createAdminApiSession({ config, requireApiLogin: true });
   try {
-    await loginToPrizePage(page, config);
-    const authHeader = await ensureAuthHeader(page, config);
-
     const results = {};
-    process.stderr.write(`{"step":"batch_prepare","status":"START"}\n`);
     if (partSet.has("normal")) {
-      results.normal = await createAndOnlineFromTemplate(page, authHeader, config, {
+      results.normal = await createAndOnlineFromTemplate(api, config, {
         templateAlias: String(args.normalTemplateAlias),
         aliasPrefix: "n",
         titlePrefix: "N",
         startOffsetSeconds,
         endDays,
       });
-      process.stderr.write(`{"step":"batch_prepare","part":"normal","ok":${results.normal.ok ? "true" : "false"},"alias":"${results.normal.created?.alias || ""}"}\n`);
     } else {
       results.normal = null;
     }
 
     if (partSet.has("weight")) {
-      results.weight = await createAndOnlineFromTemplate(page, authHeader, config, {
+      results.weight = await createAndOnlineFromTemplate(api, config, {
         templateAlias: String(args.weightTemplateAlias),
         aliasPrefix: "w",
         titlePrefix: "W",
         startOffsetSeconds,
         endDays,
       });
-      process.stderr.write(`{"step":"batch_prepare","part":"weight","ok":${results.weight.ok ? "true" : "false"},"alias":"${results.weight.created?.alias || ""}"}\n`);
     } else {
       results.weight = null;
     }
 
     if (partSet.has("stock")) {
-      results.stock = await createAndOnlineFromTemplate(page, authHeader, config, {
+      results.stock = await createAndOnlineFromTemplate(api, config, {
         templateAlias: String(args.stockTemplateAlias),
         aliasPrefix: "s",
         titlePrefix: "S",
         startOffsetSeconds,
         endDays,
       });
-      process.stderr.write(`{"step":"batch_prepare","part":"stock","ok":${results.stock.ok ? "true" : "false"},"alias":"${results.stock.created?.alias || ""}"}\n`);
     } else {
       results.stock = null;
     }
@@ -332,17 +289,18 @@ async function main() {
       },
       results,
       totalDurationMs: Date.now() - batchStartedAt,
-      finalUrl: page.url(),
+      finalUrl: "/activities/lottery",
     }, ok ? process.stdout : process.stderr);
     return ok ? 0 : 1;
   } finally {
-    await browser.close().catch(() => {});
+    await api.close?.().catch(() => {});
   }
 }
 
 try {
-  process.exitCode = await main();
+  process.exitCode = await run();
 } catch (error) {
-  printJson({ ok: false, error: error.message }, process.stderr);
+  printJson({ ok: false, mode: "headless_api", error: error.message }, process.stderr);
   process.exitCode = 1;
 }
+
