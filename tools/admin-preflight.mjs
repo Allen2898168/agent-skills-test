@@ -5,6 +5,20 @@ import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
+function usage() {
+  return `Usage:
+  # preflight (does NOT pull activity-web by default)
+  node tools/admin-preflight.mjs
+
+  # preflight + update activity-web to latest
+  node tools/admin-preflight.mjs --pull-activity-web
+
+Options:
+  --pull-activity-web
+  --help
+`;
+}
+
 function run(command, args) {
   const result = spawnSync(command, args, { cwd: repoRoot, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
   const stdout = (result.stdout || "").trim();
@@ -21,7 +35,16 @@ function run(command, args) {
 }
 
 function main() {
-  const pull = run(process.execPath, ["tools/pull-activity-web.mjs"]);
+  const argv = process.argv.slice(2);
+  if (argv.includes("--help") || argv.includes("-h")) {
+    process.stdout.write(usage());
+    return 0;
+  }
+  const shouldPull = argv.includes("--pull-activity-web");
+
+  const pull = shouldPull
+    ? run(process.execPath, ["tools/pull-activity-web.mjs"])
+    : { ok: true, status: 0, stdout: "", stderr: "", json: { ok: true, skipped: true, reason: "not_requested" } };
   const firstRun = run(process.execPath, ["tools/first-run-check.mjs", "--skill", "admin"]);
   const audit = run(process.execPath, ["skills/weex-admin-ops/scripts/maintenance/audit-headless-api.mjs"]);
   const apiSurface = run(process.execPath, ["skills/weex-admin-ops/scripts/maintenance/validate-admin-api-surface.mjs"]);
@@ -41,4 +64,3 @@ function main() {
 }
 
 process.exitCode = main();
-
