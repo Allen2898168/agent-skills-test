@@ -39,3 +39,6 @@
 - 新手活动 API：`scripts/newbie-activity-fast-api.mjs`
 - 新手活动向导：`scripts/newbie-config-wizard-api.mjs`
 
+## 模块中文名映射（用于对话输出）
+
+- 新手活动“模块级自由配置（API）”模块 key -> 前端中文名：`references/mappings/newbie-activity-modules.md`

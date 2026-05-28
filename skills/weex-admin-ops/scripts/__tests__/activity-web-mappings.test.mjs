@@ -7,6 +7,7 @@ import {
   ensureActivityWebDir,
   extractActivityTaskListTypes,
   extractLotteryRaffleStyles,
+  extractNewbieActivityModuleNameMap,
   resolveOptionValue,
 } from "../lib/activity-web-mappings.mjs";
 
@@ -34,4 +35,15 @@ test("extractLotteryRaffleStyles reads raffleStyle label mapping", () => {
   assert.ok(first.value);
   assert.ok(first.label);
   assert.equal(resolveOptionValue(first.label, styles), first.value);
+});
+
+test("extractNewbieActivityModuleNameMap reads el-card headers", () => {
+  const activityWebDir = ensureActivityWebDir(repoRoot);
+  const { moduleNameMap } = extractNewbieActivityModuleNameMap(activityWebDir);
+  assert.equal(moduleNameMap.base, "活动基本信息");
+  assert.equal(moduleNameMap.userApply, "用户报名");
+  assert.equal(moduleNameMap.tasks, "活动任务信息");
+  assert.equal(moduleNameMap.resourceCard, "资源位信息卡片");
+  assert.equal(moduleNameMap.i18n, "多语言");
+  assert.equal(moduleNameMap.faq, "常见问题");
 });

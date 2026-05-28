@@ -49,6 +49,30 @@ export function extractActivityTaskListTypes(activityWebDir) {
   return { filePath, options };
 }
 
+function extractElCardHeader(filePath) {
+  const text = readFileSafe(filePath);
+  const match = text.match(/<el-card[^>]*\sheader="([^"]+)"[^>]*>/m);
+  return match?.[1] ? String(match[1]).trim() : "";
+}
+
+export function extractNewbieActivityModuleNameMap(activityWebDir) {
+  const sources = {
+    base: "activity-ui/src/views/activity/newbie/components/baseForm.vue",
+    userApply: "activity-ui/src/views/activity/newbie/components/userApply.vue",
+    tasks: "activity-ui/src/views/activity/newbie/components/taskForm/index.vue",
+    resourceCard: "activity-ui/src/views/activity/newbie/components/ResourceCardForm.vue",
+    i18n: "activity-ui/src/views/activity/newbie/components/i18nConfigForm.vue",
+    faq: "activity-ui/src/views/activity/lottery/components/FAQForm.vue",
+  };
+  const moduleNameMap = {};
+  for (const [key, rel] of Object.entries(sources)) {
+    const filePath = path.join(activityWebDir, rel);
+    const header = extractElCardHeader(filePath);
+    moduleNameMap[key] = header || "";
+  }
+  return { activityWebDir, sources, moduleNameMap };
+}
+
 export function resolveOptionValue(input, options) {
   const normalized = normalizeToken(input);
   if (!normalized) return "";
@@ -84,4 +108,3 @@ export function decorateCsvValues(value, options) {
     .map(item => decorateValue(resolveOptionValue(item, options), options))
     .join(",");
 }
-
