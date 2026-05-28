@@ -33,6 +33,7 @@ function scoreAction(action, query) {
   if (action.supportedActions?.some(item => query.includes(item))) score += 3;
   if (action.id === "verify_register_template_row_actions" && query.includes("操作列")) score += 3;
   if (action.id === "delete_register_templates_by_operator" && query.includes("最近编辑人") && query.includes("删除")) score += 4;
+  if (action.id === "verify_activity_tasks_all_types" && /活动任务管理|任务管理/.test(query) && /补全|覆盖|全类型|全活动类型|全部类型|任意活动类型/.test(query)) score += 14;
   if (action.id === "create_guide_templates" && /活动.*引导.*配置|引导.*流程.*配置|流程.*引导.*配置|活动流程引导配置/.test(query)) score += 8;
   if (action.id === "verify_guide_template_row_actions" && /活动.*引导.*配置|引导.*流程.*配置|流程.*引导.*配置|活动流程引导配置/.test(query) && query.includes("操作列")) score += 12;
   if (action.id === "configure_lottery_activity" && /转盘抽奖|抽奖活动/.test(query) && /配置|创建|新增|上线|下线/.test(query)) score += 20;

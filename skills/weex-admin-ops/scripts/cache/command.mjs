@@ -8,6 +8,7 @@ export function commandFor(match, args, skillRoot) {
   if (match.action.id === "create_register_templates") return registerTemplateCommand(match, args, skillRoot);
   if (match.action.id === "verify_register_template_row_actions") return registerTemplateRowActionsCommand(match, args, skillRoot);
   if (match.action.id === "delete_register_templates_by_operator") return deleteRegisterTemplatesByOperatorCommand(match, args, skillRoot);
+  if (match.action.id === "verify_activity_tasks_all_types") return verifyActivityTasksAllTypesCommand(match, args, skillRoot);
   if (match.action.id === "create_guide_templates") return createGuideTemplatesCommand(match, args, skillRoot);
   if (match.action.id === "verify_guide_template_row_actions") return guideTemplateRowActionsCommand(match, args, skillRoot);
   if (match.action.id === "create_lottery_activity_draft") return createLotteryActivityDraftCommand(match, args, skillRoot);
@@ -25,6 +26,17 @@ export function commandFor(match, args, skillRoot) {
   if (params.aliasPrefix) commandArgs.push("--alias-prefix", params.aliasPrefix);
   if (args.visible || params.visible) commandArgs.push("--visible");
   if (args.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function verifyActivityTasksAllTypesCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  if (params.types) commandArgs.push("--types", String(params.types));
+  if (params.pageSize) commandArgs.push("--page-size", String(params.pageSize));
+  if (params.confirm || args.confirm) commandArgs.push("--confirm");
   return { script, commandArgs };
 }
 

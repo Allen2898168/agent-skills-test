@@ -29,3 +29,12 @@
 - 验证结果：本轮未创建新任务。
 - 关联文件：`references/operations/activity-task-roulette-conditions.md`。
 - 后续处理：创建该类型前必须先查询是否已有配置。
+
+## 2026-05-28 clone 任务时 linkTaskId 绑定冲突（人人代理活动）
+- 业务线：活动任务管理。
+- 场景：按活动类型筛选模板任务后 clone 创建“最小配置任务”（无头 API）。
+- 失败表现：`POST /prod-api/activity/task` 返回 `code=500`，提示 `被邀请任务已被任务编号：5977绑定`。
+- 失败原因：模板任务包含 `linkTaskId` 等关联字段，直接 clone 会触发后端绑定/唯一性校验。
+- 解决方式：clone payload 统一清空 `linkTaskId`（含嵌套字段）后再创建。
+- 验证结果：已通过 `scripts/verify-activity-tasks-all-types-fast-api.mjs --types AGENT --confirm` 创建→回查→删除闭环验证。
+- 关联文件：`references/operations/activity-task-management-all-types.md`、`scripts/verify-activity-tasks-all-types-fast-api.mjs`。

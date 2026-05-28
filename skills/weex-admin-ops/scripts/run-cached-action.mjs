@@ -47,6 +47,8 @@ Options:
   --operator <name>   Recent editor/operator for delete_register_templates_by_operator
   --confirm-delete    Required by delete_register_templates_by_operator for actual deletion
   --confirm           Required by configure_lottery_activity to execute presets
+  --types <csv>       Types for verify_activity_tasks_all_types (e.g. LOTTERY,GUESS)
+  --page-size <n>     Page size for verify_activity_tasks_all_types template search
   --spec-file <path>  One-shot lottery spec file for configure_lottery_activity
   --spec-json <json>  One-shot lottery spec JSON for configure_lottery_activity
   --title-exact <x>   Exact title for create_lottery_activity_draft
