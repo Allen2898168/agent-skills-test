@@ -26,6 +26,11 @@
   - 新增多语言模板无头 API：`skills/weex-admin-ops/scripts/multilanguage-template-fast-api.mjs`（create/detail/delete 验证通过，templateType=1 新手活动）。
   - 新增资源位信息卡片无头 API：`skills/weex-admin-ops/scripts/resource-card-fast-api.mjs`（create/detail/delete 验证通过；注意 activityType 使用字符串枚举 `BEGINNER_TASK`）。
   - 转盘抽奖全配置显式绑定依赖：`skills/weex-admin-ops/scripts/create-lottery-full-config-explicit-deps-fast-api.mjs`（奖品/任务显式绑定 + 活动创建/回查/删除通过；报名模板默认复用模板自带 applyConfigId 以确保可清理）。
+  - 补齐“依赖模块自由配置 + NL 接入”缺口：
+    - 渠道标题/邀请码标题（multiLanguageTemplateItem）：`skills/weex-admin-ops/scripts/multilanguage-template-item-fast-api.mjs`（list 只读验证通过）。
+    - 新手活动批量绑定多语言模板：`skills/weex-admin-ops/scripts/batch-bind-i18n-template-fast-api.mjs`（snapshot 只读验证通过）。
+    - 资源位信息卡片支持“显式 payload（不靠 clone）+ update/copy”：`skills/weex-admin-ops/scripts/resource-card-fast-api.mjs`（新增 action create/update/copy/wizard）。
+    - NL/action-cache 覆盖检查工具：`tools/admin-coverage-check.mjs`；并已把新 action 接入 `skills/weex-admin-ops/scripts/action-cache.json` + `scripts/cache/*`（dry-run 命中通过）。
 
 - 2026-05-26 通过接口批量补齐奖品子类型模板（非 UI 操作）：
   - 脚本：`skills/weex-admin-ops/scripts/create-all-prize-subtypes-api.mjs`（命名：`<prizeType>-<prizeSubType>`）。

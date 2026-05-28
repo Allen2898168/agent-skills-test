@@ -3,7 +3,14 @@ import path from "node:path";
 export function commandFor(match, args, skillRoot) {
   if (match.action.id === "lottery_admin_main_regression") return lotteryAdminMainRegressionCommand(match, args, skillRoot);
   if (match.action.id === "configure_lottery_activity") return configureLotteryActivityCommand(match, args, skillRoot);
+  if (match.action.id === "configure_lottery_activity_modules") return configureLotteryModulesCommand(match, args, skillRoot);
   if (match.action.id === "configure_newbie_activity") return configureNewbieActivityCommand(match, args, skillRoot);
+  if (match.action.id === "configure_newbie_activity_modules") return configureNewbieModulesCommand(match, args, skillRoot);
+  if (match.action.id === "create_task_packages") return taskPackageCommand(match, args, skillRoot);
+  if (match.action.id === "create_resource_cards") return resourceCardCommand(match, args, skillRoot);
+  if (match.action.id === "create_multilanguage_templates") return multilanguageTemplateCommand(match, args, skillRoot);
+  if (match.action.id === "manage_multilanguage_template_items") return multilanguageTemplateItemCommand(match, args, skillRoot);
+  if (match.action.id === "batch_bind_i18n_templates") return batchBindI18nTemplateCommand(match, args, skillRoot);
   if (match.action.id === "copy_prize_by_id") return copyPrizeCommand(match, args, skillRoot);
   if (match.action.id === "create_roulette_participant_scope_tasks") return rouletteParticipantScopeCommand(match, args, skillRoot);
   if (match.action.id === "create_register_templates") return registerTemplateCommand(match, args, skillRoot);
@@ -28,6 +35,138 @@ export function commandFor(match, args, skillRoot) {
   if (params.aliasPrefix) commandArgs.push("--alias-prefix", params.aliasPrefix);
   if (args.visible || params.visible) commandArgs.push("--visible");
   if (args.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureLotteryModulesCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec) commandArgs.push("--action", "update");
+  if (!hasSpec) commandArgs.push("--action", "snapshot");
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureNewbieModulesCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec) commandArgs.push("--action", "update");
+  if (!hasSpec) commandArgs.push("--action", "snapshot");
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function taskPackageCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.action) commandArgs.push("--action", String(params.action));
+  else commandArgs.push("--action", "list");
+  if (params.id) commandArgs.push("--id", String(params.id));
+  if (params.taskIds) commandArgs.push("--task-ids", String(params.taskIds));
+  if (params.name) commandArgs.push("--name", String(params.name));
+  if (params.remark) commandArgs.push("--remark", String(params.remark));
+  if (params.confirmCreate || args.confirm) commandArgs.push("--confirm-create");
+  if (params.confirmCleanup || args.confirmCleanup) commandArgs.push("--confirm-cleanup");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function resourceCardCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (params.wizard) {
+    commandArgs.push("--wizard");
+  } else if (hasSpec) {
+    commandArgs.push("--action", String(params.resourceAction || "create"));
+    if (params.id) commandArgs.push("--id", String(params.id));
+    if (params.confirm || args.confirm) commandArgs.push("--confirm");
+    if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+    if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  } else {
+    if (params.action) commandArgs.push("--action", String(params.action));
+    else commandArgs.push("--action", "list-newbie");
+    if (params.id) commandArgs.push("--id", String(params.id));
+    if (params.count) commandArgs.push("--count", String(params.count));
+    if (params.namePrefix) commandArgs.push("--name-prefix", String(params.namePrefix));
+    if (params.confirmCreate || args.confirm) commandArgs.push("--confirm-create");
+    if (params.confirmCleanup || args.confirmCleanup) commandArgs.push("--confirm-cleanup");
+    if (params.cleanup || args.cleanup) commandArgs.push("--cleanup");
+  }
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function multilanguageTemplateCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.action) commandArgs.push("--action", String(params.action));
+  else commandArgs.push("--action", "list");
+  if (params.id) commandArgs.push("--id", String(params.id));
+  if (params.namePrefix) commandArgs.push("--name-prefix", String(params.namePrefix));
+  if (params.confirmCreate || args.confirm) commandArgs.push("--confirm-create");
+  if (params.confirmCleanup || args.confirmCleanup) commandArgs.push("--confirm-cleanup");
+  if (params.cleanup || args.cleanup) commandArgs.push("--cleanup");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function multilanguageTemplateItemCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) {
+    if (params.templateId) {
+      commandArgs.push("--action", "list", "--template-id", String(params.templateId));
+      if (params.key) commandArgs.push("--key", String(params.key));
+    } else {
+      commandArgs.push("--wizard");
+    }
+  } else {
+    commandArgs.push("--action", String(params.itemAction || "upsert"));
+    if (params.confirm || args.confirm) commandArgs.push("--confirm");
+    if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+    if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  }
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function batchBindI18nTemplateCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) {
+    if (params.snapshot) commandArgs.push("--action", "snapshot");
+    else commandArgs.push("--wizard");
+  } else {
+    commandArgs.push("--action", "bind");
+    if (params.confirm || args.confirm) commandArgs.push("--confirm");
+    if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+    if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  }
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
   return { script, commandArgs };
 }
 

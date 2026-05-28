@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import fs from "node:fs";
+import path from "node:path";
 import { parseFlags, printJson, timestamp } from "./lib/cli.mjs";
 import { adminConfig, assertAdminLoginConfig, loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
 import { createAdminApiSession, firstRow } from "./lib/admin-api.mjs";
@@ -17,13 +19,19 @@ function usage() {
   # view detail
   node skills/weex-admin-ops/scripts/multilanguage-template-fast-api.mjs --action detail --id 123
 
+  # copy/update
+  node skills/weex-admin-ops/scripts/multilanguage-template-fast-api.mjs --action copy --id 123 --confirm-create
+  node skills/weex-admin-ops/scripts/multilanguage-template-fast-api.mjs --action update --confirm-create --spec-json '{"confirm":true,"confirmations":{"templateWrites":true},"payload":{"id":123,"templateName":"新名字","templateType":1,"items":[{\"key\":\"intro\",\"contents\":{\"zh_CN\":\"规则\"}}]}}'
+
 Options:
-  --action <list|detail|create-min-newbie|delete>
+  --action <list|detail|create-min-newbie|copy|update|delete>
   --id <id>                       used by detail/delete
   --name-prefix <text>            default 多语言模板_新手
   --confirm-create                required for create
   --cleanup                       delete the created template (create-min-newbie only)
   --confirm-cleanup               required for delete in cleanup
+  --spec-file <path>              JSON spec file for update
+  --spec-json <json>              JSON spec string for update
   --dry-run
   --help
 `;
@@ -38,7 +46,23 @@ function parseArgs() {
   args.action = args.action ? String(args.action) : "";
   args.id = args.id ? String(args.id) : "";
   args.namePrefix = args.namePrefix ? String(args.namePrefix) : "多语言模板_新手";
+  args.specFile = args.specFile ? String(args.specFile) : "";
+  args.specJson = args.specJson ? String(args.specJson) : "";
   return args;
+}
+
+function readSpec(args) {
+  if (args.specJson) return JSON.parse(args.specJson);
+  if (!args.specFile) return null;
+  const abs = path.isAbsolute(args.specFile) ? args.specFile : path.join(repoRoot, args.specFile);
+  return JSON.parse(fs.readFileSync(abs, "utf8"));
+}
+
+function requireConfirmations(spec, args) {
+  const confirm = Boolean(spec?.confirm ?? args.confirmCreate);
+  if (!confirm) throw new Error("需要用户确认：请在 spec 里设置 confirm=true 并传 --confirm-create。");
+  const confirmations = spec?.confirmations || {};
+  if (confirmations.templateWrites !== true) throw new Error("高风险确认未完成：confirmations.templateWrites 需要为 true。");
 }
 
 async function listTemplates(api, pageNum = 1, pageSize = 20) {
@@ -54,6 +78,19 @@ async function detailTemplate(api, id) {
 async function deleteTemplate(api, id) {
   const del = await api.delete(`/prod-api/activity/multiLanguageTemplate/${encodeURIComponent(id)}`);
   return { ok: del.body?.code === 200, status: del.status, body: { code: del.body?.code ?? null, msg: del.body?.msg || "" } };
+}
+
+async function copyTemplate(api, id) {
+  const res = await api.post("/prod-api/activity/multiLanguageTemplate/copy", { id: Number(id) });
+  if (res.body?.code !== 200) throw new Error(`Copy template failed: ${JSON.stringify(res.body)}`);
+  const copiedId = res.body?.data?.id ?? res.body?.data ?? res.body?.id ?? "";
+  return { ok: true, copiedId: copiedId ? String(copiedId) : "", raw: { code: res.body?.code ?? null, msg: res.body?.msg || "" } };
+}
+
+async function updateTemplate(api, payload) {
+  const res = await api.put("/prod-api/activity/multiLanguageTemplate", payload);
+  if (res.body?.code !== 200) throw new Error(`Update template failed: ${JSON.stringify(res.body)}`);
+  return { ok: true, code: res.body?.code ?? null, msg: res.body?.msg || "" };
 }
 
 function buildMinimalNewbieTemplatePayload(name) {
@@ -144,6 +181,41 @@ async function run() {
       return del.ok ? 0 : 1;
     }
 
+    if (args.action === "copy") {
+      if (!args.id) throw new Error("--id is required for copy");
+      if (!args.confirmCreate) throw new Error("需要用户确认：请加 --confirm-create 后才允许复制多语言模板。");
+      const copied = await copyTemplate(api, args.id);
+      let detail = null;
+      if (copied.copiedId) detail = await detailTemplate(api, copied.copiedId).catch(() => null);
+      printJson({
+        ok: true,
+        mode: "headless_api",
+        finalUrl: `${config.baseUrl}/activity/commonModule/multiLangConfig`,
+        sourceId: String(args.id),
+        copied: { id: copied.copiedId || null, templateName: detail?.templateName || null, templateType: detail?.templateType ?? null },
+        durationMs: Date.now() - startedAt,
+      });
+      return 0;
+    }
+
+    if (args.action === "update") {
+      const spec = readSpec(args);
+      requireConfirmations(spec, args);
+      const payload = spec?.payload;
+      if (!payload || typeof payload !== "object") throw new Error("spec.payload must be an object");
+      if (!payload.id) throw new Error("spec.payload.id is required");
+      await updateTemplate(api, payload);
+      const det = await detailTemplate(api, payload.id);
+      printJson({
+        ok: true,
+        mode: "headless_api",
+        finalUrl: `${config.baseUrl}/activity/commonModule/multiLangConfig`,
+        updated: { id: String(payload.id), templateName: det.templateName || "", templateType: det.templateType ?? null, itemsCount: Array.isArray(det.items) ? det.items.length : null },
+        durationMs: Date.now() - startedAt,
+      });
+      return 0;
+    }
+
     if (args.action === "create-min-newbie") {
       const created = await createMinimalNewbie(api, args);
       const evidence = {
@@ -174,4 +246,3 @@ try {
   printJson({ ok: false, mode: "headless_api", error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-

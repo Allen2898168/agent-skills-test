@@ -38,7 +38,14 @@ function scoreAction(action, query) {
   if (action.id === "create_guide_templates" && /活动.*引导.*配置|引导.*流程.*配置|流程.*引导.*配置|活动流程引导配置/.test(query)) score += 8;
   if (action.id === "verify_guide_template_row_actions" && /活动.*引导.*配置|引导.*流程.*配置|流程.*引导.*配置|活动流程引导配置/.test(query) && query.includes("操作列")) score += 12;
   if (action.id === "configure_lottery_activity" && /转盘抽奖|抽奖活动/.test(query) && /配置|创建|新增|上线|下线/.test(query)) score += 20;
+  if (action.id === "configure_lottery_activity_modules" && /转盘抽奖|抽奖活动/.test(query) && /单独配置|模块配置|按模块|只改|修改|更新/.test(query)) score += 22;
   if (action.id === "configure_newbie_activity" && /新手活动|BEGINNER_TASK/.test(query) && /配置|创建|新增|全配置|上线|下线|删除/.test(query)) score += 20;
+  if (action.id === "configure_newbie_activity_modules" && /新手活动|BEGINNER_TASK/.test(query) && /单独配置|模块配置|按模块|只改|修改|更新/.test(query)) score += 22;
+  if (action.id === "create_task_packages" && /任务包/.test(query) && /创建|新增|生成|复制|删除|修改|更新/.test(query)) score += 14;
+  if (action.id === "create_resource_cards" && /(资源位|资源卡|卡片)/.test(query) && /创建|新增|生成|复制|删除|修改|更新/.test(query)) score += 14;
+  if (action.id === "create_multilanguage_templates" && /(多语言|语言模板|多语言模板)/.test(query) && /创建|新增|生成|复制|删除|修改|更新/.test(query)) score += 14;
+  if (action.id === "manage_multilanguage_template_items" && /(渠道标题|邀请码标题|title_channel|title_invite|渠道码|邀请码)/.test(query) && /创建|新增|上传|批量|复制|删除|修改|更新|配置/.test(query)) score += 16;
+  if (action.id === "batch_bind_i18n_templates" && /(批量绑定|绑定模版|绑定模板)/.test(query) && /(新手活动|BEGINNER_TASK|多语言|i18n)/.test(query)) score += 18;
   if (action.id === "create_lottery_activity_draft" && /活动列表/.test(query) && /转盘抽奖/.test(query) && /新增|创建|草稿|配置|走一下|尝试/.test(query)) score += 14;
   if (action.id === "create_lottery_activity_draft" && /转盘抽奖.{0,8}活动|活动.{0,8}转盘抽奖/.test(query) && /新增|创建|生成|草稿|配置|全配置|权重配置|走一下|尝试/.test(query)) score += 14;
   if (action.id === "lottery_admin_main_regression" && /转盘抽奖/.test(query) && /后管|后台|活动后台/.test(query) && /主回归|回归/.test(query)) score += 18;
@@ -61,9 +68,61 @@ function inferParams(query) {
     ...inferGuideRowActionParams(query),
     ...inferLotteryActivityDraftParams(query),
     ...inferLotteryOnlineParams(query),
+    ...inferResourceCardParams(query),
+    ...inferMultilanguageTemplateItemParams(query),
+    ...inferBatchBindI18nTemplateParams(query),
     prizeId: inferPrizeId(query),
   };
 }
+
+function inferResourceCardParams(query) {
+  if (!/(资源位|资源卡|卡片)/.test(query)) return {};
+  const wizard = /自由配置|自定义|不要clone|不用clone|不靠clone/.test(query);
+  let resourceAction;
+  if (query.includes("复制")) resourceAction = "copy";
+  else if (/更新|修改|编辑/.test(query)) resourceAction = "update";
+  else if (/创建|新增|生成/.test(query)) resourceAction = "create";
+  return { wizard: wizard ? true : undefined, resourceAction };
+}
+
+function inferMultilanguageTemplateItemParams(query) {
+  const templateId = inferTemplateId(query);
+  const keyMatch = query.match(/(?:key|键|渠道标题键|标题键)\s*(?:为|是|=|:|：)?\s*([A-Za-z0-9_:-]+)/i);
+  const key = keyMatch?.[1];
+  const itemAction = /批量|上传模板|editTemplate/i.test(query) ? "edit-template" : "upsert";
+  return { templateId, key, itemAction };
+}
+
+function inferBatchBindI18nTemplateParams(query) {
+  const activityIds = inferActivityIds(query);
+  const multiLanguageTemplateId = inferTemplateId(query);
+  const snapshot = /列出|查看|获取/.test(query) && /(新手活动|活动列表)/.test(query) && /(活动\s*(?:id|ID)|activityIds)/.test(query);
+  return {
+    snapshot: snapshot ? true : undefined,
+    multiLanguageTemplateId,
+    activityIds: activityIds.length ? activityIds.join(",") : undefined,
+  };
+}
+
+function inferTemplateId(query) {
+  const m = query.match(/(?:模板\s*(?:id|ID)|template\s*id|templateId|multiLanguageTemplateId)\s*(?:为|是|=|:|：)?\s*(\d+)/i);
+  return m?.[1];
+}
+
+function inferActivityIds(query) {
+  const tail = query.match(/(?:活动\s*(?:id|ID)|activityIds)\s*(?:为|是|=|:|：)?\s*([\d,，\s]+)/i);
+  if (!tail?.[1]) return [];
+  return tail[1]
+    .replace(/[，\s]+/g, ",")
+    .split(",")
+    .map(s => s.trim())
+    .filter(Boolean)
+    .filter(s => /^\d+$/.test(s));
+}
+
+// Module config actions share the same inferred params as online: activityId/activityAlias
+// plus optional spec pointers when user already provided a local file path in query.
+// Note: we intentionally keep inference conservative to avoid accidental writes.
 
 function inferLotteryOnlineParams(query) {
   if (!/上线|发布/.test(query) || !/转盘抽奖|抽奖活动|活动列表|活动/.test(query)) return {};
