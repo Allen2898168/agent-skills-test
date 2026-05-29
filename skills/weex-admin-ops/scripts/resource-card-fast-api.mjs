@@ -17,7 +17,11 @@ function usage() {
   node skills/weex-admin-ops/scripts/resource-card-fast-api.mjs --action create --confirm --spec-json '{"confirm":true,"confirmations":{"cardWrites":true},"payload":{"activityType":"BEGINNER_TASK","name":"资源卡_自定义","title":"资源卡_自定义","subTitle":"子标题","buttonName":"立即查看","showIntroduction":0,"imageUrl":"https://...","webUrl":"https://...","status":1}}'
   node skills/weex-admin-ops/scripts/resource-card-fast-api.mjs --action update --confirm --spec-file ./tmp/resource-card-update.json
 
-  # create 3 minimal newbie cards, verify, then (optional) delete
+  # create 3 minimal cards by activity type, verify, then (optional) delete
+  node skills/weex-admin-ops/scripts/resource-card-fast-api.mjs --action create-min --activity-type TRACE_PRO --count 3 --name-prefix 资源卡_小活动 --confirm-create
+  node skills/weex-admin-ops/scripts/resource-card-fast-api.mjs --action create-min --activity-type TRACE_PRO --count 3 --name-prefix 资源卡_小活动 --confirm-create --cleanup --confirm-cleanup
+
+  # create 3 minimal newbie cards, verify, then (optional) delete (legacy)
   node skills/weex-admin-ops/scripts/resource-card-fast-api.mjs --action create-min-newbie --confirm-create
   node skills/weex-admin-ops/scripts/resource-card-fast-api.mjs --action create-min-newbie --confirm-create --cleanup --confirm-cleanup
 
@@ -30,10 +34,11 @@ function usage() {
   node skills/weex-admin-ops/scripts/resource-card-fast-api.mjs --wizard
 
 Options:
-  --action <list-newbie|create|update|copy|create-min-newbie|detail|delete>
+  --action <list-newbie|create|update|copy|create-min|create-min-newbie|detail|delete>
   --id <id>
+  --activity-type <type>      e.g. TRACE_PRO (create-min only)
   --name-prefix <text>         default 资源卡_新手
-  --count <n>                  default 3 (create-min-newbie only)
+  --count <n>                  default 3 (create-min/create-min-newbie)
   --spec-file <path>           JSON spec file for create/update
   --spec-json <json>           JSON spec string for create/update
   --confirm                    required for create/update/copy
@@ -56,6 +61,7 @@ function parseArgs() {
   args.confirmCleanup = Boolean(args.confirmCleanup);
   args.action = args.action ? String(args.action) : "";
   args.id = args.id ? String(args.id) : "";
+  args.activityType = args.activityType ? String(args.activityType) : "";
   args.namePrefix = args.namePrefix ? String(args.namePrefix) : "资源卡_新手";
   args.count = Math.max(1, Math.min(10, Number(args.count || 3)));
   args.specFile = args.specFile ? String(args.specFile) : "";
@@ -140,11 +146,13 @@ async function listPage(api, { pageNum = 1, pageSize = 20, activityType = "", na
   return api.get(`/prod-api/activity/resource/list?${qs.toString()}`);
 }
 
-async function findTemplateNewbieCard(api) {
-  const res = await listAll(api, "BEGINNER_TASK");
-  const rows = Array.isArray(res.body?.data) ? res.body.data : Array.isArray(res.body?.rows) ? res.body.rows : [];
-  const row = rows.find(item => item?.id) || null;
-  if (row?.id) return detail(api, row.id);
+async function findTemplateCardByType(api, activityType) {
+  if (activityType) {
+    const res = await listAll(api, activityType);
+    const rows = Array.isArray(res.body?.data) ? res.body.data : Array.isArray(res.body?.rows) ? res.body.rows : [];
+    const row = rows.find(item => item?.id) || null;
+    if (row?.id) return detail(api, row.id);
+  }
 
   // fallback：新手卡片可能尚未存在，用任意活动类型的资源卡片作为模板，以复用已满足后端必填校验的字段（imageUrl/webUrl 等）
   const any = await listPage(api, { pageNum: 1, pageSize: 1 });
@@ -153,6 +161,10 @@ async function findTemplateNewbieCard(api) {
     throw new Error("未找到可用于 clone 的资源位卡片模板（全局也为空）；请先在后管创建至少一条资源位卡片。");
   }
   return detail(api, anyRow.id);
+}
+
+async function findTemplateNewbieCard(api) {
+  return findTemplateCardByType(api, "BEGINNER_TASK");
 }
 
 async function detail(api, id) {
@@ -251,6 +263,33 @@ async function createMinNewbie(api, args) {
     created.push({ id: String(det.id), name: String(det.name || name), activityType: det.activityType ?? null, status: det.status ?? null });
   }
   return created;
+}
+
+async function createMinByType(api, args, activityTypeOptions) {
+  if (!args.confirmCreate) throw new Error("需要用户确认：请加 --confirm-create 后才允许创建资源位信息卡片。");
+  if (!args.activityType) throw new Error("--activity-type is required for create-min");
+  const resolvedType = resolveOptionValue(args.activityType, activityTypeOptions);
+  if (!resolvedType) throw new Error(`Unknown --activity-type: ${args.activityType}`);
+  const template = await findTemplateCardByType(api, resolvedType);
+  const created = [];
+  for (let i = 0; i < args.count; i += 1) {
+    const name = `${args.namePrefix}_${timestamp()}_${i + 1}`.slice(0, 60);
+    const payload = buildMinimalPayload({ name, activityType: resolvedType, template });
+    const res = await api.post("/prod-api/activity/resource", payload);
+    if (res.body?.code !== 200) throw new Error(`Create resource card failed: ${JSON.stringify(res.body)}`);
+    const createdId = res.body?.data?.id ?? res.body?.data ?? res.body?.id ?? "";
+    let det = null;
+    if (createdId) det = await detail(api, createdId).catch(() => null);
+    if (!det) {
+      const list = await listPage(api, { pageNum: 1, pageSize: 5, activityType: resolvedType, name });
+      const rows = Array.isArray(list.body?.rows) ? list.body.rows : Array.isArray(list.body?.data) ? list.body.data : [];
+      const row = rows.find(item => String(item?.name || "") === name) || firstRow(list);
+      if (!row?.id) throw new Error(`Created resource card not found in list: ${name}`);
+      det = await detail(api, row.id);
+    }
+    created.push({ id: String(det.id), name: String(det.name || name), activityType: det.activityType ?? null, status: det.status ?? null });
+  }
+  return { resolvedType, created };
 }
 
 async function run() {
@@ -379,6 +418,27 @@ async function run() {
       if (!args.confirmCleanup) throw new Error("需要清理确认：请加 --confirm-cleanup 后才允许删除刚创建的资源位信息卡片。");
       const deletes = [];
       for (const item of created) deletes.push({ id: item.id, ...(await del(api, item.id)) });
+      const ok = deletes.every(d => d.ok);
+      printJson({ ...evidence, cleanedUp: ok, cleanup: { deleteCards: deletes }, durationMs: Date.now() - startedAt }, ok ? process.stdout : process.stderr);
+      return ok ? 0 : 1;
+    }
+
+    if (args.action === "create-min") {
+      const result = await createMinByType(api, args, activityTypeOptions);
+      const evidence = {
+        ok: true,
+        mode: "headless_api",
+        finalUrl: `${config.baseUrl}/activity/resource`,
+        activityType: result.resolvedType,
+        created: result.created,
+      };
+      if (!args.cleanup) {
+        printJson({ ...evidence, cleanedUp: false, durationMs: Date.now() - startedAt });
+        return 0;
+      }
+      if (!args.confirmCleanup) throw new Error("需要清理确认：请加 --confirm-cleanup 后才允许删除刚创建的资源位信息卡片。");
+      const deletes = [];
+      for (const item of result.created) deletes.push({ id: item.id, ...(await del(api, item.id)) });
       const ok = deletes.every(d => d.ok);
       printJson({ ...evidence, cleanedUp: ok, cleanup: { deleteCards: deletes }, durationMs: Date.now() - startedAt }, ok ? process.stdout : process.stderr);
       return ok ? 0 : 1;

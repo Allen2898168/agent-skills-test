@@ -5,6 +5,28 @@ export function commandFor(match, args, skillRoot) {
   if (match.action.id === "configure_lottery_activity") return configureLotteryActivityCommand(match, args, skillRoot);
   if (match.action.id === "configure_lottery_activity_modules") return configureLotteryModulesCommand(match, args, skillRoot);
   if (match.action.id === "configure_newbie_activity") return configureNewbieActivityCommand(match, args, skillRoot);
+  if (match.action.id === "configure_trading_competition_activity") return configureTradingCompetitionActivityCommand(match, args, skillRoot);
+  if (match.action.id === "configure_trading_competition_activity_modules") return configureTradingCompetitionModulesCommand(match, args, skillRoot);
+  if (match.action.id === "configure_race_competition_activity") return configureRaceCompetitionActivityCommand(match, args, skillRoot);
+  if (match.action.id === "configure_race_competition_activity_modules") return configureRaceCompetitionModulesCommand(match, args, skillRoot);
+  if (match.action.id === "configure_trace_pro_activity") return configureTraceProActivityCommand(match, args, skillRoot);
+  if (match.action.id === "configure_agent_trace_pro_activity") return configureAgentTraceProActivityCommand(match, args, skillRoot);
+  if (match.action.id === "configure_trace_pro_activity_modules") return configureTraceProModulesCommand(match, args, skillRoot);
+  if (match.action.id === "configure_agent_trace_pro_activity_modules") return configureAgentTraceProModulesCommand(match, args, skillRoot);
+  if (match.action.id === "configure_customized_activity") return configureCustomizedActivityCommand(match, args, skillRoot);
+  if (match.action.id === "configure_customized_activity_modules") return configureCustomizedModulesCommand(match, args, skillRoot);
+  if (match.action.id === "configure_recharge_trans_task_activity") return configureRechargeTransTaskActivityCommand(match, args, skillRoot);
+  if (match.action.id === "configure_recharge_trans_task_activity_modules") return configureRechargeTransTaskModulesCommand(match, args, skillRoot);
+  if (match.action.id === "configure_agent_activity") return configureAgentActivityCommand(match, args, skillRoot);
+  if (match.action.id === "configure_agent_activity_modules") return configureAgentModulesCommand(match, args, skillRoot);
+  if (match.action.id === "configure_contract_mining_activity") return configureContractMiningActivityCommand(match, args, skillRoot);
+  if (match.action.id === "configure_contract_mining_activity_modules") return configureContractMiningModulesCommand(match, args, skillRoot);
+  if (match.action.id === "configure_flip_activity") return configureFlipActivityCommand(match, args, skillRoot);
+  if (match.action.id === "configure_flip_activity_modules") return configureFlipModulesCommand(match, args, skillRoot);
+  if (match.action.id === "configure_guess_activity") return configureGuessActivityCommand(match, args, skillRoot);
+  if (match.action.id === "configure_guess_activity_modules") return configureGuessModulesCommand(match, args, skillRoot);
+  if (match.action.id === "configure_monopoly_world_cup_activity") return configureMonopolyWorldCupActivityCommand(match, args, skillRoot);
+  if (match.action.id === "configure_monopoly_world_cup_activity_modules") return configureMonopolyWorldCupModulesCommand(match, args, skillRoot);
   if (match.action.id === "configure_newbie_activity_modules") return configureNewbieModulesCommand(match, args, skillRoot);
   if (match.action.id === "create_task_packages") return taskPackageCommand(match, args, skillRoot);
   if (match.action.id === "create_resource_cards") return resourceCardCommand(match, args, skillRoot);
@@ -55,7 +77,194 @@ function configureLotteryModulesCommand(match, args, skillRoot) {
   return { script, commandArgs };
 }
 
+function configureTradingCompetitionModulesCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec) commandArgs.push("--action", "update");
+  if (!hasSpec) commandArgs.push("--action", "snapshot");
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureRaceCompetitionModulesCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec) commandArgs.push("--action", "update");
+  if (!hasSpec) commandArgs.push("--action", "snapshot");
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
 function configureNewbieModulesCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec) commandArgs.push("--action", "update");
+  if (!hasSpec) commandArgs.push("--action", "snapshot");
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureTraceProModulesCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec) commandArgs.push("--action", "update");
+  if (!hasSpec) commandArgs.push("--action", "snapshot");
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureAgentTraceProModulesCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec) commandArgs.push("--action", "update");
+  if (!hasSpec) commandArgs.push("--action", "snapshot");
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureCustomizedModulesCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec) commandArgs.push("--action", "update");
+  if (!hasSpec) commandArgs.push("--action", "snapshot");
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureRechargeTransTaskModulesCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec) commandArgs.push("--action", "update");
+  if (!hasSpec) commandArgs.push("--action", "snapshot");
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureAgentModulesCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec) commandArgs.push("--action", "update");
+  if (!hasSpec) commandArgs.push("--action", "snapshot");
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureContractMiningModulesCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec) commandArgs.push("--action", "update");
+  if (!hasSpec) commandArgs.push("--action", "snapshot");
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureFlipModulesCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec) commandArgs.push("--action", "update");
+  if (!hasSpec) commandArgs.push("--action", "snapshot");
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureGuessModulesCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec) commandArgs.push("--action", "update");
+  if (!hasSpec) commandArgs.push("--action", "snapshot");
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureMonopolyWorldCupModulesCommand(match, args, skillRoot) {
   const params = { ...match.inferred, ...args.passthrough };
   const script = path.join(skillRoot, match.action.script);
   const commandArgs = [script];
@@ -230,6 +439,236 @@ function configureNewbieActivityCommand(match, args, skillRoot) {
   if (params.templateId) commandArgs.push("--template-id", String(params.templateId));
   if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
   if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureTradingCompetitionActivityCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (params.preset) commandArgs.push("--preset", String(params.preset));
+  if (params.templateAlias) commandArgs.push("--template-alias", String(params.templateAlias));
+  if (params.templateId) commandArgs.push("--template-id", String(params.templateId));
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureRaceCompetitionActivityCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (params.preset) commandArgs.push("--preset", String(params.preset));
+  if (params.templateAlias) commandArgs.push("--template-alias", String(params.templateAlias));
+  if (params.templateId) commandArgs.push("--template-id", String(params.templateId));
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureTraceProActivityCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (params.preset) commandArgs.push("--preset", String(params.preset));
+  if (params.templateAlias) commandArgs.push("--template-alias", String(params.templateAlias));
+  if (params.templateId) commandArgs.push("--template-id", String(params.templateId));
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.requiredVolume) commandArgs.push("--required-volume", String(params.requiredVolume));
+  if (params.resourceCards) commandArgs.push("--resource-cards", String(params.resourceCards));
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureAgentTraceProActivityCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (params.preset) commandArgs.push("--preset", String(params.preset));
+  if (params.templateAlias) commandArgs.push("--template-alias", String(params.templateAlias));
+  if (params.templateId) commandArgs.push("--template-id", String(params.templateId));
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.requiredVolume) commandArgs.push("--required-volume", String(params.requiredVolume));
+  if (params.resourceCards) commandArgs.push("--resource-cards", String(params.resourceCards));
+  if (params.startOffsetSeconds) commandArgs.push("--start-offset-seconds", String(params.startOffsetSeconds));
+  if (params.endDays) commandArgs.push("--end-days", String(params.endDays));
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (params.cleanup) commandArgs.push("--cleanup");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureCustomizedActivityCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (params.preset) commandArgs.push("--preset", String(params.preset));
+  if (params.templateAlias) commandArgs.push("--template-alias", String(params.templateAlias));
+  if (params.templateId) commandArgs.push("--template-id", String(params.templateId));
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.requiredVolume) commandArgs.push("--required-volume", String(params.requiredVolume));
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureRechargeTransTaskActivityCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (params.preset) commandArgs.push("--preset", String(params.preset));
+  if (params.templateAlias) commandArgs.push("--template-alias", String(params.templateAlias));
+  if (params.templateId) commandArgs.push("--template-id", String(params.templateId));
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.requiredVolume) commandArgs.push("--required-volume", String(params.requiredVolume));
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureAgentActivityCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (params.preset) commandArgs.push("--preset", String(params.preset));
+  if (params.templateAlias) commandArgs.push("--template-alias", String(params.templateAlias));
+  if (params.templateId) commandArgs.push("--template-id", String(params.templateId));
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureContractMiningActivityCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (params.preset) commandArgs.push("--preset", String(params.preset));
+  if (params.templateAlias) commandArgs.push("--template-alias", String(params.templateAlias));
+  if (params.templateId) commandArgs.push("--template-id", String(params.templateId));
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureFlipActivityCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (params.preset) commandArgs.push("--preset", String(params.preset));
+  if (params.templateAlias) commandArgs.push("--template-alias", String(params.templateAlias));
+  if (params.templateId) commandArgs.push("--template-id", String(params.templateId));
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureGuessActivityCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (params.preset) commandArgs.push("--preset", String(params.preset));
+  if (params.templateAlias) commandArgs.push("--template-alias", String(params.templateAlias));
+  if (params.templateId) commandArgs.push("--template-id", String(params.templateId));
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
+  if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function configureMonopolyWorldCupActivityCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  const hasSpec = Boolean(params.specFile || params.specJson);
+  if (!hasSpec) commandArgs.push("--wizard");
+  if (hasSpec && (params.confirm || args.confirm)) commandArgs.push("--confirm");
+  if (params.specFile) commandArgs.push("--spec-file", String(params.specFile));
+  if (params.specJson) commandArgs.push("--spec-json", String(params.specJson));
+  if (params.preset) commandArgs.push("--preset", String(params.preset));
+  if (params.templateAlias) commandArgs.push("--template-alias", String(params.templateAlias));
+  if (params.templateId) commandArgs.push("--template-id", String(params.templateId));
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.requiredVolume) commandArgs.push("--required-volume", String(params.requiredVolume));
   if (params.activityAlias) commandArgs.push("--activity-alias", String(params.activityAlias));
   if (params.activityId) commandArgs.push("--activity-id", String(params.activityId));
   if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");

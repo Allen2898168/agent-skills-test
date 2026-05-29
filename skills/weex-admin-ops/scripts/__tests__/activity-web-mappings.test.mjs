@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import {
   ensureActivityWebDir,
   extractActivityTaskListTypes,
+  extractCompetitionActivityModuleNameMap,
   extractLotteryRaffleStyles,
   extractNewbieActivityModuleNameMap,
   resolveOptionValue,
@@ -44,6 +45,23 @@ test("extractNewbieActivityModuleNameMap reads el-card headers", () => {
   assert.equal(moduleNameMap.userApply, "用户报名");
   assert.equal(moduleNameMap.tasks, "活动任务信息");
   assert.equal(moduleNameMap.resourceCard, "资源位信息卡片");
+  assert.equal(moduleNameMap.i18n, "多语言");
+  assert.equal(moduleNameMap.faq, "常见问题");
+});
+
+test("extractCompetitionActivityModuleNameMap reads core competition module headers", () => {
+  const activityWebDir = ensureActivityWebDir(repoRoot);
+  const { moduleNameMap } = extractCompetitionActivityModuleNameMap(activityWebDir);
+  assert.equal(moduleNameMap.base, "活动基本信息");
+  assert.equal(moduleNameMap.schedule, "活动日程");
+  assert.equal(moduleNameMap.userApply, "用户报名");
+  assert.equal(moduleNameMap.prize, "奖品管理");
+  assert.equal(moduleNameMap.contract, "奖池配置");
+  assert.equal(moduleNameMap.rankingReward, "排名奖励");
+  assert.equal(moduleNameMap.teamAwardSetting, "队内奖励设置");
+  assert.equal(moduleNameMap.virtualRanking, "交易排行榜信息");
+  assert.equal(moduleNameMap.team, "团队管理");
+  assert.equal(moduleNameMap.pageSetting, "活动页面设置");
   assert.equal(moduleNameMap.i18n, "多语言");
   assert.equal(moduleNameMap.faq, "常见问题");
 });

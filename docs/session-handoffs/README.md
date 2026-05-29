@@ -14,3 +14,4 @@
 - `joker-activity.md`：小丑牌活动多语言回填链路。
 - `frontend-ops-register.md`：前端页面操作 skill、STG 登录和邮箱注册链路探测。
 - `2026-05-11-runtime-self-contained.md`：项目运行时自包含、首次配置检查、对话式配置和 FIN 登录恢复规则。
+- `2026-05-26-to-2026-05-28-and-earlier.md`：2026-05-26～2026-05-28 及更早的会话交接记录归档（从 `docs/session-handoff.md` 拆分）。

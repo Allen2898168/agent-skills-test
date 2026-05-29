@@ -62,6 +62,28 @@ function extractElCardHeader(filePath) {
   return match?.[1] ? String(match[1]).trim() : "";
 }
 
+function extractDefinePropsDefaultTitle(filePath) {
+  const text = readFileSafe(filePath);
+  // match: defineProps({ title: { ..., default: '用户报名' } ... })
+  const match = text.match(/defineProps\s*\(\s*\{\s*[\s\S]*?\btitle\s*:\s*\{\s*[\s\S]*?\bdefault\s*:\s*'([^']+)'\s*[\s\S]*?\}\s*[\s\S]*?\}\s*\)\s*/m);
+  return match?.[1] ? String(match[1]).trim() : "";
+}
+
+function extractHeaderFromConditionalExpression(filePath) {
+  const text = readFileSafe(filePath);
+  // match: :header="showCard ? '奖池配置' : undefined"
+  const match = text.match(/:header\s*=\s*"[^"]*?\?\s*'([^']+)'\s*:\s*undefined[^"]*?"/m);
+  return match?.[1] ? String(match[1]).trim() : "";
+}
+
+function extractElCardHeaderSmart(filePath) {
+  return (
+    extractElCardHeader(filePath)
+    || extractDefinePropsDefaultTitle(filePath)
+    || extractHeaderFromConditionalExpression(filePath)
+  );
+}
+
 export function extractNewbieActivityModuleNameMap(activityWebDir) {
   const sources = {
     base: "activity-ui/src/views/activity/newbie/components/baseForm.vue",
@@ -74,7 +96,36 @@ export function extractNewbieActivityModuleNameMap(activityWebDir) {
   const moduleNameMap = {};
   for (const [key, rel] of Object.entries(sources)) {
     const filePath = path.join(activityWebDir, rel);
-    const header = extractElCardHeader(filePath);
+    const header = extractElCardHeaderSmart(filePath);
+    moduleNameMap[key] = header || "";
+  }
+  return { activityWebDir, sources, moduleNameMap };
+}
+
+export function extractCompetitionActivityModuleNameMap(activityWebDir) {
+  const sources = {
+    base: "activity-ui/src/views/activity/competition/components/baseInfo.vue",
+    schedule: "activity-ui/src/views/activity/competition/components/eventSchedule.vue",
+    userApply: "activity-ui/src/views/activity/competition/components/userApply.vue",
+    prize: "activity-ui/src/views/activity/competition/components/prizeManage.vue",
+    contract: "activity-ui/src/views/activity/competition/components/contractInfo.vue",
+    rankingReward: "activity-ui/src/views/activity/competition/components/rewardRanking.vue",
+    teamAwardSetting: "activity-ui/src/views/activity/competition/components/TeamAwardSetting.vue",
+    virtualRanking: "activity-ui/src/views/activity/competition/components/virtualRanking.vue",
+    team: "activity-ui/src/views/activity/competition/components/team/index.vue",
+    pageSetting: "activity-ui/src/views/activity/competition/components/pageSetting.vue",
+    i18n: "activity-ui/src/views/activity/competition/components/langContentSetting.vue",
+    faq: "activity-ui/src/views/activity/lottery/components/FAQForm.vue",
+    calendar: "activity-ui/src/views/activity/commonTool/ActivityCalendarConfig.vue",
+    additionalAward: "activity-ui/src/views/activity/competition/components/compoundCompetition/additionalAwardConfig.vue",
+    activityShowType: "activity-ui/src/views/activity/competition/components/compoundCompetition/team/ActivityShowTypeSelector.vue",
+    poolDivision: "activity-ui/src/views/activity/competition/components/simulate/poolDivision.vue",
+    simulateBonusPool: "activity-ui/src/views/activity/competition/components/simulate/simulateContractInfo.vue",
+  };
+  const moduleNameMap = {};
+  for (const [key, rel] of Object.entries(sources)) {
+    const filePath = path.join(activityWebDir, rel);
+    const header = extractElCardHeaderSmart(filePath);
     moduleNameMap[key] = header || "";
   }
   return { activityWebDir, sources, moduleNameMap };
