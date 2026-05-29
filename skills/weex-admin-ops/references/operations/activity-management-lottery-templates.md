@@ -22,7 +22,7 @@ The following fields are shared by all three regression templates unless a templ
 - `类别配置`: `通用`
 - `流程引导配置`: `37 - 转盘活动 - 自动化测试引导配置`
 - `是否为平台活动`: `是`
-- `用户报名模版`: `【2781】 全用户转盘报名模板_全平台用户_auto_manual_20260512064613`
+- `用户报名模版`: `【2442】 全平台-无任何限制`
 - `是否支持预报名`: `不支持`
 - `是否显示活动日历入口`: `是`
 - `抽奖样式`: `圆形转盘`
@@ -63,6 +63,12 @@ Use this template for:
 - Main backend regression
 - Main frontend regression
 - Standard baseline activity creation
+
+Headless main regression runtime:
+- `lottery-activity-fast-api.mjs --action create-draft` now injects AC-14 `prizeWeight` even though the source template does not carry it.
+- Runtime creates one cumulative-count group: count `5` with `同用户`; it has prize IDs `1-8`, prize ID `5` weight `100`, all other prizes weight `0`, and group total `100`.
+- AC-14 passes only when detail回查 includes a valid deterministic cumulative group and all saved rows use the same `用户UID` side; do not mix `同用户` and `全平台` in one activity.
+- This deterministic setup supports frontend validation: the sixth draw should be assertable against prize ID `5` instead of a random 12.5% outcome.
 
 ## 2. 二次权重专项活动模板
 

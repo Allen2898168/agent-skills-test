@@ -21,6 +21,7 @@ The action cache is the first execution layer for frontend checks that have alre
 | `frontend_contract_place_order` | `scripts/frontend-contract-place-order.mjs` | candidate | Use skill-local `WEEX_FRONTEND_CONTRACT_*` credentials to call STG Contract Open API `POST /capi/v3/order`; requires `--confirm-order`. |
 | `frontend_draw_signup_trade_close_verify` | `scripts/frontend-draw-signup-trade-close-verify.mjs` | candidate | For draw activities where trade tasks are valid only after signup: signup on draw page, place API order, one-key close on futures page, then verify `taskCompletions`/`frequency`; requires `--confirm-run`. |
 | `frontend_draw_kafka_recharge_verify` | `scripts/frontend-draw-kafka-recharge-verify.mjs` | candidate | For internal STG recharge-task callback checks: signup if needed, send Kafka callback value in UI, then verify draw `taskCompletions`/`frequency`; requires `--confirm-run`. |
+| `frontend_draw_weight_special_verify` | `scripts/frontend-draw-weight-special-verify.mjs` | candidate | For draw cumulative re-weighting checks: run visible single draws, capture each `恭喜你` popup, close via top-right `X`, and assert target draw prize text. |
 
 ## Natural-Language Matching
 
@@ -92,6 +93,15 @@ For draw recharge completion by Kafka callback:
 - for browser mode pass `-- --visible`;
 - pass explicit `-- --task-id <id>` when task ID is known;
 - callback value is written in Kafka UI `Value` editor only; script uses ACE editor write path and does not fill key/header by default.
+
+For draw cumulative weight verification:
+
+- use `--action frontend_draw_weight_special_verify` for explicit execution;
+- always dry-run first:
+  `node scripts/run-cached-action.mjs --action frontend_draw_weight_special_verify --dry-run -- --activity-alias <alias> --expected-prize-text <text> --draw-times 6`;
+- for browser mode pass `-- --visible`;
+- the script uses the default frontend test account unless `-- --account-alias <alias>` is provided;
+- close each prize popup through the top-right `X`; do not close or reopen the page between draws.
 
 ## Cache Graduation Rules
 

@@ -87,7 +87,7 @@ These can be suggested, but still mention them before execution when creating or
 No verified default configuration for creating a newbie activity has been captured yet.
 
 For `活动列表 / 转盘抽奖`:
-- `用户报名模版` default fixed value: `【2729】 自动化报名模板_auto_manual_20260505161031`.
+- `用户报名模版` default fixed value: `【2442】 全平台-无任何限制`.
 - `活动别名` default rule: keep the alias within `10` characters.
 - Use longer aliases only when the tester explicitly asks for alias boundary-value testing.
 - This default should still be surfaced to the user as part of the configurable-item confirmation step before execution.

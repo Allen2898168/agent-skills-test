@@ -323,6 +323,50 @@ test("evaluateAdminMainCase validates AC-08 by checking taskConfig exists in act
   assert.equal(result.status, "PASS");
 });
 
+test("evaluateAdminMainCase validates AC-14 by checking cumulative prize weight config", () => {
+  const sameUserRows = Array.from({ length: 8 }, (_, index) => ({
+    prizeId: index + 1,
+    cumulativeCount: 5,
+    weight: index === 4 ? 100 : 0,
+    type: 1,
+  }));
+  const result = evaluateAdminMainCase(
+    { caseId: "AC-14", caseName: "累计次数再权重配置" },
+    {
+      phaseId: "create_lottery_activity_draft",
+      ok: true,
+      payload: {
+        ok: true,
+        verifyFirst: {
+          prizeWeight: sameUserRows,
+        },
+      },
+    }
+  );
+  assert.equal(result.status, "PASS");
+  assert.equal(result.evidence.prizeWeightCount, 8);
+  assert.equal(result.evidence.prizeWeightGroupCount, 1);
+  assert.deepEqual(result.evidence.prizeWeightTypeCoverage, ["同用户"]);
+  assert.equal(result.evidence.prizeWeightDeterministicPrizeId, 5);
+});
+
+test("evaluateAdminMainCase fails AC-14 when cumulative prize weight config is missing", () => {
+  const result = evaluateAdminMainCase(
+    { caseId: "AC-14", caseName: "累计次数再权重配置" },
+    {
+      phaseId: "create_lottery_activity_draft",
+      ok: true,
+      payload: {
+        ok: true,
+        verifyFirst: {
+          prizeWeight: [],
+        },
+      },
+    }
+  );
+  assert.equal(result.status, "FAIL");
+});
+
 test("evaluateAdminMainCase validates ST-01 by checking ONLINE status", () => {
   const result = evaluateAdminMainCase(
     { caseId: "ST-01", caseName: "草稿上线" },

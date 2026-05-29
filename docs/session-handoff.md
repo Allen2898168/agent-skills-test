@@ -6,7 +6,7 @@
 - 活动后台权威 skill：`skills/weex-admin-ops/`，默认 staging：`https://stg-activity.weex.tech`。
 - FIN Admin 权威 skill：`skills/weex-fin-admin-ops/`，默认 staging：`https://stg-admin-web-fin.weex.tech`。
 - 前端权威 skill：`skills/weex-frontend-ops/`，目标 URL 按用户输入或 `references/routes.md`。
-- 最近更新时间：2026-05-26。
+- 最近更新时间：2026-05-29。
 - 历史交接索引：`docs/session-handoffs/README.md`。
 
 ## 必读入口
@@ -21,6 +21,20 @@
 - 三个失败复盘入口：`skills/weex-admin-ops/FAILURES.md`、`skills/weex-fin-admin-ops/FAILURES.md`、`skills/weex-frontend-ops/FAILURES.md`。
 
 ## 最近完成
+
+- 2026-05-29 用户确认转盘抽奖活动默认 `用户报名模版` 应使用 `【2442】 全平台-无任何限制`，已替换旧默认 `2729`。新建并上线活动 `9694` / `wt43083858` 后，前端账号 `8186595891@weex.com` / UID `8186595891` 报名成功；通过 MQ 充值回调生成 10 次抽奖次数，不走 FIN 登录。二次权重专项可见浏览器复验通过：连续单抽 6 次均捕获 `恭喜你` 弹窗并用右上角 `X` 关闭，次数 `10 -> 4`，第 6 次弹窗文案为 `100 USDT 合约赠金`。已登记 `frontend_draw_weight_special_verify` action-cache，并更新前端 draw playbook 与失败复盘。
+
+- 2026-05-29 已编辑 staging 转盘抽奖活动 `9107`：累计次数再权重配置为累计 5 次、同用户、奖品 ID `5` 权重 `100`，其余 7 个奖品权重 `0`；详情回查 `ONLINE / IN_PROGRESS` 且权重合计 `100`，用于前端第 6 次抽奖确定性断言。
+
+- 2026-05-29 补齐转盘抽奖后管 AC-14「累计次数再权重配置」自动化覆盖：`lottery-activity-fast-api.mjs --action create-draft` 创建草稿时注入一组 `prizeWeight`（累计 5 次=同用户，8 行、奖品 ID 5 权重 100，其余 0），`lottery-admin-main-regression` 已把 AC-14 纳入 `create_lottery_activity_draft` 阶段，manifest `admin_activity_config.automationCaseIds` 已补 AC-14。
+- 验证：单测 `lottery-admin-main-regression-lib.test.mjs` 通过；dry-run `--case-ids AC-14` 命中创建草稿阶段。注意：早期真实 staging 创建活动 `9691` 使用过均匀权重并已删除；随后按业务口径修正为同一活动只配置一侧，且使用确定性奖品权重，便于第 6 次抽奖断言中奖奖品。
+
+- 2026-05-29 新增 activity-web 源码影响分析工具：
+  - 脚本：`tools/activity-web-impact-check.mjs`，支持 `--activity-web-dir`、`--changed-files`，也可默认从 `activity-web` 执行 `git diff --name-only origin/main...HEAD`。
+  - 核心库：`tools/lib/activity-web-impact.mjs`，将后管源码变更映射为影响业务链路、推荐 `caseId`、推荐 action-cache dry-run 命令，并输出接口/字段/枚举/未接自动化 case 的潜在覆盖缺口。
+  - 测试：`tools/__tests__/activity-web-impact-check.test.mjs` 覆盖转盘奖池组件变更推荐回归，以及新增字段/接口覆盖缺口识别。
+  - 当前真实 `activity-web` 路径 `/Users/jonathan/Documents/Codex/2026-05-05/activity-web` 本地与 `origin/main` 无差异，工具输出影响为空。
+- 2026-05-29 按用户纠正更新转盘抽奖 AC-15/ST-03 口径：复制失败根因是源活动别名过长；回归固定使用小于 10 字符的新建活动别名执行复制，删除用例直接删除草稿状态活动。已移除 manifest 中 AC-15/ST-03 阻塞标记，并同步 row-action playbook 与失败复盘。
 
 - 2026-05-28 补齐后管无头 API“全配置”缺口（仅 activity-web 域）：
   - 新增多语言模板无头 API：`skills/weex-admin-ops/scripts/multilanguage-template-fast-api.mjs`（create/detail/delete 验证通过，templateType=1 新手活动）。

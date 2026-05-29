@@ -232,6 +232,39 @@
       ],
       "status": "candidate",
       "lastVerifiedAt": "2026-05-13"
+    },
+    {
+      "id": "frontend_draw_weight_special_verify",
+      "operation": "draw.weight.special.verify",
+      "description": "For draw cumulative re-weighting checks: run N visible single draws, capture each success popup, close via popup top-right X, and assert the target draw popup prize text.",
+      "keywords": [
+        "二次权重前端验证",
+        "累计次数再权重前端",
+        "第六次抽奖",
+        "连续单抽验证",
+        "draw weight special"
+      ],
+      "script": "scripts/frontend-draw-weight-special-verify.mjs",
+      "defaultParameters": {
+        "environment": "stg",
+        "activityHost": "https://stg-www.weex.tech",
+        "activityAlias": "<required>",
+        "drawTimes": 6,
+        "expectedPrizeId": "5",
+        "expectedPrizeText": "<required for stable assertion>",
+        "account": "default frontend test account unless --account-alias is provided",
+        "visible": "pass --visible when browser mode is required"
+      },
+      "requiresConfirmation": false,
+      "successAssertions": [
+        "initial draw count is at least drawTimes",
+        "each luckDraw response has business code 00000",
+        "each draw shows the 恭喜你 popup",
+        "draw count decreases by drawTimes",
+        "target draw popup contains expectedPrizeText"
+      ],
+      "status": "candidate",
+      "lastVerifiedAt": "2026-05-29"
     }
   ]
 }

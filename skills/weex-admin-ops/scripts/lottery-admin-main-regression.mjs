@@ -176,7 +176,7 @@ export function buildPlan(args) {
           "create_roulette_reward_mode_tasks",
         ],
         description: "Create the main regression lottery draft with the verified template chain.",
-        caseIds: ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05", "AC-06", "AC-07", "AC-08", "AC-09", "AC-10", "AC-11", "AC-12", "AC-13"],
+        caseIds: ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05", "AC-06", "AC-07", "AC-08", "AC-09", "AC-10", "AC-11", "AC-12", "AC-13", "AC-14"],
         commands: [
           useFastApi
             ? ["skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs", "--action", "create-draft", "--title-prefix", String(args.titlePrefix || "后管主回归"), "--alias-prefix", String(args.aliasPrefix || "ln")]

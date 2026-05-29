@@ -23,7 +23,7 @@ Link field or displayed text:
 - `活动任务信息` displays existing roulette activity tasks.
 
 Dependency or limitation:
-- Current lottery activity chain fixes `用户报名模版` to template `2729`: `【2729】 自动化报名模板_auto_manual_20260505161031`.
+- Current lottery activity chain fixes `用户报名模版` to template `2442`: `【2442】 全平台-无任何限制`.
 - Test activities may require fake-money-account scoped registration templates.
 - Lottery prize table `奖品池ID` is prefilled and should remain `1-8`.
 - Activity task selection must be followed by the module `+` button before `排序系数` can be filled.

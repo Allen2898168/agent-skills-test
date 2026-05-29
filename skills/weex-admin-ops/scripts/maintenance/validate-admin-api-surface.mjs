@@ -56,8 +56,14 @@ function candidatesFor(endpoint) {
 
   // IDs are usually path variables in backend code (e.g. /activity/prize/{id}).
   if (/\/\d+$/.test(normalized)) {
-    add(normalized.replace(/\/\d+$/, ""));
-    add(normalized.replace(/\/\d+$/, "/"));
+    const withoutNumericId = normalized.replace(/\/\d+$/, "");
+    add(withoutNumericId);
+    add(`${withoutNumericId}/`);
+    if (withoutNumericId.startsWith("/prod-api/")) {
+      add(withoutNumericId.replace(/^\/prod-api/, ""));
+      add(withoutNumericId.replace(/^\/prod-api\//, "/"));
+      add(`${withoutNumericId.replace(/^\/prod-api/, "")}/`);
+    }
   }
 
   return [...candidates];
@@ -72,7 +78,12 @@ function main() {
     ? path.resolve(skillRoot, "../..")
     : path.resolve(skillRoot, "..");
 
-  const activityWebDir = path.join(repoRoot, "activity-web");
+  const activityWebDir = [
+    process.env.ACTIVITY_WEB_DIR,
+    path.join(repoRoot, "activity-web"),
+    path.resolve(repoRoot, "../activity-web"),
+    path.resolve(repoRoot, "../../activity-web"),
+  ].filter(Boolean).find(candidate => fs.existsSync(candidate)) || path.join(repoRoot, "activity-web");
   if (!fs.existsSync(activityWebDir)) {
     process.stdout.write(JSON.stringify({ ok: true, skipped: true, reason: "activity-web directory missing", activityWebDir }, null, 2));
     return 0;

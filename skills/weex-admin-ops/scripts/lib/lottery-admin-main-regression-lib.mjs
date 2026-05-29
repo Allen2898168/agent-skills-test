@@ -113,6 +113,10 @@ export function evaluateAdminMainCase(caseEntry, phaseResult) {
     const passed = taskCount > 0;
     return buildCaseResult(caseEntry, phaseResult.phaseId, passed ? "PASS" : "FAIL", payload);
   }
+  if (caseEntry.caseId === "AC-14") {
+    const passed = validateCumulativePrizeWeight(verifyFirst.prizeWeight).ok;
+    return buildCaseResult(caseEntry, phaseResult.phaseId, passed ? "PASS" : "FAIL", payload);
+  }
   if (caseEntry.caseId === "ST-01") {
     const passed = verifyItem.status === "ONLINE" || payload.onlineBody?.code === 200;
     return buildCaseResult(caseEntry, phaseResult.phaseId, passed ? "PASS" : "FAIL", payload);
@@ -350,6 +354,47 @@ function hasTemplatePlatformScopeCoverage(created, expectedScopes) {
   return expectedScopes.every(scope => covered.has(scope));
 }
 
+function validateCumulativePrizeWeight(rows) {
+  if (!Array.isArray(rows) || rows.length < 8) return { ok: false, groupCount: 0, typeCoverage: [] };
+  const groups = new Map();
+  for (const row of rows) {
+    const cumulativeCount = Number(row?.cumulativeCount);
+    if (!Number.isFinite(cumulativeCount) || cumulativeCount <= 0) continue;
+    if (!groups.has(cumulativeCount)) groups.set(cumulativeCount, []);
+    groups.get(cumulativeCount).push(row);
+  }
+  const validGroups = [];
+  const coveredTypes = new Set();
+  const deterministicPrizeIds = new Set();
+  for (const groupRows of groups.values()) {
+    const prizeIds = new Set(groupRows.map(row => Number(row?.prizeId)).filter(Number.isFinite));
+    const weightSum = groupRows.reduce((sum, row) => sum + Number(row?.weight || 0), 0);
+    const deterministicRows = groupRows.filter(row => Number(row?.weight || 0) === 100);
+    const type = Number(groupRows[0]?.type);
+    const sameType = groupRows.every(row => Number(row?.type) === type);
+    const deterministic = deterministicRows.length === 1
+      && groupRows.every(row => Number(row?.weight || 0) === 0 || Number(row?.weight || 0) === 100);
+    if (groupRows.length >= 8 && prizeIds.size >= 8 && Math.abs(weightSum - 100) < 0.000001 && deterministic && sameType && [1, 2].includes(type)) {
+      validGroups.push(groupRows);
+      coveredTypes.add(type);
+      deterministicPrizeIds.add(Number(deterministicRows[0]?.prizeId));
+    }
+  }
+  return {
+    ok: validGroups.length > 0 && coveredTypes.size === 1,
+    groupCount: validGroups.length,
+    typeCoverage: prizeWeightTypeLabels(coveredTypes),
+    deterministicPrizeId: deterministicPrizeIds.size === 1 ? [...deterministicPrizeIds][0] : "",
+  };
+}
+
+function prizeWeightTypeLabels(types) {
+  const labels = [];
+  if (types.has(1)) labels.push("同用户");
+  if (types.has(2)) labels.push("全平台");
+  return labels;
+}
+
 function findPrizeRowAction(phaseResult, stepName) {
   const actionResults = Array.isArray(phaseResult?.childResults)
     ? phaseResult.childResults.flatMap(item => Array.isArray(item?.payload?.results) ? item.payload.results : [])
@@ -401,6 +446,7 @@ function summarizeEvidence(payload) {
   const verifyFirst = payload?.verifyFirst || {};
   const verifyItem = payload?.verifyItem || {};
   const target = payload?.target || {};
+  const prizeWeightSummary = validateCumulativePrizeWeight(verifyFirst?.prizeWeight);
   const summary = {
     ok: payload?.ok,
     error: payload?.error || "",
@@ -420,6 +466,12 @@ function summarizeEvidence(payload) {
     pageText: payload?.pageText ? String(payload.pageText).slice(0, 300) : "",
     responseCount: Array.isArray(payload?.responses) ? payload.responses.length : 0,
   };
+  if (Array.isArray(verifyFirst?.prizeWeight)) {
+    summary.prizeWeightCount = verifyFirst.prizeWeight.length;
+    summary.prizeWeightGroupCount = prizeWeightSummary.groupCount;
+    summary.prizeWeightTypeCoverage = prizeWeightSummary.typeCoverage;
+    summary.prizeWeightDeterministicPrizeId = prizeWeightSummary.deterministicPrizeId;
+  }
   if (payload?.category) {
     summary.recordType = "prize";
     summary.prizeId = payload.id || "";

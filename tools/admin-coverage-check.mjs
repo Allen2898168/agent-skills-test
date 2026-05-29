@@ -14,8 +14,8 @@ function readText(repoRoot, rel) {
   }
 }
 
-function findActivityWebApiEndpoints(repoRoot, relApiFile) {
-  const txt = readText(repoRoot, relApiFile);
+function findActivityWebApiEndpoints(activityWebRoot, relApiFile) {
+  const txt = readText(activityWebRoot, relApiFile);
   const endpoints = [];
   for (const m of txt.matchAll(/url:\s*['"`]([^'"`]+)['"`]/g)) endpoints.push(m[1]);
   return Array.from(new Set(endpoints)).sort();
@@ -23,7 +23,12 @@ function findActivityWebApiEndpoints(repoRoot, relApiFile) {
 
 function main() {
   const repoRoot = process.cwd();
-  const activityWebRoot = path.join(repoRoot, "activity-web");
+  const activityWebRoot = [
+    process.env.ACTIVITY_WEB_DIR,
+    path.join(repoRoot, "activity-web"),
+    path.resolve(repoRoot, "../activity-web"),
+    path.resolve(repoRoot, "../../activity-web"),
+  ].filter(Boolean).find(candidate => fs.existsSync(candidate)) || path.join(repoRoot, "activity-web");
   const result = {
     ok: true,
     repoRoot,
@@ -87,9 +92,9 @@ function main() {
   // Activity-web API surface hints (for missing module endpoints)
   if (result.activityWebFound) {
     const endpoints = {
-      multiLang: findActivityWebApiEndpoints(repoRoot, "activity-web/activity-ui/src/api/activity/langsTemplate.js"),
-      resource: findActivityWebApiEndpoints(repoRoot, "activity-web/activity-ui/src/api/activity/resource.js"),
-      taskPackage: findActivityWebApiEndpoints(repoRoot, "activity-web/activity-ui/src/api/activity/taskPackage.js"),
+      multiLang: findActivityWebApiEndpoints(activityWebRoot, "activity-ui/src/api/activity/langsTemplate.js"),
+      resource: findActivityWebApiEndpoints(activityWebRoot, "activity-ui/src/api/activity/resource.js"),
+      taskPackage: findActivityWebApiEndpoints(activityWebRoot, "activity-ui/src/api/activity/taskPackage.js"),
     };
     result.activityWebEndpoints = endpoints;
   }

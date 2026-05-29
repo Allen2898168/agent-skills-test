@@ -102,10 +102,33 @@ function summarizeActivityDetail(item) {
     startTime: item.startTime || "",
     endTime: item.endTime || "",
     prize: Array.isArray(item.prize) ? item.prize.map(record => ({ prizeId: record.prizeId, linkPrizeId: record.linkPrizeId })) : [],
+    prizeWeight: Array.isArray(item.prizeWeight)
+      ? item.prizeWeight.map(record => ({
+        prizeId: record.prizeId,
+        cumulativeCount: record.cumulativeCount,
+        weight: record.weight,
+        type: record.type,
+      }))
+      : [],
     taskConfig: Array.isArray(item.taskConfig) ? item.taskConfig.map(record => ({ id: record.id, taskType: record.taskType })) : [],
     taskRequirement: Array.isArray(item.taskRequirement) ? item.taskRequirement.map(record => ({ id: record.id, taskType: record.taskType })) : [],
     taskConfigIds: Array.isArray(item.taskConfigIds) ? item.taskConfigIds : [],
   };
+}
+
+function buildCumulativePrizeWeight(prizes) {
+  const deterministicPrizeId = 5;
+  const prizeIds = Array.from({ length: 8 }, (_, index) => {
+    const record = Array.isArray(prizes) ? prizes[index] : null;
+    return Number(record?.prizeId || index + 1);
+  });
+  const buildGroup = (cumulativeCount, type) => prizeIds.map((prizeId) => ({
+    prizeId,
+    weight: Number(prizeId) === deterministicPrizeId ? 100 : 0,
+    cumulativeCount,
+    type,
+  }));
+  return buildGroup(5, 1);
 }
 
 async function snapshot(api, args) {
@@ -152,6 +175,7 @@ async function createDraft(api, args) {
   const payload = stripCloneFields(template);
   payload.title = title;
   payload.showUrl = alias;
+  payload.applyConfigId = Number(args.applyConfigId || 2442);
   if (args.raffleStyle && "raffleStyle" in payload) payload.raffleStyle = String(args.raffleStyle);
   if ("startTime" in payload) payload.startTime = window.start;
   if ("endTime" in payload) payload.endTime = window.end;
@@ -159,6 +183,7 @@ async function createDraft(api, args) {
     if ("startTime" in payload.periods[0]) payload.periods[0].startTime = window.start;
     if ("endTime" in payload.periods[0]) payload.periods[0].endTime = window.end;
   }
+  payload.prizeWeight = buildCumulativePrizeWeight(payload.prize);
   const created = await api.post("/prod-api/activity/config", payload);
   if (created.body?.code !== 200) throw new Error(`Create activity draft failed: ${JSON.stringify(created.body)}`);
   const row = await listByAlias(api, alias);

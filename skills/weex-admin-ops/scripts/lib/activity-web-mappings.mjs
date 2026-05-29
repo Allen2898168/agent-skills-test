@@ -17,9 +17,16 @@ function normalizeToken(value) {
 }
 
 export function ensureActivityWebDir(repoRoot) {
-  const activityWebDir = path.join(repoRoot, "activity-web");
-  if (!fs.existsSync(activityWebDir)) throw new Error(`activity-web not found: ${activityWebDir}`);
-  return activityWebDir;
+  const candidates = [
+    process.env.ACTIVITY_WEB_DIR,
+    path.join(repoRoot, "activity-web"),
+    path.resolve(repoRoot, "../activity-web"),
+    path.resolve(repoRoot, "../../activity-web"),
+  ].filter(Boolean);
+  for (const activityWebDir of candidates) {
+    if (fs.existsSync(activityWebDir)) return activityWebDir;
+  }
+  throw new Error(`activity-web not found: ${candidates.join(" or ")}`);
 }
 
 export function extractLotteryRaffleStyles(activityWebDir) {

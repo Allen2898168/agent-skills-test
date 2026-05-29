@@ -59,7 +59,7 @@ export function buildLotteryDraftPlan(args = {}) {
     defaults: LOTTERY_DRAFT_DEFAULTS,
     dependencies: {
       guideTemplate: "Select the first available 转盘抽奖 guide-flow template.",
-      registrationTemplate: "Select fixed registration template 【2729】 自动化报名模板_auto_manual_20260505161031 for 用户报名模版.",
+      registrationTemplate: "Select fixed registration template 【2442】 全平台-无任何限制 for 用户报名模版.",
       prizes: "Select eight prize records from activity-list prize configuration options.",
       task: "Select one existing 转盘抽奖 activity task, click the module + button, then set sort coefficient.",
       images: "Use the configured default upload image for header/share/prize/FAQ-related image fields.",

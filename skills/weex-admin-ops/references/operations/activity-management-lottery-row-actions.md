@@ -9,8 +9,8 @@ Visible-browser checks on 2026-05-07:
 - Online activity `9023` (`strict-ui-lottery-20260507200430`) showed row actions `查看` / `修改` / `下线` / `复制`; no `删除` button was visible. This matches the rule that online activities cannot be deleted.
 - `查看` opened `/activities/lottery/view?activityId=9023` and triggered `GET /prod-api/activity/config/9023` with business `code=200`.
 - `修改` opened `/activities/lottery/edit?activityId=9023`; the original online activity was not saved during row-action validation.
-- `复制` on both online `9023` and draft `9022` triggered `POST /prod-api/activity/config/copy`, but backend returned business `code=500`, `system busy, please retry later`; no copied row was created.
-- The latest dev feedback attributes that failure to the source activity alias being too long, not to a newly generated copied alias.
+- Historical `复制` failures on activities `9023` / `9022` were caused by source activity aliases that were too long. This is not an active blocker when the regression creates its own source activity with `showUrl` shorter than 10 characters.
+- Headless regression avoids the long-alias failure by creating or cloning with a generated alias such as `cp########` capped at 10 characters, then verifying the copied draft by alias search.
 - A temporary draft `9024` was created through the strict visible UI path to continue row-action checks. Its row actions included `查看` / `修改` / `上线` / `删除` / `复制`.
 - `修改` on draft `9024` opened `/activities/lottery/edit?activityId=9024`; changing `活动副标题` and clicking the page `保存` button triggered `PUT /prod-api/activity/config` with business `code=200` and page message `编辑成功`.
 - `删除` on draft `9024` opened a confirmation dialog `确认删除该活动吗`; the verification input auto-focused. Fill the fixed staging verification code, then click the bottom-right `确定`. The page triggered `POST /prod-api/activity/lottery/delete`, business `code=200`, and alias search returned `total=0`.
@@ -20,7 +20,7 @@ Non-visible/headless checks on 2026-05-07:
 - Temporary draft `9025` (`strict-ui-lottery-20260507212249`) was created in headless mode and used for row-action verification.
 - `查看` opened `/activities/lottery/view?activityId=9025`; detail request returned business `code=200`.
 - `修改` opened the edit page, changed `活动副标题`, clicked `保存`, triggered `PUT /prod-api/activity/config` with business `code=200`, and detail re-query matched the updated subtitle.
-- `复制` again triggered `POST /prod-api/activity/config/copy` and returned business `code=500`, `system busy, please retry later`.
+- For row-action regression, use a freshly created short-alias activity as the copy source. After copy creates a draft, run delete against that draft status activity.
 - `删除` filled the verification input in the confirmation dialog and clicked `确定`; `POST /prod-api/activity/lottery/delete` returned business `code=200`, and alias search returned `total=0`.
 
 Headless real-UI checks on 2026-05-14:
@@ -43,6 +43,8 @@ Headless real-UI checks on 2026-05-14:
 - Edit pages use bottom button text `保存`, not `修改`; row-action scripts must click the real bottom `保存` button and require a `PUT /prod-api/activity/config` business `code=200`.
 - For `删除` and `上线`, the confirmation dialog requires filling the verification input before clicking `确定`; opening the dialog or clicking confirm without the code is not sufficient.
 - Do not mark lottery delete as passed unless `POST /prod-api/activity/lottery/delete` returns business `code=200` and alias search returns `total=0`.
+- Copy/delete regression must create or select a source activity whose alias is shorter than 10 characters. Do not use historical long-alias activities as copy sources.
+- ST-03 should delete a known draft activity directly. The preferred headless path is: create short-alias copy/draft -> verify draft row -> delete draft -> verify alias absent.
 - Direct API calls to `/prod-api/activity/lottery/online` with guessed fields such as `googleCode` or `code` returned `google验证码不得为空` on 2026-05-11. Until the real payload key is proven, use the UI confirmation dialog for online operations.
 - When the user asks to create several frontend-display lottery activities, prefer create -> online -> frontend verify per activity. If batching is still used, refresh every activity's time immediately before online.
 - For near-future activities, refresh time using the backend/admin business timezone before creation or before updating the draft. A start time that is future in the local machine timezone can still fail server validation.

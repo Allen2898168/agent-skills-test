@@ -8,6 +8,7 @@ Use this file as the table of contents for frontend operation playbooks. Keep fu
 - Frontend authentication: `auth.md`
 - Frontend contract Open API trading: `contract-api.md`
 - Frontend draw activity pages: `draw.md`
+- Frontend draw cumulative weight: `draw-weight.md`
 - Frontend draw Kafka callback validation: `draw-kafka.md`
 
 ## Known Operation Playbooks
@@ -22,3 +23,4 @@ Use this file as the table of contents for frontend operation playbooks. Keep fu
 | STG contract Open API PlaceOrder | `contract-api.md` | candidate | 2026-05-12 | Uses skill-local `WEEX_FRONTEND_CONTRACT_*` credentials and `POST /capi/v3/order`; dry-run first and real order requires `--confirm-order`. |
 | STG draw signup-then-trade completion chain | `draw.md` | candidate | 2026-05-12 | For activities where trading task is valid only after signup: signup on draw page, place API order, one-key close on futures page, then verify draw task completion API. |
 | STG draw task completion via Kafka callback | `draw-kafka.md` | candidate | 2026-05-13 | Split playbook for internal staging callback validation; use only when explicitly validating callback behavior. |
+| STG draw cumulative weight single-draw verification | `draw-weight.md` | candidate | 2026-05-29 | For累计次数再权重配置: run single draws in browser mode, close each success popup via top-right X, and assert target draw popup prize text. |
