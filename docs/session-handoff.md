@@ -22,6 +22,8 @@
 
 ## 最近完成
 
+- 2026-05-30 非转盘/非新手活动 API 全配置写验证补链路：修复 `GUESS / MONOPOLY_WORLD_CUP / AGENT_TRACE_PRO` 在 staging 的 min/full verify + cleanup 不稳定问题。关键修复包括：child 脚本登录导致 token 失效（创建活动前刷新 session + 支持用 `WEEX_ADMIN_AUTHORIZATION` 透传父会话 Authorization）、`create-prizes-fast-api.mjs` 增加 `--confirm-create` 确认开关并同步更新依赖脚本、MONOPOLY_WORLD_CUP 报名模板需使用 `用户手动点击报名`、GUESS/小活动 cleanup 增加解绑报名模板到默认 `2442` 后再删除，避免“模板被活动占用”报错。验证编排：`node skills/weex-admin-ops/scripts/verify-nonlottery-api-full-config-staging.mjs --confirm-run --verify-level <min|full> [--confirm-full-verify]`。
+
 - 2026-05-29 用户确认转盘抽奖活动默认 `用户报名模版` 应使用 `【2442】 全平台-无任何限制`，已替换旧默认 `2729`。新建并上线活动 `9694` / `wt43083858` 后，前端账号 `8186595891@weex.com` / UID `8186595891` 报名成功；通过 MQ 充值回调生成 10 次抽奖次数，不走 FIN 登录。二次权重专项可见浏览器复验通过：连续单抽 6 次均捕获 `恭喜你` 弹窗并用右上角 `X` 关闭，次数 `10 -> 4`，第 6 次弹窗文案为 `100 USDT 合约赠金`。已登记 `frontend_draw_weight_special_verify` action-cache，并更新前端 draw playbook 与失败复盘。
 
 - 2026-05-29 已编辑 staging 转盘抽奖活动 `9107`：累计次数再权重配置为累计 5 次、同用户、奖品 ID `5` 权重 `100`，其余 7 个奖品权重 `0`；详情回查 `ONLINE / IN_PROGRESS` 且权重合计 `100`，用于前端第 6 次抽奖确定性断言。
