@@ -30,6 +30,8 @@
 
 - 2026-05-30 新增“全活动类型验证编排 + 能力自检”：新增 `verify-activity-api-full-config-staging.mjs`（按 新手→转盘→非新手非转盘11类 顺序执行 min/full verify + cleanup 的编排入口）；新增 `maintenance/audit-no-activity-web-runtime.mjs`（运行时不依赖 activity-web 审计）与 `maintenance/self-check-activity-api-full-config.mjs`（覆盖审计 + runtime 审计 + 全类型 wizard/module-config 映射输出自检）。同时补齐多个 config-wizard 的 `fieldNameMap/fieldNameMapSource` 输出，确保对话字段提示以中文映射为准。
 
+- 2026-05-30 全活动类型 staging 证据闭环：已跑通 `verify-activity-api-full-config-staging.mjs --verify-level min` 与 `--verify-level full --confirm-full-verify`（默认 `--start-offset-seconds 120`，并执行 cleanup 删除创建的测试活动/依赖），覆盖 新手活动/转盘抽奖/非新手非转盘 11 个类型 的全配置创建、最小验证、最全验证（上线/下线）、清理删除闭环。
+
 - 2026-05-30 人人代理(AGENT) 任务 clone 绑定冲突修复：`INVITE_FRIEND` 模板含 `linkTaskId` 时，脚本改为先 clone 创建新的 `INVITED` 被邀请任务，再创建邀请任务并重绑 `linkTaskId`；`create-agent-full-config-explicit-deps-fast-api.mjs` cleanup 同步删除两条任务；staging 已跑通 `verify-nonlottery-api-full-config-staging.mjs --only agent` 的 min/full/cleanup 闭环验证。
 
 - 2026-05-30 非转盘/非新手活动 staging 证据闭环：已跑通 `verify-nonlottery-api-full-config-staging.mjs` 的 `--verify-level min --only all` 与 `--verify-level full --only all`，覆盖 `TRADING_COMPETITION/RACE_COMPETITION/TRACE_PRO/CUSTOMIZED/RECHARGE_TRANS_TASK/AGENT/CONTRACT_MINING/FLIP/GUESS/MONOPOLY_WORLD_CUP/AGENT_TRACE_PRO` 的显式依赖创建、最小验证、最全验证（上线/下线）、清理删除闭环。
