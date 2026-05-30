@@ -52,7 +52,7 @@ export function loadLocalEnv(repoRoot) {
     if (!isAllowedAdminEnvKey(key)) continue;
     let value = line.slice(index + 1).trim();
     if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) value = value.slice(1, -1);
-    if (!(key in process.env)) process.env[key] = value;
+    if (!(key in process.env) || process.env[key] === "") process.env[key] = value;
   }
   return true;
 }
