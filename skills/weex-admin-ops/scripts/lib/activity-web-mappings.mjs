@@ -131,6 +131,27 @@ export function extractCompetitionActivityModuleNameMap(activityWebDir) {
   return { activityWebDir, sources, moduleNameMap };
 }
 
+export function extractSpeedRaceModuleNameMap(activityWebDir) {
+  const sources = {
+    base: "activity-ui/src/views/activity/speedRace/components/baseInfo.vue",
+    speedConfig: "activity-ui/src/views/activity/speedRace/components/speedConfig.vue",
+    prizePool: "activity-ui/src/views/activity/speedRace/components/prizePoolConfig.vue",
+    leaderboard: "activity-ui/src/views/activity/speedRace/components/leaderboardConfig.vue",
+    pageSetting: "activity-ui/src/views/activity/competition/components/pageSetting.vue",
+    i18n: "activity-ui/src/views/activity/competition/components/langContentSetting.vue",
+    faq: "activity-ui/src/views/activity/lottery/components/FAQForm.vue",
+  };
+  const moduleNameMap = {
+    userApply: "用户报名",
+  };
+  for (const [key, rel] of Object.entries(sources)) {
+    const filePath = path.join(activityWebDir, rel);
+    const header = extractElCardHeader(filePath);
+    moduleNameMap[key] = header || "";
+  }
+  return { activityWebDir, sources, moduleNameMap };
+}
+
 export function resolveOptionValue(input, options) {
   const normalized = normalizeToken(input);
   if (!normalized) return "";

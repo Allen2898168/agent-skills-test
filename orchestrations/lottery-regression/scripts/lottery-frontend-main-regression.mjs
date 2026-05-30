@@ -252,6 +252,23 @@ export function buildPlan(args) {
     ]],
   });
   phases.push({
+    phaseId: "frontend_style_display",
+    dependsOn: ["frontend_readonly_checks"],
+    description: "Verify frontend lottery style display and prize assets.",
+    caseIds: ["FE-09", "FE-10", "FE-11", "FE-12", "FE-13", "FE-14", "FE-15"],
+    commands: [[
+      "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+      "--phase",
+      "style_display",
+      "--activity-alias",
+      activityAliasToken,
+      "--admin-snapshot-path",
+      "<admin-snapshot-path>",
+      "--wait-for-start-ms",
+      String(args.waitForStartMs || "720000"),
+    ]],
+  });
+  phases.push({
     phaseId: "frontend_recharge_prepare",
     dependsOn: ["frontend_readonly_checks"],
     description: "Prepare draw count through recharge task linkage.",
@@ -265,6 +282,83 @@ export function buildPlan(args) {
       "--recharge-amount",
       String(args.rechargeAmount || "1000"),
       "--wait-for-start-ms",
+      String(args.waitForStartMs || "720000"),
+    ]],
+  });
+  phases.push({
+    phaseId: "frontend_exception_ui",
+    dependsOn: ["frontend_recharge_prepare"],
+    description: "Verify injected draw failure, timeout, network error, and recovery UI.",
+    caseIds: ["FE-38", "FE-39", "FE-58", "FE-59", "FE-60", "FE-61", "FE-62", "FE-63"],
+    commands: [[
+      "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+      "--phase",
+      "exception_ui",
+      "--activity-alias",
+      activityAliasToken,
+      "--wait-for-start-ms",
+      String(args.waitForStartMs || "720000"),
+    ]],
+  });
+  phases.push({
+    phaseId: "frontend_five_draw",
+    dependsOn: ["frontend_recharge_prepare"],
+    description: "Run the five-draw transaction checks.",
+    caseIds: ["FE-25", "FE-29", "FE-40", "FE-41", "FE-42", "FE-43", "FE-44", "FE-47"],
+    commands: [[
+      "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+      "--phase",
+      "five_draw",
+      "--activity-alias",
+      activityAliasToken,
+      "--wait-for-start-ms",
+      String(args.waitForStartMs || "720000"),
+    ]],
+  });
+  phases.push({
+    phaseId: "frontend_low_stock_five_draw",
+    dependsOn: ["frontend_recharge_prepare"],
+    description: "Run low-stock five-draw failure and no-deduction checks.",
+    caseIds: ["FE-23", "FE-45", "FE-46", "FE-57"],
+    commands: [[
+      "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+      "--phase",
+      "five_draw",
+      "--activity-alias",
+      activityAliasToken,
+      "--wait-for-start-ms",
+      String(args.waitForStartMs || "720000"),
+    ]],
+  });
+  phases.push({
+    phaseId: "frontend_low_stock_single_draw",
+    dependsOn: ["frontend_recharge_prepare", "frontend_low_stock_five_draw"],
+    description: "Run low-stock single-draw success then shortage checks.",
+    caseIds: ["FE-85"],
+    commands: [[
+      "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+      "--phase",
+      "low_stock_single_draw",
+      "--activity-alias",
+      activityAliasToken,
+      "--wait-for-start-ms",
+      String(args.waitForStartMs || "720000"),
+    ]],
+  });
+  phases.push({
+    phaseId: "frontend_weight_special",
+    dependsOn: ["frontend_recharge_prepare"],
+    description: "Run cumulative re-weighting frontend checks.",
+    caseIds: ["FE-64", "FE-65", "FE-66", "FE-67"],
+    commands: [[
+      "skills/weex-frontend-ops/scripts/frontend-draw-weight-special-verify.mjs",
+      "--activity-alias",
+      activityAliasToken,
+      "--expected-prize-text",
+      "100 USDT 合约赠金",
+      "--draw-times",
+      "6",
+      "--timeout-ms",
       String(args.waitForStartMs || "720000"),
     ]],
   });
@@ -296,6 +390,36 @@ export function buildPlan(args) {
       activityAliasToken,
       "--draw-payload-path",
       "<draw-payload-path>",
+      "--wait-for-start-ms",
+      String(args.waitForStartMs || "720000"),
+    ]],
+  });
+  phases.push({
+    phaseId: "frontend_reward_record_extended",
+    dependsOn: ["frontend_readonly_checks"],
+    description: "Verify reward record empty/data states, time filter, and scroll loading.",
+    caseIds: ["FE-51", "FE-52", "FE-53", "FE-54"],
+    commands: [[
+      "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+      "--phase",
+      "reward_record_extended",
+      "--activity-alias",
+      activityAliasToken,
+      "--wait-for-start-ms",
+      String(args.waitForStartMs || "720000"),
+    ]],
+  });
+  phases.push({
+    phaseId: "frontend_responsive_ui",
+    dependsOn: ["frontend_readonly_checks"],
+    description: "Verify H5/mobile responsive layout, dialogs, and long text overflow.",
+    caseIds: ["FE-68", "FE-69", "FE-70", "FE-71", "FE-72"],
+    commands: [[
+      "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+      "--phase",
+      "responsive_ui",
+      "--activity-alias",
+      activityAliasToken,
       "--wait-for-start-ms",
       String(args.waitForStartMs || "720000"),
     ]],

@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 import { openLoginStatePage } from "../business/auth-pages.mjs";
 
@@ -495,7 +496,8 @@ async function ensureSignup(page, activityUrl, network) {
   };
 }
 
-async function performSingleDraw(page, network) {
+async function performSingleDraw(page, network, options = {}) {
+  const attemptDuplicate = options.attemptDuplicate !== false;
   const beforeText = await page.locator("body").innerText().catch(() => "");
   const countBefore = parseCount(beforeText);
   const luckDrawCountBefore = Array.isArray(network?.luckDraws) ? network.luckDraws.length : 0;
@@ -532,9 +534,11 @@ async function performSingleDraw(page, network) {
   });
   const busySnapshot = await sampleButtonBusyState(page, button);
   let secondClickBlocked = false;
-  await button.click({ timeout: 1000 }).catch(() => {
-    secondClickBlocked = true;
-  });
+  if (attemptDuplicate) {
+    await button.click({ timeout: 1000 }).catch(() => {
+      secondClickBlocked = true;
+    });
+  }
   await page.waitForTimeout(10000);
   const popupVisible = await page.getByText("恭喜你").first().isVisible().catch(() => false);
   const afterText = await page.locator("body").innerText().catch(() => "");
@@ -549,17 +553,158 @@ async function performSingleDraw(page, network) {
       || ""
   );
   const apiSuccess = apiCode === "00000";
+  const failurePromptVisible = !apiSuccess && Boolean(apiMessage || /库存|不足|失败|繁忙|稍后|所剩不多|尝试单次抽奖/.test(afterText));
   return {
     requestObserved: apiSuccess || popupVisible || (countBefore != null && countAfter != null && countBefore - countAfter === 1),
     requestSent: Boolean(latestLuckDraw),
     buttonVisibleBefore,
     buttonDisabledDuringDraw: busySnapshot.busy,
+    duplicateClickBlocked: !attemptDuplicate || secondClickBlocked || requestCountDelta <= 1,
+    requestCountDelta,
+    apiSuccess,
+    apiCode,
+    apiMessage,
+    failurePromptVisible,
+    popupVisible,
+    countBefore,
+    countAfter,
+  };
+}
+
+async function readRewardPopup(page) {
+  const popupVisible = await page.getByText("恭喜你").first().isVisible({ timeout: 15000 }).catch(() => false);
+  if (!popupVisible) {
+    return { popupVisible: false, popupRewardSummary: "", popupRewardCount: 0 };
+  }
+  const popupData = await page.evaluate(() => {
+    const visible = element => !!element
+      && element.getClientRects().length
+      && getComputedStyle(element).display !== "none"
+      && getComputedStyle(element).visibility !== "hidden";
+    const roots = [...document.querySelectorAll('[class*="dialog"], .el-dialog, [role="dialog"], div, section')]
+      .filter(visible)
+      .filter(element => String(element.innerText || element.textContent || "").includes("恭喜你"));
+    const dialog = roots.sort((a, b) => {
+      const ar = a.getBoundingClientRect();
+      const br = b.getBoundingClientRect();
+      return (ar.width * ar.height) - (br.width * br.height);
+    })[0] || roots[0];
+    const text = String(dialog?.innerText || dialog?.textContent || "")
+      .split("\n")
+      .map(item => item.trim())
+      .filter(Boolean);
+    const lines = text.filter(item => ![
+      "恭喜你",
+      "知道了",
+      "关闭",
+      "确认",
+    ].includes(item) && !/^(抽奖|立即报名|我的奖品|分享)$/.test(item));
+    return {
+      popupRewardSummary: lines.slice(0, 8).join(" ").trim(),
+      popupRewardCount: lines.length,
+    };
+  }).catch(() => ({ popupRewardSummary: "", popupRewardCount: 0 }));
+  return {
+    popupVisible,
+    popupRewardSummary: popupData.popupRewardSummary || "",
+    popupRewardCount: Number(popupData.popupRewardCount || 0),
+  };
+}
+
+async function closeRewardPopup(page) {
+  if (!(await page.getByText("恭喜你").first().isVisible().catch(() => false))) return true;
+  const closeLocators = [
+    page.locator(".el-dialog__close, [aria-label='Close'], [class*='close'], [class*='Close']").last(),
+    page.getByText("确定", { exact: true }).last(),
+    page.getByText("知道了", { exact: true }).last(),
+  ];
+  for (const locator of closeLocators) {
+    if (!(await locator.isVisible().catch(() => false))) continue;
+    await locator.click({ force: true, timeout: 3000 }).catch(() => {});
+    await page.waitForTimeout(1000);
+    if (!(await page.getByText("恭喜你").first().isVisible().catch(() => false))) return true;
+  }
+  await page.keyboard.press("Escape").catch(() => {});
+  await page.waitForTimeout(1000);
+  return !(await page.getByText("恭喜你").first().isVisible().catch(() => false));
+}
+
+async function performFiveDraw(page, network) {
+  const beforeText = await page.locator("body").innerText().catch(() => "");
+  const countBefore = parseCount(beforeText);
+  const luckDrawCountBefore = Array.isArray(network?.luckDraws) ? network.luckDraws.length : 0;
+  const raffleDrawCountBefore = Array.isArray(network?.raffleDraws) ? network.raffleDraws.length : 0;
+  let button = page.locator("button").filter({ hasText: "抽奖 × 5" }).first();
+  if (!(await button.isVisible().catch(() => false))) {
+    button = page.getByText("抽奖 × 5", { exact: true }).first();
+  }
+  if (!(await button.isVisible().catch(() => false))) {
+    button = page.locator("button").filter({ hasText: /抽奖\s*[xX×]\s*5/ }).first();
+  }
+  if (!(await button.isVisible().catch(() => false))) {
+    return {
+      requestObserved: false,
+      requestSent: false,
+      buttonVisibleBefore: false,
+      buttonDisabledDuringDraw: false,
+      buttonRestoredAfterDraw: false,
+      duplicateClickBlocked: false,
+      requestCountDelta: 0,
+      apiSuccess: false,
+      apiCode: "",
+      apiMessage: "",
+      popupVisible: false,
+      popupRewardSummary: "",
+      popupRewardCount: 0,
+      failurePromptVisible: false,
+      countBefore,
+      countAfter: countBefore,
+    };
+  }
+  await waitBeforeClick(page);
+  await button.click({ timeout: 5000 }).catch(async () => {
+    await button.click({ force: true, timeout: 5000 }).catch(() => {});
+  });
+  const busySnapshot = await sampleButtonBusyState(page, button);
+  let secondClickBlocked = false;
+  await button.click({ timeout: 1000 }).catch(() => {
+    secondClickBlocked = true;
+  });
+  await page.waitForTimeout(10000);
+  const popup = await readRewardPopup(page);
+  const afterText = await page.locator("body").innerText().catch(() => "");
+  const countAfter = parseCount(afterText);
+  const luckDraws = Array.isArray(network?.luckDraws) ? network.luckDraws : [];
+  const raffleDraws = Array.isArray(network?.raffleDraws) ? network.raffleDraws : [];
+  const newLuckDraws = luckDraws.slice(luckDrawCountBefore);
+  const newRaffleDraws = raffleDraws.slice(raffleDrawCountBefore);
+  const requestCountDelta = Math.max(0, newLuckDraws.length || newRaffleDraws.length);
+  const latestLuckDraw = newLuckDraws.at(-1) || newRaffleDraws.at(-1) || luckDraws.at(-1) || raffleDraws.at(-1) || null;
+  const apiCode = latestLuckDraw?.body?.code ? String(latestLuckDraw.body.code) : "";
+  const apiMessage = String(
+    latestLuckDraw?.body?.msg
+      || latestLuckDraw?.body?.message
+      || ""
+  );
+  const apiSuccess = apiCode === "00000";
+  const failurePromptVisible = !apiSuccess && Boolean(apiMessage || /库存|不足|失败|繁忙|稍后/.test(afterText));
+  if (popup.popupVisible) await closeRewardPopup(page);
+  const buttonRestoredAfterDraw = await page.locator("button").filter({ hasText: /抽奖/ }).first().isVisible().catch(() => false);
+  return {
+    requestObserved: apiSuccess || popup.popupVisible || failurePromptVisible || (countBefore != null && countAfter != null && countBefore - countAfter === 5),
+    requestSent: Boolean(latestLuckDraw),
+    buttonVisibleBefore: true,
+    buttonDisabledDuringDraw: busySnapshot.busy,
+    buttonRestoredAfterDraw,
     duplicateClickBlocked: secondClickBlocked || requestCountDelta <= 1,
     requestCountDelta,
     apiSuccess,
     apiCode,
     apiMessage,
-    popupVisible,
+    popupVisible: popup.popupVisible,
+    popupRewardSummary: popup.popupRewardSummary,
+    popupRewardCount: popup.popupRewardCount,
+    failurePromptVisible,
     countBefore,
     countAfter,
   };
@@ -567,18 +712,26 @@ async function performSingleDraw(page, network) {
 
 async function openRewardRecord(page) {
   if (await page.getByText("恭喜你").first().isVisible().catch(() => false)) {
-    await page.keyboard.press("Escape").catch(() => {});
+    await closeRewardPopup(page);
     await page.waitForTimeout(1500);
   }
   const trigger = page.getByText("我的奖品", { exact: true }).last();
   const opened = await trigger.isVisible().catch(() => false);
-  if (opened) {
-    await waitBeforeClick(page);
-    await trigger.click({ force: true, timeout: 5000 }).catch(() => {});
+  let bodyTextAfterClick = "";
+  let dialogTitleVisible = false;
+  let dialogVisible = false;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    if (opened) {
+      await waitBeforeClick(page);
+      await trigger.click({ force: true, timeout: 5000 }).catch(() => {});
+    }
+    await page.waitForTimeout(3000);
+    bodyTextAfterClick = await page.locator("body").innerText().catch(() => "");
+    dialogTitleVisible = await page.getByText("奖励记录").first().isVisible({ timeout: 3000 }).catch(() => false);
+    dialogVisible = Boolean(dialogTitleVisible || ["活动名称", "奖励金额", "获奖时间", "备注"].some(item => bodyTextAfterClick.includes(item)));
+    if (dialogVisible) break;
   }
-  await page.waitForTimeout(3000);
-  const dialogVisible = await page.getByText("奖励记录").first().isVisible({ timeout: 15000 }).catch(() => false);
-  let bodyText = dialogVisible ? await page.locator("body").innerText().catch(() => "") : "";
+  let bodyText = dialogVisible ? bodyTextAfterClick : "";
   let lines = bodyText
     .split("\n")
     .map(item => item.trim())
@@ -590,9 +743,16 @@ async function openRewardRecord(page) {
         .split("\n")
         .map(item => item.trim())
         .filter(Boolean);
-      rewardHit = lines.find(item => (
+      const headerIndex = Math.max(
+        lines.lastIndexOf("备注"),
+        lines.lastIndexOf("获奖时间"),
+        lines.lastIndexOf("奖励金额"),
+        lines.lastIndexOf("活动名称"),
+      );
+      const scopedLines = headerIndex >= 0 ? lines.slice(headerIndex + 1) : lines;
+      rewardHit = scopedLines.find(item => (
         /抽中|USDT|BTC|ETH|赠金|体验金|积分|资格|实物/.test(item)
-        && !/买币|市场|合约交易|现货交易|理财|更多|分享|活动日历/.test(item)
+        && !/买币|市场|合约交易|现货交易|理财|更多|分享|活动日历|恭喜\d+\*+/.test(item)
       )) || "";
       if (rewardHit) break;
       await page.waitForTimeout(1200);
@@ -600,7 +760,14 @@ async function openRewardRecord(page) {
     }
   }
   const fieldHeaders = ["活动名称", "奖励金额", "获奖时间", "备注"].filter(item => bodyText.includes(item));
-  const dataLines = lines.filter(item => ![
+  const headerIndex = Math.max(
+    lines.lastIndexOf("备注"),
+    lines.lastIndexOf("获奖时间"),
+    lines.lastIndexOf("奖励金额"),
+    lines.lastIndexOf("活动名称"),
+  );
+  const recordLines = headerIndex >= 0 ? lines.slice(headerIndex + 1) : lines;
+  const dataLines = recordLines.filter(item => ![
     "奖励记录",
     "活动名称",
     "奖励金额",
@@ -621,12 +788,13 @@ async function openRewardRecord(page) {
     hasRewardRow,
     hasReadableRewardValue,
     latestRewardText,
+    allRewardText: dataLines.join(" "),
     dataLineCount: dataLines.length,
   };
 }
 
-function readOptionalJsonFile(filePath) {
-  const resolved = resolveArtifactPath(repoRoot, filePath);
+function readOptionalJsonFile(filePath, repoRootPath = process.cwd()) {
+  const resolved = resolveArtifactPath(repoRootPath, filePath);
   if (!resolved || resolved.includes("<") || resolved.includes(">")) return null;
   try {
     return JSON.parse(fs.readFileSync(resolved, "utf8"));
@@ -735,6 +903,8 @@ export {
   waitForActivityStartWithSession,
   ensureSignup,
   performSingleDraw,
+  performFiveDraw,
+  closeRewardPopup,
   openRewardRecord,
   readOptionalJsonFile,
   extractPopupPrizeTextFromPayload,

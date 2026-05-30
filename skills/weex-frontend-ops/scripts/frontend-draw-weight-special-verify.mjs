@@ -6,6 +6,7 @@ import { buildFrontendAuthSession } from "./lib/login-tool-adapter.mjs";
 import { openLoginStatePage } from "./business/auth-pages.mjs";
 import {
   ensureSignup,
+  openRewardRecord,
   parseCount,
   readPopupPrizeText,
   stabilizeInitialDrawPageState,
@@ -308,10 +309,13 @@ async function main() {
     const targetPrizeOk = expectedPrizeHit || expectedTextHit;
     const allApiSuccess = draws.every(item => item.luckDraw.code === "00000");
     const allPopupVisible = draws.every(item => item.popupVisible);
+    await page.waitForTimeout(5000);
+    const rewardRecord = await openRewardRecord(page);
     const finalState = await stabilizeInitialDrawPageState(page, args.activityAlias);
 
     printJson({
       ok: Boolean(allApiSuccess && allPopupVisible && targetPrizeOk),
+      activityAlias: args.activityAlias,
       activityUrl,
       viewport: "desktop 1440x1000",
       account: { alias: account.alias, username: account.username, uid: auth.tokens.userId || "" },
@@ -328,6 +332,7 @@ async function main() {
         targetDrawContainsExpectedPrizeId: expectedPrizeHit,
         targetDrawContainsExpectedPrizeText: expectedTextHit,
       },
+      rewardRecord,
       draws,
       failedResponses: failedResponses.slice(0, 20),
     });

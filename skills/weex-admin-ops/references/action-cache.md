@@ -31,6 +31,8 @@ The action cache is the first execution layer for workflows that have already be
 | `lottery_admin_main_regression` | `scripts/lottery-admin-main-regression.mjs` | candidate | Run the lottery admin regression orchestration. Headless mode uses API fast paths for backend fixture creation, activity status flow, and row-action equivalents; visible mode keeps real UI writes. |
 | `create_lottery_activity_draft` | `scripts/create-lottery-activity-draft.mjs` | candidate | Create a draft `活动列表 / 转盘抽奖` activity through the verified real-UI workflow, with configurable time and lottery style. |
 | `online_lottery_activity` | `scripts/online-lottery-activity.mjs` | candidate | Put a draft `活动列表 / 转盘抽奖` activity online through the verified list-row confirmation flow. |
+| `configure_race_activity` | `scripts/race-config-wizard-api.mjs` | candidate | Race activity(RACE_COMPETITION) wizard (headless_api): supports minimal/full/create/online/offline/delete presets after high-risk confirmations. |
+| `configure_race_activity_modules` | `scripts/race-activity-module-config-fast-api.mjs` | candidate | Race activity module config (headless_api): snapshot current config and apply module-level updates via `PUT /prod-api/activity/config` after confirmation. |
 
 ## Natural-Language Matching
 
@@ -119,6 +121,20 @@ For lottery activity online:
 - pass `--activity-alias <showUrl>` or `--activity-id <id>`; alias is recommended because the row action is driven from the list result;
 - the script searches the target row, clicks row action `上线`, fills the verification input in the confirmation dialog, clicks `确定`, and verifies `POST /prod-api/activity/lottery/online` business `code=200` plus final `status=ONLINE`;
 - natural language such as `把活动ID 9107 的转盘抽奖活动上线` or `上线活动别名 jonathan-test-20260514051431` should match this action.
+
+For race competition activity:
+- use `--action configure_race_activity` for explicit execution;
+- default flow is `--wizard`, returning supported modules and a one-shot spec template;
+- supported presets are `minimal_create_verify_delete`、`full_create_verify_delete`、`create_draft`、`online`、`offline`、`delete`;
+- verified create template is `8352 / jyjss`;
+- `9209 / hahha` is not suitable as a create template because real snapshot shows `requirementsCount=0` and `stageCount=0`;
+- natural language such as `创建一个交易竞速赛最小配置活动`、`跑交易竞速赛最全配置回归并删除` should match this action.
+
+For race competition activity module config:
+- use `--action configure_race_activity_modules` for explicit execution;
+- no-spec mode returns `--wizard` + `snapshot` guidance;
+- `update` requires `--spec-file` or `--spec-json`, plus `confirm=true` and `confirmations.moduleWrites=true`;
+- supported modules are `base / userApply / speedConfig / prizePool / leaderboard / pageSetting / i18n / faq`.
 
 For lottery admin main regression orchestration:
 - use `--action lottery_admin_main_regression` for explicit execution;

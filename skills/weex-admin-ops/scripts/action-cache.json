@@ -201,6 +201,34 @@
       "fallback": "Use the documented lottery real-UI workflow when visible mode is required."
     },
     {
+      "id": "configure_race_activity",
+      "status": "candidate",
+      "script": "scripts/race-config-wizard-api.mjs",
+      "description": "Race activity(RACE_COMPETITION) config wizard (headless_api): prints supported modules/fields + one-shot JSON reply template; execution supports minimal/full/create/online/offline/delete presets after high-risk confirmations.",
+      "domains": ["活动列表", "交易竞速赛"],
+      "intentKeywords": ["配置", "创建", "新增", "最小", "最全", "上线", "下线", "删除"],
+      "objectKeywords": ["交易竞速赛", "RACE_COMPETITION", "活动列表"],
+      "defaultMode": "invisible",
+      "verifiedModes": ["dry_run"],
+      "lastVerifiedAt": "2026-05-29",
+      "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
+      "fallback": "Run API scripts directly: race-activity-fast-api.mjs and race-activity-module-config-fast-api.mjs."
+    },
+    {
+      "id": "configure_race_activity_modules",
+      "status": "candidate",
+      "script": "scripts/race-activity-module-config-fast-api.mjs",
+      "description": "Race activity module config (headless_api): snapshot current config, output one-shot module spec template, then apply module-level updates via PUT /prod-api/activity/config after confirmation.",
+      "domains": ["活动列表", "交易竞速赛"],
+      "intentKeywords": ["配置", "修改", "更新", "单独配置", "模块配置"],
+      "objectKeywords": ["交易竞速赛", "RACE_COMPETITION", "活动"],
+      "defaultMode": "invisible",
+      "verifiedModes": ["dry_run"],
+      "lastVerifiedAt": "2026-05-29",
+      "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
+      "fallback": "Use the documented race-activity headless flow or visible UI workflow when required."
+    },
+    {
       "id": "configure_newbie_activity",
       "status": "candidate",
       "script": "scripts/newbie-config-wizard-api.mjs",

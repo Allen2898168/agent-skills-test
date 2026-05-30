@@ -113,6 +113,7 @@
   - operations：`skills/weex-admin-ops/references/operations/activity-management-agent-tracepro.md`
 
 - 2026-05-28 及更早交接记录已归档：`docs/session-handoffs/2026-05-26-to-2026-05-28-and-earlier.md`
+- 2026-05-11 至 2026-05-22 抽奖、FIN、前端运行时与历史链路摘要已归档：`docs/session-handoffs/2026-05-11-to-22-lottery-and-runtime.md`
 
 ## 当前 Git 状态
 

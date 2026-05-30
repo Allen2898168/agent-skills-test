@@ -9,6 +9,7 @@ import {
   extractCompetitionActivityModuleNameMap,
   extractLotteryRaffleStyles,
   extractNewbieActivityModuleNameMap,
+  extractSpeedRaceModuleNameMap,
   resolveOptionValue,
 } from "../lib/activity-web-mappings.mjs";
 
@@ -61,6 +62,18 @@ test("extractCompetitionActivityModuleNameMap reads core competition module head
   assert.equal(moduleNameMap.teamAwardSetting, "队内奖励设置");
   assert.equal(moduleNameMap.virtualRanking, "交易排行榜信息");
   assert.equal(moduleNameMap.team, "团队管理");
+  assert.equal(moduleNameMap.pageSetting, "活动页面设置");
+  assert.equal(moduleNameMap.i18n, "多语言");
+  assert.equal(moduleNameMap.faq, "常见问题");
+});
+
+test("extractSpeedRaceModuleNameMap reads speed-race module headers", () => {
+  const activityWebDir = ensureActivityWebDir(repoRoot);
+  const { moduleNameMap } = extractSpeedRaceModuleNameMap(activityWebDir);
+  assert.equal(moduleNameMap.base, "交易竞速赛基本信息");
+  assert.equal(moduleNameMap.speedConfig, "竞速配置");
+  assert.equal(moduleNameMap.prizePool, "奖池配置");
+  assert.equal(moduleNameMap.leaderboard, "排行榜配置");
   assert.equal(moduleNameMap.pageSetting, "活动页面设置");
   assert.equal(moduleNameMap.i18n, "多语言");
   assert.equal(moduleNameMap.faq, "常见问题");

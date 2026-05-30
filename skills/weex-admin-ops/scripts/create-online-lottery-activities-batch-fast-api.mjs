@@ -2,6 +2,10 @@
 import { parseFlags, printJson } from "./lib/cli.mjs";
 import { adminConfig, assertAdminLoginConfig, loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
 import { createAdminApiSession, firstRow, stripCloneFields } from "./lib/admin-api.mjs";
+import {
+  applyDeterministicCumulativePrizeWeight,
+  applySinglePrizeStockWeights,
+} from "./lib/lottery-stock-config.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
 
@@ -161,7 +165,15 @@ async function online(api, config, activityId) {
   return { ok: false, tried: candidates.map(v => v.name), chosen: "", last: last ? { ...last, body: scrubOnlinePayload(last.body) } : null };
 }
 
-async function createAndOnlineFromTemplate(api, config, { templateAlias, aliasPrefix, titlePrefix, startOffsetSeconds, endDays }) {
+async function createAndOnlineFromTemplate(api, config, {
+  templateAlias,
+  aliasPrefix,
+  titlePrefix,
+  startOffsetSeconds,
+  endDays,
+  singlePrizeStock = false,
+  deterministicCumulativeWeight = false,
+}) {
   const startedAt = Date.now();
   const stamp = String(Date.now()).slice(-8);
   const nextAlias = buildShortAlias(aliasPrefix, stamp, 10);
@@ -183,6 +195,8 @@ async function createAndOnlineFromTemplate(api, config, { templateAlias, aliasPr
     if ("startTime" in createPayload.periods[0]) createPayload.periods[0].startTime = window.startText;
     if ("endTime" in createPayload.periods[0]) createPayload.periods[0].endTime = window.endText;
   }
+  if (deterministicCumulativeWeight) applyDeterministicCumulativePrizeWeight(createPayload, { prizeId: 5, cumulativeCount: 5, type: 1 });
+  if (singlePrizeStock) applySinglePrizeStockWeights(createPayload, { prizeId: 1 });
 
   await createByPayload(api, createPayload);
   const createdRow = await listByAlias(api, nextAlias);
@@ -259,6 +273,7 @@ async function run() {
         titlePrefix: "W",
         startOffsetSeconds,
         endDays,
+        deterministicCumulativeWeight: true,
       });
     } else {
       results.weight = null;
@@ -271,6 +286,7 @@ async function run() {
         titlePrefix: "S",
         startOffsetSeconds,
         endDays,
+        singlePrizeStock: true,
       });
     } else {
       results.stock = null;
@@ -303,4 +319,3 @@ try {
   printJson({ ok: false, mode: "headless_api", error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-

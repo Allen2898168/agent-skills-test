@@ -1,66 +1,120 @@
-# 活动列表 / 交易竞速赛（RACE_COMPETITION）：API 自动化全配置（含依赖项）
+# 交易竞速赛活动无头链路
 
-本页目标：在后管 skill 中提供“交易竞速赛”的 **基于 API 的自然语言全配置**（含依赖项显式全配置），并具备：
-- 最小验证（min verify）
-- 最全验证（full verify）
-- 清理（cleanup）
-- 对话/模板输出以“前端中文模块/字段映射”为准
+## 适用范围
 
-## 中文映射（回答用户时优先使用）
+- 页面：`活动列表 / 交易竞速赛`
+- 活动类型：`RACE_COMPETITION`
+- 执行模式：`headless_api`
 
-- 模块 key -> 前端中文名：`skills/weex-admin-ops/references/mappings/race-activity-modules.md`
-- 字段 key -> 前端中文名（精选）：`skills/weex-admin-ops/references/mappings/race-activity-fields.md`
+## 核心接口
 
-## 自然语言入口（action-cache）
+- 列表：`GET /prod-api/activity/config/list?type=RACE_COMPETITION`
+- 详情：`GET /prod-api/activity/config/{activityId}`
+- 新增：`POST /prod-api/activity/config`
+- 修改：`PUT /prod-api/activity/config`
+- 上线：`POST /prod-api/activity/competition/online`
+- 下线：`POST /prod-api/activity/competition/offline`
+- 删除：`POST /prod-api/activity/competition/delete`
 
-只做 dry-run 预览（推荐）：
-- `node skills/weex-admin-ops/scripts/run-cached-action.mjs --query "配置交易竞速赛全配置" --dry-run`
-- `node skills/weex-admin-ops/scripts/run-cached-action.mjs --query "交易竞速赛 模块配置" --dry-run`
+## 源码确认模块
 
-对应 action id：
-- `configure_race_competition_activity`
-- `configure_race_competition_activity_modules`
+- `交易竞速赛基本信息`
+- `用户报名`
+- `竞速配置`
+- `奖池配置`
+- `排行榜配置`
+- `活动页面设置`
+- `多语言`
+- `常见问题`
 
-## 全配（依赖项显式创建）+ min verify + cleanup
+来源：
+- `activity-ui/src/views/activity/speedRace/edit.vue`
+- `activity-ui/src/views/activity/speedRace/components/*.vue`
+- `activity-ui/src/views/activity/competition/components/{userApply,pageSetting,langContentSetting}.vue`
+- `activity-ui/src/views/activity/lottery/components/FAQForm.vue`
 
-用途：快速跑通“依赖项显式创建 + 草稿回查校验 + 清理”，避免污染 staging。
+## 已沉淀脚本
 
-执行（写操作，必须显式确认）：
-- `node skills/weex-admin-ops/scripts/create-race-full-config-explicit-deps-fast-api.mjs --confirm-create --verify-level min --cleanup --confirm-cleanup --required-volume 1 --start-offset-seconds 120 --end-days 7`
+- `skills/weex-admin-ops/scripts/race-activity-fast-api.mjs`
+- `skills/weex-admin-ops/scripts/race-activity-module-config-fast-api.mjs`
+- `skills/weex-admin-ops/scripts/race-config-wizard-api.mjs`
 
-该脚本会显式创建并绑定：
-- `用户报名模板(applyConfigId)`：新建 1 个全平台报名模板
-- `活动任务(taskId)`：新建 1 个竞速赛交易量任务（RACE_COMPETITION）
-- `奖品(prizeId)`：新建 1 个赠金奖品，并尝试绑定到 `raceFixBonusPoolParams[0].prizeId`
+## 已验证模板
 
-验证依据：
-- 创建后会执行 `race-activity-fast-api.mjs --action draft-checks`
-- 输出会包含 `created.*`、`verifyHints.*`、以及 `cleanedUp`/`cleanup` 结果
+- 推荐模板：`8352 / jyjss`
+  - 真实回查：`requirementsCount=1`、`stageCount=6`、`i18nCount=5`、`questionsCount=5`
+  - 适合作为“最小/最全配置”回归模板
 
-## 全配（依赖项显式创建）+ full verify + cleanup
+- 不建议用作模板：`9209 / hahha`
+  - 真实回查：`requirementsCount=0`、`stageCount=0`
+  - 只适合只读快照，不适合创建回归活动
 
-用途：在 min verify 基础上，增加上线/下线写操作验证。
+## 命令
 
-执行（写操作，必须显式确认）：
-- `node skills/weex-admin-ops/scripts/create-race-full-config-explicit-deps-fast-api.mjs --confirm-create --verify-level full --confirm-full-verify --cleanup --confirm-cleanup --required-volume 1 --start-offset-seconds 120 --end-days 7`
+只读快照：
 
-验证依据：
-- `draft-checks` + `online` + `offline` 均通过才算 full verify
+```bash
+node skills/weex-admin-ops/scripts/race-activity-fast-api.mjs --action snapshot --activity-id 8352
+```
 
-## 模块级自由配置（按模块/字段更新）
+模板结构：
 
-用途：对既有活动进行“按模块修改”，以中文映射指导填参。
+```bash
+node skills/weex-admin-ops/scripts/race-activity-fast-api.mjs --action inspect-template --activity-id 8352
+```
 
-1) snapshot（只读，输出一次性 spec 模板 + 当前关键模块字段）：
-- `node skills/weex-admin-ops/scripts/race-activity-module-config-fast-api.mjs --action snapshot --activity-alias <alias>`
+创建草稿：
 
-2) update（写操作，必须在 spec 中 `confirm=true` 且 `confirmations.moduleWrites=true`，并传 `--confirm`）：
-- `node skills/weex-admin-ops/scripts/race-activity-module-config-fast-api.mjs --action update --activity-alias <alias> --spec-file ./tmp/race-modules.json --confirm`
+```bash
+node skills/weex-admin-ops/scripts/race-activity-fast-api.mjs --action create-draft --template-id 8352 --title-prefix 竞速回归 --alias-prefix sr
+```
 
-补充：
-- 未覆盖到 modules 的顶层字段，可临时用 `rawTopLevel` 兜底；跑通后再把字段补进 `race-activity-fields.md` + modules 写入逻辑。
+模块更新：
 
-## 重要说明
+```bash
+node skills/weex-admin-ops/scripts/race-activity-module-config-fast-api.mjs --action update --activity-id <activityId> --spec-file /tmp/race-spec.json --confirm
+```
 
-- 竞速赛列表页“上线/下线/删除”当前复用交易大赛接口：`/prod-api/activity/competition/online|offline|delete`；脚本也保持一致。
+总入口最小配置：
 
+```bash
+node skills/weex-admin-ops/scripts/race-config-wizard-api.mjs --spec-json '{"confirm":true,"preset":"minimal_create_verify_delete","confirmations":{"templateClone":true,"moduleWrites":true,"onlineOfflineDeleteWrites":true},"templateId":"8352","titlePrefix":"竞速总验","aliasPrefix":"sw","cleanup":true}' --confirm
+```
+
+总入口最全配置：
+
+```bash
+node skills/weex-admin-ops/scripts/race-config-wizard-api.mjs --spec-json '{"confirm":true,"preset":"full_create_verify_delete","confirmations":{"templateClone":true,"moduleWrites":true,"onlineOfflineDeleteWrites":true},"templateId":"8352","titlePrefix":"竞速全验","aliasPrefix":"sx","cleanup":true}' --confirm
+```
+
+## 最小配置口径
+
+- `speedConfig.rankType=TRADING`
+- `speedConfig.currencySupportType=ALL_SUPPORTED`
+- `leaderboard.isShow=0`
+- `i18n` 仅 `zh_CN`
+- `faq` 仅 `cn`
+
+## 最全配置口径
+
+- `speedConfig.rankType=TRADING`
+- `speedConfig.currencySupportType=PARTIALLY_SUPPORT`
+- `speedConfig.productCodeList=["BTC-USDT","ETH-USDT"]`
+- `prizePool.isParticipantsNum=1`
+- `prizePool.isTotalPricePoolAmount=1`
+- `prizePool.totalPricePoolAmount=88.88`
+- `leaderboard.isShow=1`
+- `leaderboard.minRank=1`
+- `leaderboard.maxRank=10`
+- `i18n` 为 `zh_CN + en_US`
+- `faq` 为 `cn + en`
+
+## 本轮真实验证
+
+- 2026-05-29
+- 原子链路：
+  - `9698 / sr51628774`：创建 -> 最小更新 -> 回查 -> 删除
+  - `9699 / sr51692669`：创建 -> 最全更新 -> 回查 -> 删除
+- 总入口：
+  - `9701 / sw51783658`：`minimal_create_verify_delete` 成功并自动删除
+  - `9702 / sx51798404`：`full_create_verify_delete` 成功并自动删除

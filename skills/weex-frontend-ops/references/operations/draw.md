@@ -205,3 +205,7 @@ Use when the draw activity contract trading task is counted only after signup.
 ## Draw Task Completion By Kafka Callback
 
 Internal STG Kafka callback validation is maintained in `draw-kafka.md`.
+
+## Remaining Draw Frontend Regression Phases
+
+抽奖样式、异常容错、奖励记录补充分支和响应式专项维护在 `draw-ui-extended.md`。

@@ -4,46 +4,14 @@ import path from "node:path";
 import { parseFlags, printJson } from "./lib/cli.mjs";
 import { adminConfig, assertAdminLoginConfig, loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
 import { createAdminApiSession, firstRow } from "./lib/admin-api.mjs";
+import { ensureActivityWebDir, extractSpeedRaceModuleNameMap } from "./lib/activity-web-mappings.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
 
 function usage() {
   return `Usage:
-  # snapshot current config (read-only)
   node skills/weex-admin-ops/scripts/race-activity-module-config-fast-api.mjs --action snapshot --activity-alias <alias>
-  node skills/weex-admin-ops/scripts/race-activity-module-config-fast-api.mjs --action snapshot --activity-id <id>
-
-  # update modules by spec (writes)
   node skills/weex-admin-ops/scripts/race-activity-module-config-fast-api.mjs --action update --activity-alias <alias> --spec-file ./tmp/race-modules.json --confirm
-
-Spec:
-  {
-    "confirm": true,
-    "confirmations": { "moduleWrites": true },
-    "modules": {
-      "base": { "title": "...", "showUrl": "...", "startTime": "YYYY-MM-DD HH:mm:ss", "endTime": "..." },
-      "userApply": { "applyConfigId": 2668 },
-      "speedConfig": { "rankType": "TRADING", "requirements": [ ... ] },
-      "prizePoolConfig": { "bonusPoolType": "FIXED", "raceParams": { ... }, "raceFixBonusPoolParams": [ ... ] },
-      "leaderboardConfig": { "raceRankingParams": { ... } },
-      "pageSetting": { "introTitle": "...", "introContent": "...", "rules": [ ... ] },
-      "i18n": { "activityConfigI18n": [ ... ] },
-      "faq": { "questions": [ ... ] },
-      "calendar": { "syncCalendarFlag": 0, "syncCalendarDto": { ... } }
-    },
-    "rawTopLevel": { "anyOtherKey": "value" }
-  }
-
-Options:
-  --action <snapshot|update>
-  --activity-alias <showUrl>
-  --activity-id <id>
-  --wizard
-  --spec-file <path>
-  --spec-json <json>
-  --confirm
-  --dry-run
-  --help
 `;
 }
 
@@ -77,38 +45,6 @@ function requireConfirmations(spec, args) {
   if (confirmations.moduleWrites !== true) throw new Error("高风险确认未完成：confirmations.moduleWrites 需要为 true。");
 }
 
-function parseMarkdownTableToMap(md, keyColumnName, valueColumnName) {
-  const lines = String(md || "").split(/\r?\n/);
-  const headerIndex = lines.findIndex(line => line.includes(`| ${keyColumnName} |`) && line.includes(`| ${valueColumnName} |`));
-  if (headerIndex < 0) return {};
-  const out = {};
-  for (let i = headerIndex + 2; i < lines.length; i += 1) {
-    const line = lines[i];
-    if (!line.startsWith("|")) break;
-    const parts = line.split("|").map(v => v.trim()).filter(Boolean);
-    if (parts.length < 2) continue;
-    const key = parts[0].replace(/`/g, "");
-    const value = parts[1];
-    if (key && value) out[key] = value;
-  }
-  return out;
-}
-
-function loadMarkdownMap(refRelPath, keyColumnName, valueColumnName) {
-  const refPath = path.join(repoRoot, refRelPath);
-  if (!fs.existsSync(refPath)) return { source: "missing", map: {} };
-  const md = fs.readFileSync(refPath, "utf8");
-  return { source: refRelPath, map: parseMarkdownTableToMap(md, keyColumnName, valueColumnName) };
-}
-
-function loadModuleNameMap() {
-  return loadMarkdownMap("skills/weex-admin-ops/references/mappings/race-activity-modules.md", "模块 key", "前端中文名");
-}
-
-function loadFieldNameMap() {
-  return loadMarkdownMap("skills/weex-admin-ops/references/mappings/race-activity-fields.md", "字段 key", "前端中文名");
-}
-
 async function findByAlias(api, alias) {
   const list = await api.get(`/prod-api/activity/config/list?pageNum=1&pageSize=10&type=RACE_COMPETITION&showUrl=${encodeURIComponent(alias)}`);
   return firstRow(list);
@@ -119,7 +55,7 @@ async function resolveTarget(api, args) {
   if (!args.activityAlias) throw new Error("--activity-alias or --activity-id is required");
   const row = await findByAlias(api, args.activityAlias);
   const id = row?.activityId || row?.id;
-  if (!id) throw new Error(`Race competition activity not found by alias: ${args.activityAlias}`);
+  if (!id) throw new Error(`Race activity not found by alias: ${args.activityAlias}`);
   return { id: String(id), alias: String(args.activityAlias) };
 }
 
@@ -130,203 +66,151 @@ async function detail(api, id) {
 }
 
 function summarize(item) {
-  const d = item || {};
+  const detail = item || {};
   return {
-    activityId: String(d.activityId || d.id || ""),
-    showUrl: String(d.showUrl || ""),
-    title: String(d.title || ""),
-    status: String(d.status || ""),
-    stage: String(d.stage || ""),
-    applyConfigId: d.applyConfigId ?? null,
-    requirementsCount: Array.isArray(d.requirements) ? d.requirements.length : 0,
-    raceFixBonusPoolParamsCount: Array.isArray(d.raceFixBonusPoolParams) ? d.raceFixBonusPoolParams.length : 0,
-    i18nCount: Array.isArray(d.activityConfigI18n) ? d.activityConfigI18n.length : 0,
-    questionsCount: Array.isArray(d.questions) ? d.questions.length : 0,
+    activityId: String(detail.activityId || detail.id || ""),
+    showUrl: String(detail.showUrl || ""),
+    type: String(detail.type || ""),
+    status: String(detail.status || ""),
+    guideTemplateId: detail.guideTemplateId ?? null,
+    applyConfigId: detail.applyConfigId ?? detail.applyConfig?.id ?? null,
+    rankType: detail.rankType ?? detail.raceParams?.rankType ?? "",
+    requirementsCount: Array.isArray(detail.requirements) ? detail.requirements.length : 0,
+    stageCount: Array.isArray(detail.raceFixBonusPoolParams) ? detail.raceFixBonusPoolParams.length : 0,
+    i18nCount: Array.isArray(detail.activityConfigI18n) ? detail.activityConfigI18n.length : 0,
+    questionsCount: Array.isArray(detail.questions) ? detail.questions.length : 0,
   };
 }
 
-function assignIfPresent(target, source, key) {
-  if (!source || typeof source !== "object") return;
-  if (key in source) target[key] = source[key];
+function normalizeShowCountdown(value) {
+  if (value === true || value === false) return value;
+  if (String(value).toUpperCase() === "MANUAL") return true;
+  if (String(value).toUpperCase() === "AUTO") return false;
+  return value;
 }
 
-function applyModulesToDetail(current, spec) {
+function applyModulesToDetail(current, modules) {
   const patched = JSON.parse(JSON.stringify(current || {}));
-  const modules = (spec && typeof spec === "object" ? spec.modules : null) || {};
+  const m = modules || {};
 
-  if (modules.base && typeof modules.base === "object") {
+  if (m.base && typeof m.base === "object") {
     for (const key of [
       "configType",
       "activityOwner",
       "channelCategory",
       "guideTemplateId",
+      "showUrl",
       "periods",
-      "title",
-      "subTitle",
       "startTime",
       "endTime",
-      "showUrl",
-      "applicationMode",
-      "showCountdown",
+      "tradingType",
       "showActivityCalendar",
-      "multiLanguageTemplateId",
       "isPreApply",
-      "preApplyConfigId",
       "preApplyStartTime",
       "preApplyEndTime",
-      "requirements",
-      "rankType",
     ]) {
-      assignIfPresent(patched, modules.base, key);
+      if (key in m.base) patched[key] = m.base[key];
     }
-    if ("preApplyConfigId" in modules.base) patched.preApplyConfig = { id: modules.base.preApplyConfigId };
-  }
-
-  if (modules.userApply && typeof modules.userApply === "object") {
-    if ("applyConfigId" in modules.userApply) patched.applyConfigId = modules.userApply.applyConfigId;
-    if ("initBonusValue" in modules.userApply) patched.initBonusValue = modules.userApply.initBonusValue;
-  }
-
-  if (modules.speedConfig && typeof modules.speedConfig === "object") {
-    if ("rankType" in modules.speedConfig) {
-      patched.rankType = modules.speedConfig.rankType;
-      patched.raceParams = { ...(patched.raceParams || {}), rankType: modules.speedConfig.rankType };
-    }
-    if (Array.isArray(modules.speedConfig.requirements)) patched.requirements = modules.speedConfig.requirements;
-  }
-
-  if (modules.prizePoolConfig && typeof modules.prizePoolConfig === "object") {
-    if ("bonusPoolType" in modules.prizePoolConfig) patched.bonusPoolType = modules.prizePoolConfig.bonusPoolType;
-    if (modules.prizePoolConfig.raceParams && typeof modules.prizePoolConfig.raceParams === "object") {
-      patched.raceParams = { ...(patched.raceParams || {}), ...modules.prizePoolConfig.raceParams };
-    }
-    if (Array.isArray(modules.prizePoolConfig.raceFixBonusPoolParams)) patched.raceFixBonusPoolParams = modules.prizePoolConfig.raceFixBonusPoolParams;
-  }
-
-  if (modules.leaderboardConfig && typeof modules.leaderboardConfig === "object") {
-    if (modules.leaderboardConfig.raceRankingParams && typeof modules.leaderboardConfig.raceRankingParams === "object") {
-      patched.raceRankingParams = modules.leaderboardConfig.raceRankingParams;
+    if ("showCountdown" in m.base) patched.showCountdown = normalizeShowCountdown(m.base.showCountdown);
+    if ("preApplyConfigId" in m.base) {
+      patched.preApplyConfigId = m.base.preApplyConfigId;
+      patched.preApplyConfig = m.base.preApplyConfigId ? { id: Number(m.base.preApplyConfigId) } : null;
     }
   }
 
-  if (modules.pageSetting && typeof modules.pageSetting === "object") {
-    for (const key of [
-      "introTitle",
-      "introContent",
-      "projectName",
-      "projectRule",
-      "rules",
-      "requirements",
-      "ruleTitle",
-      "landingPageType",
-      "showIntroFlag",
-      "showResource",
-      "resourceConfig",
-      "resourceModel",
-      "showResourceModel",
-      "webThumbnailUrl",
-      "webAnimationFlag",
-      "webMp4Files",
-      "webLottieFiles",
-      "appAnimationFlag",
-      "appMp4Files",
-      "appLottieFiles",
-      "daytimeModeWebBannerUrl",
-      "webBannerUrl",
-      "appBannerUrl",
-      "webShareUrl",
-      "appShareUrl",
-      "shareContent",
-      "agentShareContent",
-      "ogImageUrl",
-    ]) {
-      assignIfPresent(patched, modules.pageSetting, key);
+  if (m.userApply && typeof m.userApply === "object") {
+    if ("applyConfigId" in m.userApply) {
+      patched.applyConfigId = m.userApply.applyConfigId;
+      patched.applyConfig = m.userApply.applyConfigId ? { id: Number(m.userApply.applyConfigId) } : null;
+    }
+    if ("initBonusValue" in m.userApply) patched.initBonusValue = m.userApply.initBonusValue;
+  }
+
+  if (m.speedConfig && typeof m.speedConfig === "object") {
+    const currencySupportType = m.speedConfig.currencySupportType || "ALL_SUPPORTED";
+    const productCodeList = Array.isArray(m.speedConfig.productCodeList) ? m.speedConfig.productCodeList : [];
+    patched.requirements = [{
+      type: "BY_PRODUCT_CODE",
+      currencySupportType,
+      productCodeList,
+    }];
+    if ("rankType" in m.speedConfig) patched.rankType = m.speedConfig.rankType;
+    if (!patched.raceParams || typeof patched.raceParams !== "object") patched.raceParams = {};
+    if ("rankType" in m.speedConfig) patched.raceParams.rankType = m.speedConfig.rankType;
+    if ("tradingType" in m.speedConfig) patched.tradingType = m.speedConfig.tradingType;
+  }
+
+  if (m.prizePool && typeof m.prizePool === "object") {
+    const poolType = m.prizePool.poolType || m.prizePool.bonusPoolType || patched.bonusPoolType || "FIXED";
+    patched.bonusPoolType = poolType;
+    const raceParams = { ...(patched.raceParams || {}) };
+    for (const key of ["isParticipantsNum", "isTotalPricePoolAmount", "totalPricePoolAmount"]) {
+      if (key in m.prizePool) raceParams[key] = m.prizePool[key];
+    }
+    patched.raceParams = raceParams;
+    if (Array.isArray(m.prizePool.stageList)) {
+      patched.raceFixBonusPoolParams = m.prizePool.stageList.map((row, index) => ({
+        stageId: row.stageId ?? index + 1,
+        taskId: row.taskId,
+        dynamicsPicture: row.dynamicsPicture || undefined,
+        picture: row.picture || undefined,
+        isRewardNum: row.isRewardNum ?? 0,
+        rewardNum: row.isRewardNum === 1 ? row.rewardNum : undefined,
+        prizeList: Array.isArray(row.prizeList) ? row.prizeList : undefined,
+      }));
     }
   }
 
-  if (modules.i18n && typeof modules.i18n === "object") {
-    if (Array.isArray(modules.i18n.activityConfigI18n)) patched.activityConfigI18n = modules.i18n.activityConfigI18n;
+  if (m.leaderboard && typeof m.leaderboard === "object") {
+    patched.raceRankingParams = {
+      ...(patched.raceRankingParams || {}),
+      ...m.leaderboard,
+    };
   }
 
-  if (modules.faq && typeof modules.faq === "object") {
-    if (Array.isArray(modules.faq.questions)) patched.questions = modules.faq.questions;
-    if ("questionsI18n" in modules.faq) patched.questionsI18n = modules.faq.questionsI18n;
+  if (m.pageSetting && typeof m.pageSetting === "object") {
+    if ("ogImageUrl" in m.pageSetting) patched.ogImageUrl = m.pageSetting.ogImageUrl;
   }
 
-  if (modules.calendar && typeof modules.calendar === "object") {
-    for (const key of ["syncCalendarFlag", "syncCalendarDto", "imageUrlI18n", "iconUrlI18n"]) {
-      assignIfPresent(patched, modules.calendar, key);
-    }
+  if (m.i18n && typeof m.i18n === "object" && Array.isArray(m.i18n.activityConfigI18n)) {
+    patched.activityConfigI18n = m.i18n.activityConfigI18n;
   }
 
-  if (spec && typeof spec === "object" && spec.rawTopLevel && typeof spec.rawTopLevel === "object") {
-    for (const [key, value] of Object.entries(spec.rawTopLevel)) {
-      patched[key] = value;
-    }
+  if (m.faq && typeof m.faq === "object" && Array.isArray(m.faq.questions)) {
+    patched.questions = m.faq.questions;
   }
 
   return patched;
 }
 
-function buildWizardTemplate() {
+export function buildRaceModuleWizardMenu(activityWebDir) {
+  const { moduleNameMap, sources } = extractSpeedRaceModuleNameMap(activityWebDir);
   return {
-    specVersion: 1,
-    confirm: false,
-    confirmations: { moduleWrites: false },
-    modules: {
-      base: { title: "", showUrl: "", startTime: "", endTime: "" },
-      userApply: { applyConfigId: 0 },
-      speedConfig: { rankType: "TRADING", requirements: [] },
-      prizePoolConfig: { bonusPoolType: "FIXED", raceParams: {}, raceFixBonusPoolParams: [] },
-      leaderboardConfig: { raceRankingParams: { isShow: 0, minRank: null, maxRank: null } },
-      i18n: { activityConfigI18n: [] },
-      faq: { questions: [] },
-      calendar: { syncCalendarFlag: 0, syncCalendarDto: {} },
-    },
-    rawTopLevel: {},
-  };
-}
-
-async function snapshot(api, args, config) {
-  const moduleNameMap = loadModuleNameMap();
-  const fieldNameMap = loadFieldNameMap();
-  const target = await resolveTarget(api, args);
-  const item = await detail(api, target.id);
-  return {
-    ok: true,
-    mode: "headless_api",
-    finalUrl: `${config.baseUrl}/activities/speedRace`,
-    target: { activityId: target.id, activityAlias: target.alias || item.showUrl || "" },
-    moduleNameMap: moduleNameMap.map,
-    moduleNameMapSource: moduleNameMap.source,
-    fieldNameMap: fieldNameMap.map,
-    fieldNameMapSource: fieldNameMap.source,
-    summary: summarize(item),
-    oneShotSpecTemplate: buildWizardTemplate(),
-    current: {
-      base: {
-        title: item.title ?? "",
-        subTitle: item.subTitle ?? "",
-        showUrl: item.showUrl ?? "",
-        startTime: item.startTime ?? "",
-        endTime: item.endTime ?? "",
-        channelCategory: item.channelCategory ?? null,
-        rankType: item.rankType ?? item.raceParams?.rankType ?? null,
+    domain: "活动列表 / 交易竞速赛(RACE_COMPETITION)",
+    supportedModules: [
+      { key: "base", label: moduleNameMap.base || "交易竞速赛基本信息" },
+      { key: "userApply", label: moduleNameMap.userApply || "用户报名" },
+      { key: "speedConfig", label: moduleNameMap.speedConfig || "竞速配置" },
+      { key: "prizePool", label: moduleNameMap.prizePool || "奖池配置" },
+      { key: "leaderboard", label: moduleNameMap.leaderboard || "排行榜配置" },
+      { key: "pageSetting", label: moduleNameMap.pageSetting || "活动页面设置" },
+      { key: "i18n", label: moduleNameMap.i18n || "多语言" },
+      { key: "faq", label: moduleNameMap.faq || "常见问题" },
+    ],
+    sources,
+    specTemplate: {
+      confirm: false,
+      confirmations: { moduleWrites: false },
+      modules: {
+        base: { showCountdown: "MANUAL", isPreApply: 0 },
+        userApply: { applyConfigId: 2442 },
+        speedConfig: { rankType: "TRADING", currencySupportType: "ALL_SUPPORTED", productCodeList: [] },
+        prizePool: { poolType: "FIXED", isParticipantsNum: 0, isTotalPricePoolAmount: 0, stageList: [] },
+        leaderboard: { isShow: 0 },
+        pageSetting: { ogImageUrl: "" },
+        i18n: { activityConfigI18n: [] },
+        faq: { questions: [] },
       },
-      userApply: { applyConfigId: item.applyConfigId ?? null, initBonusValue: item.initBonusValue ?? null },
-      speedConfig: {
-        rankType: item.rankType ?? item.raceParams?.rankType ?? null,
-        requirements: Array.isArray(item.requirements) ? item.requirements : [],
-      },
-      prizePoolConfig: {
-        bonusPoolType: item.bonusPoolType ?? null,
-        raceParams: item.raceParams ?? null,
-        raceFixBonusPoolParams: Array.isArray(item.raceFixBonusPoolParams) ? item.raceFixBonusPoolParams : [],
-      },
-      leaderboardConfig: { raceRankingParams: item.raceRankingParams ?? null },
-      i18n: Array.isArray(item.activityConfigI18n) ? { activityConfigI18n: item.activityConfigI18n } : { activityConfigI18n: [] },
-      faq: Array.isArray(item.questions) ? { questions: item.questions } : { questions: [] },
-      calendar: { syncCalendarFlag: item.syncCalendarFlag ?? null, syncCalendarDto: item.syncCalendarDto ?? null },
     },
   };
 }
@@ -338,14 +222,11 @@ async function update(api, args, config) {
 
   const target = await resolveTarget(api, args);
   const before = await detail(api, target.id);
-  const patched = applyModulesToDetail(before, spec);
-
+  const patched = applyModulesToDetail(before, spec.modules);
   const plan = {
     action: "update",
-    type: "RACE_COMPETITION",
     target: { activityId: target.id, activityAlias: target.alias || before.showUrl || "" },
-    writeModules: Object.keys(spec.modules || {}).sort(),
-    writeRawTopLevelKeys: spec.rawTopLevel && typeof spec.rawTopLevel === "object" ? Object.keys(spec.rawTopLevel).sort() : [],
+    writeKeys: Object.keys(spec.modules || {}).sort(),
   };
   if (args.dryRun) return { ok: true, dryRun: true, mode: "headless_api", plan };
 
@@ -363,52 +244,40 @@ async function update(api, args, config) {
   };
 }
 
+async function snapshot(api, args, config) {
+  const target = await resolveTarget(api, args);
+  const item = await detail(api, target.id);
+  return { ok: true, mode: "headless_api", finalUrl: `${config.baseUrl}/activities/speedRace`, snapshot: summarize(item) };
+}
+
 async function run() {
   const args = parseArgs();
   if (args.help) {
     process.stdout.write(usage());
     return 0;
   }
+  if (!args.action && !args.wizard) throw new Error("--action is required");
 
   loadLocalEnv(repoRoot);
   const config = adminConfig(repoRoot);
-
-  if (args.wizard || !args.action) {
-    const moduleNameMap = loadModuleNameMap();
-    const fieldNameMap = loadFieldNameMap();
-    printJson({
-      ok: true,
-      dryRun: true,
-      wizard: {
-        domain: "活动列表 / 交易竞速赛(RACE_COMPETITION) 模块级配置（headless_api）",
-        moduleNameMap: moduleNameMap.map,
-        moduleNameMapSource: moduleNameMap.source,
-        fieldNameMap: fieldNameMap.map,
-        fieldNameMapSource: fieldNameMap.source,
-        supportedActions: ["snapshot", "update"],
-        confirmationRequired: ["模块写入(update)", "rawTopLevel 顶层字段写入(update)"],
-        oneShotSpecTemplate: buildWizardTemplate(),
-        notes: [
-          "update 会调用 PUT /prod-api/activity/config 覆盖对应模块字段；未出现在 spec.modules 的模块不会被修改。",
-          "rawTopLevel 用于临时兜底：当字段尚未沉淀到 modules 中时，可直接设置顶层 key；建议后续把常用字段补进 modules + 字段映射。",
-        ],
-      },
-    });
+  const activityWebDir = ensureActivityWebDir(repoRoot);
+  if (args.wizard) {
+    printJson({ ok: true, mode: "headless_api", wizard: buildRaceModuleWizardMenu(activityWebDir) });
     return 0;
   }
-
+  if (args.dryRun && !args.specFile && !args.specJson && args.action === "snapshot") {
+    printJson({ ok: true, dryRun: true, mode: "headless_api", args });
+    return 0;
+  }
   assertAdminLoginConfig(config);
+  const startedAt = Date.now();
   const api = await createAdminApiSession({ config, requireApiLogin: true });
   try {
-    if (args.action === "snapshot") {
-      printJson(await snapshot(api, args, config));
-      return 0;
-    }
-    if (args.action === "update") {
-      printJson(await update(api, args, config));
-      return 0;
-    }
-    throw new Error(`Unknown --action: ${args.action}`);
+    const handler = args.action === "snapshot" ? snapshot : args.action === "update" ? update : null;
+    if (!handler) throw new Error(`Unsupported --action: ${args.action}`);
+    const payload = await handler(api, args, config);
+    printJson({ ...payload, durationMs: Date.now() - startedAt }, payload.ok ? process.stdout : process.stderr);
+    return payload.ok ? 0 : 1;
   } finally {
     await api.close();
   }

@@ -39,6 +39,8 @@ function scoreAction(action, query) {
   if (action.id === "verify_guide_template_row_actions" && /活动.*引导.*配置|引导.*流程.*配置|流程.*引导.*配置|活动流程引导配置/.test(query) && query.includes("操作列")) score += 12;
   if (action.id === "configure_lottery_activity" && /转盘抽奖|抽奖活动/.test(query) && /配置|创建|新增|上线|下线/.test(query)) score += 20;
   if (action.id === "configure_lottery_activity_modules" && /转盘抽奖|抽奖活动/.test(query) && /单独配置|模块配置|按模块|只改|修改|更新/.test(query)) score += 22;
+  if (action.id === "configure_race_activity" && /交易竞速赛|RACE_COMPETITION/.test(query) && /配置|创建|新增|最小|最全|上线|下线|删除/.test(query)) score += 20;
+  if (action.id === "configure_race_activity_modules" && /交易竞速赛|RACE_COMPETITION/.test(query) && /单独配置|模块配置|按模块|只改|修改|更新/.test(query)) score += 22;
   if (action.id === "configure_newbie_activity" && /新手活动|BEGINNER_TASK/.test(query) && /配置|创建|新增|全配置|上线|下线|删除/.test(query)) score += 20;
   if (action.id === "configure_trading_competition_activity" && /交易大赛|交易赛|个人交易赛|TRADING_COMPETITION/i.test(query) && /配置|创建|新增|全配置|上线|下线|删除/.test(query)) score += 20;
   if (action.id === "configure_race_competition_activity" && /交易竞速赛|竞速赛|RACE_COMPETITION/i.test(query) && /配置|创建|新增|全配置|上线|下线|删除/.test(query)) score += 20;
@@ -90,6 +92,7 @@ function inferParams(query) {
     ...inferGuideRowActionParams(query),
     ...inferLotteryActivityDraftParams(query),
     ...inferLotteryOnlineParams(query),
+    ...inferRaceActivityParams(query),
     ...inferResourceCardParams(query),
     ...inferMultilanguageTemplateItemParams(query),
     ...inferBatchBindI18nTemplateParams(query),
@@ -169,6 +172,32 @@ function inferLotteryActivityDraftParams(query) {
     uid: uidMatch?.[1],
     country: countryMatch?.[1]?.trim(),
     noPreapply: /无预报名|不预报名|不要预报名|不支持预报名/.test(query),
+    visible: /浏览器模式|可见|打开浏览器|让我看着/.test(query),
+  };
+}
+
+function inferRaceActivityParams(query) {
+  if (!/交易竞速赛|RACE_COMPETITION/.test(query)) return {};
+  const titlePrefixMatch = query.match(/(?:标题前缀|活动标题前缀)\s*(?:用|为|是|=|:|：)?\s*([\u4e00-\u9fa5A-Za-z0-9_.-]+)/);
+  const aliasPrefixMatch = query.match(/(?:别名前缀|活动别名前缀)\s*(?:用|为|是|=|:|：)?\s*([A-Za-z0-9_.-]+)/);
+  const templateIdMatch = query.match(/(?:模板\s*(?:id|ID)|template\s*id)\s*(?:用|为|是|=|:|：)?\s*(\d+)/i);
+  const templateAliasMatch = query.match(/(?:模板\s*别名|template\s*alias)\s*(?:用|为|是|=|:|：)?\s*([A-Za-z0-9_.-]+)/i);
+  const activityIdMatch = query.match(/(?:活动\s*(?:id|ID)|activity\s*id)\s*(?:为|是|=|:|：)?\s*(\d+)/i);
+  const activityAliasMatch = query.match(/(?:活动\s*别名|别名|showUrl)\s*(?:为|是|=|:|：)?\s*([A-Za-z0-9_.-]+)/i);
+  let preset;
+  if (/最小/.test(query)) preset = "minimal_create_verify_delete";
+  else if (/最全|全量|全配置/.test(query)) preset = "full_create_verify_delete";
+  else if (/上线/.test(query)) preset = "online";
+  else if (/下线/.test(query)) preset = "offline";
+  else if (/删除/.test(query)) preset = "delete";
+  return {
+    titlePrefix: titlePrefixMatch?.[1],
+    aliasPrefix: aliasPrefixMatch?.[1],
+    templateId: templateIdMatch?.[1],
+    templateAlias: templateAliasMatch?.[1],
+    activityId: activityIdMatch?.[1],
+    activityAlias: activityAliasMatch?.[1],
+    preset,
     visible: /浏览器模式|可见|打开浏览器|让我看着/.test(query),
   };
 }

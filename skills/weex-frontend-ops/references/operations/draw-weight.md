@@ -2,17 +2,21 @@
 
 ## Cumulative Weight Single-Draw Verification
 
-Status: candidate
-Last verified: 2026-05-29
+Status: standard regression partial
+Last verified: 2026-05-30
 Environment: staging `https://stg-www.weex.tech`
 Viewport: desktop `1440x1000`
 
 Use when validating the admin-side `累计次数再权重配置` on the frontend draw page. The verified pattern is cumulative `5` times + same user + target prize pool ID `5` weight `100`; the 6th single draw should show the configured target prize text.
 
+This flow is now included in the standard lottery frontend main regression as phase `frontend_weight_special`, covering `FE-64` / `FE-65` / `FE-66` / `FE-67`. `run-full-headless --selection 二次权重专项` routes to `lottery_frontend_main_regression` and emits the four case results in the standard report.
+
 ### Script
 
 - `scripts/frontend-draw-weight-special-verify.mjs`
 - Cached action: `frontend_draw_weight_special_verify`
+- Standard regression phase: `frontend_weight_special`
+- Standard case IDs: `FE-64`, `FE-65`, `FE-66`, `FE-67`
 
 ### Stable Rules
 
@@ -39,3 +43,13 @@ Use when validating the admin-side `累计次数再权重配置` on the frontend
 - Executed 6 single draws in visible browser mode.
 - Draw count changed from `10` to `4`.
 - The 6th popup showed `100 USDT 合约赠金`.
+
+### Verified 2026-05-30 Standard Regression Sample
+
+- Entrypoint: `run-full-headless --selection 二次权重专项`.
+- Activity ID `9719`, alias `w13402457`.
+- Result: `FE-64/65/66/67` all PASS.
+- Draw count changed from `10` to `4`.
+- The 6th popup showed `100 USDT 合约赠金`.
+- Reward record latest text contained `100 USDT 合约赠金`.
+- Cleanup: activity was taken offline and deleted after verification.

@@ -17,11 +17,11 @@ test("frontend main regression auto-handles staged frontend preconditions", () =
   assert.equal(byKey.get("REWARD_RECORD_DELAY_READY")?.autoHandled, true);
 });
 
-test("frontend five-draw precondition remains manual until dedicated entrypoint is implemented", () => {
+test("frontend five-draw precondition is auto-handled by recharge preparation", () => {
   const manifest = loadLotteryRegressionManifest();
   const selection = resolveScenarioSelection("五连抽主流程", manifest);
   const preconditions = resolvePreconditions(selection.selectedScenarios, manifest);
   const gt5 = preconditions.find(item => item.key === "NORMAL_ACTIVITY_DRAW_GT5");
   assert.ok(gt5);
-  assert.equal(gt5.autoHandled, false);
+  assert.equal(gt5.autoHandled, true);
 });

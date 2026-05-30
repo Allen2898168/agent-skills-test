@@ -123,7 +123,7 @@ async function prepareActivitiesBatch({ startOffsetSeconds }) {
     "--parts",
     "normal,weight,stock",
     "--normal-template-alias", "lf25085715",
-    "--weight-template-alias", "lw25121831",
+    "--weight-template-alias", "wt43083858",
     "--stock-template-alias", "ls25122120",
     "--start-offset-seconds", String(startOffsetSeconds),
   ];
@@ -155,7 +155,7 @@ function buildPrepareBatchArgs({ startOffsetSeconds, parts }) {
   const partSet = new Set(parts || []);
   const args = [script, "--parts", (parts || []).join(","), "--start-offset-seconds", String(startOffsetSeconds)];
   if (partSet.has("normal")) args.push("--normal-template-alias", "lf25085715");
-  if (partSet.has("weight")) args.push("--weight-template-alias", "lw25121831");
+  if (partSet.has("weight")) args.push("--weight-template-alias", "wt43083858");
   if (partSet.has("stock")) args.push("--stock-template-alias", "ls25122120");
   return args;
 }
@@ -502,8 +502,6 @@ async function run() {
     });
     results.push({ id: "admin", ...adminResult });
     entrypoints.push({ id: "admin", entrypoint: "lottery_admin_main_regression" });
-  } else {
-    results.push({ id: "admin", ok: false, error: "admin execution missing" });
   }
 
   for (const exec of frontendExecs) {

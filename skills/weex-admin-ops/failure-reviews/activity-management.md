@@ -219,3 +219,14 @@
 - 解决方式：时间窗口改为“按真实当前时间戳 + offset 计算”，再用 `Asia/Shanghai` 直接格式化字符串；确保开始时间永远在未来（默认 +30 分钟）。
 - 验证结果：修复后使用同链路创建活动不再命中该后端校验。
 - 关联流程或脚本：`skills/weex-admin-ops/scripts/lottery-admin-main-regression.mjs`、`skills/weex-admin-ops/scripts/create-lottery-activity-draft.mjs`。
+
+## 2026-05-29 交易竞速赛总入口未透传 draft-checks 的 activityId
+
+- 业务线：活动列表 / 交易竞速赛 / 无头总入口。
+- 场景：执行 `race-config-wizard-api.mjs` 的 `minimal_create_verify_delete`。
+- 失败表现：`create-draft`、`update-modules` 已成功，但 `draft-checks` 报错 `--activity-alias or --activity-id is required`，导致 cleanup 未执行并残留草稿 `9700 / sr51743667`。
+- 失败原因：总入口只把 `activityId` 传给 `update-modules`，没有继续传给后续 `draft-checks`。
+- 解决方式：`create-draft` 成功后缓存 `activityId`，后续 `draft-checks` 自动补齐 `--activity-id <createdId>`；并删除残留草稿 `9700`。
+- 验证结果：修复后 `minimal_create_verify_delete` 成功跑通，活动 `9701 / sw51783658` 创建、更新、回查、删除全通过；`full_create_verify_delete` 也通过，活动 `9702 / sx51798404` 无残留。
+- 关联流程或脚本：`skills/weex-admin-ops/scripts/race-config-wizard-api.mjs`。
+- 后续处理：已吸收到固定执行路径。

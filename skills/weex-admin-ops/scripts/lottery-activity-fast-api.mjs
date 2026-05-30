@@ -359,10 +359,26 @@ async function offline(api, args, config) {
   };
 }
 
+async function deleteActivity(api, args, config) {
+  const target = await resolveTarget(api, args);
+  const result = await api.post("/prod-api/activity/lottery/delete", { activityId: Number(target.id), totp: String(config.googleCode || "") });
+  const remaining = target.alias ? await listByAlias(api, target.alias) : null;
+  return {
+    ok: result.body?.code === 200 && !remaining,
+    mode: "headless_api",
+    finalUrl: "/activities/lottery",
+    target: { activityId: target.id, activityAlias: target.alias },
+    alias: target.alias,
+    activityId: target.id,
+    deleteBody: { code: result.body?.code || null, msg: result.body?.msg || "" },
+    rowAbsentAfterSearch: !remaining,
+  };
+}
+
 async function run() {
   const args = parseArgs();
   if (args.help) {
-    process.stdout.write("Usage: node skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs --action snapshot|inspect-template|create-draft|draft-checks|online|online-checks|offline [--activity-alias alias]\n");
+    process.stdout.write("Usage: node skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs --action snapshot|inspect-template|create-draft|draft-checks|online|online-checks|offline|delete [--activity-alias alias]\n");
     return 0;
   }
   if (args.raffleStyle) {
@@ -380,7 +396,7 @@ async function run() {
   const startedAt = Date.now();
   const api = await createAdminApiSession({ config, requireApiLogin: true });
   try {
-    const handlers = { snapshot, "inspect-template": inspectTemplate, "create-draft": createDraft, "draft-checks": draftChecks, online, "online-checks": onlineChecks, offline };
+    const handlers = { snapshot, "inspect-template": inspectTemplate, "create-draft": createDraft, "draft-checks": draftChecks, online, "online-checks": onlineChecks, offline, delete: deleteActivity };
     const handler = handlers[String(args.action)];
     if (!handler) throw new Error(`Unsupported --action: ${args.action}`);
     const payload = await handler(api, args, config);
