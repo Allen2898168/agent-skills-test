@@ -24,6 +24,8 @@
 
 - 2026-05-30 非转盘/非新手活动 API 全配置写验证补链路：修复 `GUESS / MONOPOLY_WORLD_CUP / AGENT_TRACE_PRO` 在 staging 的 min/full verify + cleanup 不稳定问题。关键修复包括：child 脚本登录导致 token 失效（创建活动前刷新 session + 支持用 `WEEX_ADMIN_AUTHORIZATION` 透传父会话 Authorization）、`create-prizes-fast-api.mjs` 增加 `--confirm-create` 确认开关并同步更新依赖脚本、MONOPOLY_WORLD_CUP 报名模板需使用 `用户手动点击报名`、GUESS/小活动 cleanup 增加解绑报名模板到默认 `2442` 后再删除，避免“模板被活动占用”报错。验证编排：`node skills/weex-admin-ops/scripts/verify-nonlottery-api-full-config-staging.mjs --confirm-run --verify-level <min|full> [--confirm-full-verify]`。
 
+- 2026-05-30 模块级配置脚本 `--wizard` 收口：`CONTRACT_MINING / FLIP / GUESS / MONOPOLY_WORLD_CUP / AGENT_TRACE_PRO` 的模块配置脚本支持不传 `--action`/不传活动 ID 直接输出中文映射 + one-shot spec 模板；并统一 wizard 输出 `moduleNameMapSource/fieldNameMapSource` 为 `references/mappings/*.md`。
+
 - 2026-05-30 人人代理(AGENT) 任务 clone 绑定冲突修复：`INVITE_FRIEND` 模板含 `linkTaskId` 时，脚本改为先 clone 创建新的 `INVITED` 被邀请任务，再创建邀请任务并重绑 `linkTaskId`；`create-agent-full-config-explicit-deps-fast-api.mjs` cleanup 同步删除两条任务；staging 已跑通 `verify-nonlottery-api-full-config-staging.mjs --only agent` 的 min/full/cleanup 闭环验证。
 
 - 2026-05-30 非转盘/非新手活动 staging 证据闭环：已跑通 `verify-nonlottery-api-full-config-staging.mjs` 的 `--verify-level min --only all` 与 `--verify-level full --only all`，覆盖 `TRADING_COMPETITION/RACE_COMPETITION/TRACE_PRO/CUSTOMIZED/RECHARGE_TRANS_TASK/AGENT/CONTRACT_MINING/FLIP/GUESS/MONOPOLY_WORLD_CUP/AGENT_TRACE_PRO` 的显式依赖创建、最小验证、最全验证（上线/下线）、清理删除闭环。
