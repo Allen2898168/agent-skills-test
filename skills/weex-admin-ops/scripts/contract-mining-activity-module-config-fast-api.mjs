@@ -90,19 +90,29 @@ function parseMarkdownTableToMap(md, keyColumnName, valueColumnName) {
   return out;
 }
 
-function loadMarkdownMap(refRelPath, keyColumnName, valueColumnName) {
-  const refPath = path.join(repoRoot, refRelPath);
+function loadMarkdownMap(fileRelPath, keyColumnName, valueColumnName, sourceRelPath = fileRelPath) {
+  const refPath = path.join(repoRoot, fileRelPath);
   if (!fs.existsSync(refPath)) return { source: "missing", map: {} };
   const md = fs.readFileSync(refPath, "utf8");
-  return { source: refRelPath, map: parseMarkdownTableToMap(md, keyColumnName, valueColumnName) };
+  return { source: sourceRelPath, map: parseMarkdownTableToMap(md, keyColumnName, valueColumnName) };
 }
 
 function loadModuleNameMap() {
-  return loadMarkdownMap("skills/weex-admin-ops/references/mappings/contract-mining-activity-modules.md", "模块 key", "前端中文名");
+  return loadMarkdownMap(
+    "skills/weex-admin-ops/references/mappings/contract-mining-activity-modules.md",
+    "模块 key",
+    "前端中文名",
+    "references/mappings/contract-mining-activity-modules.md",
+  );
 }
 
 function loadFieldNameMap() {
-  return loadMarkdownMap("skills/weex-admin-ops/references/mappings/contract-mining-activity-fields.md", "字段 key", "前端中文名");
+  return loadMarkdownMap(
+    "skills/weex-admin-ops/references/mappings/contract-mining-activity-fields.md",
+    "字段 key",
+    "前端中文名",
+    "references/mappings/contract-mining-activity-fields.md",
+  );
 }
 
 async function findByAlias(api, alias) {
@@ -338,18 +348,18 @@ async function run() {
     return 0;
   }
 
-  loadLocalEnv(repoRoot);
-  const config = adminConfig(repoRoot);
-  if (!args.action) throw new Error("--action is required");
-  if (!["snapshot", "update"].includes(args.action)) throw new Error(`Unknown --action: ${args.action}`);
-
   if (args.wizard) {
+    const moduleNameMap = loadModuleNameMap();
+    const fieldNameMap = loadFieldNameMap();
     printJson({
       ok: true,
       mode: "headless_api",
+      wizard: true,
       domain: "活动列表 / 合约挖矿活动(CONTRACT_MINING) 模块级配置（API）",
-      moduleNameMap: loadModuleNameMap().map,
-      fieldNameMap: loadFieldNameMap().map,
+      moduleNameMap: moduleNameMap.map,
+      moduleNameMapSource: moduleNameMap.source,
+      fieldNameMap: fieldNameMap.map,
+      fieldNameMapSource: fieldNameMap.source,
       oneShotSpecTemplate: buildWizardTemplate(),
       notes: [
         "snapshot：输出当前配置（按模块拆分）+ 一次性 spec 模板。",
@@ -359,6 +369,11 @@ async function run() {
     });
     return 0;
   }
+
+  loadLocalEnv(repoRoot);
+  const config = adminConfig(repoRoot);
+  if (!args.action) throw new Error("--action is required");
+  if (!["snapshot", "update"].includes(args.action)) throw new Error(`Unknown --action: ${args.action}`);
 
   if (args.dryRun && args.action === "update") {
     const spec = loadSpec(args);
@@ -390,4 +405,3 @@ try {
   printJson({ ok: false, mode: "headless_api", error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-

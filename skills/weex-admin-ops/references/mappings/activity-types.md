@@ -22,9 +22,7 @@
 - 代理小活动（AGENT_TRACE_PRO）
 
 待验证（需要用户确认 staging 写操作：min verify / full verify / cleanup）：
-1. 竞猜大赛（GUESS）
-2. 大富翁世界杯（MONOPOLY_WORLD_CUP）
-3. 代理小活动（AGENT_TRACE_PRO）
+- （已于 2026-05-30 完成非新手/非转盘 11 个活动类型的 min/full/cleanup staging 证据闭环验证）
 
 说明：
 - 该列表仅作为“沉淀执行顺序”索引；每个活动类型的模块/字段/依赖项映射单独维护在 `references/mappings/<activity>/`。

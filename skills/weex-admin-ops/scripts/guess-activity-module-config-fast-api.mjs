@@ -88,19 +88,19 @@ function parseMarkdownTableToMap(md, keyColumnName, valueColumnName) {
   return out;
 }
 
-function loadMarkdownMap(refRelPath, keyColumnName, valueColumnName) {
-  const refPath = path.join(repoRoot, refRelPath);
+function loadMarkdownMap(fileRelPath, keyColumnName, valueColumnName, sourceRelPath = fileRelPath) {
+  const refPath = path.join(repoRoot, fileRelPath);
   if (!fs.existsSync(refPath)) return { source: "missing", map: {} };
   const md = fs.readFileSync(refPath, "utf8");
-  return { source: refRelPath, map: parseMarkdownTableToMap(md, keyColumnName, valueColumnName) };
+  return { source: sourceRelPath, map: parseMarkdownTableToMap(md, keyColumnName, valueColumnName) };
 }
 
 function loadModuleNameMap() {
-  return loadMarkdownMap("skills/weex-admin-ops/references/mappings/guess-activity-modules.md", "模块 key", "前端中文名");
+  return loadMarkdownMap("skills/weex-admin-ops/references/mappings/guess-activity-modules.md", "模块 key", "前端中文名", "references/mappings/guess-activity-modules.md");
 }
 
 function loadFieldNameMap() {
-  return loadMarkdownMap("skills/weex-admin-ops/references/mappings/guess-activity-fields.md", "字段 key", "前端中文名");
+  return loadMarkdownMap("skills/weex-admin-ops/references/mappings/guess-activity-fields.md", "字段 key", "前端中文名", "references/mappings/guess-activity-fields.md");
 }
 
 async function findByAlias(api, alias) {
@@ -318,11 +318,32 @@ async function run() {
     process.stdout.write(usage());
     return 0;
   }
-  if (!args.action && !args.wizard) throw new Error("--action is required unless --wizard is used");
+  if (args.wizard) {
+    const moduleNameMap = loadModuleNameMap();
+    const fieldNameMap = loadFieldNameMap();
+    printJson({
+      ok: true,
+      mode: "headless_api",
+      wizard: true,
+      domain: "活动列表 / 竞猜大赛(GUESS) 模块级配置（API）",
+      moduleNameMap: moduleNameMap.map,
+      moduleNameMapSource: moduleNameMap.source,
+      fieldNameMap: fieldNameMap.map,
+      fieldNameMapSource: fieldNameMap.source,
+      oneShotSpecTemplate: buildWizardTemplate(),
+      notes: [
+        "snapshot：输出当前配置（按模块拆分）+ 一次性 spec 模板。",
+        "update：需在 spec.confirm=true 且 confirmations.moduleWrites=true 后才允许写入。",
+        "复杂字段建议直接写 modules.guessConfigs.guessList（整段覆盖），避免局部 patch 误配。",
+      ],
+    });
+    return 0;
+  }
+
+  if (!args.action) throw new Error("--action is required");
 
   loadLocalEnv(repoRoot);
   const config = adminConfig(repoRoot);
-  if (args.wizard && !args.action) args.action = "snapshot";
 
   if (args.dryRun && args.action !== "update") {
     printJson({ ok: true, dryRun: true, action: args.action, args });

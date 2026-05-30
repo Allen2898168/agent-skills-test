@@ -63,7 +63,7 @@ function requireConfirmations(spec, args) {
 }
 
 function parseMarkdownTableToMap(md, keyColumnName, valueColumnName) {
-  const lines = String(md || "").split(/\\r?\\n/);
+  const lines = String(md || "").split(/\r?\n/);
   const headerIndex = lines.findIndex(line => line.includes(`| ${keyColumnName} |`) && line.includes(`| ${valueColumnName} |`));
   if (headerIndex < 0) return {};
   const out = {};
@@ -79,19 +79,29 @@ function parseMarkdownTableToMap(md, keyColumnName, valueColumnName) {
   return out;
 }
 
-function loadMarkdownMap(refRelPath, keyColumnName, valueColumnName) {
-  const refPath = path.join(repoRoot, refRelPath);
+function loadMarkdownMap(fileRelPath, keyColumnName, valueColumnName, sourceRelPath = fileRelPath) {
+  const refPath = path.join(repoRoot, fileRelPath);
   if (!fs.existsSync(refPath)) return { source: "missing", map: {} };
   const md = fs.readFileSync(refPath, "utf8");
-  return { source: refRelPath, map: parseMarkdownTableToMap(md, keyColumnName, valueColumnName) };
+  return { source: sourceRelPath, map: parseMarkdownTableToMap(md, keyColumnName, valueColumnName) };
 }
 
 function loadModuleNameMap() {
-  return loadMarkdownMap("skills/weex-admin-ops/references/mappings/agent-tracepro-activity-modules.md", "模块 key", "前端中文名");
+  return loadMarkdownMap(
+    "skills/weex-admin-ops/references/mappings/agent-tracepro-activity-modules.md",
+    "模块 key",
+    "前端中文名",
+    "references/mappings/agent-tracepro-activity-modules.md",
+  );
 }
 
 function loadFieldNameMap() {
-  return loadMarkdownMap("skills/weex-admin-ops/references/mappings/agent-tracepro-activity-fields.md", "字段 key", "前端中文名");
+  return loadMarkdownMap(
+    "skills/weex-admin-ops/references/mappings/agent-tracepro-activity-fields.md",
+    "字段 key",
+    "前端中文名",
+    "references/mappings/agent-tracepro-activity-fields.md",
+  );
 }
 
 async function findByAlias(api, alias) {
@@ -243,13 +253,15 @@ function applyModulesToDetail(current, spec) {
   return patched;
 }
 
-function buildWizardTemplate({ moduleNameMap, fieldNameMap }) {
+function buildWizardTemplate({ moduleNameMap, moduleNameMapSource, fieldNameMap, fieldNameMapSource }) {
   return {
     ok: true,
     mode: "headless_api",
     wizard: true,
     moduleNameMap,
+    moduleNameMapSource,
     fieldNameMap,
+    fieldNameMapSource,
     oneShotSpecTemplate: {
       confirm: false,
       confirmations: { moduleWrites: false },
@@ -269,12 +281,19 @@ async function run() {
     process.stdout.write(usage());
     return 0;
   }
-  if (!args.action && !args.wizard) throw new Error("--action is required");
+  if (!args.action && !args.wizard) throw new Error("--action is required unless --wizard is used");
 
   const moduleNameMap = loadModuleNameMap();
   const fieldNameMap = loadFieldNameMap();
   if (args.wizard) {
-    printJson(buildWizardTemplate({ moduleNameMap: moduleNameMap.map, fieldNameMap: fieldNameMap.map }));
+    printJson(
+      buildWizardTemplate({
+        moduleNameMap: moduleNameMap.map,
+        moduleNameMapSource: moduleNameMap.source,
+        fieldNameMap: fieldNameMap.map,
+        fieldNameMapSource: fieldNameMap.source,
+      }),
+    );
     return 0;
   }
 
@@ -301,7 +320,12 @@ async function run() {
         fieldNameMap: fieldNameMap.map,
         fieldNameMapSource: fieldNameMap.source,
         summary: summarize(current),
-        oneShotSpecTemplate: buildWizardTemplate({ moduleNameMap: moduleNameMap.map, fieldNameMap: fieldNameMap.map }).oneShotSpecTemplate,
+        oneShotSpecTemplate: buildWizardTemplate({
+          moduleNameMap: moduleNameMap.map,
+          moduleNameMapSource: moduleNameMap.source,
+          fieldNameMap: fieldNameMap.map,
+          fieldNameMapSource: fieldNameMap.source,
+        }).oneShotSpecTemplate,
       });
       return 0;
     }
@@ -338,4 +362,3 @@ try {
   printJson({ ok: false, mode: "headless_api", error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-
