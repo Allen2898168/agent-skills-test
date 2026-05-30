@@ -219,6 +219,11 @@ function buildWizardMenu() {
   ];
 
   return {
+    domain: "活动列表 / 转盘抽奖(LOTTERY)",
+    moduleNameMap: moduleNameMap.map,
+    moduleNameMapSource: moduleNameMap.source,
+    fieldNameMap: fieldNameMap.map,
+    fieldNameMapSource: fieldNameMap.source,
     lottery: {
       modules: lotteryModules(),
       moduleNameMap: moduleNameMap.map,

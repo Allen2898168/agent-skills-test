@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-05-29",
+  "updatedAt": "2026-05-30",
   "actions": [
     {
       "id": "lottery_admin_main_regression",
@@ -236,6 +236,20 @@
       "domains": ["活动列表", "新手活动"],
       "intentKeywords": ["配置", "创建", "新增", "全配置", "上线", "下线", "删除"],
       "objectKeywords": ["新手活动", "活动列表", "BEGINNER_TASK"],
+      "defaultMode": "invisible",
+      "verifiedModes": ["dry_run"],
+      "lastVerifiedAt": "2026-05-28",
+      "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
+      "fallback": "Run API scripts directly: newbie-activity-fast-api.mjs."
+    },
+    {
+      "id": "configure_beginner_task_activity",
+      "status": "candidate",
+      "script": "scripts/newbie-config-wizard-api.mjs",
+      "description": "BEGINNER_TASK(Newbie) activity config wizard (headless_api) alias: same behavior as configure_newbie_activity.",
+      "domains": ["活动列表", "新手活动"],
+      "intentKeywords": ["配置", "创建", "新增", "全配置", "上线", "下线", "删除"],
+      "objectKeywords": ["新手活动", "活动列表", "BEGINNER_TASK", "新手任务", "新手引导"],
       "defaultMode": "invisible",
       "verifiedModes": ["dry_run"],
       "lastVerifiedAt": "2026-05-28",
@@ -558,6 +572,20 @@
       "domains": ["活动列表", "新手活动"],
       "intentKeywords": ["配置", "修改", "更新", "单独配置", "模块配置"],
       "objectKeywords": ["新手活动", "BEGINNER_TASK", "活动"],
+      "defaultMode": "invisible",
+      "verifiedModes": ["dry_run"],
+      "lastVerifiedAt": "2026-05-28",
+      "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
+      "fallback": "Use newbie-config-wizard-api.mjs for full create/verify/delete presets."
+    },
+    {
+      "id": "configure_beginner_task_activity_modules",
+      "status": "candidate",
+      "script": "scripts/newbie-activity-module-config-fast-api.mjs",
+      "description": "BEGINNER_TASK(Newbie) module config (headless_api) alias: same behavior as configure_newbie_activity_modules.",
+      "domains": ["活动列表", "新手活动"],
+      "intentKeywords": ["配置", "修改", "更新", "单独配置", "模块配置"],
+      "objectKeywords": ["新手活动", "BEGINNER_TASK", "新手任务", "新手引导", "活动"],
       "defaultMode": "invisible",
       "verifiedModes": ["dry_run"],
       "lastVerifiedAt": "2026-05-28",
