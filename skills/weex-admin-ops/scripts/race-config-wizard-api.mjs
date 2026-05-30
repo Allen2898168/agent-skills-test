@@ -5,7 +5,6 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { parseFlags, printJson } from "./lib/cli.mjs";
 import { pathsFrom } from "./lib/runtime.mjs";
-import { ensureActivityWebDir, extractSpeedRaceModuleNameMap } from "./lib/activity-web-mappings.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
 const DEFAULT_IMAGE = "https://s3.weexstg.com/otc/images/commonFile/0bc69943370645596e200bdff7d653dc481591a50f60892bdc08c3c107b9f1ee.webp";
@@ -28,48 +27,47 @@ function parseArgs() {
   return args;
 }
 
-function readFileSafe(filePath) {
-  try {
-    return fs.readFileSync(filePath, "utf8");
-  } catch {
-    return "";
+function parseMarkdownTableToMap(md, keyColumnName, valueColumnName) {
+  const lines = String(md || "").split(/\r?\n/);
+  const headerIndex = lines.findIndex(line => line.includes(`| ${keyColumnName} |`) && line.includes(`| ${valueColumnName} |`));
+  if (headerIndex < 0) return {};
+  const out = {};
+  for (let i = headerIndex + 2; i < lines.length; i += 1) {
+    const line = lines[i];
+    if (!line.startsWith("|")) break;
+    const parts = line.split("|").map(v => v.trim()).filter(Boolean);
+    if (parts.length < 2) continue;
+    const key = parts[0].replace(/`/g, "");
+    const value = parts[1];
+    if (key && value) out[key] = value;
   }
+  return out;
 }
 
-function extractVueFormFields(activityWebDir, relPath) {
-  const filePath = path.join(activityWebDir, relPath);
-  const text = readFileSafe(filePath);
-  const props = new Set();
-  const models = new Set();
-  for (const match of text.matchAll(/prop\s*=\s*"([A-Za-z0-9_]+)"/g)) props.add(match[1]);
-  for (const match of text.matchAll(/v-model\s*=\s*"[^"]*?([A-Za-z0-9_]+)"/g)) models.add(match[1]);
-  return { filePath, props: Array.from(props).sort(), formModels: Array.from(models).sort() };
+function loadRaceModuleNameMap() {
+  const refPath = path.join(repoRoot, "skills/weex-admin-ops/references/mappings/race-activity-modules.md");
+  if (!fs.existsSync(refPath)) return { source: "missing", map: {} };
+  const md = fs.readFileSync(refPath, "utf8");
+  return { source: "references/mappings/race-activity-modules.md", map: parseMarkdownTableToMap(md, "模块 key", "前端中文名") };
 }
 
-export function buildWizardMenu(activityWebDir) {
-  const { moduleNameMap } = extractSpeedRaceModuleNameMap(activityWebDir);
+export function buildWizardMenu() {
+  const moduleNameMap = loadRaceModuleNameMap();
   return {
     domain: "活动列表 / 交易竞速赛(RACE_COMPETITION)",
     mode: "headless_api_only",
+    moduleNameMap: moduleNameMap.map,
+    moduleNameMapSource: moduleNameMap.source,
     supportedModules: [
-      { key: "base", label: moduleNameMap.base || "交易竞速赛基本信息", risk: "高" },
-      { key: "userApply", label: moduleNameMap.userApply || "用户报名", risk: "高" },
-      { key: "speedConfig", label: moduleNameMap.speedConfig || "竞速配置", risk: "高" },
-      { key: "prizePool", label: moduleNameMap.prizePool || "奖池配置", risk: "高" },
-      { key: "leaderboard", label: moduleNameMap.leaderboard || "排行榜配置", risk: "中" },
-      { key: "pageSetting", label: moduleNameMap.pageSetting || "活动页面设置", risk: "低" },
-      { key: "i18n", label: moduleNameMap.i18n || "多语言", risk: "中" },
-      { key: "faq", label: moduleNameMap.faq || "常见问题", risk: "低" },
+      { key: "base", label: moduleNameMap.map.base || "交易竞速赛基本信息", risk: "高" },
+      { key: "userApply", label: moduleNameMap.map.userApply || "用户报名", risk: "高" },
+      { key: "speedConfig", label: moduleNameMap.map.speedConfig || "竞速配置", risk: "高" },
+      { key: "prizePool", label: moduleNameMap.map.prizePool || "奖池配置", risk: "高" },
+      { key: "leaderboard", label: moduleNameMap.map.leaderboard || "排行榜配置", risk: "中" },
+      { key: "pageSetting", label: moduleNameMap.map.pageSetting || "活动页面设置", risk: "低" },
+      { key: "i18n", label: moduleNameMap.map.i18n || "多语言", risk: "中" },
+      { key: "faq", label: moduleNameMap.map.faq || "常见问题", risk: "低" },
     ],
-    uiModuleFields: {
-      base: extractVueFormFields(activityWebDir, "activity-ui/src/views/activity/speedRace/components/baseInfo.vue"),
-      speedConfig: extractVueFormFields(activityWebDir, "activity-ui/src/views/activity/speedRace/components/speedConfig.vue"),
-      prizePool: extractVueFormFields(activityWebDir, "activity-ui/src/views/activity/speedRace/components/prizePoolConfig.vue"),
-      leaderboard: extractVueFormFields(activityWebDir, "activity-ui/src/views/activity/speedRace/components/leaderboardConfig.vue"),
-      pageSetting: extractVueFormFields(activityWebDir, "activity-ui/src/views/activity/competition/components/pageSetting.vue"),
-      i18n: extractVueFormFields(activityWebDir, "activity-ui/src/views/activity/competition/components/langContentSetting.vue"),
-      faq: extractVueFormFields(activityWebDir, "activity-ui/src/views/activity/lottery/components/FAQForm.vue"),
-    },
     presets: [
       { preset: "minimal_create_verify_delete", description: "创建草稿 -> 压成最小配置 -> 回查 -> 删除" },
       { preset: "full_create_verify_delete", description: "创建草稿 -> 应用最全配置 -> 回查 -> 删除" },
@@ -347,10 +345,9 @@ function planPreset(args) {
 
 function main() {
   let args = parseArgs();
-  const activityWebDir = ensureActivityWebDir(repoRoot);
   args = loadSpecOverrides(args);
   if (args.wizard || !args.confirm) {
-    printJson({ ok: true, mode: "headless_api", wizard: buildWizardMenu(activityWebDir) });
+    printJson({ ok: true, mode: "headless_api", wizard: buildWizardMenu() });
     return 0;
   }
   requireHighRiskConfirmations(args);

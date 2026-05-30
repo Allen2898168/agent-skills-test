@@ -4,7 +4,6 @@ import path from "node:path";
 import { parseFlags, printJson } from "./lib/cli.mjs";
 import { adminConfig, assertAdminLoginConfig, loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
 import { createAdminApiSession, firstRow } from "./lib/admin-api.mjs";
-import { ensureActivityWebDir, extractSpeedRaceModuleNameMap } from "./lib/activity-web-mappings.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
 
@@ -43,6 +42,38 @@ function requireConfirmations(spec, args) {
   if (!confirm) throw new Error("需要用户确认：请在 spec 里设置 confirm=true 并传 --confirm。");
   const confirmations = spec?.confirmations || {};
   if (confirmations.moduleWrites !== true) throw new Error("高风险确认未完成：confirmations.moduleWrites 需要为 true。");
+}
+
+function parseMarkdownTableToMap(md, keyColumnName, valueColumnName) {
+  const lines = String(md || "").split(/\r?\n/);
+  const headerIndex = lines.findIndex(line => line.includes(`| ${keyColumnName} |`) && line.includes(`| ${valueColumnName} |`));
+  if (headerIndex < 0) return {};
+  const out = {};
+  for (let i = headerIndex + 2; i < lines.length; i += 1) {
+    const line = lines[i];
+    if (!line.startsWith("|")) break;
+    const parts = line.split("|").map(v => v.trim()).filter(Boolean);
+    if (parts.length < 2) continue;
+    const key = parts[0].replace(/`/g, "");
+    const value = parts[1];
+    if (key && value) out[key] = value;
+  }
+  return out;
+}
+
+function loadMarkdownMap(refRelPath, keyColumnName, valueColumnName) {
+  const refPath = path.join(repoRoot, refRelPath);
+  if (!fs.existsSync(refPath)) return { source: "missing", map: {} };
+  const md = fs.readFileSync(refPath, "utf8");
+  return { source: refRelPath, map: parseMarkdownTableToMap(md, keyColumnName, valueColumnName) };
+}
+
+function loadModuleNameMap() {
+  return loadMarkdownMap("skills/weex-admin-ops/references/mappings/race-activity-modules.md", "模块 key", "前端中文名");
+}
+
+function loadFieldNameMap() {
+  return loadMarkdownMap("skills/weex-admin-ops/references/mappings/race-activity-fields.md", "字段 key", "前端中文名");
 }
 
 async function findByAlias(api, alias) {
@@ -183,21 +214,25 @@ function applyModulesToDetail(current, modules) {
   return patched;
 }
 
-export function buildRaceModuleWizardMenu(activityWebDir) {
-  const { moduleNameMap, sources } = extractSpeedRaceModuleNameMap(activityWebDir);
+export function buildRaceModuleWizardMenu() {
+  const moduleNameMap = loadModuleNameMap();
+  const fieldNameMap = loadFieldNameMap();
   return {
     domain: "活动列表 / 交易竞速赛(RACE_COMPETITION)",
     supportedModules: [
-      { key: "base", label: moduleNameMap.base || "交易竞速赛基本信息" },
-      { key: "userApply", label: moduleNameMap.userApply || "用户报名" },
-      { key: "speedConfig", label: moduleNameMap.speedConfig || "竞速配置" },
-      { key: "prizePool", label: moduleNameMap.prizePool || "奖池配置" },
-      { key: "leaderboard", label: moduleNameMap.leaderboard || "排行榜配置" },
-      { key: "pageSetting", label: moduleNameMap.pageSetting || "活动页面设置" },
-      { key: "i18n", label: moduleNameMap.i18n || "多语言" },
-      { key: "faq", label: moduleNameMap.faq || "常见问题" },
+      { key: "base", label: moduleNameMap.map.base || "交易竞速赛基本信息" },
+      { key: "userApply", label: moduleNameMap.map.userApply || "用户报名" },
+      { key: "speedConfig", label: moduleNameMap.map.speedConfig || "竞速配置" },
+      { key: "prizePool", label: moduleNameMap.map.prizePool || "奖池配置" },
+      { key: "leaderboard", label: moduleNameMap.map.leaderboard || "排行榜配置" },
+      { key: "pageSetting", label: moduleNameMap.map.pageSetting || "活动页面设置" },
+      { key: "i18n", label: moduleNameMap.map.i18n || "多语言" },
+      { key: "faq", label: moduleNameMap.map.faq || "常见问题" },
     ],
-    sources,
+    moduleNameMap: moduleNameMap.map,
+    moduleNameMapSource: moduleNameMap.source,
+    fieldNameMap: fieldNameMap.map,
+    fieldNameMapSource: fieldNameMap.source,
     specTemplate: {
       confirm: false,
       confirmations: { moduleWrites: false },
@@ -260,9 +295,8 @@ async function run() {
 
   loadLocalEnv(repoRoot);
   const config = adminConfig(repoRoot);
-  const activityWebDir = ensureActivityWebDir(repoRoot);
   if (args.wizard) {
-    printJson({ ok: true, mode: "headless_api", wizard: buildRaceModuleWizardMenu(activityWebDir) });
+    printJson({ ok: true, mode: "headless_api", wizard: buildRaceModuleWizardMenu() });
     return 0;
   }
   if (args.dryRun && !args.specFile && !args.specJson && args.action === "snapshot") {

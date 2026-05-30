@@ -16,7 +16,9 @@ function usage() {
 Options:
   --template-id <id>      optional; if omitted, auto-pick an AGENT(14) INVITE_FRIEND template
   --name-prefix <text>    default 人人代理_邀请
+  --invited-name-prefix <text> default 人人代理_被邀请（当模板含 linkTaskId 时，会先创建被邀请任务）
   --tag-prefix <text>     default agiv
+  --invited-tag-prefix <text> default agbe
   --remark <text>         optional
   --confirm-create
   --dry-run
@@ -30,7 +32,9 @@ function parseArgs() {
   args.confirmCreate = Boolean(args.confirmCreate);
   args.templateId = args.templateId ? String(args.templateId) : "";
   args.namePrefix = args.namePrefix ? String(args.namePrefix) : "人人代理_邀请";
+  args.invitedNamePrefix = args.invitedNamePrefix ? String(args.invitedNamePrefix) : "人人代理_被邀请";
   args.tagPrefix = args.tagPrefix ? String(args.tagPrefix) : "agiv";
+  args.invitedTagPrefix = args.invitedTagPrefix ? String(args.invitedTagPrefix) : "agbe";
   args.remark = args.remark ? String(args.remark) : "";
   return args;
 }
@@ -77,6 +81,29 @@ function mutateTaskPayload(payload, args) {
   return { name, tag };
 }
 
+async function createTaskFromTemplate(api, { templateDetail, args, kind, patchPayload }) {
+  const payload = stripCloneFields(templateDetail);
+  if (typeof patchPayload === "function") patchPayload(payload);
+  const mutated = mutateTaskPayload(payload, {
+    ...args,
+    namePrefix: kind === "invited" ? args.invitedNamePrefix : args.namePrefix,
+    tagPrefix: kind === "invited" ? args.invitedTagPrefix : args.tagPrefix,
+  });
+
+  const created = await api.post("/prod-api/activity/task", payload);
+  if (created.body?.code !== 200) {
+    throw new Error(
+      `Create task failed: ${JSON.stringify({ code: created.body?.code, msg: created.body?.msg || created.body?.message })}`,
+    );
+  }
+
+  const verify = await api.get(`/prod-api/activity/task/list?name=${encodeURIComponent(mutated.name)}&pageNum=1&pageSize=1`);
+  const row = firstRow(verify);
+  if (!row?.id) throw new Error(`Created task not found by name: ${mutated.name}`);
+  const detail = await taskDetail(api, row.id);
+  return { id: String(row.id), name: mutated.name, tag: mutated.tag, detail };
+}
+
 async function run() {
   const args = parseArgs();
   if (args.help) {
@@ -86,7 +113,11 @@ async function run() {
 
   loadLocalEnv(repoRoot);
   const config = adminConfig(repoRoot);
-  const plan = { mode: "headless_api", templateId: args.templateId || null, writes: { create: true } };
+  const plan = {
+    mode: "headless_api",
+    templateId: args.templateId || null,
+    writes: { create: true, mayCreateLinkedInvitedTask: true },
+  };
 
   if (args.dryRun) {
     printJson({ ok: true, dryRun: true, plan });
@@ -99,23 +130,32 @@ async function run() {
   const startedAt = Date.now();
   try {
     const template = await pickInviteTemplate(api, args);
-    const payload = stripCloneFields(template);
-    const mutated = mutateTaskPayload(payload, args);
+    const linkTaskId = template?.linkTaskId ? String(template.linkTaskId) : "";
+    let createdLinked = null;
+    let createdInvite = null;
 
-    const created = await api.post("/prod-api/activity/task", payload);
-    if (created.body?.code !== 200) throw new Error(`Create task failed: ${JSON.stringify({ code: created.body?.code, msg: created.body?.msg || created.body?.message })}`);
+    if (linkTaskId) {
+      const linkedTemplate = await taskDetail(api, linkTaskId);
+      createdLinked = await createTaskFromTemplate(api, { templateDetail: linkedTemplate, args, kind: "invited" });
+    }
 
-    const verify = await api.get(`/prod-api/activity/task/list?name=${encodeURIComponent(mutated.name)}&pageNum=1&pageSize=1`);
-    const row = firstRow(verify);
-    if (!row?.id) throw new Error(`Created task not found by name: ${mutated.name}`);
-    const detail = await taskDetail(api, row.id);
+    createdInvite = await createTaskFromTemplate(api, {
+      templateDetail: template,
+      args,
+      kind: "invite",
+      patchPayload: payload => {
+        if (createdLinked?.id) payload.linkTaskId = Number(createdLinked.id);
+      },
+    });
 
     printJson({
       ok: true,
       mode: "headless_api",
       finalUrl: `${config.baseUrl}/activity/task`,
-      created: { id: String(row.id), name: mutated.name, tag: mutated.tag },
-      createdTaskDetail: detail,
+      created: { id: String(createdInvite.id), name: createdInvite.name, tag: createdInvite.tag },
+      createdTaskDetail: createdInvite.detail,
+      createdLinked: createdLinked ? { id: String(createdLinked.id), name: createdLinked.name, tag: createdLinked.tag } : null,
+      createdLinkedTaskDetail: createdLinked ? createdLinked.detail : null,
       durationMs: Date.now() - startedAt,
     });
     return 0;
@@ -130,4 +170,3 @@ try {
   printJson({ ok: false, mode: "headless_api", error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-

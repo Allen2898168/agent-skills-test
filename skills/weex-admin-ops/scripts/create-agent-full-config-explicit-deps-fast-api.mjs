@@ -225,7 +225,7 @@ async function run() {
   assertAdminLoginConfig(config);
   const startedAt = Date.now();
 
-  const created = { applyConfigId: "", registerTemplateId: "", taskId: "", taskDetail: null };
+  const created = { applyConfigId: "", registerTemplateId: "", taskId: "", taskDetail: null, linkedTaskId: "", linkedTaskDetail: null };
   let api = null;
   try {
 	    const apiForTemplate = await createAdminApiSession({ config, requireApiLogin: true });
@@ -258,6 +258,8 @@ async function run() {
     if (!task.ok) throw new Error(`create-agent-invite-task-fast-api.mjs failed: ${task.json?.error || "unknown"}`);
     created.taskId = String(task.json?.created?.id || "");
     created.taskDetail = task.json?.createdTaskDetail || null;
+    created.linkedTaskId = String(task.json?.createdLinked?.id || "");
+    created.linkedTaskDetail = task.json?.createdLinkedTaskDetail || null;
     if (!created.taskId || !created.taskDetail) throw new Error("No task id/detail returned from create-agent-invite-task-fast-api.mjs");
 
 	    // Child scripts may perform API logins that invalidate previously issued tokens.
@@ -328,6 +330,7 @@ async function run() {
       dependencyIds: {
         createdRegisterTemplateId: created.registerTemplateId,
         createdTaskId: created.taskId,
+        createdLinkedTaskId: created.linkedTaskId || null,
         template: { activityId: template.id, alias: template.alias || null },
       },
       plan,
@@ -346,8 +349,10 @@ async function run() {
 	      })),
 	      deleteActivity: await deleteActivity(api, activityId, config),
 	      deleteTask: await deleteTask(api, created.taskId),
+	      deleteLinkedTask: { ok: true, skipped: true },
 	      deleteRegisterTemplate: { ok: true, skipped: true },
 	    };
+	    if (created.linkedTaskId) cleanup.deleteLinkedTask = await deleteTask(api, created.linkedTaskId);
 	    if (created.registerTemplateId) {
 	      let delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
 	      for (let attempt = 1; !delRegister.ok && attempt <= 3; attempt++) {
@@ -361,6 +366,7 @@ async function run() {
     const ok =
       cleanup.deleteActivity.ok
       && cleanup.deleteTask.ok
+      && cleanup.deleteLinkedTask.ok
       && cleanup.deleteRegisterTemplate.ok;
     printJson({ ...evidence, cleanedUp: ok, cleanup, durationMs: Date.now() - startedAt }, ok ? process.stdout : process.stderr);
     await api.close();

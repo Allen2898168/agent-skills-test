@@ -99,9 +99,15 @@ function runMatchedCommand(commandArgs) {
 }
 
 function decorateCommand(command) {
-  const activityWebDir = ensureActivityWebDir(executionRoot);
-  const raffleStyles = extractLotteryRaffleStyles(activityWebDir).styles || [];
-  const activityTypes = extractActivityTaskListTypes(activityWebDir).options || [];
+  let raffleStyles = [];
+  let activityTypes = [];
+  try {
+    const activityWebDir = ensureActivityWebDir(executionRoot);
+    raffleStyles = extractLotteryRaffleStyles(activityWebDir).styles || [];
+    activityTypes = extractActivityTaskListTypes(activityWebDir).options || [];
+  } catch {
+    // Decorator is best-effort for display only; command execution must not depend on activity-web.
+  }
   const out = [...command];
   for (let i = 0; i < out.length - 1; i += 1) {
     const flag = out[i];

@@ -33,8 +33,8 @@
 ## 2026-05-28 clone 任务时 linkTaskId 绑定冲突（人人代理活动）
 - 业务线：活动任务管理。
 - 场景：按活动类型筛选模板任务后 clone 创建“最小配置任务”（无头 API）。
-- 失败表现：`POST /prod-api/activity/task` 返回 `code=500`，提示 `被邀请任务已被任务编号：5977绑定`。
-- 失败原因：模板任务包含 `linkTaskId` 等关联字段，直接 clone 会触发后端绑定/唯一性校验。
-- 解决方式：clone payload 统一清空 `linkTaskId`（含嵌套字段）后再创建。
-- 验证结果：已通过 `scripts/verify-activity-tasks-all-types-fast-api.mjs --types AGENT --confirm` 创建→回查→删除闭环验证。
-- 关联文件：`references/operations/activity-task-management-all-types.md`、`scripts/verify-activity-tasks-all-types-fast-api.mjs`。
+- 失败表现：`POST /prod-api/activity/task` 返回 `code=500`，提示 `被邀请任务已被任务编号：6039绑定`（或同类文案）。
+- 失败原因：`INVITE_FRIEND` 模板任务通常带 `linkTaskId` 指向一条 `INVITED` 被邀请任务；直接 clone 会复用同一个被邀请任务，触发后端“一对一绑定”校验。
+- 解决方式：当模板含 `linkTaskId` 时，先 clone 创建新的 `INVITED` 被邀请任务，再创建 `INVITE_FRIEND` 邀请任务并把 `linkTaskId` 指向新建任务；清理时需要删除两条任务。
+- 验证结果：已沉淀到脚本，待在 staging 跑 `verify-nonlottery-api-full-config-staging.mjs --only agent` 验证 min/full/cleanup 闭环。
+- 关联文件：`scripts/create-agent-invite-task-fast-api.mjs`、`scripts/create-agent-full-config-explicit-deps-fast-api.mjs`。

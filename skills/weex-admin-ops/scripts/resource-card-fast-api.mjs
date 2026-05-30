@@ -4,9 +4,25 @@ import path from "node:path";
 import { parseFlags, printJson, timestamp } from "./lib/cli.mjs";
 import { adminConfig, assertAdminLoginConfig, loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
 import { createAdminApiSession, firstRow } from "./lib/admin-api.mjs";
-import { ensureActivityWebDir, extractActivityTaskListTypes, resolveOptionValue } from "./lib/activity-web-mappings.mjs";
+import { resolveOptionValue } from "./lib/activity-web-mappings.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
+
+const BUILTIN_ACTIVITY_TYPE_OPTIONS = [
+  { label: "新手活动", value: "BEGINNER_TASK" },
+  { label: "转盘抽奖", value: "LOTTERY" },
+  { label: "交易大赛", value: "TRADING_COMPETITION" },
+  { label: "交易竞速赛", value: "RACE_COMPETITION" },
+  { label: "小活动型活动", value: "TRACE_PRO" },
+  { label: "定制化活动", value: "CUSTOMIZED" },
+  { label: "充值交易活动", value: "RECHARGE_TRANS_TASK" },
+  { label: "人人代理活动", value: "AGENT" },
+  { label: "合约挖矿活动", value: "CONTRACT_MINING" },
+  { label: "小丑牌活动", value: "FLIP" },
+  { label: "竞猜大赛", value: "GUESS" },
+  { label: "大富翁世界杯", value: "MONOPOLY_WORLD_CUP" },
+  { label: "代理小活动", value: "AGENT_TRACE_PRO" },
+];
 
 function usage() {
   return `Usage:
@@ -298,16 +314,14 @@ async function run() {
     process.stdout.write(usage());
     return 0;
   }
-  const activityWebDir = ensureActivityWebDir(repoRoot);
-  const activityTypeCatalog = extractActivityTaskListTypes(activityWebDir);
-  const activityTypeOptions = activityTypeCatalog.options || [];
+  const activityTypeOptions = BUILTIN_ACTIVITY_TYPE_OPTIONS;
   if (args.wizard) {
     printJson({
       ok: true,
       mode: "headless_api",
       wizard: true,
       activityTypeOptions,
-      sources: { activityTypeOptionsFrom: activityTypeCatalog.filePath },
+      sources: { activityTypeOptionsFrom: "built-in (skills/weex-admin-ops/scripts/resource-card-fast-api.mjs)" },
       specTemplates: wizardSpec(),
     });
     return 0;
