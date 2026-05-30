@@ -114,7 +114,7 @@ function loadModuleNameMap() {
     const value = parts[1];
     if (key && value) map[key] = value;
   }
-  return { source: "skills/weex-admin-ops/references/mappings/monopoly-worldcup-activity-modules.md", map };
+  return { source: "references/mappings/monopoly-worldcup-activity-modules.md", map };
 }
 
 function wizardReplyTemplate() {
@@ -300,7 +300,7 @@ async function run() {
     return 0;
   }
   if (!args.confirm || args.wizard || !args.preset) {
-    printJson(wizardOutput());
+    printJson({ ok: true, mode: "headless_api", wizard: wizardOutput() });
     return 0;
   }
   requireHighRiskConfirmations(args);
@@ -316,7 +316,6 @@ async function run() {
 try {
   process.exitCode = await run();
 } catch (error) {
-  printJson({ ok: false, error: error.message }, process.stderr);
+  printJson({ ok: false, mode: "headless_api", error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-

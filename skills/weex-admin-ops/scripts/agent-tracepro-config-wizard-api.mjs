@@ -299,7 +299,7 @@ async function run() {
   args = loadSpecOverrides(args);
   const wantWizard = args.wizard || !args.confirm;
   if (wantWizard) {
-    printJson(buildWizardMenu());
+    printJson({ ok: true, mode: "headless_api", wizard: buildWizardMenu() });
     return 0;
   }
 
@@ -327,4 +327,3 @@ try {
   printJson({ ok: false, mode: "headless_api", error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-

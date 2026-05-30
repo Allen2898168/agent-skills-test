@@ -576,7 +576,7 @@
       "verifiedModes": ["headless_api"],
       "lastVerifiedAt": "2026-05-28",
       "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
-      "fallback": "Use activity-web UI workflow for task package management if the API changes."
+      "fallback": "如 API 变更导致脚本不可用：回退到后管页面手工流程（活动通用模块管理/任务包管理），并根据新接口更新脚本。"
     },
     {
       "id": "create_resource_cards",
@@ -590,7 +590,7 @@
       "verifiedModes": ["headless_api"],
       "lastVerifiedAt": "2026-05-28",
       "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
-      "fallback": "Use activity-web UI workflow for resource card management if the API changes."
+      "fallback": "如 API 变更导致脚本不可用：回退到后管页面手工流程（活动通用模块管理/资源位信息卡片），并根据新接口更新脚本。"
     },
     {
       "id": "create_multilanguage_templates",
@@ -604,7 +604,7 @@
       "verifiedModes": ["headless_api"],
       "lastVerifiedAt": "2026-05-28",
       "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
-      "fallback": "Use activity-web UI workflow for multi-language template management if the API changes."
+      "fallback": "如 API 变更导致脚本不可用：回退到后管页面手工流程（活动通用模块管理/多语言模板），并根据新接口更新脚本。"
     },
     {
       "id": "manage_multilanguage_template_items",
@@ -618,7 +618,7 @@
       "verifiedModes": ["dry_run"],
       "lastVerifiedAt": "2026-05-28",
       "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
-      "fallback": "Use activity-web UI workflow: 活动通用模块管理/多语言配置/查看/编辑渠道标题."
+      "fallback": "如需要可见/页面操作：回退到后管页面手工流程（活动通用模块管理/多语言配置/查看/编辑渠道标题）。"
     },
     {
       "id": "batch_bind_i18n_templates",
@@ -632,7 +632,7 @@
       "verifiedModes": ["dry_run"],
       "lastVerifiedAt": "2026-05-28",
       "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
-      "fallback": "Use activity-web UI workflow: 新手活动列表/批量绑定模版 dialog."
+      "fallback": "如需要可见/页面操作：回退到后管页面手工流程（新手活动列表/批量绑定模版弹窗）。"
     },
     {
       "id": "create_lottery_activity_draft",

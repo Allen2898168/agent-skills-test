@@ -113,7 +113,7 @@ function loadModuleNameMap() {
     if (parts.length < 2) continue;
     map[parts[0].replace(/`/g, "")] = parts[1];
   }
-  return { source: "skills/weex-admin-ops/references/mappings/contract-mining-activity-modules.md", map };
+  return { source: "references/mappings/contract-mining-activity-modules.md", map };
 }
 
 function wizardReplyTemplate() {
@@ -290,7 +290,7 @@ async function run() {
   const args = loadSpecOverrides(raw);
   const isWizard = args.wizard || !args.confirm;
   if (isWizard) {
-    printJson({ ok: true, mode: "headless_api", ...wizardOutput() });
+    printJson({ ok: true, mode: "headless_api", wizard: wizardOutput() });
     return 0;
   }
 
@@ -313,4 +313,3 @@ try {
   printJson({ ok: false, mode: "headless_api", error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-
