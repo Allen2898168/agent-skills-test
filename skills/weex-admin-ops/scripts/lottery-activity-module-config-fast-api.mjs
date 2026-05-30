@@ -4,11 +4,9 @@ import path from "node:path";
 import { parseFlags, printJson } from "./lib/cli.mjs";
 import { adminConfig, assertAdminLoginConfig, loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
 import { createAdminApiSession, firstRow } from "./lib/admin-api.mjs";
-import {
-  ensureActivityWebDir,
-  extractLotteryRaffleStyles,
-  resolveOptionValue,
-} from "./lib/activity-web-mappings.mjs";
+import { resolveOptionValue } from "./lib/activity-web-mappings.mjs";
+import { loadLotteryRaffleStyleCatalog } from "./lib/catalogs.mjs";
+import { loadMarkdownTableMap } from "./lib/mapping-md.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
 
@@ -82,6 +80,26 @@ function requireConfirmations(spec, args) {
   if (!confirm) throw new Error("需要用户确认：请在 spec 里设置 confirm=true 并传 --confirm。");
   const confirmations = spec?.confirmations || {};
   if (confirmations.moduleWrites !== true) throw new Error("高风险确认未完成：confirmations.moduleWrites 需要为 true。");
+}
+
+function loadModuleNameMap() {
+  return loadMarkdownTableMap({
+    repoRoot,
+    fileRelPath: "skills/weex-admin-ops/references/mappings/lottery-activity-modules.md",
+    sourceRelPath: "references/mappings/lottery-activity-modules.md",
+    keyColumnName: "模块 key",
+    valueColumnName: "前端中文名",
+  });
+}
+
+function loadFieldNameMap() {
+  return loadMarkdownTableMap({
+    repoRoot,
+    fileRelPath: "skills/weex-admin-ops/references/mappings/lottery-activity-fields.md",
+    sourceRelPath: "references/mappings/lottery-activity-fields.md",
+    keyColumnName: "字段 key",
+    valueColumnName: "前端中文名",
+  });
 }
 
 async function findByAlias(api, alias) {
@@ -206,8 +224,7 @@ async function update(api, args, config) {
   const spec = loadSpec(args);
   if (!spec) throw new Error("spec is required: provide --spec-file or --spec-json");
   requireConfirmations(spec, args);
-  const activityWebDir = ensureActivityWebDir(repoRoot);
-  const raffleStyleCatalog = extractLotteryRaffleStyles(activityWebDir);
+  const raffleStyleCatalog = loadLotteryRaffleStyleCatalog(repoRoot);
   const raffleStyleOptions = raffleStyleCatalog.styles || [];
 
   const target = await resolveTarget(api, args);
@@ -247,44 +264,53 @@ async function run() {
     process.stdout.write(usage());
     return 0;
   }
-  if (!args.action && !args.wizard) throw new Error("--action is required");
-
-  loadLocalEnv(repoRoot);
-  const config = adminConfig(repoRoot);
-
   if (args.wizard) {
-    const activityWebDir = ensureActivityWebDir(repoRoot);
-    const raffleStyleCatalog = extractLotteryRaffleStyles(activityWebDir);
+    const raffleStyleCatalog = loadLotteryRaffleStyleCatalog(repoRoot);
+    const moduleNameMap = loadModuleNameMap();
+    const fieldNameMap = loadFieldNameMap();
+    const styleValue = String(raffleStyleCatalog.styles?.[0]?.value || "CIRCLE");
     printJson({
       ok: true,
-      dryRun: true,
-      wizard: {
-        domain: "活动列表 / 转盘抽奖(LOTTERY) 模块级自由配置（API）",
-        raffleStyleOptions: raffleStyleCatalog.styles,
-        sources: { raffleStyleOptionsFrom: raffleStyleCatalog.filePath },
-        supportedModules: ["base", "style", "tasks", "prize", "prizeWeight", "colorTag", "dailyLimit", "probability", "i18n", "faq", "calendar", "preApply"],
-        oneShotReplyTemplate: {
-          confirm: false,
-          confirmations: { moduleWrites: false },
-          modules: {
-            base: { title: "", showUrl: "", startTime: "", endTime: "", applyConfigId: null },
-            style: { raffleStyle: String(raffleStyleCatalog.styles?.[0]?.value || "CIRCLE") },
-            tasks: { taskConfig: [], showBeginnerTaskConfig: [] },
-            prize: { prize: [] },
-            prizeWeight: { prizeWeightConfig: {}, prizeWeight: [] },
-            colorTag: { prizeColorTagWeightConfig: {} },
-            dailyLimit: { prizeLimited: [] },
-            probability: { prizeWeight: [] },
-            i18n: { activityConfigI18n: [] },
-            faq: { questions: [] },
-            calendar: { syncCalendarFlag: 0, syncCalendarDto: {} },
-            preApply: { isPreApply: 0, preApplyConfigId: "", preApplyStartTime: "", preApplyEndTime: "" },
-          },
+      mode: "headless_api",
+      wizard: true,
+      domain: "活动列表 / 转盘抽奖(LOTTERY) 模块级自由配置（API）",
+      moduleNameMap: moduleNameMap.map,
+      moduleNameMapSource: moduleNameMap.source,
+      fieldNameMap: fieldNameMap.map,
+      fieldNameMapSource: fieldNameMap.source,
+      raffleStyleOptions: raffleStyleCatalog.styles,
+      raffleStyleOptionsSource: raffleStyleCatalog.source,
+      supportedModules: ["base", "style", "tasks", "prize", "prizeWeight", "colorTag", "dailyLimit", "probability", "i18n", "faq", "calendar", "preApply"],
+      oneShotSpecTemplate: {
+        confirm: false,
+        confirmations: { moduleWrites: false },
+        modules: {
+          base: { title: "", showUrl: "", startTime: "", endTime: "", applyConfigId: null },
+          style: { raffleStyle: styleValue },
+          tasks: { taskConfig: [], showBeginnerTaskConfig: [] },
+          prize: { prize: [] },
+          prizeWeight: { prizeWeightConfig: {}, prizeWeight: [] },
+          colorTag: { prizeColorTagWeightConfig: {} },
+          dailyLimit: { prizeLimited: [] },
+          probability: { prizeWeight: [] },
+          i18n: { activityConfigI18n: [] },
+          faq: { questions: [] },
+          calendar: { syncCalendarFlag: 0, syncCalendarDto: {}, imageUrlI18n: [], iconUrlI18n: [] },
+          preApply: { isPreApply: 0, preApplyConfigId: "", preApplyStartTime: "", preApplyEndTime: "" },
         },
       },
+      notes: [
+        "update：需在 spec.confirm=true 且 confirmations.moduleWrites=true 后才允许写入。",
+        "raffleStyle 会按 raffleStyleOptions 进行归一化（支持传 label/value）。",
+      ],
     });
     return 0;
   }
+
+  if (!args.action) throw new Error("--action is required");
+
+  loadLocalEnv(repoRoot);
+  const config = adminConfig(repoRoot);
   if (args.dryRun && args.action === "snapshot") {
     printJson({ ok: true, dryRun: true, mode: "headless_api", args });
     return 0;

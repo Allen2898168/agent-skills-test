@@ -4,7 +4,7 @@
 
 来源：`activity-web/activity-ui/src/views/activity/newbie/components/addAndEdit.vue` 的模块组件及其 `el-card header` 标题。
 
-| 模块 key | 前端中文名（el-card header） | 前端组件路径 |
+| 模块 key | 前端中文名 | 前端组件路径 |
 | --- | --- | --- |
 | `base` | 活动基本信息 | `activity-web/activity-ui/src/views/activity/newbie/components/baseForm.vue` |
 | `userApply` | 用户报名 | `activity-web/activity-ui/src/views/activity/newbie/components/userApply.vue` |

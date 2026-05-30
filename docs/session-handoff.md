@@ -26,6 +26,8 @@
 
 - 2026-05-30 模块级配置脚本 `--wizard` 收口：`CONTRACT_MINING / FLIP / GUESS / MONOPOLY_WORLD_CUP / AGENT_TRACE_PRO` 的模块配置脚本支持不传 `--action`/不传活动 ID 直接输出中文映射 + one-shot spec 模板；并统一 wizard 输出 `moduleNameMapSource/fieldNameMapSource` 为 `references/mappings/*.md`。
 
+- 2026-05-30 活动列表“无 activity-web 运行时依赖”推进：新增 `references/catalogs/*.json`（活动任务类型、转盘抽奖样式、转盘抽奖支持任务）并改造 `newbie/lottery` 的 wizard 与 `verify-activity-tasks-*-all-types` 脚本改为读取 catalog；补齐新手/转盘的模块/字段中文映射（`references/mappings/newbie-activity-fields.md`、`references/mappings/lottery-activity-*.md`）；新增覆盖审计：`scripts/maintenance/audit-activity-api-full-config-coverage-all.mjs`。
+
 - 2026-05-30 人人代理(AGENT) 任务 clone 绑定冲突修复：`INVITE_FRIEND` 模板含 `linkTaskId` 时，脚本改为先 clone 创建新的 `INVITED` 被邀请任务，再创建邀请任务并重绑 `linkTaskId`；`create-agent-full-config-explicit-deps-fast-api.mjs` cleanup 同步删除两条任务；staging 已跑通 `verify-nonlottery-api-full-config-staging.mjs --only agent` 的 min/full/cleanup 闭环验证。
 
 - 2026-05-30 非转盘/非新手活动 staging 证据闭环：已跑通 `verify-nonlottery-api-full-config-staging.mjs` 的 `--verify-level min --only all` 与 `--verify-level full --only all`，覆盖 `TRADING_COMPETITION/RACE_COMPETITION/TRACE_PRO/CUSTOMIZED/RECHARGE_TRANS_TASK/AGENT/CONTRACT_MINING/FLIP/GUESS/MONOPOLY_WORLD_CUP/AGENT_TRACE_PRO` 的显式依赖创建、最小验证、最全验证（上线/下线）、清理删除闭环。

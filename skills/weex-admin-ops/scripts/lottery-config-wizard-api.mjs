@@ -5,6 +5,8 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { parseFlags, printJson } from "./lib/cli.mjs";
 import { pathsFrom } from "./lib/runtime.mjs";
+import { loadLotteryRaffleStyleCatalog, loadLotterySupportedTasksCatalog } from "./lib/catalogs.mjs";
+import { loadMarkdownTableMap } from "./lib/mapping-md.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
 
@@ -145,23 +147,23 @@ function lotteryModules() {
   ];
 }
 
-function buildWizardMenu(activityWebDir) {
-  const raffle = extractRaffleStyles(activityWebDir);
-  const tasks = extractLotteryTasks(activityWebDir);
-  const payload = extractLotteryPayloadKeys(activityWebDir);
-  const moduleFields = {
-    base: extractVueFormFields(activityWebDir, "activity-ui/src/views/activity/lottery/components/baseForm.vue"),
-    style: extractVueFormFields(activityWebDir, "activity-ui/src/views/activity/lottery/components/styleForm.vue"),
-    prize: extractVueFormFields(activityWebDir, "activity-ui/src/views/activity/lottery/components/prizeConfigForm.vue"),
-    prizeWeight: extractVueFormFields(activityWebDir, "activity-ui/src/views/activity/lottery/components/prizeWeightForm.vue"),
-    colorTag: extractVueFormFields(activityWebDir, "activity-ui/src/views/activity/lottery/components/colorTagConfigForm.vue"),
-    share: extractVueFormFields(activityWebDir, "activity-ui/src/views/activity/lottery/components/shareInfoForm.vue"),
-    dailyLimit: extractVueFormFields(activityWebDir, "activity-ui/src/views/activity/lottery/components/dailyLimitForm.vue"),
-    probability: extractVueFormFields(activityWebDir, "activity-ui/src/views/activity/lottery/components/prizeProbabilityForm.vue"),
-    tasks: extractVueFormFields(activityWebDir, "activity-ui/src/views/activity/lottery/components/activityTaskForm.vue"),
-    i18n: extractVueFormFields(activityWebDir, "activity-ui/src/views/activity/lottery/components/i18nConfigForm.vue"),
-    faq: extractVueFormFields(activityWebDir, "activity-ui/src/views/activity/lottery/components/FAQForm.vue"),
-  };
+function buildWizardMenu() {
+  const raffle = loadLotteryRaffleStyleCatalog(repoRoot);
+  const tasks = loadLotterySupportedTasksCatalog(repoRoot);
+  const moduleNameMap = loadMarkdownTableMap({
+    repoRoot,
+    fileRelPath: "skills/weex-admin-ops/references/mappings/lottery-activity-modules.md",
+    sourceRelPath: "references/mappings/lottery-activity-modules.md",
+    keyColumnName: "模块 key",
+    valueColumnName: "前端中文名",
+  });
+  const fieldNameMap = loadMarkdownTableMap({
+    repoRoot,
+    fileRelPath: "skills/weex-admin-ops/references/mappings/lottery-activity-fields.md",
+    sourceRelPath: "references/mappings/lottery-activity-fields.md",
+    keyColumnName: "字段 key",
+    valueColumnName: "前端中文名",
+  });
 
   const oneShotReplyTemplate = {
     specVersion: 1,
@@ -217,18 +219,21 @@ function buildWizardMenu(activityWebDir) {
   ];
 
   return {
-    activityWebDir,
     lottery: {
       modules: lotteryModules(),
-      uiPayloadKeys: payload,
-      uiModuleFields: moduleFields,
+      moduleNameMap: moduleNameMap.map,
+      moduleNameMapSource: moduleNameMap.source,
+      fieldNameMap: fieldNameMap.map,
+      fieldNameMapSource: fieldNameMap.source,
       raffleStyles: raffle.styles,
+      raffleStylesSource: raffle.source,
       supportedTasks: tasks.tasks,
+      supportedTasksSource: tasks.source,
       sources: {
-        raffleStylesFrom: raffle.filePath,
-        supportedTasksFrom: tasks.filePath,
-        payloadKeysFrom: payload.filePath,
-        moduleFieldsFrom: "activity-ui/src/views/activity/lottery/components/*.vue",
+        moduleNameMapFrom: moduleNameMap.source,
+        fieldNameMapFrom: fieldNameMap.source,
+        raffleStylesFrom: raffle.source,
+        supportedTasksFrom: tasks.source,
       },
       dependencyDefaults,
       defaultUniversalConfig: {
@@ -281,12 +286,6 @@ function buildWizardMenu(activityWebDir) {
       ],
     },
   };
-}
-
-function ensureActivityWebDir() {
-  const activityWebDir = path.join(repoRoot, "activity-web");
-  if (!fs.existsSync(activityWebDir)) throw new Error(`activity-web not found: ${activityWebDir}`);
-  return activityWebDir;
 }
 
 function runPreset(args) {
@@ -391,8 +390,7 @@ function main() {
   args = loadSpecOverrides(args);
   requireHighRiskConfirmations(args);
 
-  const activityWebDir = ensureActivityWebDir();
-  const wizard = buildWizardMenu(activityWebDir);
+  const wizard = buildWizardMenu();
 
   if (!args.confirm) {
     printJson({ ok: true, dryRun: true, wizard });

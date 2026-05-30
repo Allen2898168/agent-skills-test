@@ -4,6 +4,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { parseFlags, printJson } from "./lib/cli.mjs";
 import { pathsFrom } from "./lib/runtime.mjs";
+import { loadMarkdownTableMap } from "./lib/mapping-md.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
 
@@ -105,16 +106,21 @@ function newbieModules() {
   ];
 }
 
-function buildWizardMenu(activityWebDir) {
-  const payloadKeys = extractPayloadKeys(activityWebDir);
-  const moduleFields = {
-    base: extractVueFormFields(activityWebDir, "activity-ui/src/views/activity/newbie/components/baseForm.vue"),
-    i18n: extractVueFormFields(activityWebDir, "activity-ui/src/views/activity/newbie/components/i18nConfigForm.vue"),
-    userApply: extractVueFormFields(activityWebDir, "activity-ui/src/views/activity/newbie/components/userApply.vue"),
-    resourceCard: extractVueFormFields(activityWebDir, "activity-ui/src/views/activity/newbie/components/ResourceCardForm.vue"),
-    tasks: { filePath: path.join(activityWebDir, "activity-ui/src/views/activity/newbie/components/taskForm/index.vue"), notes: ["任务包(taskPackageId/routineTaskPackageId) 或 自定义任务(taskConfig/routineTaskConfig) 二选一"] },
-    faq: { filePath: path.join(activityWebDir, "activity-ui/src/views/activity/lottery/components/FAQForm.vue"), notes: ["新手活动复用 lottery FAQForm"] },
-  };
+function buildWizardMenu() {
+  const moduleNameMap = loadMarkdownTableMap({
+    repoRoot,
+    fileRelPath: "skills/weex-admin-ops/references/mappings/newbie-activity-modules.md",
+    sourceRelPath: "references/mappings/newbie-activity-modules.md",
+    keyColumnName: "模块 key",
+    valueColumnName: "前端中文名",
+  });
+  const fieldNameMap = loadMarkdownTableMap({
+    repoRoot,
+    fileRelPath: "skills/weex-admin-ops/references/mappings/newbie-activity-fields.md",
+    sourceRelPath: "references/mappings/newbie-activity-fields.md",
+    keyColumnName: "字段 key",
+    valueColumnName: "前端中文名",
+  });
 
   const oneShotReplyTemplate = {
     specVersion: 1,
@@ -142,8 +148,10 @@ function buildWizardMenu(activityWebDir) {
     domain: "活动列表 / 新手活动(BEGINNER_TASK)",
     mode: "headless_api_only",
     supportedModules: newbieModules(),
-    uiPayloadKeys: payloadKeys,
-    uiModuleFields: moduleFields,
+    moduleNameMap: moduleNameMap.map,
+    moduleNameMapSource: moduleNameMap.source,
+    fieldNameMap: fieldNameMap.map,
+    fieldNameMapSource: fieldNameMap.source,
     requiredTemplateNote: "无头全配置创建默认采用“clone 现有全配置新手活动模板”；请在一次性模板里填写 templateAlias 或 templateId（建议 templateId）。",
     confirmationRequired: [
       "多语言模板(multiLanguageTemplateId)与其导致的表单禁用逻辑",
@@ -166,12 +174,6 @@ function buildWizardMenu(activityWebDir) {
       "full_create_verify_delete 会创建并删除测试活动，确保无残留。",
     ],
   };
-}
-
-function ensureActivityWebDir() {
-  const activityWebDir = path.join(repoRoot, "activity-web");
-  if (!fs.existsSync(activityWebDir)) throw new Error(`activity-web not found: ${activityWebDir}`);
-  return activityWebDir;
 }
 
 function loadSpecOverrides(args) {
@@ -266,8 +268,7 @@ function main() {
   if (!args.preset) args.preset = "full_create_verify_delete";
   requireHighRiskConfirmations(args);
 
-  const activityWebDir = ensureActivityWebDir();
-  const wizard = buildWizardMenu(activityWebDir);
+  const wizard = buildWizardMenu();
 
   if (!args.confirm) {
     printJson({ ok: true, dryRun: true, wizard });

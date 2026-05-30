@@ -1,0 +1,25 @@
+{
+  "source": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/activity-web/activity-ui/src/views/activity/lottery/components/styleForm.vue",
+  "styles": [
+    {
+      "value": "CIRCLE",
+      "label": "圆形转盘"
+    },
+    {
+      "value": "DART",
+      "label": "飞镖转盘"
+    },
+    {
+      "value": "EASTER_EGG",
+      "label": "彩蛋"
+    },
+    {
+      "value": "CIRCULAR_RECORD",
+      "label": "环形跑马灯"
+    },
+    {
+      "value": "WORLD_CUP_KICK_BALL",
+      "label": "足球射门"
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "source": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/activity-web/activity-ui/src/views/activity/const/index.js",
+  "list": [
+    {
+      "key": "TRADING_COMPETITION",
+      "label": "交易大赛",
+      "value": "TRADING_COMPETITION"
+    },
+    {
+      "key": "RACE_COMPETITION",
+      "label": "交易竞速赛",
+      "value": "RACE_COMPETITION"
+    },
+    {
+      "key": "BEGINNER_TASK",
+      "label": "新手活动",
+      "value": "BEGINNER_TASK"
+    },
+    {
+      "key": "LOTTERY",
+      "label": "转盘抽奖",
+      "value": "LOTTERY"
+    },
+    {
+      "key": "TRACE_PRO",
+      "label": "小活动型活动",
+      "value": "TRACE_PRO"
+    },
+    {
+      "key": "CUSTOMIZED",
+      "label": "定制化活动",
+      "value": "CUSTOMIZED"
+    },
+    {
+      "key": "RECHARGE_TRANS_TASK",
+      "label": "充值交易活动",
+      "value": "RECHARGE_TRANS_TASK"
+    },
+    {
+      "key": "AGENT",
+      "label": "人人代理活动",
+      "value": "AGENT"
+    },
+    {
+      "key": "CONTRACT_MINING",
+      "label": "合约挖矿活动",
+      "value": "CONTRACT_MINING"
+    },
+    {
+      "key": "FLIP",
+      "label": "小丑牌活动",
+      "value": "FLIP"
+    },
+    {
+      "key": "GUESS",
+      "label": "竞猜大赛",
+      "value": "GUESS"
+    },
+    {
+      "key": "MONOPOLY_WORLD_CUP",
+      "label": "大富翁世界杯",
+      "value": "MONOPOLY_WORLD_CUP"
+    },
+    {
+      "key": "AGENT_TRACE_PRO",
+      "label": "代理小活动",
+      "value": "AGENT_TRACE_PRO"
+    },
+    {
+      "key": "NONE",
+      "label": "暂无特殊配置",
+      "value": "NONE"
+    }
+  ],
+  "backendMapping": {
+    "BEGINNER_TASK": 1,
+    "TRADING_COMPETITION": 2,
+    "SUBSCRIBE": 3,
+    "FIREWORKS_TASK": 4,
+    "LOTTERY": 5,
+    "AUTO_APPLY": 6,
+    "TRACE_PRO": 7,
+    "RECHARGE_TRANS_TASK": 12,
+    "AGENT": 14,
+    "RACE_COMPETITION": 20,
+    "AGENT_TRACE_PRO": 21,
+    "GUESS": 22,
+    "MONOPOLY_WORLD_CUP": 23,
+    "CUSTOMIZED": 9,
+    "CONTRACT_MINING": 15
+  },
+  "mappingByValue": {
+    "TRADING_COMPETITION": 2,
+    "RACE_COMPETITION": 20,
+    "BEGINNER_TASK": 1,
+    "LOTTERY": 5,
+    "TRACE_PRO": 7,
+    "CUSTOMIZED": 9,
+    "RECHARGE_TRANS_TASK": 12,
+    "AGENT": 14,
+    "CONTRACT_MINING": 15,
+    "GUESS": 22,
+    "MONOPOLY_WORLD_CUP": 23,
+    "AGENT_TRACE_PRO": 21
+  }
+}

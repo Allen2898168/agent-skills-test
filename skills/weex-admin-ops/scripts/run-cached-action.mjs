@@ -8,11 +8,9 @@ import { matchAction } from "./cache/matcher.mjs";
 import {
   decorateCsvValues,
   decorateValue,
-  ensureActivityWebDir,
-  extractActivityTaskListTypes,
-  extractLotteryRaffleStyles,
   resolveOptionValue,
 } from "./lib/activity-web-mappings.mjs";
+import { loadActivityTaskTypeCatalog, loadLotteryRaffleStyleCatalog } from "./lib/catalogs.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -99,15 +97,8 @@ function runMatchedCommand(commandArgs) {
 }
 
 function decorateCommand(command) {
-  let raffleStyles = [];
-  let activityTypes = [];
-  try {
-    const activityWebDir = ensureActivityWebDir(executionRoot);
-    raffleStyles = extractLotteryRaffleStyles(activityWebDir).styles || [];
-    activityTypes = extractActivityTaskListTypes(activityWebDir).options || [];
-  } catch {
-    // Decorator is best-effort for display only; command execution must not depend on activity-web.
-  }
+  const raffleStyles = loadLotteryRaffleStyleCatalog(executionRoot).styles || [];
+  const activityTypes = loadActivityTaskTypeCatalog(executionRoot).list || [];
   const out = [...command];
   for (let i = 0; i < out.length - 1; i += 1) {
     const flag = out[i];

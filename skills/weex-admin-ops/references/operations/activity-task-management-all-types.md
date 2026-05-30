@@ -34,7 +34,6 @@
 
 ## 说明
 
-- 活动类型与后端筛选 code 来源：`activity-web/activity-ui/src/views/activity/const/index.js`（脚本会读取并解析 `ACTIVITY_TASK_LIST_TYPE` + `ACTIVITY_BACKEND_MAPPING`，并补齐 `CUSTOMIZED=9`、`CONTRACT_MINING=15`）。
+- 活动类型与后端筛选 code 以 skill 内 catalog 为准：`skills/weex-admin-ops/references/catalogs/activity-task-types.json`（由维护脚本从历史前端实现抽取；运行时不依赖 `activity-web`）。
 - `NONE/暂无特殊配置` 会按列表筛选参数 `isNoSpecialConfig=YES` 取模板（与页面一致）。
 - 若某类型在当前环境列表为空，脚本会标记 `no_template_found` 并跳过写操作（不猜测高风险字段）。
-

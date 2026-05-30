@@ -4,7 +4,7 @@ import path from "node:path";
 import { parseFlags, printJson } from "./lib/cli.mjs";
 import { adminConfig, assertAdminLoginConfig, loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
 import { createAdminApiSession, firstRow } from "./lib/admin-api.mjs";
-import { ensureActivityWebDir, extractActivityTaskListTypes, extractNewbieActivityModuleNameMap } from "./lib/activity-web-mappings.mjs";
+import { loadMarkdownTableMap } from "./lib/mapping-md.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
 
@@ -80,6 +80,26 @@ function requireConfirmations(spec, args) {
   if (!confirm) throw new Error("需要用户确认：请在 spec 里设置 confirm=true 并传 --confirm。");
   const confirmations = spec?.confirmations || {};
   if (confirmations.moduleWrites !== true) throw new Error("高风险确认未完成：confirmations.moduleWrites 需要为 true。");
+}
+
+function loadModuleNameMap() {
+  return loadMarkdownTableMap({
+    repoRoot,
+    fileRelPath: "skills/weex-admin-ops/references/mappings/newbie-activity-modules.md",
+    sourceRelPath: "references/mappings/newbie-activity-modules.md",
+    keyColumnName: "模块 key",
+    valueColumnName: "前端中文名",
+  });
+}
+
+function loadFieldNameMap() {
+  return loadMarkdownTableMap({
+    repoRoot,
+    fileRelPath: "skills/weex-admin-ops/references/mappings/newbie-activity-fields.md",
+    sourceRelPath: "references/mappings/newbie-activity-fields.md",
+    keyColumnName: "字段 key",
+    valueColumnName: "前端中文名",
+  });
 }
 
 async function findByAlias(api, alias) {
@@ -254,45 +274,43 @@ async function run() {
     process.stdout.write(usage());
     return 0;
   }
-  if (!args.action && !args.wizard) throw new Error("--action is required");
-
-  loadLocalEnv(repoRoot);
-  const config = adminConfig(repoRoot);
-
   if (args.wizard) {
-    const activityWebDir = ensureActivityWebDir(repoRoot);
-    const activityTypeCatalog = extractActivityTaskListTypes(activityWebDir);
-    const newbieModuleNameMap = extractNewbieActivityModuleNameMap(activityWebDir);
+    const moduleNameMap = loadModuleNameMap();
+    const fieldNameMap = loadFieldNameMap();
     printJson({
       ok: true,
-      dryRun: true,
-      wizard: {
-        domain: "活动列表 / 新手活动(BEGINNER_TASK) 模块级自由配置（API）",
-        activityTypeOptions: activityTypeCatalog.options,
-        sources: { activityTypeOptionsFrom: activityTypeCatalog.filePath },
-        moduleNameMap: newbieModuleNameMap.moduleNameMap,
-        moduleNameMapSources: newbieModuleNameMap.sources,
-        supportedModules: ["base", "userApply", "tasks", "resourceCard", "i18n", "faq"],
-        taskModeOptions: [
-          { label: "自定义任务", value: "custom" },
-          { label: "任务包", value: "taskPackage" },
-        ],
-        oneShotReplyTemplate: {
-          confirm: false,
-          confirmations: { moduleWrites: false },
-          modules: {
-            base: { title: "", showUrl: "", startTime: "", endTime: "" },
-            userApply: { applyConfigId: null },
-            tasks: { mode: "custom", taskIds: [], routineTaskIds: [], taskPackageId: null, routineTaskPackageId: null, routineTitle: "", routineSubTitle: "" },
-            resourceCard: { resourceCardIds: [] },
-            i18n: { activityConfigI18n: [] },
-            faq: { questions: [] },
-          },
+      mode: "headless_api",
+      wizard: true,
+      domain: "活动列表 / 新手活动(BEGINNER_TASK) 模块级自由配置（API）",
+      moduleNameMap: moduleNameMap.map,
+      moduleNameMapSource: moduleNameMap.source,
+      fieldNameMap: fieldNameMap.map,
+      fieldNameMapSource: fieldNameMap.source,
+      supportedModules: ["base", "userApply", "tasks", "resourceCard", "i18n", "faq"],
+      oneShotSpecTemplate: {
+        confirm: false,
+        confirmations: { moduleWrites: false },
+        modules: {
+          base: { title: "", showUrl: "", startTime: "", endTime: "" },
+          userApply: { applyConfigId: null },
+          tasks: { mode: "custom", taskIds: [], routineTaskIds: [], taskPackageId: null, routineTaskPackageId: null, routineTitle: "", routineSubTitle: "" },
+          resourceCard: { resourceCardIds: [] },
+          i18n: { activityConfigI18n: [] },
+          faq: { questions: [] },
         },
       },
+      notes: [
+        "tasks.mode 支持：custom（自定义任务）/ taskPackage（任务包）。",
+        "update：需在 spec.confirm=true 且 confirmations.moduleWrites=true 后才允许写入。",
+      ],
     });
     return 0;
   }
+
+  if (!args.action) throw new Error("--action is required");
+
+  loadLocalEnv(repoRoot);
+  const config = adminConfig(repoRoot);
   if (args.dryRun && args.action === "snapshot") {
     printJson({ ok: true, dryRun: true, mode: "headless_api", args });
     return 0;

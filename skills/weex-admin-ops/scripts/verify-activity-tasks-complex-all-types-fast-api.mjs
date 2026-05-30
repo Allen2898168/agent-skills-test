@@ -1,9 +1,8 @@
 #!/usr/bin/env node
-import fs from "node:fs";
-import path from "node:path";
 import { parseFlags, printJson, timestamp } from "./lib/cli.mjs";
 import { adminConfig, assertAdminLoginConfig, loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
 import { createAdminApiSession, firstRow, stripCloneFields } from "./lib/admin-api.mjs";
+import { loadActivityTaskTypeCatalog } from "./lib/catalogs.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
 
@@ -35,57 +34,6 @@ function parseArgs() {
   args.candidates = Math.max(1, Math.min(20, Number(args.candidates || 6)));
   args.maxAttempts = Math.max(1, Math.min(10, Number(args.maxAttempts || 3)));
   return args;
-}
-
-function extractObjectLiteral(text, exportName) {
-  const marker = `export const ${exportName} =`;
-  const start = text.indexOf(marker);
-  if (start < 0) return "";
-  const braceStart = text.indexOf("{", start);
-  if (braceStart < 0) return "";
-  let depth = 0;
-  for (let i = braceStart; i < text.length; i++) {
-    const ch = text[i];
-    if (ch === "{") depth++;
-    if (ch === "}") {
-      depth--;
-      if (depth === 0) return text.slice(braceStart, i + 1);
-    }
-  }
-  return "";
-}
-
-function parseActivityTaskListType(block) {
-  const items = [];
-  const re = /([A-Z0-9_]+)\s*:\s*\{\s*label:\s*'([^']+)'\s*,\s*value:\s*'([^']+)'\s*\}/g;
-  for (const match of block.matchAll(re)) {
-    items.push({ key: match[1], label: match[2], value: match[3] });
-  }
-  return items;
-}
-
-function parseActivityBackendMapping(block) {
-  const mapping = {};
-  const re = /([A-Z0-9_]+)\s*:\s*([0-9]+)\s*(,|\/|$)/g;
-  for (const match of block.matchAll(re)) mapping[match[1]] = Number(match[2]);
-  return mapping;
-}
-
-function loadActivityTypeCatalog(activityWebDir) {
-  const filePath = path.join(activityWebDir, "activity-ui/src/views/activity/const/index.js");
-  const text = fs.readFileSync(filePath, "utf8");
-  const listTypeBlock = extractObjectLiteral(text, "ACTIVITY_TASK_LIST_TYPE");
-  const backendBlock = extractObjectLiteral(text, "ACTIVITY_BACKEND_MAPPING");
-  const list = parseActivityTaskListType(listTypeBlock);
-  const backend = parseActivityBackendMapping(backendBlock);
-  const backendWithCustom = { ...backend, CUSTOMIZED: 9, CONTRACT_MINING: 15 };
-  const mappingByValue = {};
-  for (const item of list) {
-    if (item.value === "NONE") continue;
-    const code = backendWithCustom[item.value];
-    if (code !== undefined) mappingByValue[item.value] = code;
-  }
-  return { filePath, list, backendMapping: backendWithCustom, mappingByValue };
 }
 
 async function listTaskRows(api, filter) {
@@ -245,17 +193,13 @@ async function run() {
     process.stdout.write(usage());
     return 0;
   }
-
-  const activityWebDir = path.join(repoRoot, "activity-web");
-  if (!fs.existsSync(activityWebDir)) throw new Error(`activity-web not found: ${activityWebDir}`);
-
   loadLocalEnv(repoRoot);
   const config = adminConfig(repoRoot);
   assertAdminLoginConfig(config);
   const startedAt = Date.now();
 
-  const catalog = loadActivityTypeCatalog(activityWebDir);
-  const types = catalog.list
+  const catalog = loadActivityTaskTypeCatalog(repoRoot);
+  const types = (catalog.list || [])
     .map(item => ({ ...item, backendCode: item.value === "NONE" ? null : catalog.mappingByValue[item.value] }))
     .filter(item => item.value === "NONE" || item.backendCode !== undefined);
 
@@ -392,4 +336,3 @@ try {
   printJson({ ok: false, mode: "headless_api", error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-

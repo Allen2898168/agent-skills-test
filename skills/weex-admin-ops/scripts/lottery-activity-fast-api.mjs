@@ -2,7 +2,8 @@
 import { parseFlags, printJson } from "./lib/cli.mjs";
 import { adminConfig, assertAdminLoginConfig, loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
 import { buildSuffix, createAdminApiSession, firstRow, stripCloneFields } from "./lib/admin-api.mjs";
-import { ensureActivityWebDir, extractLotteryRaffleStyles, resolveOptionValue } from "./lib/activity-web-mappings.mjs";
+import { resolveOptionValue } from "./lib/activity-web-mappings.mjs";
+import { loadLotteryRaffleStyleCatalog } from "./lib/catalogs.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
 
@@ -382,8 +383,7 @@ async function run() {
     return 0;
   }
   if (args.raffleStyle) {
-    const activityWebDir = ensureActivityWebDir(repoRoot);
-    const styles = extractLotteryRaffleStyles(activityWebDir).styles || [];
+    const styles = loadLotteryRaffleStyleCatalog(repoRoot).styles || [];
     args.raffleStyle = resolveOptionValue(args.raffleStyle, styles);
   }
   loadLocalEnv(repoRoot);
