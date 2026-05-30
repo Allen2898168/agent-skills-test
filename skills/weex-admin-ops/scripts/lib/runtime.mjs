@@ -29,6 +29,7 @@ export function adminConfig(repoRoot) {
     username: process.env.WEEX_ADMIN_USERNAME || "auto",
     password: process.env.WEEX_ADMIN_PASSWORD || "",
     googleCode: process.env.WEEX_ADMIN_GOOGLE_CODE || "",
+    authorization: process.env.WEEX_ADMIN_AUTHORIZATION || "",
     imagePath: process.env.WEEX_PRIZE_IMAGE_PATH || path.join(skillRoot, "assets/default-prize-images/default-bonus-prize.webp"),
     chromePath: process.env.CHROME_EXECUTABLE_PATH || "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     useExistingChrome: process.env.WEEX_ADMIN_USE_EXISTING_CHROME === "1",

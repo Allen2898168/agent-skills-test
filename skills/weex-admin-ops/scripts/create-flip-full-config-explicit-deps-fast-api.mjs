@@ -307,6 +307,7 @@ async function run() {
       `小丑牌赠金_${ts}`,
       "--alias-prefix",
       `flip_bonus_${ts}`,
+      "--confirm-create",
     ]);
     if (!prizeRes.ok) throw new Error(`create-prizes-fast-api.mjs failed: ${prizeRes.json?.error || "unknown"}`);
     const createdPrizes = Array.isArray(prizeRes.json?.created) ? prizeRes.json.created : [];
@@ -433,4 +434,3 @@ try {
   printJson({ ok: false, mode: "headless_api", error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-

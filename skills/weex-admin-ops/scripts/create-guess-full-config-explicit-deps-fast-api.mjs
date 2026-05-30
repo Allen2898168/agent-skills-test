@@ -82,11 +82,11 @@ function activityWindow(offsetSeconds = 1800, endDays = 30) {
   };
 }
 
-function runChildJson(commandArgs, { timeoutMs = 300000 } = {}) {
+function runChildJson(commandArgs, { timeoutMs = 300000, envOverrides = {} } = {}) {
   return new Promise(resolve => {
     const child = spawn(process.execPath, commandArgs, {
       cwd: repoRoot,
-      env: process.env,
+      env: { ...process.env, ...envOverrides },
       stdio: ["ignore", "pipe", "pipe"],
     });
     let stdout = "";
@@ -105,6 +105,10 @@ function runChildJson(commandArgs, { timeoutMs = 300000 } = {}) {
       resolve({ ok: code === 0 && Boolean(parsed?.ok !== false), code, killedByTimeout, stdout, stderr, json: parsed });
     });
   });
+}
+
+function sleepMs(ms) {
+  return new Promise(resolve => setTimeout(resolve, Math.max(0, Number(ms) || 0)));
 }
 
 async function uploadImgReplace({ baseUrl, authorization, filePath }) {
@@ -279,6 +283,16 @@ async function deletePrize(api, id) {
   return { ok: del.body?.code === 200, status: del.status, body: { code: del.body?.code ?? null, msg: del.body?.msg || "" } };
 }
 
+async function rebindApplyTemplateToDefault(api, activityId, { defaultApplyConfigId = 2442 } = {}) {
+  const detail = await api.get(`/prod-api/activity/config/${encodeURIComponent(String(activityId))}`);
+  const item = detail.body?.data || null;
+  if (!item || detail.body?.code !== 200) return { ok: false, skipped: true, reason: "detail_unavailable", detail: { status: detail.status, code: detail.body?.code ?? null, msg: detail.body?.msg || "" } };
+  const patched = { ...item, applyConfigId: Number(defaultApplyConfigId) };
+  if ("registerTemplateId" in patched) patched.registerTemplateId = Number(defaultApplyConfigId);
+  const put = await api.put("/prod-api/activity/config", patched);
+  return { ok: put.body?.code === 200, status: put.status, body: { code: put.body?.code ?? null, msg: put.body?.msg || "" } };
+}
+
 async function run() {
   const args = parseArgs();
   if (args.help) {
@@ -316,61 +330,66 @@ async function run() {
   assertAdminLoginConfig(config);
   const startedAt = Date.now();
 
-  const created = { registerTemplateId: "", applyConfigId: "", prizeId: "", integralTaskId: "", guessTaskId: "", activityId: "", activityAlias: "" };
-  let api = null;
-  try {
-    api = await createAdminApiSession({ config, requireApiLogin: true });
+    const created = { registerTemplateId: "", applyConfigId: "", prizeId: "", integralTaskId: "", guessTaskId: "", activityId: "", activityAlias: "" };
+    let api = null;
+    try {
+      api = await createAdminApiSession({ config, requireApiLogin: true });
 
-    const uploadedImageUrl = await uploadImgReplace({ baseUrl: config.baseUrl, authorization: api.authorization, filePath: config.imagePath });
+      const uploadedImageUrl = await uploadImgReplace({ baseUrl: config.baseUrl, authorization: api.authorization, filePath: config.imagePath });
 
-    const template = await resolveTemplate(api, args.templateAlias).catch(() => ({ id: null, alias: null, detail: null }));
+      const template = await resolveTemplate(api, args.templateAlias).catch(() => ({ id: null, alias: null, detail: null }));
 
-    // 1) register template
-    const registerOut = await runChildJson([
-      "skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs",
-      "--platform-scope",
-      "all",
-      "--dry-run",
-    ]);
-    if (!registerOut.ok) throw new Error("register template dry-run failed unexpectedly");
-    const createdRegister = await runChildJson([
-      "skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs",
-      "--platform-scope",
-      "all",
-    ]);
-    if (!createdRegister.ok) throw new Error(`create register template failed: ${createdRegister.json?.error || createdRegister.stderr}`);
-    const rt = createdRegister.json?.created?.[0];
-    created.registerTemplateId = String(rt?.id || "");
-    created.applyConfigId = created.registerTemplateId;
-    if (!created.applyConfigId) throw new Error("missing applyConfigId from created register template");
+      // 1) register template
+      const registerOut = await runChildJson([
+        "skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs",
+        "--platform-scope",
+        "all",
+        "--dry-run",
+      ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
+      if (!registerOut.ok) throw new Error("register template dry-run failed unexpectedly");
+      const createdRegister = await runChildJson([
+        "skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs",
+        "--platform-scope",
+        "all",
+      ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
+      if (!createdRegister.ok) throw new Error(`create register template failed: ${createdRegister.json?.error || createdRegister.stderr}`);
+      const rt = createdRegister.json?.created?.[0];
+      created.registerTemplateId = String(rt?.id || "");
+      created.applyConfigId = created.registerTemplateId;
+      if (!created.applyConfigId) throw new Error("missing applyConfigId from created register template");
 
-    // 2) prize
+      // 2) prize
     const createdPrize = await runChildJson([
       "skills/weex-admin-ops/scripts/create-prizes-fast-api.mjs",
       "--count",
       "1",
-    ]);
-    if (!createdPrize.ok) throw new Error(`create prize failed: ${createdPrize.json?.error || createdPrize.stderr}`);
-    created.prizeId = String(createdPrize.json?.created?.[0]?.id || "");
-    if (!created.prizeId) throw new Error("missing prizeId from created prize");
-
-    // 3) integral task
-    const createdIntegralTask = await runChildJson([
-      "skills/weex-admin-ops/scripts/create-guess-integral-task-fast-api.mjs",
       "--confirm-create",
-    ]);
-    if (!createdIntegralTask.ok) throw new Error(`create integral task failed: ${createdIntegralTask.json?.error || createdIntegralTask.stderr}`);
-    created.integralTaskId = String(createdIntegralTask.json?.created?.id || "");
-    if (!created.integralTaskId) throw new Error("missing integralTaskId");
+    ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
+      if (!createdPrize.ok) throw new Error(`create prize failed: ${createdPrize.json?.error || createdPrize.stderr}`);
+      created.prizeId = String(createdPrize.json?.created?.[0]?.id || "");
+      if (!created.prizeId) throw new Error("missing prizeId from created prize");
 
-    // 4) guessing task
-    const createdGuessTask = await runChildJson([
-      "skills/weex-admin-ops/scripts/create-guessing-task-fast-api.mjs",
-      "--confirm-create",
-    ]);
-    if (!createdGuessTask.ok) throw new Error(`create guess task failed: ${createdGuessTask.json?.error || createdGuessTask.stderr}`);
-    created.guessTaskId = String(createdGuessTask.json?.created?.id || "");
-    if (!created.guessTaskId) throw new Error("missing guessTaskId");
+      // 3) integral task
+      const createdIntegralTask = await runChildJson([
+        "skills/weex-admin-ops/scripts/create-guess-integral-task-fast-api.mjs",
+        "--confirm-create",
+      ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
+      if (!createdIntegralTask.ok) throw new Error(`create integral task failed: ${createdIntegralTask.json?.error || createdIntegralTask.stderr}`);
+      created.integralTaskId = String(createdIntegralTask.json?.created?.id || "");
+      if (!created.integralTaskId) throw new Error("missing integralTaskId");
+
+      // 4) guessing task
+      const createdGuessTask = await runChildJson([
+        "skills/weex-admin-ops/scripts/create-guessing-task-fast-api.mjs",
+        "--confirm-create",
+      ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
+      if (!createdGuessTask.ok) throw new Error(`create guess task failed: ${createdGuessTask.json?.error || createdGuessTask.stderr}`);
+      created.guessTaskId = String(createdGuessTask.json?.created?.id || "");
+      if (!created.guessTaskId) throw new Error("missing guessTaskId");
+
+    // Child scripts may perform API logins that invalidate previously issued tokens.
+    // Refresh the session before creating the activity to avoid intermittent business code=401.
+    api = await createAdminApiSession({ config, requireApiLogin: true });
 
     // 5) create activity
     const built = buildActivityPayload({ templateDetail: template.detail, args, created, uploadedImageUrl });
@@ -406,12 +425,24 @@ async function run() {
     let cleanedUp = null;
     if (args.cleanup) {
       await offline(api, activityId, config).catch(() => {});
+      // Try to unbind the newly created apply template to allow deletion.
+      const rebindApplyTemplate = await rebindApplyTemplateToDefault(api, activityId, { defaultApplyConfigId: 2442 }).catch(err => ({
+        ok: false,
+        error: err?.message || String(err),
+      }));
       const delAct = await deleteActivity(api, activityId, config);
       const delIntegral = await deleteIntegralTask(api, created.integralTaskId);
       const delGuessTask = await deleteGuessTask(api, created.guessTaskId);
       const delPrize = await deletePrize(api, created.prizeId);
-      const delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
-      cleanedUp = { activity: delAct, integralTask: delIntegral, guessTask: delGuessTask, prize: delPrize, registerTemplate: delRegister };
+      let delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
+      // Backend cleanup may be eventually consistent: apply templates can stay "in use" briefly after activity deletion.
+      for (let attempt = 1; !delRegister.ok && attempt <= 3; attempt++) {
+        const msg = String(delRegister?.body?.msg || "");
+        if (!msg.includes("该报名模版已经被(") || !msg.includes(")使用")) break;
+        await sleepMs(1200 * attempt);
+        delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
+      }
+      cleanedUp = { rebindApplyTemplate, activity: delAct, integralTask: delIntegral, guessTask: delGuessTask, prize: delPrize, registerTemplate: delRegister };
     }
 
     printJson({
@@ -438,4 +469,3 @@ try {
   printJson({ ok: false, mode: "headless_api", error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-

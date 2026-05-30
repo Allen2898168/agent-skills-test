@@ -84,11 +84,11 @@ function activityWindow(offsetSeconds = 1800, endDays = 30) {
   };
 }
 
-function runChildJson(commandArgs, { timeoutMs = 300000 } = {}) {
+function runChildJson(commandArgs, { timeoutMs = 300000, envOverrides = {} } = {}) {
   return new Promise(resolve => {
     const child = spawn(process.execPath, commandArgs, {
       cwd: repoRoot,
-      env: process.env,
+      env: { ...process.env, ...envOverrides },
       stdio: ["ignore", "pipe", "pipe"],
     });
     let stdout = "";
@@ -107,6 +107,20 @@ function runChildJson(commandArgs, { timeoutMs = 300000 } = {}) {
       resolve({ ok: code === 0 && Boolean(parsed?.ok !== false), code, killedByTimeout, stdout, stderr, json: parsed });
     });
   });
+}
+
+function sleepMs(ms) {
+  return new Promise(resolve => setTimeout(resolve, Math.max(0, Number(ms) || 0)));
+}
+
+async function rebindApplyTemplateToDefault(api, activityId, { defaultApplyConfigId = 2442 } = {}) {
+  const detail = await api.get(`/prod-api/activity/config/${encodeURIComponent(String(activityId))}`);
+  const item = detail.body?.data || null;
+  if (!item || detail.body?.code !== 200) return { ok: false, skipped: true, reason: "detail_unavailable", detail: { status: detail.status, code: detail.body?.code ?? null, msg: detail.body?.msg || "" } };
+  const patched = { ...item, applyConfigId: Number(defaultApplyConfigId) };
+  if ("registerTemplateId" in patched) patched.registerTemplateId = Number(defaultApplyConfigId);
+  const put = await api.put("/prod-api/activity/config", patched);
+  return { ok: put.body?.code === 200, status: put.status, body: { code: put.body?.code ?? null, msg: put.body?.msg || "" } };
 }
 
 async function resolveTemplate(api, templateAlias) {
@@ -297,7 +311,9 @@ async function run() {
       "skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs",
       "--platform-scope",
       "all",
-    ]);
+      "--signup-modes",
+      "manual",
+    ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
     if (!createdRegister.ok) throw new Error(`create register template failed: ${createdRegister.json?.error || createdRegister.stderr}`);
     const rt = createdRegister.json?.created?.[0];
     created.registerTemplateId = String(rt?.id || "");
@@ -310,7 +326,7 @@ async function run() {
       "--subtypes",
       "DICE,INTEGRAL,NO_REWARD",
       "--confirm-create",
-    ]);
+    ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
     if (!createdPrizes.ok) throw new Error(`create monopoly prizes failed: ${createdPrizes.json?.error || createdPrizes.stderr}`);
     const list = Array.isArray(createdPrizes.json?.created) ? createdPrizes.json.created : [];
     const bySubtype = new Map(list.map(p => [String(p?.prizeSubType || "").toUpperCase(), p]));
@@ -327,10 +343,14 @@ async function run() {
       "--required-volume",
       String(args.requiredVolume),
       "--confirm-create",
-    ]);
+    ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
     if (!createdTask.ok) throw new Error(`create task failed: ${createdTask.json?.error || createdTask.stderr}`);
     created.dailyDiceTaskId = String(createdTask.json?.created?.id || "");
     if (!created.dailyDiceTaskId) throw new Error("missing dailyDiceTaskId");
+
+    // Child scripts may perform API logins that invalidate previously issued tokens.
+    // Refresh the session before creating the activity to avoid intermittent business code=401.
+    api = await createAdminApiSession({ config, requireApiLogin: true });
 
     // 4) create activity
     const built = buildActivityPayloadFromTemplate({ templateDetail: template.detail, args, created });
@@ -346,12 +366,16 @@ async function run() {
     // 5) min verify: draft-checks (key fields)
     const detailRes = await api.get(`/prod-api/activity/config/${encodeURIComponent(String(activityId))}`);
     const d = detailRes.body?.data || {};
+    const dailyTaskIdFromDetail =
+      Number(d?.contractTradingVolumeTaskId || 0)
+      || Number(d?.monopolyList?.[0]?.taskConfig?.dailyTask?.tasks?.[0]?.taskId || 0)
+      || 0;
     const minOk =
       d?.type === "MONOPOLY_WORLD_CUP" &&
       Boolean(d?.applyConfigId) &&
       Array.isArray(d?.monopolyList) &&
       d.monopolyList.length >= 1 &&
-      Number(d?.contractTradingVolumeTaskId) > 0;
+      dailyTaskIdFromDetail > 0;
     const verify = {
       ok: Boolean(minOk),
       checks: {
@@ -359,9 +383,9 @@ async function run() {
         applyConfigId: d?.applyConfigId ?? null,
         monopolyListCount: Array.isArray(d?.monopolyList) ? d.monopolyList.length : null,
         contractTradingVolumeTaskId: d?.contractTradingVolumeTaskId ?? null,
+        dailyTaskIdFromDetail: dailyTaskIdFromDetail || null,
       },
     };
-    if (!verify.ok) throw new Error(`min verify failed: ${JSON.stringify(verify.checks)}`);
 
     let fullVerify = null;
     if (verifyLevel === "full") {
@@ -375,17 +399,42 @@ async function run() {
     let cleanedUp = null;
     if (args.cleanup) {
       await offline(api, activityId, config).catch(() => {});
+      const rebindApplyTemplate = await rebindApplyTemplateToDefault(api, activityId, { defaultApplyConfigId: 2442 }).catch(err => ({
+        ok: false,
+        error: err?.message || String(err),
+      }));
       const delAct = await deleteActivity(api, activityId, config);
       const delTask = await deleteTask(api, created.dailyDiceTaskId);
       const delDice = await deletePrize(api, created.dicePrizeId);
       const delIntegral = await deletePrize(api, created.integralPrizeId);
       const delNoReward = await deletePrize(api, created.noRewardPrizeId);
-      const delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
-      cleanedUp = { activity: delAct, task: delTask, dicePrize: delDice, integralPrize: delIntegral, noRewardPrize: delNoReward, registerTemplate: delRegister };
+      let delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
+      for (let attempt = 1; !delRegister.ok && attempt <= 3; attempt++) {
+        const msg = String(delRegister?.body?.msg || "");
+        if (!msg.includes("该报名模版已经被(") || !msg.includes(")使用")) break;
+        await sleepMs(1200 * attempt);
+        delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
+      }
+      cleanedUp = { rebindApplyTemplate, activity: delAct, task: delTask, dicePrize: delDice, integralPrize: delIntegral, noRewardPrize: delNoReward, registerTemplate: delRegister };
     }
 
-    printJson({
-      ok: true,
+    const cleanupOk = cleanedUp
+      ? Boolean(
+        cleanedUp.activity?.ok
+          && cleanedUp.task?.ok
+          && cleanedUp.dicePrize?.ok
+          && cleanedUp.integralPrize?.ok
+          && cleanedUp.noRewardPrize?.ok
+          && cleanedUp.registerTemplate?.ok,
+      )
+      : null;
+    const ok =
+      Boolean(verify.ok)
+      && (verifyLevel === "full" ? Boolean(fullVerify?.ok) : true)
+      && (args.cleanup ? Boolean(cleanupOk) : true);
+
+    const output = {
+      ok,
       mode: "headless_api",
       finalUrl: `${config.baseUrl}/activities/monopoly`,
       template: { alias: template.alias, id: template.id },
@@ -394,8 +443,9 @@ async function run() {
       fullVerify,
       cleanedUp,
       durationMs: Date.now() - startedAt,
-    });
-    return 0;
+    };
+    printJson(output, ok ? process.stdout : process.stderr);
+    return ok ? 0 : 1;
   } finally {
     await api?.close?.().catch(() => {});
   }
@@ -407,4 +457,3 @@ try {
   printJson({ ok: false, mode: "headless_api", error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-

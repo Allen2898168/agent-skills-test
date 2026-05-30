@@ -56,19 +56,24 @@ async function taskDetail(api, id) {
 
 async function pickTradingVolumeTemplate(api, args) {
   if (args.templateId) return await taskDetail(api, args.templateId);
-  const list = await taskList(api, { pageNum: 1, pageSize: 10, activityTypeCode: AGENT_TRACE_PRO_ACTIVITY_TYPE_CODE });
-  const rows = Array.isArray(list.body?.rows) ? list.body.rows : [];
-  for (const row of rows) {
-    if (!row?.id) continue;
-    const detail = await taskDetail(api, row.id).catch(() => null);
-    const requirement0 = Array.isArray(detail?.requirement) ? detail.requirement[0] : null;
-    if (requirement0?.type === "TRADING_VOLUME") return detail;
+  let firstRowItem = null;
+  for (let pageNum = 1; pageNum <= 5; pageNum += 1) {
+    const list = await taskList(api, { pageNum, pageSize: 30, activityTypeCode: AGENT_TRACE_PRO_ACTIVITY_TYPE_CODE });
+    const rows = Array.isArray(list.body?.rows) ? list.body.rows : [];
+    if (!firstRowItem) firstRowItem = firstRow(list);
+    for (const row of rows) {
+      if (!row?.id) continue;
+      const detail = await taskDetail(api, row.id).catch(() => null);
+      const requirement0 = Array.isArray(detail?.requirement) ? detail.requirement[0] : null;
+      // AGENT_TRACE_PRO(21) on staging currently uses ORDER_VOLUME for contract-volume-like requirements.
+      if (requirement0?.type === "ORDER_VOLUME") return detail;
+    }
+    if (!rows.length) break;
   }
-  const first = firstRow(list);
-  if (first?.id) {
-    const fallback = await taskDetail(api, first.id);
+  if (firstRowItem?.id) {
+    const fallback = await taskDetail(api, firstRowItem.id);
     const requirement0 = Array.isArray(fallback?.requirement) ? fallback.requirement[0] : null;
-    throw new Error(`未找到 AGENT_TRACE_PRO(21) 的 TRADING_VOLUME 任务模板；fallback 模板 requirement[0].type=${requirement0?.type || "<missing>"}，请手动指定 --template-id`);
+    throw new Error(`未找到 AGENT_TRACE_PRO(21) 的 ORDER_VOLUME 任务模板；fallback 模板 requirement[0].type=${requirement0?.type || "<missing>"}，请手动指定 --template-id`);
   }
   throw new Error("未找到可用于 clone 的 AGENT_TRACE_PRO(21) 任务模板；请先在后管创建至少一条 代理小活动 活动任务，或直接指定 --template-id");
 }
@@ -93,17 +98,26 @@ function patchTradingVolumeRequirement(payload, requiredVolume) {
   if (!Array.isArray(payload.requirement) || !payload.requirement[0] || typeof payload.requirement[0] !== "object") {
     throw new Error("Task template requirement[] is missing");
   }
-  if (payload.requirement[0].type !== "TRADING_VOLUME") throw new Error(`Unexpected requirement[0].type: ${payload.requirement[0].type}`);
+  if (payload.requirement[0].type !== "ORDER_VOLUME") throw new Error(`Unexpected requirement[0].type: ${payload.requirement[0].type}`);
   payload.requirement[0].requiredVolume = Number(requiredVolume);
   payload.requirement[0].currencySupportType = "ALL_SUPPORTED";
   payload.requirement[0].productCodeList = [];
+  payload.requirement[0].volumeCountType = Array.isArray(payload.requirement[0].volumeCountType) ? payload.requirement[0].volumeCountType : ["FEE"];
 }
 
-function patchAward(payload, { prizeId, awardAmount }) {
+async function prizeDetail(api, id) {
+  const detail = await api.get(`/prod-api/activity/prize/${encodeURIComponent(String(id))}`);
+  if (detail.body?.code !== 200 || !detail.body?.data) throw new Error(`Prize detail failed: ${id}`);
+  return detail.body.data;
+}
+
+function patchAward(payload, { prize, awardAmount }) {
   if (!payload.taskAward || typeof payload.taskAward !== "object") {
     throw new Error("Task template taskAward is missing");
   }
-  payload.taskAward.awardPrizeId = Number(prizeId);
+  payload.taskAward.awardPrizeId = Number(prize?.id);
+  if (prize?.prizeType) payload.taskAward.prizeType = prize.prizeType;
+  if (prize?.prizeSubType) payload.taskAward.prizeSubType = prize.prizeSubType;
   if (Number.isFinite(Number(awardAmount)) && Number(awardAmount) > 0) {
     payload.taskAward.awardAmountMin = Number(awardAmount);
   }
@@ -137,7 +151,8 @@ async function run() {
     const payload = stripCloneFields(template);
     const mutated = mutateTaskPayload(payload, args);
     patchTradingVolumeRequirement(payload, args.requiredVolume);
-    patchAward(payload, { prizeId: args.prizeId, awardAmount });
+    const prize = await prizeDetail(api, args.prizeId);
+    patchAward(payload, { prize, awardAmount });
 
     const created = await api.post("/prod-api/activity/task", payload);
     if (created.body?.code !== 200) throw new Error(`Create task failed: ${JSON.stringify({ code: created.body?.code, msg: created.body?.msg || created.body?.message })}`);
@@ -167,4 +182,3 @@ try {
   printJson({ ok: false, mode: "headless_api", error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-

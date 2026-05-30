@@ -7,8 +7,9 @@ import { createAdminApiSession, firstRow, stripCloneFields } from "./lib/admin-a
 const { repoRoot } = pathsFrom(import.meta.url);
 
 function parseArgs() {
-  const args = parseFlags(process.argv.slice(2), { booleans: ["--dry-run"] });
+  const args = parseFlags(process.argv.slice(2), { booleans: ["--dry-run", "--confirm-create"] });
   args.dryRun = Boolean(args.dryRun);
+  args.confirmCreate = Boolean(args.confirmCreate);
   args.category = args.category || "赠金";
   args.subtype = args.subtype || "赠金";
   args.count = Number(args.count || 1);
@@ -57,6 +58,7 @@ async function run() {
     printJson({ ok: true, dryRun: true, mode: "headless_api", plan });
     return 0;
   }
+  if (!args.confirmCreate) throw new Error("需要用户确认：请加 --confirm-create 后才允许创建奖品。");
 
   assertAdminLoginConfig(config);
   const startedAt = Date.now();
@@ -80,4 +82,3 @@ try {
   printJson({ ok: false, mode: "headless_api", error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-

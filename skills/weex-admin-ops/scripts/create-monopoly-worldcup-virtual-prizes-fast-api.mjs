@@ -91,8 +91,13 @@ async function uploadImgReplace({ baseUrl, authorization, filePath }) {
 }
 
 async function findByAlias(api, alias) {
-  const list = await api.get(`/prod-api/activity/prize/list?pageNum=1&pageSize=1&alias=${encodeURIComponent(alias)}`);
-  return firstRow(list);
+  const list = await api.get(`/prod-api/activity/prize/list?pageNum=1&pageSize=20&alias=${encodeURIComponent(alias)}`);
+  const rows = Array.isArray(list?.body?.rows)
+    ? list.body.rows
+    : Array.isArray(list?.body?.data)
+      ? list.body.data
+      : [];
+  return rows.find(item => String(item?.prizeAlias || item?.alias || "") === String(alias)) || null;
 }
 
 async function run() {
@@ -128,10 +133,10 @@ async function run() {
   try {
     const uploaded = await uploadImgReplace({ baseUrl: config.baseUrl, authorization: api.authorization, filePath: config.imagePath });
     const ts = timestamp();
-    const short = String(Date.now()).slice(-6);
+    const uniqueKey = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
     const created = [];
     for (const subtype of subtypes) {
-      const alias = `${args.aliasPrefix}_${subtype}_${short}`.slice(0, 32);
+      const alias = `${args.aliasPrefix}_${subtype}_${uniqueKey}`.slice(0, 32);
       const name = `${args.namePrefix}_${buildPrizeName(subtype)}_${ts}`.slice(0, 60);
       if (!args.force) {
         const existing = await findByAlias(api, alias).catch(() => null);
@@ -164,4 +169,3 @@ try {
   printJson({ ok: false, mode: "headless_api", error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-

@@ -65,7 +65,7 @@ async function pickTemplate(api, args) {
     const detail = await taskDetail(api, row.id).catch(() => null);
     if (!detail) continue;
     const r0 = requirement0(detail);
-    if (r0?.type === "TRADING_VOLUME" && String(detail?.resetType || detail?.taskResetType || "") === "DAILY") {
+    if (r0?.type === "TRADING_VOLUME") {
       return detail;
     }
   }
@@ -73,7 +73,7 @@ async function pickTemplate(api, args) {
   if (first?.id) {
     const fallback = await taskDetail(api, first.id);
     const r0 = requirement0(fallback);
-    throw new Error(`未找到 MONOPOLY_WORLD_CUP(23) 的 TRADING_VOLUME + resetType=DAILY 任务模板；fallback requirement[0].type=${r0?.type || "<missing>"}，resetType=${fallback?.resetType || "<missing>"}；请手动指定 --template-id`);
+    throw new Error(`未找到 MONOPOLY_WORLD_CUP(23) 的 TRADING_VOLUME 任务模板；fallback requirement[0].type=${r0?.type || "<missing>"}，resetType=${fallback?.resetType || "<missing>"}；请手动指定 --template-id`);
   }
   throw new Error("未找到可用于 clone 的 MONOPOLY_WORLD_CUP(23) 任务模板；请先在后管创建至少一条大富翁活动任务，或直接指定 --template-id");
 }
@@ -122,6 +122,22 @@ function patchAward(payload, dicePrizeId) {
   payload.taskAward = award;
 }
 
+function patchDailyReset(payload) {
+  payload.resetType = "DAILY";
+  payload.resetDay = null;
+  payload.resetTime = payload.resetTime || "00:00:00";
+  if ("startTime" in payload) payload.startTime = null;
+  if ("endTime" in payload) payload.endTime = null;
+  payload.timeType = payload.timeType || "DURING";
+  if (Array.isArray(payload.requirement) && payload.requirement[0] && typeof payload.requirement[0] === "object") {
+    payload.requirement[0].resetType = "DAILY";
+    if ("resetTime" in payload.requirement[0]) payload.requirement[0].resetTime = payload.resetTime;
+    payload.requirement[0].timeType = payload.requirement[0].timeType || payload.timeType;
+    if ("startTime" in payload.requirement[0]) payload.requirement[0].startTime = null;
+    if ("endTime" in payload.requirement[0]) payload.requirement[0].endTime = null;
+  }
+}
+
 async function run() {
   const args = parseArgs();
   if (args.help) {
@@ -149,6 +165,7 @@ async function run() {
     const mutated = mutateTaskPayload(payload, args);
     patchRequirement(payload, args.requiredVolume);
     patchAward(payload, args.dicePrizeId);
+    patchDailyReset(payload);
 
     const created = await api.post("/prod-api/activity/task", payload);
     if (created.body?.code !== 200) throw new Error(`Create task failed: ${JSON.stringify({ code: created.body?.code, msg: created.body?.msg || created.body?.message })}`);
@@ -178,4 +195,3 @@ try {
   printJson({ ok: false, mode: "headless_api", error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-

@@ -147,6 +147,7 @@ function summarizeActivityDetail(item) {
     startTime: d.startTime || null,
     endTime: d.endTime || null,
     channelCategory: d.channelCategory ?? null,
+    applyConfigId: d.applyConfigId ?? null,
     miniActivityCount: Array.isArray(d.miniActivity) ? d.miniActivity.length : null,
     resourceConfigCount: Array.isArray(d.resourceConfig) ? d.resourceConfig.length : null,
     i18nCount: d.activityConfigI18n ? Object.keys(d.activityConfigI18n || {}).length : null,
@@ -268,10 +269,10 @@ async function createDraft(api, args) {
 
 async function draftChecks(api, args) {
   const target = await resolveTarget(api, args);
-  const item = target.detail;
+  const id = target.id;
+  const item = await detailById(api, id);
   const alias = target.alias || item.showUrl || "";
   const title = item.title || "";
-  const id = target.id;
   const detail = summarizeActivityDetail(item);
   const issues = [];
   if (detail.channelCategory !== CHANNEL_CATEGORY_AGENT) issues.push(`channelCategory expected ${CHANNEL_CATEGORY_AGENT}, got ${detail.channelCategory ?? "<missing>"}`);

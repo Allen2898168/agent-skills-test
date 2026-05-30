@@ -88,11 +88,11 @@ function activityWindow(offsetSeconds = 1800, endDays = 30) {
   };
 }
 
-function runChildJson(commandArgs, { timeoutMs = 300000 } = {}) {
+function runChildJson(commandArgs, { timeoutMs = 300000, envOverrides = {} } = {}) {
   return new Promise(resolve => {
     const child = spawn(process.execPath, commandArgs, {
       cwd: repoRoot,
-      env: process.env,
+      env: { ...process.env, ...envOverrides },
       stdio: ["ignore", "pipe", "pipe"],
     });
     let stdout = "";
@@ -111,6 +111,16 @@ function runChildJson(commandArgs, { timeoutMs = 300000 } = {}) {
       resolve({ ok: code === 0 && Boolean(parsed?.ok !== false), code, killedByTimeout, stdout, stderr, json: parsed });
     });
   });
+}
+
+async function rebindApplyTemplateToDefault(api, activityId, { defaultApplyConfigId = 2442 } = {}) {
+  const detail = await api.get(`/prod-api/activity/config/${encodeURIComponent(String(activityId))}`);
+  const item = detail.body?.data || null;
+  if (!item || detail.body?.code !== 200) return { ok: false, skipped: true, reason: "detail_unavailable", detail: { status: detail.status, code: detail.body?.code ?? null, msg: detail.body?.msg || "" } };
+  const patched = { ...item, applyConfigId: Number(defaultApplyConfigId) };
+  if ("registerTemplateId" in patched) patched.registerTemplateId = Number(defaultApplyConfigId);
+  const put = await api.put("/prod-api/activity/config", patched);
+  return { ok: put.body?.code === 200, status: put.status, body: { code: put.body?.code ?? null, msg: put.body?.msg || "" } };
 }
 
 async function resolveTemplate(api, templateAlias) {
@@ -238,6 +248,8 @@ async function run() {
     const template = await resolveTemplate(apiForTemplate, args.templateAlias);
     await apiForTemplate.close();
 
+    api = await createAdminApiSession({ config, requireApiLogin: true });
+
     // 1) register template (applyConfigId)
     const ts = timestamp().slice(-6);
     const registerTemplate = await runChildJson([
@@ -250,8 +262,7 @@ async function run() {
       "signup,view",
       "--name-prefix",
       `代理小活动报名模板_${ts}`,
-      "--confirm-create",
-    ]);
+    ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
     if (!registerTemplate.ok) throw new Error(`create-register-templates-fast-api.mjs failed: ${registerTemplate.json?.error || "unknown"}`);
     const createdTemplates = Array.isArray(registerTemplate.json?.created) ? registerTemplate.json.created : [];
     created.registerTemplateId = String(createdTemplates[0]?.id || "");
@@ -270,7 +281,7 @@ async function run() {
       "--name-prefix",
       `代理小活动赠金_${ts}`,
       "--confirm-create",
-    ]);
+    ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
     if (!prizesCreate.ok) throw new Error(`create-prizes-fast-api.mjs failed: ${prizesCreate.json?.error || "unknown"}`);
     const createdPrizes = Array.isArray(prizesCreate.json?.created) ? prizesCreate.json.created : [];
     created.prizeId = String(createdPrizes[0]?.id || "");
@@ -284,7 +295,7 @@ async function run() {
       "--prize-id",
       String(created.prizeId),
       "--confirm-create",
-    ]);
+    ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
     if (!task.ok) throw new Error(`create-agent-tracepro-trading-volume-task-with-bonus-prize-fast-api.mjs failed: ${task.json?.error || "unknown"}`);
     created.taskId = String(task.json?.created?.id || "");
     created.taskDetail = task.json?.createdTaskDetail || null;
@@ -298,15 +309,17 @@ async function run() {
         "create-min",
         "--count",
         String(args.resourceCards),
-        "--activity-types",
+        "--activity-type",
         "TRACE_PRO",
         "--confirm-create",
-      ]);
+      ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
       if (!cards.ok) throw new Error(`resource-card-fast-api.mjs failed: ${cards.json?.error || "unknown"}`);
-      created.resourceCardIds = Array.isArray(cards.json?.createdIds) ? cards.json.createdIds.map(String) : [];
+      created.resourceCardIds = Array.isArray(cards.json?.created) ? cards.json.created.map(item => String(item?.id || "")).filter(Boolean) : [];
     }
 
     // 5) create activity
+    // Child scripts may perform API logins that invalidate previously issued tokens.
+    // Refresh the session before creating the activity to avoid intermittent business code=401.
     api = await createAdminApiSession({ config, requireApiLogin: true });
     const built = await buildAgentTraceProPayload({ templateDetail: template.detail, created, args });
     const createdActivity = await api.post("/prod-api/activity/config", built.payload);
@@ -324,7 +337,7 @@ async function run() {
       "draft-checks",
       "--activity-alias",
       built.alias,
-    ]);
+    ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
     if (!draftCheck.ok) throw new Error(`agent-tracepro draft-checks failed: ${draftCheck.json?.error || "unknown"}`);
 
     const verifySteps = { draftChecks: draftCheck.json };
@@ -341,6 +354,10 @@ async function run() {
     const cleanup = { attempted: Boolean(args.cleanup), ok: true, steps: {} };
     if (args.cleanup) {
       if (!args.confirmCleanup) throw new Error("需要用户确认：cleanup 需要同时传 --confirm-cleanup。");
+      cleanup.steps.rebindApplyTemplate = await rebindApplyTemplateToDefault(api, activityId, { defaultApplyConfigId: 2442 }).catch(err => ({
+        ok: false,
+        error: err?.message || String(err),
+      }));
       const delAct = await deleteTraceProActivity(api, activityId, config);
       cleanup.steps.deleteActivity = delAct;
       if (!delAct.ok) cleanup.ok = false;
@@ -353,10 +370,15 @@ async function run() {
       }
     }
 
-    printJson({
-      ok: true,
+    const ok =
+      Boolean(draftCheck.json?.ok !== false)
+      && (verifyLevel === "full" ? Boolean(verifySteps.online && verifySteps.offline) : true)
+      && (args.cleanup ? Boolean(cleanup.ok) : true);
+
+    const output = {
+      ok,
       mode: "headless_api",
-      finalUrl: "/activities/copyTrading",
+      finalUrl: `${config.baseUrl}/activities/copyTrading`,
       created: {
         activityId,
         alias: built.alias,
@@ -371,8 +393,9 @@ async function run() {
       verifyHints: verifySteps,
       cleanup,
       durationMs: Date.now() - startedAt,
-    });
-    return 0;
+    };
+    printJson(output, ok ? process.stdout : process.stderr);
+    return ok ? 0 : 1;
   } finally {
     if (api) await api.close().catch(() => {});
   }
@@ -384,4 +407,3 @@ try {
   printJson({ ok: false, mode: "headless_api", error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-

@@ -260,6 +260,7 @@ async function run() {
       `竞速赛奖品_${ts}`,
       "--alias-prefix",
       `rc_prize_${ts}`,
+      "--confirm-create",
     ]);
     if (!prizes.ok) throw new Error(`create-prizes-fast-api.mjs failed: ${prizes.json?.error || "unknown"}`);
     const prizeIds = Array.isArray(prizes.json?.created) ? prizes.json.created.map(item => String(item?.id || "")).filter(Boolean) : [];
@@ -384,4 +385,3 @@ try {
   printJson({ ok: false, mode: "headless_api", error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-

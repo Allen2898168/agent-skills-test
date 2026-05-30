@@ -251,6 +251,7 @@ async function run() {
       `交易大赛奖品_${ts}`,
       "--alias-prefix",
       `tc_prize_${ts}`,
+      "--confirm-create",
     ]);
     if (!prizes.ok) throw new Error(`create-prizes-fast-api.mjs failed: ${prizes.json?.error || "unknown"}`);
     created.prizeIds = Array.isArray(prizes.json?.created) ? prizes.json.created.map(item => String(item?.id || "")).filter(Boolean) : [];
