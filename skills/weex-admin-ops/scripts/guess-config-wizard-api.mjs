@@ -114,6 +114,26 @@ function loadModuleNameMap() {
   return { source: "references/mappings/guess-activity-modules.md", map };
 }
 
+function loadFieldNameMap() {
+  const filePath = path.join(repoRoot, "skills/weex-admin-ops/references/mappings/guess-activity-fields.md");
+  if (!fs.existsSync(filePath)) return { source: "missing", map: {} };
+  const md = fs.readFileSync(filePath, "utf8");
+  const lines = md.split(/\r?\n/);
+  const headerIndex = lines.findIndex(line => line.includes("| 字段 key |") && line.includes("| 前端中文名 |"));
+  if (headerIndex < 0) return { source: "unknown", map: {} };
+  const map = {};
+  for (let i = headerIndex + 2; i < lines.length; i += 1) {
+    const line = lines[i];
+    if (!line.startsWith("|")) break;
+    const parts = line.split("|").map(v => v.trim()).filter(Boolean);
+    if (parts.length < 2) continue;
+    const key = parts[0].replace(/`/g, "");
+    const value = parts[1];
+    if (key && value) map[key] = value;
+  }
+  return { source: "references/mappings/guess-activity-fields.md", map };
+}
+
 function wizardReplyTemplate() {
   return {
     confirm: false,
@@ -138,11 +158,14 @@ function wizardReplyTemplate() {
 
 function wizardOutput() {
   const moduleNameMap = loadModuleNameMap();
+  const fieldNameMap = loadFieldNameMap();
   const oneShotReplyTemplate = wizardReplyTemplate();
   return {
     domain: "活动列表 / 竞猜大赛(GUESS) API 向导（进行中）",
     moduleNameMap: moduleNameMap.map,
     moduleNameMapSource: moduleNameMap.source,
+    fieldNameMap: fieldNameMap.map,
+    fieldNameMapSource: fieldNameMap.source,
     presets: [
       { preset: "full_create_verify_delete", risk: "高", description: "显式创建依赖项(报名模板/奖品/活动任务) -> 创建草稿 -> draft-checks -> 删除清理（默认开启 cleanup）" },
       { preset: "full_create_full_verify_delete", risk: "高", description: "显式创建依赖项 -> 创建草稿 -> draft-checks -> 上线 -> 下线 -> 删除清理（需要更高风险确认）" },

@@ -124,8 +124,16 @@ function loadCustomizedModuleNameMap() {
   return { source: "references/mappings/customized-activity-modules.md", map: parseMarkdownTableToMap(md, "模块 key", "前端中文名") };
 }
 
+function loadCustomizedFieldNameMap() {
+  const refPath = path.join(repoRoot, "skills/weex-admin-ops/references/mappings/customized-activity-fields.md");
+  if (!fs.existsSync(refPath)) return { source: "missing", map: {} };
+  const md = fs.readFileSync(refPath, "utf8");
+  return { source: "references/mappings/customized-activity-fields.md", map: parseMarkdownTableToMap(md, "字段 key", "前端中文名") };
+}
+
 function buildWizardMenu() {
   const moduleNameMap = loadCustomizedModuleNameMap();
+  const fieldNameMap = loadCustomizedFieldNameMap();
   const oneShotReplyTemplate = {
     specVersion: 1,
     confirm: false,
@@ -152,6 +160,8 @@ function buildWizardMenu() {
     domain: "活动列表 / 定制化活动(CUSTOMIZED) API 向导（进行中）",
     moduleNameMap: moduleNameMap.map,
     moduleNameMapSource: moduleNameMap.source,
+    fieldNameMap: fieldNameMap.map,
+    fieldNameMapSource: fieldNameMap.source,
     presets: [
       { preset: "full_create_verify_delete", risk: "高", description: "显式创建依赖项(报名模板/活动任务) -> 创建草稿 -> draft-checks -> 删除清理（默认开启 cleanup）" },
       { preset: "full_create_full_verify_delete", risk: "高", description: "显式创建依赖项 -> 创建草稿 -> draft-checks -> 上线 -> 下线 -> 删除清理（需要更高风险确认）" },
@@ -318,4 +328,3 @@ try {
   printJson({ ok: false, error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-

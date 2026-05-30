@@ -51,13 +51,23 @@ function loadRaceModuleNameMap() {
   return { source: "references/mappings/race-activity-modules.md", map: parseMarkdownTableToMap(md, "模块 key", "前端中文名") };
 }
 
+function loadRaceFieldNameMap() {
+  const refPath = path.join(repoRoot, "skills/weex-admin-ops/references/mappings/race-activity-fields.md");
+  if (!fs.existsSync(refPath)) return { source: "missing", map: {} };
+  const md = fs.readFileSync(refPath, "utf8");
+  return { source: "references/mappings/race-activity-fields.md", map: parseMarkdownTableToMap(md, "字段 key", "前端中文名") };
+}
+
 export function buildWizardMenu() {
   const moduleNameMap = loadRaceModuleNameMap();
+  const fieldNameMap = loadRaceFieldNameMap();
   return {
     domain: "活动列表 / 交易竞速赛(RACE_COMPETITION)",
     mode: "headless_api_only",
     moduleNameMap: moduleNameMap.map,
     moduleNameMapSource: moduleNameMap.source,
+    fieldNameMap: fieldNameMap.map,
+    fieldNameMapSource: fieldNameMap.source,
     supportedModules: [
       { key: "base", label: moduleNameMap.map.base || "交易竞速赛基本信息", risk: "高" },
       { key: "userApply", label: moduleNameMap.map.userApply || "用户报名", risk: "高" },
