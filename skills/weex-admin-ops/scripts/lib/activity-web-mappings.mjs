@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 
+export { decorateCsvValues, decorateValue, resolveOptionValue } from "./option-decorators.mjs";
+
 function readFileSafe(filePath) {
   try {
     return fs.readFileSync(filePath, "utf8");
@@ -152,38 +154,4 @@ export function extractSpeedRaceModuleNameMap(activityWebDir) {
   return { activityWebDir, sources, moduleNameMap };
 }
 
-export function resolveOptionValue(input, options) {
-  const normalized = normalizeToken(input);
-  if (!normalized) return "";
-  const hit = (options || []).find(item => (
-    normalizeToken(item.value) === normalized
-    || normalizeToken(item.key) === normalized
-    || normalizeToken(item.label) === normalized
-  ));
-  return hit ? String(hit.value) : String(input ?? "");
-}
-
-export function labelForValue(value, options) {
-  const normalized = normalizeToken(value);
-  if (!normalized) return "";
-  const hit = (options || []).find(item => normalizeToken(item.value) === normalized);
-  return hit ? String(hit.label) : "";
-}
-
-export function decorateValue(value, options) {
-  const label = labelForValue(value, options);
-  if (!label) return String(value ?? "");
-  const asString = String(value ?? "");
-  return label === asString ? asString : `${asString}(${label})`;
-}
-
-export function decorateCsvValues(value, options) {
-  const raw = String(value ?? "").trim();
-  if (!raw) return raw;
-  return raw
-    .split(",")
-    .map(item => item.trim())
-    .filter(Boolean)
-    .map(item => decorateValue(resolveOptionValue(item, options), options))
-    .join(",");
-}
+// Option decorators are re-exported from ./option-decorators.mjs.

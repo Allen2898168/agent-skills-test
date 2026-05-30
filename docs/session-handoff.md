@@ -34,6 +34,8 @@
 
 - 2026-05-30 自检一致性修复：补齐 `lottery-config-wizard-api.mjs --wizard` 的 `domain/moduleNameMap/fieldNameMap` 顶层输出（与其他活动向导一致），并在 `scripts/action-cache.json` 增加 `configure_beginner_task_activity*` 两个别名 actionId 以兼容按活动类型枚举调用与自然语言匹配。
 
+- 2026-05-30 自然语言与运行时去耦加强：新增 `maintenance/audit-activity-nl-action-cache-match.mjs` 保障“活动列表 13 类活动”自然语言 query 可稳定命中对应 `configure_*_activity`；并把 option decorate 逻辑抽到 `scripts/lib/option-decorators.mjs`，运行时脚本不再 import `activity-web-mappings.mjs`（后者仅保留给维护脚本/测试读取 activity-web 用）。
+
 - 2026-05-30 人人代理(AGENT) 任务 clone 绑定冲突修复：`INVITE_FRIEND` 模板含 `linkTaskId` 时，脚本改为先 clone 创建新的 `INVITED` 被邀请任务，再创建邀请任务并重绑 `linkTaskId`；`create-agent-full-config-explicit-deps-fast-api.mjs` cleanup 同步删除两条任务；staging 已跑通 `verify-nonlottery-api-full-config-staging.mjs --only agent` 的 min/full/cleanup 闭环验证。
 
 - 2026-05-30 非转盘/非新手活动 staging 证据闭环：已跑通 `verify-nonlottery-api-full-config-staging.mjs` 的 `--verify-level min --only all` 与 `--verify-level full --only all`，覆盖 `TRADING_COMPETITION/RACE_COMPETITION/TRACE_PRO/CUSTOMIZED/RECHARGE_TRANS_TASK/AGENT/CONTRACT_MINING/FLIP/GUESS/MONOPOLY_WORLD_CUP/AGENT_TRACE_PRO` 的显式依赖创建、最小验证、最全验证（上线/下线）、清理删除闭环。

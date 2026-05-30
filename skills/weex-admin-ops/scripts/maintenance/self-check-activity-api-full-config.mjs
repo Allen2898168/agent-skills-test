@@ -85,6 +85,7 @@ async function main() {
   const audits = {
     coverageAll: await runChildJson(["skills/weex-admin-ops/scripts/maintenance/audit-activity-api-full-config-coverage-all.mjs"], { timeoutMs: 120000 }),
     noActivityWebRuntime: await runChildJson(["skills/weex-admin-ops/scripts/maintenance/audit-no-activity-web-runtime.mjs"], { timeoutMs: 120000 }),
+    nlActionCacheMatch: await runChildJson(["skills/weex-admin-ops/scripts/maintenance/audit-activity-nl-action-cache-match.mjs"], { timeoutMs: 120000 }),
   };
 
   const coverage = audits.coverageAll.json;
@@ -136,6 +137,7 @@ async function main() {
   const ok =
     Boolean(audits.coverageAll.ok && audits.coverageAll.json?.ok) &&
     Boolean(audits.noActivityWebRuntime.ok && audits.noActivityWebRuntime.json?.ok) &&
+    Boolean(audits.nlActionCacheMatch.ok && audits.nlActionCacheMatch.json?.ok) &&
     checks.every(item => (
       item.coverageOk &&
       item.wizard.ok &&
@@ -152,6 +154,7 @@ async function main() {
     audits: {
       coverageAll: { ok: audits.coverageAll.ok, jsonOk: audits.coverageAll.json?.ok ?? null },
       noActivityWebRuntime: { ok: audits.noActivityWebRuntime.ok, jsonOk: audits.noActivityWebRuntime.json?.ok ?? null },
+      nlActionCacheMatch: { ok: audits.nlActionCacheMatch.ok, jsonOk: audits.nlActionCacheMatch.json?.ok ?? null },
     },
     checks,
     nextStep: ok ? "能力自检通过：可以在用户确认后执行 staging 写操作验证（min/full/cleanup）。" : "自检失败：请根据 checks.stderrTail 修复对应脚本。",

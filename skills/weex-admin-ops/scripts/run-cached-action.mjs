@@ -9,7 +9,7 @@ import {
   decorateCsvValues,
   decorateValue,
   resolveOptionValue,
-} from "./lib/activity-web-mappings.mjs";
+} from "./lib/option-decorators.mjs";
 import { loadActivityTaskTypeCatalog, loadLotteryRaffleStyleCatalog } from "./lib/catalogs.mjs";
 
 const __filename = fileURLToPath(import.meta.url);

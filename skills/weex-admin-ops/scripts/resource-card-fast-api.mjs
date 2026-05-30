@@ -4,7 +4,7 @@ import path from "node:path";
 import { parseFlags, printJson, timestamp } from "./lib/cli.mjs";
 import { adminConfig, assertAdminLoginConfig, loadLocalEnv, pathsFrom } from "./lib/runtime.mjs";
 import { createAdminApiSession, firstRow } from "./lib/admin-api.mjs";
-import { resolveOptionValue } from "./lib/activity-web-mappings.mjs";
+import { resolveOptionValue } from "./lib/option-decorators.mjs";
 
 const { repoRoot } = pathsFrom(import.meta.url);
 
