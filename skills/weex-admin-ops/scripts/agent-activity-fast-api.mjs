@@ -133,6 +133,21 @@ function summarizeActivityDetail(item) {
   };
 }
 
+function sleepMs(ms) {
+  return new Promise(resolve => setTimeout(resolve, Math.max(0, Number(ms) || 0)));
+}
+
+async function waitForStatus(api, activityId, predicate, { timeoutMs = 12000, intervalMs = 800 } = {}) {
+  const startedAt = Date.now();
+  let last = await detailById(api, activityId);
+  while (Date.now() - startedAt < timeoutMs) {
+    if (predicate(last)) return last;
+    await sleepMs(intervalMs);
+    last = await detailById(api, activityId);
+  }
+  return last;
+}
+
 async function snapshot(api, args) {
   const target = await resolveTarget(api, args);
   const detail = summarizeActivityDetail(target.detail);
@@ -257,7 +272,11 @@ async function draftChecks(api, args) {
 async function online(api, args, config) {
   const target = await resolveTarget(api, args);
   const result = await api.post("/prod-api/activity/agent/online", { activityId: Number(target.id), totp: String(config.googleCode || "") });
-  const verifyItem = await detailById(api, target.id);
+  const verifyItem = await waitForStatus(
+    api,
+    target.id,
+    item => String(item?.status || "").toUpperCase() === "ONLINE",
+  );
   return {
     ok: result.body?.code === 200 && String(verifyItem.status || "").toUpperCase() === "ONLINE",
     mode: "headless_api",
@@ -272,7 +291,11 @@ async function online(api, args, config) {
 async function offline(api, args, config) {
   const target = await resolveTarget(api, args);
   const result = await api.post("/prod-api/activity/agent/offline", { activityId: Number(target.id), totp: String(config.googleCode || "") });
-  const verifyItem = await detailById(api, target.id);
+  const verifyItem = await waitForStatus(
+    api,
+    target.id,
+    item => String(item?.status || "").toUpperCase() !== "ONLINE",
+  );
   return {
     ok: result.body?.code === 200 && String(verifyItem.status || "").toUpperCase() !== "ONLINE",
     mode: "headless_api",
@@ -338,4 +361,3 @@ try {
   printJson({ ok: false, mode: "headless_api", error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-

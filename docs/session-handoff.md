@@ -24,7 +24,13 @@
 
 - 2026-05-30 非转盘/非新手活动 API 全配置写验证补链路：修复 `GUESS / MONOPOLY_WORLD_CUP / AGENT_TRACE_PRO` 在 staging 的 min/full verify + cleanup 不稳定问题。关键修复包括：child 脚本登录导致 token 失效（创建活动前刷新 session + 支持用 `WEEX_ADMIN_AUTHORIZATION` 透传父会话 Authorization）、`create-prizes-fast-api.mjs` 增加 `--confirm-create` 确认开关并同步更新依赖脚本、MONOPOLY_WORLD_CUP 报名模板需使用 `用户手动点击报名`、GUESS/小活动 cleanup 增加解绑报名模板到默认 `2442` 后再删除，避免“模板被活动占用”报错。验证编排：`node skills/weex-admin-ops/scripts/verify-nonlottery-api-full-config-staging.mjs --confirm-run --verify-level <min|full> [--confirm-full-verify]`。
 
-- 2026-05-30 人人代理(AGENT) 任务 clone 绑定冲突修复：`INVITE_FRIEND` 模板含 `linkTaskId` 时，脚本改为先 clone 创建新的 `INVITED` 被邀请任务，再创建邀请任务并重绑 `linkTaskId`；`create-agent-full-config-explicit-deps-fast-api.mjs` cleanup 同步删除两条任务。待跑 `verify-nonlottery-api-full-config-staging.mjs --only agent` 做 min/full/cleanup 闭环验证。
+- 2026-05-30 人人代理(AGENT) 任务 clone 绑定冲突修复：`INVITE_FRIEND` 模板含 `linkTaskId` 时，脚本改为先 clone 创建新的 `INVITED` 被邀请任务，再创建邀请任务并重绑 `linkTaskId`；`create-agent-full-config-explicit-deps-fast-api.mjs` cleanup 同步删除两条任务；staging 已跑通 `verify-nonlottery-api-full-config-staging.mjs --only agent` 的 min/full/cleanup 闭环验证。
+
+- 2026-05-30 非转盘/非新手活动 staging 证据闭环：已跑通 `verify-nonlottery-api-full-config-staging.mjs` 的 `--verify-level min --only all` 与 `--verify-level full --only all`，覆盖 `TRADING_COMPETITION/RACE_COMPETITION/TRACE_PRO/CUSTOMIZED/RECHARGE_TRANS_TASK/AGENT/CONTRACT_MINING/FLIP/GUESS/MONOPOLY_WORLD_CUP/AGENT_TRACE_PRO` 的显式依赖创建、最小验证、最全验证（上线/下线）、清理删除闭环。
+
+- 2026-05-30 合约挖矿（CONTRACT_MINING）修复：创建活动报 `任务配置重复`，原因是模板 `miningList` 多渠道时复用同一任务 ID；修复为按 `miningList` 条目创建多条任务并逐项绑定，同时异常退出也执行 cleanup，避免污染 staging。复盘：`skills/weex-admin-ops/failure-reviews/contract-mining-activity.md`。
+
+- 2026-05-30 风险提示（staging 环境状态变更）：人人代理活动 `9247/allming-6233465` 在 full verify 过程中被下线后，接口提示 `不是未发布状态不可上线`，无法恢复到上线状态（后端限制）。当前已恢复其开始/结束时间字段，但状态保持 `OFFLINE`；后续跑 AGENT full verify 时脚本已改为检测到已有上线活动则直接报前置条件失败，不再自动下线存量活动。
 
 - 2026-05-29 用户确认转盘抽奖活动默认 `用户报名模版` 应使用 `【2442】 全平台-无任何限制`，已替换旧默认 `2729`。新建并上线活动 `9694` / `wt43083858` 后，前端账号 `8186595891@weex.com` / UID `8186595891` 报名成功；通过 MQ 充值回调生成 10 次抽奖次数，不走 FIN 登录。二次权重专项可见浏览器复验通过：连续单抽 6 次均捕获 `恭喜你` 弹窗并用右上角 `X` 关闭，次数 `10 -> 4`，第 6 次弹窗文案为 `100 USDT 合约赠金`。已登记 `frontend_draw_weight_special_verify` action-cache，并更新前端 draw playbook 与失败复盘。
 

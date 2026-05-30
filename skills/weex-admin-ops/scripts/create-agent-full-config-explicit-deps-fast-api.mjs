@@ -185,6 +185,39 @@ async function deleteRegisterTemplate(api, id) {
   return { ok: del.body?.code === 200, status: del.status, body: { code: del.body?.code ?? null, msg: del.body?.msg || "" } };
 }
 
+async function findOtherOnlineAgentActivity(api, { excludeActivityId } = {}) {
+  const exclude = excludeActivityId ? String(excludeActivityId) : "";
+  const tryList = async url => {
+    const res = await api.get(url);
+    const rows = Array.isArray(res.body?.rows) ? res.body.rows : [];
+    return rows;
+  };
+
+  let rows = [];
+  try {
+    rows = await tryList("/prod-api/activity/config/list?pageNum=1&pageSize=20&type=AGENT&status=ONLINE");
+  } catch {
+    rows = [];
+  }
+  // Some backends ignore the status=ONLINE filter; always filter client-side as well.
+  rows = rows.filter(r => String(r?.status || "").toUpperCase() === "ONLINE");
+  if (!rows.length) {
+    rows = await tryList("/prod-api/activity/config/list?pageNum=1&pageSize=50&type=AGENT");
+    rows = rows.filter(r => String(r?.status || "").toUpperCase() === "ONLINE");
+  }
+
+  const row = rows.find(r => {
+    const id = String(r?.activityId || r?.id || "");
+    return id && (!exclude || id !== exclude);
+  }) || null;
+  if (!row) return null;
+  return {
+    id: String(row.activityId || row.id || ""),
+    alias: String(row.showUrl || ""),
+    status: row.status ?? null,
+  };
+}
+
 async function run() {
   const args = parseArgs();
   if (args.help) {
@@ -284,29 +317,53 @@ async function run() {
 	    ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
     if (!draftChecks.ok) throw new Error(`agent-activity-fast-api.mjs draft-checks failed: ${draftChecks.json?.error || "unknown"}`);
 
-    let fullVerify = null;
+    const fullVerify = { online: null, offline: null };
+    const verifyErrors = [];
     if (verifyLevel === "full") {
-	      const online = await runChildJson([
-	        "skills/weex-admin-ops/scripts/agent-activity-fast-api.mjs",
-        "--action",
-        "online",
-	        "--activity-id",
-	        String(activityId),
-	      ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
-      if (!online.ok) throw new Error(`agent-activity-fast-api.mjs online failed: ${online.json?.error || "unknown"}`);
-	      const offline = await runChildJson([
-	        "skills/weex-admin-ops/scripts/agent-activity-fast-api.mjs",
-        "--action",
-        "offline",
-	        "--activity-id",
-	        String(activityId),
-	      ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
-      if (!offline.ok) throw new Error(`agent-activity-fast-api.mjs offline failed: ${offline.json?.error || "unknown"}`);
-      fullVerify = { online: { ok: true }, offline: { ok: true } };
+      const otherOnline = await findOtherOnlineAgentActivity(api, { excludeActivityId: activityId }).catch(() => null);
+      if (otherOnline?.id) {
+        verifyErrors.push({
+          step: "precondition",
+          message: "存在已上线的人人代理活动；后端限制同一时刻只能有 1 条上线，且下线可能不可逆，脚本不会自动下线现有活动。请先人工处理上线状态后再跑 full verify。",
+          detail: otherOnline,
+        });
+      } else {
+        const online = await runChildJson([
+          "skills/weex-admin-ops/scripts/agent-activity-fast-api.mjs",
+          "--action",
+          "online",
+          "--activity-id",
+          String(activityId),
+        ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
+        fullVerify.online = online.json || { ok: false, error: "no-json" };
+        if (!online.ok) {
+          verifyErrors.push({
+            step: "online",
+            message: "agent-activity-fast-api.mjs online returned ok=false",
+            detail: online.json || null,
+          });
+        }
+
+        const offline = await runChildJson([
+          "skills/weex-admin-ops/scripts/agent-activity-fast-api.mjs",
+          "--action",
+          "offline",
+          "--activity-id",
+          String(activityId),
+        ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
+        fullVerify.offline = offline.json || { ok: false, error: "no-json" };
+        if (!offline.ok) {
+          verifyErrors.push({
+            step: "offline",
+            message: "agent-activity-fast-api.mjs offline returned ok=false",
+            detail: offline.json || null,
+          });
+        }
+      }
     }
 
     const evidence = {
-      ok: true,
+      ok: verifyErrors.length === 0,
       mode: "headless_api",
       finalUrl: `${config.baseUrl}/activities/agency`,
       created: {
@@ -325,8 +382,9 @@ async function run() {
         applyConfigId: verifyItem?.applyConfigId ?? null,
         taskConfigCount: Array.isArray(verifyItem?.taskConfig) ? verifyItem.taskConfig.length : null,
         draftChecksOk: Boolean(draftChecks.ok),
-        fullVerify,
+        fullVerify: verifyLevel === "full" ? fullVerify : null,
       },
+      verifyErrors: verifyErrors.length ? verifyErrors : null,
       dependencyIds: {
         createdRegisterTemplateId: created.registerTemplateId,
         createdTaskId: created.taskId,
@@ -337,38 +395,40 @@ async function run() {
     };
 
     if (!args.cleanup) {
-      printJson({ ...evidence, cleanedUp: false, durationMs: Date.now() - startedAt });
-      return 0;
+      printJson({ ...evidence, cleanedUp: false, durationMs: Date.now() - startedAt }, evidence.ok ? process.stdout : process.stderr);
+      return evidence.ok ? 0 : 1;
     }
     if (!args.confirmCleanup) throw new Error("需要清理确认：请加 --confirm-cleanup 后才允许删除刚创建的活动与依赖模块。");
 
-	    const cleanup = {
-	      rebindApplyTemplate: await rebindApplyTemplateToDefault(api, activityId, { defaultApplyConfigId: 2442 }).catch(err => ({
-	        ok: false,
-	        error: err?.message || String(err),
-	      })),
-	      deleteActivity: await deleteActivity(api, activityId, config),
-	      deleteTask: await deleteTask(api, created.taskId),
-	      deleteLinkedTask: { ok: true, skipped: true },
-	      deleteRegisterTemplate: { ok: true, skipped: true },
-	    };
-	    if (created.linkedTaskId) cleanup.deleteLinkedTask = await deleteTask(api, created.linkedTaskId);
-	    if (created.registerTemplateId) {
-	      let delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
-	      for (let attempt = 1; !delRegister.ok && attempt <= 3; attempt++) {
-	        const msg = String(delRegister?.body?.msg || "");
-	        if (!msg.includes("该报名模版已经被(") || !msg.includes(")使用")) break;
-	        await sleepMs(1200 * attempt);
-	        delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
-	      }
-	      cleanup.deleteRegisterTemplate = delRegister;
-	    }
-    const ok =
+    const cleanup = {
+      rebindApplyTemplate: await rebindApplyTemplateToDefault(api, activityId, { defaultApplyConfigId: 2442 }).catch(err => ({
+        ok: false,
+        error: err?.message || String(err),
+      })),
+      deleteActivity: await deleteActivity(api, activityId, config),
+      deleteTask: await deleteTask(api, created.taskId),
+      deleteLinkedTask: { ok: true, skipped: true },
+      deleteRegisterTemplate: { ok: true, skipped: true },
+    };
+    if (created.linkedTaskId) cleanup.deleteLinkedTask = await deleteTask(api, created.linkedTaskId);
+    if (created.registerTemplateId) {
+      let delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
+      for (let attempt = 1; !delRegister.ok && attempt <= 3; attempt++) {
+        const msg = String(delRegister?.body?.msg || "");
+        if (!msg.includes("该报名模版已经被(") || !msg.includes(")使用")) break;
+        await sleepMs(1200 * attempt);
+        delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
+      }
+      cleanup.deleteRegisterTemplate = delRegister;
+    }
+
+    const cleanedUp =
       cleanup.deleteActivity.ok
       && cleanup.deleteTask.ok
       && cleanup.deleteLinkedTask.ok
       && cleanup.deleteRegisterTemplate.ok;
-    printJson({ ...evidence, cleanedUp: ok, cleanup, durationMs: Date.now() - startedAt }, ok ? process.stdout : process.stderr);
+    const ok = Boolean(evidence.ok) && Boolean(cleanedUp);
+    printJson({ ...evidence, cleanedUp, cleanup, durationMs: Date.now() - startedAt }, ok ? process.stdout : process.stderr);
     await api.close();
     api = null;
     return ok ? 0 : 1;

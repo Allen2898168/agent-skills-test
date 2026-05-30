@@ -148,11 +148,13 @@ function patchActivityI18n(payload, { title, subTitle }) {
 }
 
 function patchMiningListTaskConfig(payload, taskId) {
+  const taskIds = Array.isArray(taskId) ? taskId.map(x => String(x)).filter(Boolean) : [String(taskId || "")].filter(Boolean);
+  const fallbackTaskId = taskIds[0] ? Number(taskIds[0]) : null;
   if (!Array.isArray(payload.miningList) || payload.miningList.length === 0) {
     payload.miningList = [
       {
         channelType: "OFFICIAL_WEBSITE",
-        taskConfig: [{ id: Number(taskId) }],
+        taskConfig: fallbackTaskId ? [{ id: fallbackTaskId }] : [],
         showPoolFlag: "NO",
         showWeLaunchFlag: "NO",
         showBuybackNoticeFlag: "NO",
@@ -161,9 +163,10 @@ function patchMiningListTaskConfig(payload, taskId) {
     ];
     return;
   }
-  payload.miningList = payload.miningList.map(item => {
+  payload.miningList = payload.miningList.map((item, index) => {
+    const nextTaskId = taskIds[index] ? Number(taskIds[index]) : fallbackTaskId;
     const next = { ...(item || {}) };
-    next.taskConfig = [{ id: Number(taskId) }];
+    next.taskConfig = nextTaskId ? [{ id: nextTaskId }] : [];
     if (!next.channelType) next.channelType = "OFFICIAL_WEBSITE";
     if (!next.showPoolFlag) next.showPoolFlag = "NO";
     if (!next.showWeLaunchFlag) next.showWeLaunchFlag = "NO";
@@ -190,7 +193,7 @@ function buildActivityPayloadFromTemplate({ templateDetail, args, created }) {
   if (!payload.channelCategory) payload.channelCategory = "UNIVERSAL";
   payload.applyConfigId = Number(created.applyConfigId);
   payload.showActivityCalendar = payload.showActivityCalendar ?? 1;
-  patchMiningListTaskConfig(payload, created.taskId);
+  patchMiningListTaskConfig(payload, created.taskIds || created.taskId);
   patchActivityI18n(payload, { title, subTitle });
 
   return { alias, title, subTitle, window, payload };
@@ -214,6 +217,45 @@ async function deleteTask(api, id) {
 async function deleteRegisterTemplate(api, id) {
   const del = await api.delete(`/prod-api/activity/apply/${encodeURIComponent(String(id))}`);
   return { ok: del.body?.code === 200, status: del.status, body: { code: del.body?.code ?? null, msg: del.body?.msg || "" } };
+}
+
+async function cleanupCreated(api, created, config) {
+  const cleanup = {
+    rebindApplyTemplate: { ok: true, skipped: true },
+    activity: { ok: true, skipped: true },
+    tasks: { ok: true, skipped: true, deletedTasks: [] },
+    registerTemplate: { ok: true, skipped: true },
+  };
+
+  if (created?.activityId) {
+    cleanup.rebindApplyTemplate = await rebindApplyTemplateToDefault(api, created.activityId, { defaultApplyConfigId: 2442 }).catch(err => ({
+      ok: false,
+      error: err?.message || String(err),
+    }));
+    await offlineContractMiningActivity(api, created.activityId, config).catch(() => null);
+    cleanup.activity = await deleteContractMiningActivity(api, created.activityId, config);
+  }
+
+  const ids = Array.isArray(created?.taskIds) && created.taskIds.length ? created.taskIds : created?.taskId ? [created.taskId] : [];
+  cleanup.tasks = { ok: true, skipped: ids.length === 0, deletedTasks: [] };
+  for (const id of ids) {
+    const del = await deleteTask(api, id);
+    cleanup.tasks.deletedTasks.push({ id, ...del });
+  }
+  cleanup.tasks.ok = cleanup.tasks.deletedTasks.every(item => item.ok);
+
+  if (created?.registerTemplateId) {
+    let delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
+    for (let attempt = 1; !delRegister.ok && attempt <= 3; attempt++) {
+      const msg = String(delRegister?.body?.msg || "");
+      if (!msg.includes("该报名模版已经被(") || !msg.includes(")使用")) break;
+      await sleepMs(1200 * attempt);
+      delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
+    }
+    cleanup.registerTemplate = delRegister;
+  }
+
+  return cleanup;
 }
 
 async function run() {
@@ -257,13 +299,20 @@ async function run() {
   assertAdminLoginConfig(config);
   const startedAt = Date.now();
 
-  const created = { applyConfigId: "", registerTemplateId: "", taskId: "", activityId: "", activityAlias: "" };
+  const created = { applyConfigId: "", registerTemplateId: "", taskIds: [], taskId: "", activityId: "", activityAlias: "" };
   let api = null;
+  let template = null;
+  let draftChecks = null;
+  const fullVerify = { online: null, offline: null };
+  let cleanup = null;
+  let error = null;
   try {
     api = await createAdminApiSession({ config, requireApiLogin: true });
 
     // 0) resolve template (payload baseline only)
-    const template = await resolveTemplate(api, args.templateAlias);
+    template = await resolveTemplate(api, args.templateAlias);
+    const miningListCount = Array.isArray(template.detail?.miningList) && template.detail.miningList.length ? template.detail.miningList.length : 1;
+    const taskCount = Math.max(1, Math.min(5, miningListCount));
 
     // 1) register template (applyConfigId)
     const ts = String(Date.now()).slice(-6);
@@ -279,31 +328,39 @@ async function run() {
       `合约挖矿报名模板_${ts}`,
     ];
     const registerRes = await runChildJson(registerScriptArgs, { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
-	    if (!registerRes.ok) throw new Error(`Create register template failed: ${registerRes.json?.error || registerRes.stderr || registerRes.stdout}`);
+    if (!registerRes.ok) throw new Error(`Create register template failed: ${registerRes.json?.error || registerRes.stderr || registerRes.stdout}`);
     const createdTemplates = Array.isArray(registerRes.json?.created) ? registerRes.json.created : [];
     const registerId = String(createdTemplates[0]?.id || "");
     if (!registerId) throw new Error("Create register template ok but id missing in output");
     created.registerTemplateId = registerId;
     created.applyConfigId = registerId;
 
-	    // 2) main task
-	    const taskRes = await runChildJson(
-	      ["skills/weex-admin-ops/scripts/create-contract-mining-trading-mining-task-fast-api.mjs", "--confirm-create"],
-	      { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } },
-	    );
-	    if (!taskRes.ok) throw new Error(`Create contract mining task failed: ${taskRes.json?.error || taskRes.stderr || taskRes.stdout}`);
-    const taskId = String(taskRes.json?.created?.id || "");
-    if (!taskId) throw new Error("Create contract mining task ok but id missing in output");
-    created.taskId = taskId;
+    // 2) tasks (one per miningList item to avoid backend "任务配置重复")
+    for (let i = 0; i < taskCount; i += 1) {
+      const taskRes = await runChildJson(
+        [
+          "skills/weex-admin-ops/scripts/create-contract-mining-trading-mining-task-fast-api.mjs",
+          "--confirm-create",
+          "--name-prefix",
+          `合约挖矿_主任务_${i + 1}_${ts}`,
+        ],
+        { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } },
+      );
+      if (!taskRes.ok) throw new Error(`Create contract mining task failed: ${taskRes.json?.error || taskRes.stderr || taskRes.stdout}`);
+      const taskId = String(taskRes.json?.created?.id || "");
+      if (!taskId) throw new Error("Create contract mining task ok but id missing in output");
+      created.taskIds.push(taskId);
+    }
+    created.taskId = created.taskIds[0] || "";
 
-	    // Child scripts may perform API logins that invalidate previously issued tokens.
-	    // Refresh the session before creating the activity to avoid intermittent business code=401.
-	    api = await createAdminApiSession({ config, requireApiLogin: true });
+    // Child scripts may perform API logins that invalidate previously issued tokens.
+    // Refresh the session before creating the activity to avoid intermittent business code=401.
+    api = await createAdminApiSession({ config, requireApiLogin: true });
 
-	    // 3) create activity
-	    const built = buildActivityPayloadFromTemplate({ templateDetail: template.detail, args, created });
-	    const create = await api.post("/prod-api/activity/config", built.payload);
-	    if (create.body?.code !== 200) throw new Error(`Create activity failed: ${JSON.stringify({ code: create.body?.code, msg: create.body?.msg || create.body?.message })}`);
+    // 3) create activity
+    const built = buildActivityPayloadFromTemplate({ templateDetail: template.detail, args, created });
+    const create = await api.post("/prod-api/activity/config", built.payload);
+    if (create.body?.code !== 200) throw new Error(`Create activity failed: ${JSON.stringify({ code: create.body?.code, msg: create.body?.msg || create.body?.message })}`);
 
     const verifyList = await api.get(`/prod-api/activity/config/list?pageNum=1&pageSize=1&type=CONTRACT_MINING&showUrl=${encodeURIComponent(built.alias)}`);
     const row = firstRow(verifyList);
@@ -316,7 +373,7 @@ async function run() {
     const checks = await api.get(`/prod-api/activity/config/${encodeURIComponent(String(activityId))}`);
     if (checks.body?.code !== 200 || !checks.body?.data) throw new Error("Verify detail failed");
     const verifyDetail = checks.body.data;
-    const draftChecks = [
+    draftChecks = [
       { ok: verifyDetail.type === "CONTRACT_MINING", key: "type", expected: "CONTRACT_MINING", actual: verifyDetail.type ?? null },
       { ok: Number(verifyDetail.applyConfigId) === Number(created.applyConfigId), key: "applyConfigId", expected: created.applyConfigId, actual: verifyDetail.applyConfigId ?? null },
       { ok: Array.isArray(verifyDetail.miningList) && verifyDetail.miningList.length >= 1, key: "miningList", expected: ">=1", actual: Array.isArray(verifyDetail.miningList) ? verifyDetail.miningList.length : null },
@@ -330,7 +387,6 @@ async function run() {
     const minVerifyOk = draftChecks.every(item => item.ok);
     if (!minVerifyOk) throw new Error(`draft-checks failed: ${JSON.stringify(draftChecks)}`);
 
-    const fullVerify = { online: null, offline: null };
     if (verifyLevel === "full") {
       const on = await api.post("/prod-api/activity/mining/online", { activityId: Number(activityId), totp: String(config.googleCode || "") });
       fullVerify.online = { ok: on.body?.code === 200, code: on.body?.code ?? null, msg: on.body?.msg || "" };
@@ -339,44 +395,38 @@ async function run() {
       fullVerify.offline = { ok: off.body?.code === 200, code: off.body?.code ?? null, msg: off.body?.msg || "" };
       if (!fullVerify.offline.ok) throw new Error(`offline failed: ${JSON.stringify(fullVerify.offline)}`);
     }
-
-	    const cleanup = { activity: null, task: null, registerTemplate: null };
-	    if (args.cleanup) {
-	      cleanup.rebindApplyTemplate = await rebindApplyTemplateToDefault(api, activityId, { defaultApplyConfigId: 2442 }).catch(err => ({
-	        ok: false,
-	        error: err?.message || String(err),
-	      }));
-	      // best-effort offline before delete
-	      await offlineContractMiningActivity(api, activityId, config).catch(() => null);
-	      cleanup.activity = await deleteContractMiningActivity(api, activityId, config);
-	      cleanup.task = await deleteTask(api, created.taskId);
-	      let delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
-	      for (let attempt = 1; !delRegister.ok && attempt <= 3; attempt++) {
-	        const msg = String(delRegister?.body?.msg || "");
-	        if (!msg.includes("该报名模版已经被(") || !msg.includes(")使用")) break;
-	        await sleepMs(1200 * attempt);
-	        delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
-	      }
-	      cleanup.registerTemplate = delRegister;
-	      if (!cleanup.activity?.ok) throw new Error(`cleanup activity failed: ${JSON.stringify(cleanup.activity)}`);
-	    }
-
-    printJson({
-      ok: true,
-      mode: "headless_api",
-      finalUrl: `${config.baseUrl}/activities/contractMining/index`,
-      plan,
-      template: { id: template.id, alias: template.alias },
-      created,
-      draftChecks,
-      fullVerify,
-      cleanup,
-      durationMs: Date.now() - startedAt,
-    });
-    return 0;
+  } catch (err) {
+    error = err?.message || String(err);
   } finally {
-    if (api) await api.close();
+    if (args.cleanup) {
+      try {
+        if (!api) api = await createAdminApiSession({ config, requireApiLogin: true });
+        cleanup = await cleanupCreated(api, created, config);
+      } catch (err) {
+        cleanup = cleanup || {};
+        cleanup.error = err?.message || String(err);
+      }
+    }
+    if (api) await api.close().catch(() => {});
   }
+
+  const cleanedUpOk = args.cleanup ? Boolean(cleanup?.activity?.ok ?? true) && Boolean(cleanup?.tasks?.ok ?? true) && Boolean(cleanup?.registerTemplate?.ok ?? true) : true;
+  const ok = !error && cleanedUpOk;
+  printJson({
+    ok,
+    mode: "headless_api",
+    finalUrl: `${config.baseUrl}/activities/contractMining/index`,
+    plan,
+    template: template ? { id: template.id, alias: template.alias } : null,
+    created,
+    draftChecks,
+    fullVerify,
+    cleanedUp: args.cleanup ? cleanedUpOk : false,
+    cleanup,
+    error,
+    durationMs: Date.now() - startedAt,
+  }, ok ? process.stdout : process.stderr);
+  return ok ? 0 : 1;
 }
 
 try {
