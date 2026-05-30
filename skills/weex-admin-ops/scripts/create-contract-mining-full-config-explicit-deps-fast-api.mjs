@@ -81,11 +81,11 @@ function activityWindow(offsetSeconds = 1800, endDays = 30) {
   };
 }
 
-function runChildJson(commandArgs, { timeoutMs = 300000 } = {}) {
+function runChildJson(commandArgs, { timeoutMs = 300000, envOverrides = {} } = {}) {
   return new Promise(resolve => {
     const child = spawn(process.execPath, commandArgs, {
       cwd: repoRoot,
-      env: process.env,
+      env: { ...process.env, ...envOverrides },
       stdio: ["ignore", "pipe", "pipe"],
     });
     let stdout = "";
@@ -104,6 +104,20 @@ function runChildJson(commandArgs, { timeoutMs = 300000 } = {}) {
       resolve({ ok: code === 0 && Boolean(parsed?.ok !== false), code, killedByTimeout, stdout, stderr, json: parsed });
     });
   });
+}
+
+function sleepMs(ms) {
+  return new Promise(resolve => setTimeout(resolve, Math.max(0, Number(ms) || 0)));
+}
+
+async function rebindApplyTemplateToDefault(api, activityId, { defaultApplyConfigId = 2442 } = {}) {
+  const detail = await api.get(`/prod-api/activity/config/${encodeURIComponent(String(activityId))}`);
+  const item = detail.body?.data || null;
+  if (!item || detail.body?.code !== 200) return { ok: false, skipped: true, reason: "detail_unavailable", detail: { status: detail.status, code: detail.body?.code ?? null, msg: detail.body?.msg || "" } };
+  const patched = { ...item, applyConfigId: Number(defaultApplyConfigId) };
+  if ("registerTemplateId" in patched) patched.registerTemplateId = Number(defaultApplyConfigId);
+  const put = await api.put("/prod-api/activity/config", patched);
+  return { ok: put.body?.code === 200, status: put.status, body: { code: put.body?.code ?? null, msg: put.body?.msg || "" } };
 }
 
 async function resolveTemplate(api, templateAlias) {
@@ -264,25 +278,32 @@ async function run() {
       "--name-prefix",
       `合约挖矿报名模板_${ts}`,
     ];
-    const registerRes = await runChildJson(registerScriptArgs);
-    if (!registerRes.ok) throw new Error(`Create register template failed: ${registerRes.json?.error || registerRes.stderr || registerRes.stdout}`);
+    const registerRes = await runChildJson(registerScriptArgs, { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
+	    if (!registerRes.ok) throw new Error(`Create register template failed: ${registerRes.json?.error || registerRes.stderr || registerRes.stdout}`);
     const createdTemplates = Array.isArray(registerRes.json?.created) ? registerRes.json.created : [];
     const registerId = String(createdTemplates[0]?.id || "");
     if (!registerId) throw new Error("Create register template ok but id missing in output");
     created.registerTemplateId = registerId;
     created.applyConfigId = registerId;
 
-    // 2) main task
-    const taskRes = await runChildJson(["skills/weex-admin-ops/scripts/create-contract-mining-trading-mining-task-fast-api.mjs", "--confirm-create"]);
-    if (!taskRes.ok) throw new Error(`Create contract mining task failed: ${taskRes.json?.error || taskRes.stderr || taskRes.stdout}`);
+	    // 2) main task
+	    const taskRes = await runChildJson(
+	      ["skills/weex-admin-ops/scripts/create-contract-mining-trading-mining-task-fast-api.mjs", "--confirm-create"],
+	      { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } },
+	    );
+	    if (!taskRes.ok) throw new Error(`Create contract mining task failed: ${taskRes.json?.error || taskRes.stderr || taskRes.stdout}`);
     const taskId = String(taskRes.json?.created?.id || "");
     if (!taskId) throw new Error("Create contract mining task ok but id missing in output");
     created.taskId = taskId;
 
-    // 3) create activity
-    const built = buildActivityPayloadFromTemplate({ templateDetail: template.detail, args, created });
-    const create = await api.post("/prod-api/activity/config", built.payload);
-    if (create.body?.code !== 200) throw new Error(`Create activity failed: ${JSON.stringify({ code: create.body?.code, msg: create.body?.msg || create.body?.message })}`);
+	    // Child scripts may perform API logins that invalidate previously issued tokens.
+	    // Refresh the session before creating the activity to avoid intermittent business code=401.
+	    api = await createAdminApiSession({ config, requireApiLogin: true });
+
+	    // 3) create activity
+	    const built = buildActivityPayloadFromTemplate({ templateDetail: template.detail, args, created });
+	    const create = await api.post("/prod-api/activity/config", built.payload);
+	    if (create.body?.code !== 200) throw new Error(`Create activity failed: ${JSON.stringify({ code: create.body?.code, msg: create.body?.msg || create.body?.message })}`);
 
     const verifyList = await api.get(`/prod-api/activity/config/list?pageNum=1&pageSize=1&type=CONTRACT_MINING&showUrl=${encodeURIComponent(built.alias)}`);
     const row = firstRow(verifyList);
@@ -319,15 +340,26 @@ async function run() {
       if (!fullVerify.offline.ok) throw new Error(`offline failed: ${JSON.stringify(fullVerify.offline)}`);
     }
 
-    const cleanup = { activity: null, task: null, registerTemplate: null };
-    if (args.cleanup) {
-      // best-effort offline before delete
-      await offlineContractMiningActivity(api, activityId, config).catch(() => null);
-      cleanup.activity = await deleteContractMiningActivity(api, activityId, config);
-      cleanup.task = await deleteTask(api, created.taskId);
-      cleanup.registerTemplate = await deleteRegisterTemplate(api, created.registerTemplateId);
-      if (!cleanup.activity?.ok) throw new Error(`cleanup activity failed: ${JSON.stringify(cleanup.activity)}`);
-    }
+	    const cleanup = { activity: null, task: null, registerTemplate: null };
+	    if (args.cleanup) {
+	      cleanup.rebindApplyTemplate = await rebindApplyTemplateToDefault(api, activityId, { defaultApplyConfigId: 2442 }).catch(err => ({
+	        ok: false,
+	        error: err?.message || String(err),
+	      }));
+	      // best-effort offline before delete
+	      await offlineContractMiningActivity(api, activityId, config).catch(() => null);
+	      cleanup.activity = await deleteContractMiningActivity(api, activityId, config);
+	      cleanup.task = await deleteTask(api, created.taskId);
+	      let delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
+	      for (let attempt = 1; !delRegister.ok && attempt <= 3; attempt++) {
+	        const msg = String(delRegister?.body?.msg || "");
+	        if (!msg.includes("该报名模版已经被(") || !msg.includes(")使用")) break;
+	        await sleepMs(1200 * attempt);
+	        delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
+	      }
+	      cleanup.registerTemplate = delRegister;
+	      if (!cleanup.activity?.ok) throw new Error(`cleanup activity failed: ${JSON.stringify(cleanup.activity)}`);
+	    }
 
     printJson({
       ok: true,

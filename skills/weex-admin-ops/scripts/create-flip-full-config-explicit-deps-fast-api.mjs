@@ -81,11 +81,11 @@ function activityWindow(offsetSeconds = 1800, endDays = 30) {
   };
 }
 
-function runChildJson(commandArgs, { timeoutMs = 300000 } = {}) {
+function runChildJson(commandArgs, { timeoutMs = 300000, envOverrides = {} } = {}) {
   return new Promise(resolve => {
     const child = spawn(process.execPath, commandArgs, {
       cwd: repoRoot,
-      env: process.env,
+      env: { ...process.env, ...envOverrides },
       stdio: ["ignore", "pipe", "pipe"],
     });
     let stdout = "";
@@ -104,6 +104,20 @@ function runChildJson(commandArgs, { timeoutMs = 300000 } = {}) {
       resolve({ ok: code === 0 && Boolean(parsed?.ok !== false), code, killedByTimeout, stdout, stderr, json: parsed });
     });
   });
+}
+
+function sleepMs(ms) {
+  return new Promise(resolve => setTimeout(resolve, Math.max(0, Number(ms) || 0)));
+}
+
+async function rebindApplyTemplateToDefault(api, activityId, { defaultApplyConfigId = 2442 } = {}) {
+  const detail = await api.get(`/prod-api/activity/config/${encodeURIComponent(String(activityId))}`);
+  const item = detail.body?.data || null;
+  if (!item || detail.body?.code !== 200) return { ok: false, skipped: true, reason: "detail_unavailable", detail: { status: detail.status, code: detail.body?.code ?? null, msg: detail.body?.msg || "" } };
+  const patched = { ...item, applyConfigId: Number(defaultApplyConfigId) };
+  if ("registerTemplateId" in patched) patched.registerTemplateId = Number(defaultApplyConfigId);
+  const put = await api.put("/prod-api/activity/config", patched);
+  return { ok: put.body?.code === 200, status: put.status, body: { code: put.body?.code ?? null, msg: put.body?.msg || "" } };
 }
 
 async function resolveTemplate(api, templateAlias) {
@@ -287,7 +301,7 @@ async function run() {
       "signup,view",
       "--name-prefix",
       `小丑牌报名模板_${ts}`,
-    ]);
+    ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
     if (!registerTemplate.ok) throw new Error(`create-register-templates-fast-api.mjs failed: ${registerTemplate.json?.error || "unknown"}`);
     const createdTemplates = Array.isArray(registerTemplate.json?.created) ? registerTemplate.json.created : [];
     created.registerTemplateId = String(createdTemplates[0]?.id || "");
@@ -308,7 +322,7 @@ async function run() {
       "--alias-prefix",
       `flip_bonus_${ts}`,
       "--confirm-create",
-    ]);
+    ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
     if (!prizeRes.ok) throw new Error(`create-prizes-fast-api.mjs failed: ${prizeRes.json?.error || "unknown"}`);
     const createdPrizes = Array.isArray(prizeRes.json?.created) ? prizeRes.json.created : [];
     created.giftCashPrizeId = String(createdPrizes[0]?.id || "");
@@ -318,7 +332,7 @@ async function run() {
     const vprizeRes = await runChildJson([
       "skills/weex-admin-ops/scripts/create-flip-virtual-prizes-fast-api.mjs",
       "--confirm-create",
-    ]);
+    ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
     if (!vprizeRes.ok) throw new Error(`create-flip-virtual-prizes-fast-api.mjs failed: ${vprizeRes.json?.error || "unknown"}`);
     const vCreated = Array.isArray(vprizeRes.json?.created) ? vprizeRes.json.created : [];
     const cardPrize = vCreated.find(item => item?.subtype === "FLIP_CARD");
@@ -339,7 +353,7 @@ async function run() {
       "--tag-prefix",
       "flipc",
       "--confirm-create",
-    ]);
+    ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
     if (!cardTask.ok) throw new Error(`create-flip-task-with-prize-fast-api.mjs(card) failed: ${cardTask.json?.error || "unknown"}`);
     created.cardTaskId = String(cardTask.json?.created?.id || "");
     if (!created.cardTaskId) throw new Error("No task id returned for card task");
@@ -355,12 +369,15 @@ async function run() {
       "--tag-prefix",
       "flipi",
       "--confirm-create",
-    ]);
+    ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
     if (!integralTask.ok) throw new Error(`create-flip-task-with-prize-fast-api.mjs(integral) failed: ${integralTask.json?.error || "unknown"}`);
     created.integralTaskId = String(integralTask.json?.created?.id || "");
     if (!created.integralTaskId) throw new Error("No task id returned for integral task");
 
     // 5) create activity
+    // Child scripts may perform API logins that invalidate previously issued tokens.
+    // Refresh the session before creating the activity to avoid intermittent business code=401.
+    api = await createAdminApiSession({ config, requireApiLogin: true });
     const built = buildActivityPayloadFromTemplate({ templateDetail: template.detail, args, created });
     const create = await api.post("/prod-api/activity/config", built.payload);
     if (create.body?.code !== 200) throw new Error(`Create activity failed: ${JSON.stringify({ code: create.body?.code, msg: create.body?.msg || create.body?.message })}`);
@@ -397,8 +414,12 @@ async function run() {
       if (!fullVerify.offline.ok) throw new Error(`offline failed: ${JSON.stringify(fullVerify.offline)}`);
     }
 
-    const cleanup = { activity: null, tasks: [], prizes: [], registerTemplate: null };
+    const cleanup = { rebindApplyTemplate: null, activity: null, tasks: [], prizes: [], registerTemplate: null };
     if (args.cleanup) {
+      cleanup.rebindApplyTemplate = await rebindApplyTemplateToDefault(api, activityId, { defaultApplyConfigId: 2442 }).catch(err => ({
+        ok: false,
+        error: err?.message || String(err),
+      }));
       await offlineFlipActivity(api, activityId, config).catch(() => null);
       cleanup.activity = await deleteFlipActivity(api, activityId, config);
       cleanup.tasks.push(await deleteTask(api, created.cardTaskId));
@@ -406,7 +427,14 @@ async function run() {
       cleanup.prizes.push(await deletePrize(api, created.virtualFlipCardPrizeId));
       cleanup.prizes.push(await deletePrize(api, created.virtualFlipIntegralPrizeId));
       cleanup.prizes.push(await deletePrize(api, created.giftCashPrizeId));
-      cleanup.registerTemplate = await deleteRegisterTemplate(api, created.registerTemplateId);
+      let delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
+      for (let attempt = 1; !delRegister.ok && attempt <= 3; attempt++) {
+        const msg = String(delRegister?.body?.msg || "");
+        if (!msg.includes("该报名模版已经被(") || !msg.includes(")使用")) break;
+        await sleepMs(1200 * attempt);
+        delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
+      }
+      cleanup.registerTemplate = delRegister;
       if (!cleanup.activity?.ok) throw new Error(`cleanup activity failed: ${JSON.stringify(cleanup.activity)}`);
     }
 

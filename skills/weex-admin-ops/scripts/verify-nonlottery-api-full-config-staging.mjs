@@ -19,11 +19,11 @@ function usage() {
 
 Options:
   --verify-level <min|full>     default min
-  --only <guess|monopoly|agent_trace_pro|all> default all
+  --only <competition|race|tracepro|customized|recharge|agent|contract_mining|flip|guess|monopoly|agent_trace_pro|all> default all
   --required-volume <n>         default 1
   --start-offset-seconds <n>    default 120
   --end-days <n>                default 7
-  --resource-cards <n>          default 3 (only for agent_trace_pro)
+  --resource-cards <n>          default 3 (only for tracepro/agent_trace_pro)
   --confirm-run                 required for any write execution
   --confirm-full-verify         required when --verify-level=full
   --dry-run
@@ -85,6 +85,96 @@ function buildSteps(args) {
 
   const candidates = [
     {
+      key: "competition",
+      label: "交易大赛（TRADING_COMPETITION）",
+      script: "skills/weex-admin-ops/scripts/create-competition-full-config-explicit-deps-fast-api.mjs",
+      commandArgs: [
+        "skills/weex-admin-ops/scripts/create-competition-full-config-explicit-deps-fast-api.mjs",
+        ...common,
+        ...fullFlag,
+        ...timeArgs,
+      ],
+    },
+    {
+      key: "race",
+      label: "交易竞速赛（RACE_COMPETITION）",
+      script: "skills/weex-admin-ops/scripts/create-race-full-config-explicit-deps-fast-api.mjs",
+      commandArgs: [
+        "skills/weex-admin-ops/scripts/create-race-full-config-explicit-deps-fast-api.mjs",
+        ...common,
+        ...fullFlag,
+        ...timeArgs,
+      ],
+    },
+    {
+      key: "tracepro",
+      label: "小活动型活动（TRACE_PRO）",
+      script: "skills/weex-admin-ops/scripts/create-tracepro-full-config-explicit-deps-fast-api.mjs",
+      commandArgs: [
+        "skills/weex-admin-ops/scripts/create-tracepro-full-config-explicit-deps-fast-api.mjs",
+        ...common,
+        ...fullFlag,
+        "--resource-cards",
+        String(args.resourceCards),
+        ...timeArgs,
+      ],
+    },
+    {
+      key: "customized",
+      label: "定制化活动（CUSTOMIZED）",
+      script: "skills/weex-admin-ops/scripts/create-customized-full-config-explicit-deps-fast-api.mjs",
+      commandArgs: [
+        "skills/weex-admin-ops/scripts/create-customized-full-config-explicit-deps-fast-api.mjs",
+        ...common,
+        ...fullFlag,
+        ...timeArgs,
+      ],
+    },
+    {
+      key: "recharge",
+      label: "充值交易活动（RECHARGE_TRANS_TASK）",
+      script: "skills/weex-admin-ops/scripts/create-recharge-trans-full-config-explicit-deps-fast-api.mjs",
+      commandArgs: [
+        "skills/weex-admin-ops/scripts/create-recharge-trans-full-config-explicit-deps-fast-api.mjs",
+        ...common,
+        ...fullFlag,
+        ...timeArgs,
+      ],
+    },
+    {
+      key: "agent",
+      label: "人人代理活动（AGENT）",
+      script: "skills/weex-admin-ops/scripts/create-agent-full-config-explicit-deps-fast-api.mjs",
+      commandArgs: [
+        "skills/weex-admin-ops/scripts/create-agent-full-config-explicit-deps-fast-api.mjs",
+        ...common,
+        ...fullFlag,
+        ...timeArgs,
+      ],
+    },
+    {
+      key: "contract_mining",
+      label: "合约挖矿活动（CONTRACT_MINING）",
+      script: "skills/weex-admin-ops/scripts/create-contract-mining-full-config-explicit-deps-fast-api.mjs",
+      commandArgs: [
+        "skills/weex-admin-ops/scripts/create-contract-mining-full-config-explicit-deps-fast-api.mjs",
+        ...common,
+        ...fullFlag,
+        ...timeArgs,
+      ],
+    },
+    {
+      key: "flip",
+      label: "小丑牌活动（FLIP）",
+      script: "skills/weex-admin-ops/scripts/create-flip-full-config-explicit-deps-fast-api.mjs",
+      commandArgs: [
+        "skills/weex-admin-ops/scripts/create-flip-full-config-explicit-deps-fast-api.mjs",
+        ...common,
+        ...fullFlag,
+        ...timeArgs,
+      ],
+    },
+    {
       key: "guess",
       label: "竞猜大赛（GUESS）",
       script: "skills/weex-admin-ops/scripts/create-guess-full-config-explicit-deps-fast-api.mjs",
@@ -124,7 +214,7 @@ function buildSteps(args) {
   const only = String(args.only || "all");
   if (only === "all") return candidates;
   const found = candidates.find(item => item.key === only);
-  if (!found) throw new Error(`Unknown --only: ${only} (expected guess|monopoly|agent_trace_pro|all)`);
+  if (!found) throw new Error(`Unknown --only: ${only}`);
   return [found];
 }
 
@@ -175,4 +265,3 @@ try {
   printJson({ ok: false, mode: "headless_api", error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-

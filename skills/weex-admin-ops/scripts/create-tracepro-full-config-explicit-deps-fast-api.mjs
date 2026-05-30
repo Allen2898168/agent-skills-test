@@ -85,11 +85,11 @@ function activityWindow(offsetSeconds = 1800, endDays = 30) {
   };
 }
 
-function runChildJson(commandArgs, { timeoutMs = 300000 } = {}) {
+function runChildJson(commandArgs, { timeoutMs = 300000, envOverrides = {} } = {}) {
   return new Promise(resolve => {
     const child = spawn(process.execPath, commandArgs, {
       cwd: repoRoot,
-      env: process.env,
+      env: { ...process.env, ...envOverrides },
       stdio: ["ignore", "pipe", "pipe"],
     });
     let stdout = "";
@@ -108,6 +108,20 @@ function runChildJson(commandArgs, { timeoutMs = 300000 } = {}) {
       resolve({ ok: code === 0 && Boolean(parsed?.ok !== false), code, killedByTimeout, stdout, stderr, json: parsed });
     });
   });
+}
+
+function sleepMs(ms) {
+  return new Promise(resolve => setTimeout(resolve, Math.max(0, Number(ms) || 0)));
+}
+
+async function rebindApplyTemplateToDefault(api, activityId, { defaultApplyConfigId = 2442 } = {}) {
+  const detail = await api.get(`/prod-api/activity/config/${encodeURIComponent(String(activityId))}`);
+  const item = detail.body?.data || null;
+  if (!item || detail.body?.code !== 200) return { ok: false, skipped: true, reason: "detail_unavailable", detail: { status: detail.status, code: detail.body?.code ?? null, msg: detail.body?.msg || "" } };
+  const patched = { ...item, applyConfigId: Number(defaultApplyConfigId) };
+  if ("registerTemplateId" in patched) patched.registerTemplateId = Number(defaultApplyConfigId);
+  const put = await api.put("/prod-api/activity/config", patched);
+  return { ok: put.body?.code === 200, status: put.status, body: { code: put.body?.code ?? null, msg: put.body?.msg || "" } };
 }
 
 async function resolveTemplate(api, templateAlias) {
@@ -225,23 +239,24 @@ async function run() {
   let api = null;
   try {
     // 0) resolve template (payload baseline only)
-    const apiForTemplate = await createAdminApiSession({ config, requireApiLogin: true });
-    const template = await resolveTemplate(apiForTemplate, args.templateAlias);
-    await apiForTemplate.close();
+	    const apiForTemplate = await createAdminApiSession({ config, requireApiLogin: true });
+	    const template = await resolveTemplate(apiForTemplate, args.templateAlias);
+	    await apiForTemplate.close();
+	    api = await createAdminApiSession({ config, requireApiLogin: true });
 
     // 1) register template (applyConfigId)
     const ts = timestamp().slice(-6);
-    const registerTemplate = await runChildJson([
-      "skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs",
+	    const registerTemplate = await runChildJson([
+	      "skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs",
       "--platform-scope",
       "all",
       "--signup-modes",
       "auto",
       "--permissions",
       "signup,view",
-      "--name-prefix",
-      `小活动报名模板_${ts}`,
-    ]);
+	      "--name-prefix",
+	      `小活动报名模板_${ts}`,
+	    ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
     if (!registerTemplate.ok) throw new Error(`create-register-templates-fast-api.mjs failed: ${registerTemplate.json?.error || "unknown"}`);
     const createdTemplates = Array.isArray(registerTemplate.json?.created) ? registerTemplate.json.created : [];
     created.registerTemplateId = String(createdTemplates[0]?.id || "");
@@ -249,8 +264,8 @@ async function run() {
     if (!created.registerTemplateId) throw new Error("No register template id returned from create-register-templates-fast-api.mjs");
 
     // 2) prize (create 1 bonus prize)
-    const prizes = await runChildJson([
-      "skills/weex-admin-ops/scripts/create-prizes-fast-api.mjs",
+	    const prizes = await runChildJson([
+	      "skills/weex-admin-ops/scripts/create-prizes-fast-api.mjs",
       "--category",
       "赠金",
       "--subtype",
@@ -260,23 +275,23 @@ async function run() {
       "--name-prefix",
       `小活动奖品_${ts}`,
       "--alias-prefix",
-      `tp_prize_${ts}`,
-      "--confirm-create",
-    ]);
+	      `tp_prize_${ts}`,
+	      "--confirm-create",
+	    ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
     if (!prizes.ok) throw new Error(`create-prizes-fast-api.mjs failed: ${prizes.json?.error || "unknown"}`);
     const prizeIds = Array.isArray(prizes.json?.created) ? prizes.json.created.map(item => String(item?.id || "")).filter(Boolean) : [];
     created.prizeId = String(prizeIds[0] || "");
     if (!created.prizeId) throw new Error("No prize id returned from create-prizes-fast-api.mjs");
 
     // 3) task (with prize binding)
-    const task = await runChildJson([
-      "skills/weex-admin-ops/scripts/create-tracepro-trading-volume-task-with-bonus-prize-fast-api.mjs",
+	    const task = await runChildJson([
+	      "skills/weex-admin-ops/scripts/create-tracepro-trading-volume-task-with-bonus-prize-fast-api.mjs",
       "--required-volume",
       String(args.requiredVolume),
       "--prize-id",
-      String(created.prizeId),
-      "--confirm-create",
-    ]);
+	      String(created.prizeId),
+	      "--confirm-create",
+	    ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
     if (!task.ok) throw new Error(`create-tracepro-trading-volume-task-with-bonus-prize-fast-api.mjs failed: ${task.json?.error || "unknown"}`);
     created.taskId = String(task.json?.created?.id || "");
     created.taskDetail = task.json?.createdTaskDetail || null;
@@ -284,8 +299,8 @@ async function run() {
 
     // 4) resource cards (optional)
     if (args.resourceCards > 0) {
-      const cardRes = await runChildJson([
-        "skills/weex-admin-ops/scripts/resource-card-fast-api.mjs",
+	      const cardRes = await runChildJson([
+	        "skills/weex-admin-ops/scripts/resource-card-fast-api.mjs",
         "--action",
         "create-min",
         "--activity-type",
@@ -293,9 +308,9 @@ async function run() {
         "--count",
         String(args.resourceCards),
         "--name-prefix",
-        `资源卡_小活动_${ts}`,
-        "--confirm-create",
-      ]);
+	        `资源卡_小活动_${ts}`,
+	        "--confirm-create",
+	      ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
       if (!cardRes.ok) throw new Error(`resource-card-fast-api.mjs create-min failed: ${cardRes.json?.error || "unknown"}`);
       const createdCards = Array.isArray(cardRes.json?.created) ? cardRes.json.created : [];
       created.resourceCardIds = createdCards.map(item => String(item?.id || "")).filter(Boolean);
@@ -305,7 +320,9 @@ async function run() {
     }
 
     // 5) create activity with explicit binding
-    api = await createAdminApiSession({ config, requireApiLogin: true });
+	    // Child scripts may perform API logins that invalidate previously issued tokens.
+	    // Refresh the session before creating the activity to avoid intermittent business code=401.
+	    api = await createAdminApiSession({ config, requireApiLogin: true });
     const built = buildActivityPayloadFromTemplate({ templateDetail: template.detail, args, created });
     const create = await api.post("/prod-api/activity/config", built.payload);
     if (create.body?.code !== 200) throw new Error(`Create TRACE_PRO activity failed: ${JSON.stringify(create.body)}`);
@@ -316,32 +333,32 @@ async function run() {
     const verify = await api.get(`/prod-api/activity/config/${encodeURIComponent(activityId)}`);
     const verifyItem = verify.body?.data || null;
 
-    const draftChecks = await runChildJson([
-      "skills/weex-admin-ops/scripts/tracepro-activity-fast-api.mjs",
+	    const draftChecks = await runChildJson([
+	      "skills/weex-admin-ops/scripts/tracepro-activity-fast-api.mjs",
       "--action",
       "draft-checks",
-      "--activity-id",
-      String(activityId),
-    ]);
+	      "--activity-id",
+	      String(activityId),
+	    ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
     if (!draftChecks.ok) throw new Error(`tracepro-activity-fast-api.mjs draft-checks failed: ${draftChecks.json?.error || "unknown"}`);
 
     let fullVerify = null;
     if (verifyLevel === "full") {
-      const online = await runChildJson([
-        "skills/weex-admin-ops/scripts/tracepro-activity-fast-api.mjs",
+	      const online = await runChildJson([
+	        "skills/weex-admin-ops/scripts/tracepro-activity-fast-api.mjs",
         "--action",
         "online",
-        "--activity-id",
-        String(activityId),
-      ]);
+	        "--activity-id",
+	        String(activityId),
+	      ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
       if (!online.ok) throw new Error(`tracepro-activity-fast-api.mjs online failed: ${online.json?.error || "unknown"}`);
-      const offline = await runChildJson([
-        "skills/weex-admin-ops/scripts/tracepro-activity-fast-api.mjs",
+	      const offline = await runChildJson([
+	        "skills/weex-admin-ops/scripts/tracepro-activity-fast-api.mjs",
         "--action",
         "offline",
-        "--activity-id",
-        String(activityId),
-      ]);
+	        "--activity-id",
+	        String(activityId),
+	      ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
       if (!offline.ok) throw new Error(`tracepro-activity-fast-api.mjs offline failed: ${offline.json?.error || "unknown"}`);
       fullVerify = { online: { ok: true }, offline: { ok: true } };
     }
@@ -388,12 +405,26 @@ async function run() {
     if (!args.confirmCleanup) throw new Error("需要清理确认：请加 --confirm-cleanup 后才允许删除刚创建的活动与依赖模块。");
 
     const cleanup = {
+      rebindApplyTemplate: await rebindApplyTemplateToDefault(api, activityId, { defaultApplyConfigId: 2442 }).catch(err => ({
+        ok: false,
+        error: err?.message || String(err),
+      })),
       deleteActivity: await deleteTraceProActivity(api, activityId, config),
       deleteTask: await deleteTask(api, created.taskId),
       deletePrize: await deletePrize(api, created.prizeId),
-      deleteRegisterTemplate: created.registerTemplateId ? await deleteRegisterTemplate(api, created.registerTemplateId) : { ok: true, skipped: true },
+      deleteRegisterTemplate: { ok: true, skipped: true },
       deleteResourceCards: created.resourceCardIds.length ? await Promise.all(created.resourceCardIds.map(id => deleteResourceCard(api, id))) : [],
     };
+    if (created.registerTemplateId) {
+      let delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
+      for (let attempt = 1; !delRegister.ok && attempt <= 3; attempt++) {
+        const msg = String(delRegister?.body?.msg || "");
+        if (!msg.includes("该报名模版已经被(") || !msg.includes(")使用")) break;
+        await sleepMs(1200 * attempt);
+        delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
+      }
+      cleanup.deleteRegisterTemplate = delRegister;
+    }
     const ok =
       cleanup.deleteActivity.ok
       && cleanup.deleteTask.ok

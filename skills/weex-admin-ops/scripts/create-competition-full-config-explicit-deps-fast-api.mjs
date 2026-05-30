@@ -81,11 +81,11 @@ function activityWindow(offsetSeconds = 1800, endDays = 30) {
   };
 }
 
-function runChildJson(commandArgs, { timeoutMs = 300000 } = {}) {
+function runChildJson(commandArgs, { timeoutMs = 300000, envOverrides = {} } = {}) {
   return new Promise(resolve => {
     const child = spawn(process.execPath, commandArgs, {
       cwd: repoRoot,
-      env: process.env,
+      env: { ...process.env, ...envOverrides },
       stdio: ["ignore", "pipe", "pipe"],
     });
     let stdout = "";
@@ -104,6 +104,20 @@ function runChildJson(commandArgs, { timeoutMs = 300000 } = {}) {
       resolve({ ok: code === 0 && Boolean(parsed?.ok !== false), code, killedByTimeout, stdout, stderr, json: parsed });
     });
   });
+}
+
+function sleepMs(ms) {
+  return new Promise(resolve => setTimeout(resolve, Math.max(0, Number(ms) || 0)));
+}
+
+async function rebindApplyTemplateToDefault(api, activityId, { defaultApplyConfigId = 2442 } = {}) {
+  const detail = await api.get(`/prod-api/activity/config/${encodeURIComponent(String(activityId))}`);
+  const item = detail.body?.data || null;
+  if (!item || detail.body?.code !== 200) return { ok: false, skipped: true, reason: "detail_unavailable", detail: { status: detail.status, code: detail.body?.code ?? null, msg: detail.body?.msg || "" } };
+  const patched = { ...item, applyConfigId: Number(defaultApplyConfigId) };
+  if ("registerTemplateId" in patched) patched.registerTemplateId = Number(defaultApplyConfigId);
+  const put = await api.put("/prod-api/activity/config", patched);
+  return { ok: put.body?.code === 200, status: put.status, body: { code: put.body?.code ?? null, msg: put.body?.msg || "" } };
 }
 
 async function resolveTemplate(api, templateAlias) {
@@ -211,36 +225,37 @@ async function run() {
   assertAdminLoginConfig(config);
   const startedAt = Date.now();
 
-  const created = { prizeIds: [], taskId: "", applyConfigId: "", registerTemplateId: "" };
-  let api = null;
-  try {
-    // 0) resolve template (payload baseline only)
-    const apiForTemplate = await createAdminApiSession({ config, requireApiLogin: true });
-    const template = await resolveTemplate(apiForTemplate, args.templateAlias);
-    await apiForTemplate.close();
+	  const created = { prizeIds: [], taskId: "", applyConfigId: "", registerTemplateId: "" };
+	  let api = null;
+	  try {
+	    // 0) resolve template (payload baseline only)
+	    const apiForTemplate = await createAdminApiSession({ config, requireApiLogin: true });
+	    const template = await resolveTemplate(apiForTemplate, args.templateAlias);
+	    await apiForTemplate.close();
+	    api = await createAdminApiSession({ config, requireApiLogin: true });
 
-    // 1) register template (applyConfigId)
-    const ts = timestamp().slice(-6);
-    const registerTemplate = await runChildJson([
-      "skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs",
+	    // 1) register template (applyConfigId)
+	    const ts = timestamp().slice(-6);
+	    const registerTemplate = await runChildJson([
+	      "skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs",
       "--platform-scope",
       "all",
       "--signup-modes",
       "auto",
       "--permissions",
-      "signup,view",
-      "--name-prefix",
-      `交易大赛报名模板_${ts}`,
-    ]);
-    if (!registerTemplate.ok) throw new Error(`create-register-templates-fast-api.mjs failed: ${registerTemplate.json?.error || "unknown"}`);
-    const createdTemplates = Array.isArray(registerTemplate.json?.created) ? registerTemplate.json.created : [];
-    created.registerTemplateId = String(createdTemplates[0]?.id || "");
-    created.applyConfigId = created.registerTemplateId;
-    if (!created.registerTemplateId) throw new Error("No register template id returned from create-register-templates-fast-api.mjs");
+	      "signup,view",
+	      "--name-prefix",
+	      `交易大赛报名模板_${ts}`,
+	    ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
+	    if (!registerTemplate.ok) throw new Error(`create-register-templates-fast-api.mjs failed: ${registerTemplate.json?.error || "unknown"}`);
+	    const createdTemplates = Array.isArray(registerTemplate.json?.created) ? registerTemplate.json.created : [];
+	    created.registerTemplateId = String(createdTemplates[0]?.id || "");
+	    created.applyConfigId = created.registerTemplateId;
+	    if (!created.registerTemplateId) throw new Error("No register template id returned from create-register-templates-fast-api.mjs");
 
-    // 2) prizes (create 2 bonus prizes)
-    const prizes = await runChildJson([
-      "skills/weex-admin-ops/scripts/create-prizes-fast-api.mjs",
+	    // 2) prizes (create 2 bonus prizes)
+	    const prizes = await runChildJson([
+	      "skills/weex-admin-ops/scripts/create-prizes-fast-api.mjs",
       "--category",
       "赠金",
       "--subtype",
@@ -249,66 +264,68 @@ async function run() {
       "2",
       "--name-prefix",
       `交易大赛奖品_${ts}`,
-      "--alias-prefix",
-      `tc_prize_${ts}`,
-      "--confirm-create",
-    ]);
-    if (!prizes.ok) throw new Error(`create-prizes-fast-api.mjs failed: ${prizes.json?.error || "unknown"}`);
-    created.prizeIds = Array.isArray(prizes.json?.created) ? prizes.json.created.map(item => String(item?.id || "")).filter(Boolean) : [];
-    if (!created.prizeIds.length) throw new Error("No prize ids returned from create-prizes-fast-api.mjs");
+	      "--alias-prefix",
+	      `tc_prize_${ts}`,
+	      "--confirm-create",
+	    ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
+	    if (!prizes.ok) throw new Error(`create-prizes-fast-api.mjs failed: ${prizes.json?.error || "unknown"}`);
+	    created.prizeIds = Array.isArray(prizes.json?.created) ? prizes.json.created.map(item => String(item?.id || "")).filter(Boolean) : [];
+	    if (!created.prizeIds.length) throw new Error("No prize ids returned from create-prizes-fast-api.mjs");
 
-    // 2) task
-    const task = await runChildJson([
-      "skills/weex-admin-ops/scripts/create-competition-trading-volume-task-fast-api.mjs",
-      "--required-volume",
-      String(args.requiredVolume),
-      "--confirm-create",
-    ]);
-    if (!task.ok) throw new Error(`create-competition-trading-volume-task-fast-api.mjs failed: ${task.json?.error || "unknown"}`);
-    created.taskId = String(task.json?.created?.id || "");
-    if (!created.taskId) throw new Error("No task id returned from create-competition-trading-volume-task-fast-api.mjs");
+	    // 2) task
+	    const task = await runChildJson([
+	      "skills/weex-admin-ops/scripts/create-competition-trading-volume-task-fast-api.mjs",
+	      "--required-volume",
+	      String(args.requiredVolume),
+	      "--confirm-create",
+	    ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
+	    if (!task.ok) throw new Error(`create-competition-trading-volume-task-fast-api.mjs failed: ${task.json?.error || "unknown"}`);
+	    created.taskId = String(task.json?.created?.id || "");
+	    if (!created.taskId) throw new Error("No task id returned from create-competition-trading-volume-task-fast-api.mjs");
 
-    // 3) create activity with explicit binding
-    api = await createAdminApiSession({ config, requireApiLogin: true });
-    const built = buildActivityPayloadFromTemplate({ templateDetail: template.detail, args, created });
-    const create = await api.post("/prod-api/activity/config", built.payload);
-    if (create.body?.code !== 200) throw new Error(`Create trading competition activity failed: ${JSON.stringify(create.body)}`);
-    const row = firstRow(await api.get(`/prod-api/activity/config/list?pageNum=1&pageSize=1&type=TRADING_COMPETITION&showUrl=${encodeURIComponent(built.alias)}`));
-    const activityId = String(row?.activityId || row?.id || "");
-    if (!activityId) throw new Error(`Created activity not found by alias: ${built.alias}`);
+	    // 3) create activity with explicit binding
+	    // Child scripts may perform API logins that invalidate previously issued tokens.
+	    // Refresh the session before creating the activity to avoid intermittent business code=401.
+	    api = await createAdminApiSession({ config, requireApiLogin: true });
+	    const built = buildActivityPayloadFromTemplate({ templateDetail: template.detail, args, created });
+	    const create = await api.post("/prod-api/activity/config", built.payload);
+	    if (create.body?.code !== 200) throw new Error(`Create trading competition activity failed: ${JSON.stringify(create.body)}`);
+	    const row = firstRow(await api.get(`/prod-api/activity/config/list?pageNum=1&pageSize=1&type=TRADING_COMPETITION&showUrl=${encodeURIComponent(built.alias)}`));
+	    const activityId = String(row?.activityId || row?.id || "");
+	    if (!activityId) throw new Error(`Created activity not found by alias: ${built.alias}`);
 
     const verify = await api.get(`/prod-api/activity/config/${encodeURIComponent(activityId)}`);
     const verifyItem = verify.body?.data || null;
 
-    const draftChecks = await runChildJson([
-      "skills/weex-admin-ops/scripts/competition-activity-fast-api.mjs",
-      "--action",
-      "draft-checks",
-      "--activity-id",
-      String(activityId),
-    ]);
-    if (!draftChecks.ok) throw new Error(`competition-activity-fast-api.mjs draft-checks failed: ${draftChecks.json?.error || "unknown"}`);
+	    const draftChecks = await runChildJson([
+	      "skills/weex-admin-ops/scripts/competition-activity-fast-api.mjs",
+	      "--action",
+	      "draft-checks",
+	      "--activity-id",
+	      String(activityId),
+	    ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
+	    if (!draftChecks.ok) throw new Error(`competition-activity-fast-api.mjs draft-checks failed: ${draftChecks.json?.error || "unknown"}`);
 
     let fullVerify = null;
     if (verifyLevel === "full") {
-      const online = await runChildJson([
-        "skills/weex-admin-ops/scripts/competition-activity-fast-api.mjs",
-        "--action",
-        "online",
-        "--activity-id",
-        String(activityId),
-      ]);
-      if (!online.ok) throw new Error(`competition-activity-fast-api.mjs online failed: ${online.json?.error || "unknown"}`);
-      const offline = await runChildJson([
-        "skills/weex-admin-ops/scripts/competition-activity-fast-api.mjs",
-        "--action",
-        "offline",
-        "--activity-id",
-        String(activityId),
-      ]);
-      if (!offline.ok) throw new Error(`competition-activity-fast-api.mjs offline failed: ${offline.json?.error || "unknown"}`);
-      fullVerify = { online: { ok: true }, offline: { ok: true } };
-    }
+	      const online = await runChildJson([
+	        "skills/weex-admin-ops/scripts/competition-activity-fast-api.mjs",
+	        "--action",
+	        "online",
+	        "--activity-id",
+	        String(activityId),
+	      ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
+	      if (!online.ok) throw new Error(`competition-activity-fast-api.mjs online failed: ${online.json?.error || "unknown"}`);
+	      const offline = await runChildJson([
+	        "skills/weex-admin-ops/scripts/competition-activity-fast-api.mjs",
+	        "--action",
+	        "offline",
+	        "--activity-id",
+	        String(activityId),
+	      ], { envOverrides: { WEEX_ADMIN_AUTHORIZATION: api.authorization } });
+	      if (!offline.ok) throw new Error(`competition-activity-fast-api.mjs offline failed: ${offline.json?.error || "unknown"}`);
+	      fullVerify = { online: { ok: true }, offline: { ok: true } };
+	    }
 
     const evidence = {
       ok: true,
@@ -350,11 +367,25 @@ async function run() {
     if (!args.confirmCleanup) throw new Error("需要清理确认：请加 --confirm-cleanup 后才允许删除刚创建的活动与依赖模块。");
 
     const cleanup = {
+      rebindApplyTemplate: await rebindApplyTemplateToDefault(api, activityId, { defaultApplyConfigId: 2442 }).catch(err => ({
+        ok: false,
+        error: err?.message || String(err),
+      })),
       deleteActivity: await deleteCompetitionActivity(api, activityId, config),
       deleteTask: await deleteTask(api, created.taskId),
       deletePrizes: await Promise.all(created.prizeIds.map(id => deletePrize(api, id))),
-      deleteRegisterTemplate: created.registerTemplateId ? await deleteRegisterTemplate(api, created.registerTemplateId) : { ok: true, skipped: true },
+      deleteRegisterTemplate: { ok: true, skipped: true },
     };
+    if (created.registerTemplateId) {
+      let delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
+      for (let attempt = 1; !delRegister.ok && attempt <= 3; attempt++) {
+        const msg = String(delRegister?.body?.msg || "");
+        if (!msg.includes("该报名模版已经被(") || !msg.includes(")使用")) break;
+        await sleepMs(1200 * attempt);
+        delRegister = await deleteRegisterTemplate(api, created.registerTemplateId);
+      }
+      cleanup.deleteRegisterTemplate = delRegister;
+    }
     const ok =
       cleanup.deleteActivity.ok
       && cleanup.deleteTask.ok
