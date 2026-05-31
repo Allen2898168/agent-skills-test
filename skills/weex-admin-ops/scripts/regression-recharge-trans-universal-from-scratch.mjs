@@ -369,6 +369,17 @@ async function run() {
       suite: "universal-regression",
       caseId: result.caseId,
       title: "充值交易(RECHARGE_TRANS_TASK) 通用回归（从零配置）",
+      testCase: {
+        number: `UR-ADMIN-${result.caseId}`,
+        description: "验证充值交易(RECHARGE_TRANS_TASK)在 staging 环境从零创建依赖与活动（含交易量任务），完成草稿检查、上线/下线，并按需清理创建物。",
+        preconditions: [
+          "环境：staging 活动后台可访问（默认 https://stg-activity.weex.tech）",
+          "已配置并可登录：skills/weex-admin-ops/.env.local（WEEX_ADMIN_USERNAME/WEEX_ADMIN_PASSWORD/WEEX_ADMIN_GOOGLE_CODE）",
+          "账号具备活动/任务/奖品/资源等配置权限",
+          "如启用 --cleanup：账号具备删除/解绑权限",
+        ],
+        tags: ["admin", "universal-regression", "from-scratch", "RECHARGE_TRANS_TASK"],
+      },
       summary: { ok: true, activityId: created.activityId, activityAlias: created.activityAlias, startTime: plan.window.start, endTime: plan.window.end, requiredVolume: args.requiredVolume, cleanup: args.cleanup },
       links: result.links,
       steps,
@@ -385,6 +396,17 @@ async function run() {
       suite: "universal-regression",
       caseId: "RECHARGE_TRANS_TASK_universal_from_scratch_failed",
       title: "充值交易(RECHARGE_TRANS_TASK) 通用回归（失败）",
+      testCase: {
+        number: "UR-ADMIN-RECHARGE_TRANS_TASK_universal_from_scratch",
+        description: "验证充值交易(RECHARGE_TRANS_TASK)在 staging 环境从零创建依赖与活动（含交易量任务），完成草稿检查、上线/下线，并按需清理创建物（失败场景输出）。",
+        preconditions: [
+          "环境：staging 活动后台可访问（默认 https://stg-activity.weex.tech）",
+          "已配置并可登录：skills/weex-admin-ops/.env.local（WEEX_ADMIN_USERNAME/WEEX_ADMIN_PASSWORD/WEEX_ADMIN_GOOGLE_CODE）",
+          "账号具备活动/任务/奖品/资源等配置权限",
+          "如启用 --cleanup：账号具备删除/解绑权限",
+        ],
+        tags: ["admin", "universal-regression", "from-scratch", "RECHARGE_TRANS_TASK"],
+      },
       summary: { ok: false, error: error.message, created, cleanup: args.cleanup },
       links: [{ label: "后台充值交易列表", url: `${config.baseUrl}/activities/depositTrade` }],
       steps,
@@ -403,4 +425,3 @@ try {
   printJson({ ok: false, error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-

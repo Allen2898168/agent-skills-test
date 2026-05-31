@@ -480,6 +480,17 @@ async function run() {
       suite: "universal-regression",
       caseId: result.caseId,
       title: "交易大赛(TRADING_COMPETITION) 通用回归（从零配置）",
+      testCase: {
+        number: `UR-ADMIN-${result.caseId}`,
+        description: "验证交易大赛(TRADING_COMPETITION)在 staging 环境从零创建依赖与活动（含任务与奖池/奖品），完成草稿检查、上线/下线，并按需清理创建物。",
+        preconditions: [
+          "环境：staging 活动后台可访问（默认 https://stg-activity.weex.tech）",
+          "已配置并可登录：skills/weex-admin-ops/.env.local（WEEX_ADMIN_USERNAME/WEEX_ADMIN_PASSWORD/WEEX_ADMIN_GOOGLE_CODE）",
+          "账号具备活动/任务/奖品/资源等配置权限",
+          "如启用 --cleanup：账号具备删除/解绑权限",
+        ],
+        tags: ["admin", "universal-regression", "from-scratch", "TRADING_COMPETITION"],
+      },
       summary: {
         ok: true,
         activityId: created.activityId,
@@ -504,6 +515,17 @@ async function run() {
       suite: "universal-regression",
       caseId: "TRADING_COMPETITION_universal_from_scratch_failed",
       title: "交易大赛(TRADING_COMPETITION) 通用回归（失败）",
+      testCase: {
+        number: "UR-ADMIN-TRADING_COMPETITION_universal_from_scratch",
+        description: "验证交易大赛(TRADING_COMPETITION)在 staging 环境从零创建依赖与活动（含任务与奖池/奖品），完成草稿检查、上线/下线，并按需清理创建物（失败场景输出）。",
+        preconditions: [
+          "环境：staging 活动后台可访问（默认 https://stg-activity.weex.tech）",
+          "已配置并可登录：skills/weex-admin-ops/.env.local（WEEX_ADMIN_USERNAME/WEEX_ADMIN_PASSWORD/WEEX_ADMIN_GOOGLE_CODE）",
+          "账号具备活动/任务/奖品/资源等配置权限",
+          "如启用 --cleanup：账号具备删除/解绑权限",
+        ],
+        tags: ["admin", "universal-regression", "from-scratch", "TRADING_COMPETITION"],
+      },
       summary: { ok: false, error: error.message, created, cleanup: args.cleanup },
       links: [{ label: "后台交易大赛列表", url: `${config.baseUrl}/activities/competition` }],
       steps,
@@ -522,4 +544,3 @@ try {
   printJson({ ok: false, error: error.message }, process.stderr);
   process.exitCode = 1;
 }
-

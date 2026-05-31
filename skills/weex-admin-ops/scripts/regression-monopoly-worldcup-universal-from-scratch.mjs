@@ -404,6 +404,17 @@ async function run() {
       suite: "universal-regression",
       caseId: result.caseId,
       title: "大富翁世界杯(MONOPOLY_WORLD_CUP) 通用回归（从零配置）",
+      testCase: {
+        number: `UR-ADMIN-${result.caseId}`,
+        description: "验证大富翁世界杯(MONOPOLY_WORLD_CUP)在 staging 环境从零创建依赖与活动，完成草稿检查、上线/下线，并按需清理创建物。",
+        preconditions: [
+          "环境：staging 活动后台可访问（默认 https://stg-activity.weex.tech）",
+          "已配置并可登录：skills/weex-admin-ops/.env.local（WEEX_ADMIN_USERNAME/WEEX_ADMIN_PASSWORD/WEEX_ADMIN_GOOGLE_CODE）",
+          "账号具备活动/任务/奖品/资源等配置权限",
+          "如启用 --cleanup：账号具备删除/解绑权限",
+        ],
+        tags: ["admin", "universal-regression", "from-scratch", "MONOPOLY_WORLD_CUP"],
+      },
       summary: {
         ok: true,
         activityId: created.activityId,
@@ -428,6 +439,17 @@ async function run() {
       suite: "universal-regression",
       caseId: "MONOPOLY_WORLD_CUP_universal_from_scratch_failed",
       title: "大富翁世界杯(MONOPOLY_WORLD_CUP) 通用回归（失败）",
+      testCase: {
+        number: "UR-ADMIN-MONOPOLY_WORLD_CUP_universal_from_scratch",
+        description: "验证大富翁世界杯(MONOPOLY_WORLD_CUP)在 staging 环境从零创建依赖与活动，完成草稿检查、上线/下线，并按需清理创建物（失败场景输出）。",
+        preconditions: [
+          "环境：staging 活动后台可访问（默认 https://stg-activity.weex.tech）",
+          "已配置并可登录：skills/weex-admin-ops/.env.local（WEEX_ADMIN_USERNAME/WEEX_ADMIN_PASSWORD/WEEX_ADMIN_GOOGLE_CODE）",
+          "账号具备活动/任务/奖品/资源等配置权限",
+          "如启用 --cleanup：账号具备删除/解绑权限",
+        ],
+        tags: ["admin", "universal-regression", "from-scratch", "MONOPOLY_WORLD_CUP"],
+      },
       summary: { ok: false, error: error.message, created, cleanup: args.cleanup },
       links: [{ label: "后台大富翁列表", url: `${config.baseUrl}/activities/monopoly` }],
       steps,

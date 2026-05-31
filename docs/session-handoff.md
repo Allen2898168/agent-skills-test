@@ -22,6 +22,10 @@
 
 ## 最近完成
 
+- 2026-05-31 回归产物 Markdown 标准化：`tools/lib/result-md.mjs` 新增 `testCase` 入参，支持输出“标准测试用例 MD”（用例编号/名称/描述/前置条件/子用例编号与结果）；并已让 13 条通用回归脚本默认写入该标准格式（仍保留未传 `testCase` 时的旧格式兼容）。
+  - 结果生成工具：`tools/lib/result-md.mjs`
+  - 回归脚本接入：`skills/weex-admin-ops/scripts/regression-*-universal-from-scratch.mjs`
+
 - 2026-05-31 通用回归用例/脚本骨架：新增 `result/` 下的“执行产物 Markdown”写入工具，并打通两条“从零配置（不 clone 活动模板）”通用回归脚本（均会创建依赖→创建活动→验证→解绑依赖→清理→输出 md）：
   - BEGINNER_TASK（新手活动）：`skills/weex-admin-ops/scripts/regression-newbie-universal-from-scratch.mjs`；产物示例：`result/universal-regression/20260531_043955/BEGINNER_TASK_universal_from_scratch.md`。
   - LOTTERY（转盘抽奖）：`skills/weex-admin-ops/scripts/regression-lottery-universal-from-scratch.mjs`；产物示例：`result/universal-regression/20260531_050303/LOTTERY_universal_from_scratch.md`（已补齐抽奖次数奖品+合约/现货任务“从零创建”，不再依赖 clone 任务模板）。
