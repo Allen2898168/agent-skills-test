@@ -16,6 +16,7 @@
 - `failure-reviews/activity-task-management.md`：活动任务管理相关失败。
 - `failure-reviews/activity-register-management.md`：活动用户报名管理相关失败。
 - `failure-reviews/activity-management.md`：活动列表与具体活动配置创建相关失败。
+- `failure-reviews/activity-management-race.md`：交易竞速赛（RACE_COMPETITION）相关失败。
 - `failure-reviews/contract-mining-activity.md`：合约挖矿活动相关失败。
 - `failure-reviews/joker-activity.md`：小丑牌活动相关失败。
 - `failure-reviews/activity-common-module.md`：活动通用模块管理相关失败。

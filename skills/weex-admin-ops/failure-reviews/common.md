@@ -80,6 +80,15 @@
 - 关联文件：本轮 inline 创建脚本。
 - 后续处理：如果沉淀 API 辅助脚本，应封装认证头捕获或统一复用页面网络层，不打印或保存 token。
 
+## 2026-05-31 子脚本重复登录导致父 session `code=401`
+- 业务线：通用脚本编排（headless_api）。
+- 场景：一个父脚本持有 `createAdminApiSession()` 返回的 token，同时调用多个“子脚本”执行写操作；子脚本内部会再次执行 API 登录获取新 token。
+- 失败表现：父脚本后续调用（如 `GET /prod-api/activity/apply/{id}` 或 `POST /prod-api/activity/config`）HTTP 200，但业务 `code=401`，提示认证失败。
+- 失败原因：部分后管登录策略下，同账号再次登录可能使旧 token 失效；父脚本继续使用旧 token 会被拒绝。
+- 解决方式：父脚本在进入关键阶段（尤其创建活动/上下线/删除前）必须 `close()` 并重新 `createAdminApiSession()` 刷新 token；或避免并发/频繁登录，必要时增加资源锁。
+- 验证结果：小活动(TRACE_PRO) 通用回归脚本在“依赖创建完成→创建活动”前刷新 session 后稳定通过。
+- 关联脚本：`scripts/regression-tracepro-universal-from-scratch.mjs`。
+
 ## 2026-05-05 staging 登录页普通验证码误判
 - 业务线：通用登录。
 - 场景：脚本登录 staging 后台时，页面短暂出现 `placeholder="验证码"`。

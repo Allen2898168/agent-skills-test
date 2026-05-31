@@ -76,6 +76,23 @@ function scoreAction(action, query) {
   if (action.id === "lottery_admin_main_regression" && /自动化/.test(query) && /跑|执行|开始做/.test(query)) score += 8;
   if (action.id === "online_lottery_activity" && /活动列表|转盘抽奖|抽奖活动|活动/.test(query) && /上线|发布/.test(query)) score += 16;
   if (action.id === "online_lottery_activity" && /活动ID|活动id|活动别名|showUrl|别名/.test(query) && /上线|发布/.test(query)) score += 12;
+  if (action.id === "regress_newbie_activity_universal_from_scratch" && /(新手活动|BEGINNER_TASK)/.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_lottery_activity_universal_from_scratch" && /(转盘抽奖|抽奖活动|LOTTERY)/.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_monopoly_world_cup_activity_universal_from_scratch" && /(大富翁世界杯|大富翁|MONOPOLY_WORLD_CUP|monopoly)/i.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_flip_activity_universal_from_scratch" && /(小丑牌活动|小丑牌|FLIP|joker)/i.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_customized_activity_universal_from_scratch" && /(定制化活动|定制活动|CUSTOMIZED|commission)/i.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_trading_competition_activity_universal_from_scratch" && /(交易大赛|TRADING_COMPETITION|competition)/i.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_race_competition_activity_universal_from_scratch" && /(交易竞速赛|竞速赛|RACE_COMPETITION|speedRace)/i.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_trace_pro_activity_universal_from_scratch"
+    && !/(代理小活动|AGENT_TRACE_PRO|copyTrading)/i.test(query)
+    && /(小活动|小活动型|TRACE_PRO|tracepro)/i.test(query)
+    && /(回归|用例)/.test(query)
+    && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_agent_trace_pro_activity_universal_from_scratch" && /(代理小活动|AGENT_TRACE_PRO|copyTrading)/i.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_guess_activity_universal_from_scratch" && /(竞猜大赛|竞猜|GUESS|guessCompetition)/i.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_recharge_trans_task_activity_universal_from_scratch" && /(充值交易活动|充值交易|RECHARGE_TRANS_TASK|depositTrade)/i.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_agent_activity_universal_from_scratch" && /(人人代理活动|人人代理|\bAGENT\b|agency)/i.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_contract_mining_activity_universal_from_scratch" && /(合约挖矿活动|合约挖矿|CONTRACT_MINING|contractMining)/i.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
   if (action.supportedCategories?.some(item => query.includes(item))) score += 1;
   if (action.supportedSubtypes?.some(item => query.toUpperCase().includes(String(item).toUpperCase()))) score += 1;
   return score;

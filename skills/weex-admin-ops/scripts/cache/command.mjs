@@ -38,6 +38,8 @@ export function commandFor(match, args, skillRoot) {
   if (match.action.id === "copy_prize_by_id") return copyPrizeCommand(match, args, skillRoot);
   if (match.action.id === "create_roulette_participant_scope_tasks") return rouletteParticipantScopeCommand(match, args, skillRoot);
   if (match.action.id === "create_register_templates") return registerTemplateCommand(match, args, skillRoot);
+  if (match.action.id === "create_register_template_from_scratch") return registerTemplateFromScratchCommand(match, args, skillRoot);
+  if (match.action.id === "create_resource_card_from_scratch") return resourceCardFromScratchCommand(match, args, skillRoot);
   if (match.action.id === "verify_register_template_row_actions") return registerTemplateRowActionsCommand(match, args, skillRoot);
   if (match.action.id === "delete_register_templates_by_operator") return deleteRegisterTemplatesByOperatorCommand(match, args, skillRoot);
   if (match.action.id === "verify_activity_tasks_all_types") return verifyActivityTasksAllTypesCommand(match, args, skillRoot);
@@ -46,6 +48,19 @@ export function commandFor(match, args, skillRoot) {
   if (match.action.id === "verify_guide_template_row_actions") return guideTemplateRowActionsCommand(match, args, skillRoot);
   if (match.action.id === "create_lottery_activity_draft") return createLotteryActivityDraftCommand(match, args, skillRoot);
   if (match.action.id === "online_lottery_activity") return onlineLotteryActivityCommand(match, args, skillRoot);
+  if (match.action.id === "regress_newbie_activity_universal_from_scratch") return regressNewbieUniversalFromScratchCommand(match, args, skillRoot);
+  if (match.action.id === "regress_lottery_activity_universal_from_scratch") return regressLotteryUniversalFromScratchCommand(match, args, skillRoot);
+  if (match.action.id === "regress_monopoly_world_cup_activity_universal_from_scratch") return regressMonopolyWorldCupUniversalFromScratchCommand(match, args, skillRoot);
+  if (match.action.id === "regress_flip_activity_universal_from_scratch") return regressFlipUniversalFromScratchCommand(match, args, skillRoot);
+  if (match.action.id === "regress_customized_activity_universal_from_scratch") return regressCustomizedUniversalFromScratchCommand(match, args, skillRoot);
+  if (match.action.id === "regress_trading_competition_activity_universal_from_scratch") return regressTradingCompetitionUniversalFromScratchCommand(match, args, skillRoot);
+  if (match.action.id === "regress_race_competition_activity_universal_from_scratch") return regressRaceCompetitionUniversalFromScratchCommand(match, args, skillRoot);
+  if (match.action.id === "regress_trace_pro_activity_universal_from_scratch") return regressTraceProUniversalFromScratchCommand(match, args, skillRoot);
+  if (match.action.id === "regress_agent_trace_pro_activity_universal_from_scratch") return regressAgentTraceProUniversalFromScratchCommand(match, args, skillRoot);
+  if (match.action.id === "regress_guess_activity_universal_from_scratch") return regressGuessUniversalFromScratchCommand(match, args, skillRoot);
+  if (match.action.id === "regress_recharge_trans_task_activity_universal_from_scratch") return regressRechargeTransUniversalFromScratchCommand(match, args, skillRoot);
+  if (match.action.id === "regress_agent_activity_universal_from_scratch") return regressAgentUniversalFromScratchCommand(match, args, skillRoot);
+  if (match.action.id === "regress_contract_mining_activity_universal_from_scratch") return regressContractMiningUniversalFromScratchCommand(match, args, skillRoot);
   if (match.action.id !== "create_prizes") throw new Error(`No runner implemented for action: ${match.action.id}`);
   const params = { ...match.inferred, ...args.passthrough };
   if (!params.category || !params.subtype) {
@@ -859,6 +874,228 @@ function rouletteParticipantScopeCommand(match, args, skillRoot) {
   if (params.totalLimit) commandArgs.push("--total-limit", String(params.totalLimit));
   if (args.visible || params.visible) commandArgs.push("--visible");
   if (args.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function registerTemplateFromScratchCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.name) commandArgs.push("--name", String(params.name));
+  if (params.participantMode) commandArgs.push("--participant-mode", String(params.participantMode));
+  if (params.limitPermissions) commandArgs.push("--limit-permissions", String(params.limitPermissions));
+  if (params.allowRange) commandArgs.push("--allow-range", String(params.allowRange));
+  if (params.limitRange) commandArgs.push("--limit-range", String(params.limitRange));
+  if (params.minTeamSize) commandArgs.push("--min-team-size", String(params.minTeamSize));
+  if (params.maxParticipant) commandArgs.push("--max-participant", String(params.maxParticipant));
+  if (params.confirmCreate || params.confirm || args.confirm) commandArgs.push("--confirm-create");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function resourceCardFromScratchCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.activityType) commandArgs.push("--activity-type", String(params.activityType));
+  if (params.count) commandArgs.push("--count", String(params.count));
+  if (params.namePrefix) commandArgs.push("--name-prefix", String(params.namePrefix));
+  if (params.webUrl) commandArgs.push("--web-url", String(params.webUrl));
+  if (params.buttonName) commandArgs.push("--button-name", String(params.buttonName));
+  if (params.subTitle) commandArgs.push("--sub-title", String(params.subTitle));
+  if (params.showIntroduction !== undefined) commandArgs.push("--show-introduction", String(params.showIntroduction));
+  if (params.introduction) commandArgs.push("--introduction", String(params.introduction));
+  if (params.confirmCreate || params.confirm || args.confirm) commandArgs.push("--confirm-create");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function regressNewbieUniversalFromScratchCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.startOffsetSeconds) commandArgs.push("--start-offset-seconds", String(params.startOffsetSeconds));
+  if (params.endDays) commandArgs.push("--end-days", String(params.endDays));
+  if (params.confirmRun || params.confirm || args.confirm) commandArgs.push("--confirm-run");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function regressLotteryUniversalFromScratchCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.raffleStyle) commandArgs.push("--raffle-style", String(params.raffleStyle));
+  if (params.contractRequiredVolume) commandArgs.push("--contract-required-volume", String(params.contractRequiredVolume));
+  if (params.spotRequiredVolume) commandArgs.push("--spot-required-volume", String(params.spotRequiredVolume));
+  if (params.startOffsetSeconds) commandArgs.push("--start-offset-seconds", String(params.startOffsetSeconds));
+  if (params.endDays) commandArgs.push("--end-days", String(params.endDays));
+  if (params.confirmRun || params.confirm || args.confirm) commandArgs.push("--confirm-run");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function regressMonopolyWorldCupUniversalFromScratchCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.requiredVolume) commandArgs.push("--required-volume", String(params.requiredVolume));
+  if (params.startOffsetSeconds) commandArgs.push("--start-offset-seconds", String(params.startOffsetSeconds));
+  if (params.endDays) commandArgs.push("--end-days", String(params.endDays));
+  if (params.confirmRun || params.confirm || args.confirm) commandArgs.push("--confirm-run");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function regressFlipUniversalFromScratchCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.startOffsetSeconds) commandArgs.push("--start-offset-seconds", String(params.startOffsetSeconds));
+  if (params.endDays) commandArgs.push("--end-days", String(params.endDays));
+  if (params.confirmRun || params.confirm || args.confirm) commandArgs.push("--confirm-run");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function regressCustomizedUniversalFromScratchCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.requiredVolume) commandArgs.push("--required-volume", String(params.requiredVolume));
+  if (params.startOffsetSeconds) commandArgs.push("--start-offset-seconds", String(params.startOffsetSeconds));
+  if (params.endDays) commandArgs.push("--end-days", String(params.endDays));
+  if (params.confirmRun || params.confirm || args.confirm) commandArgs.push("--confirm-run");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function regressTradingCompetitionUniversalFromScratchCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.requiredVolume) commandArgs.push("--required-volume", String(params.requiredVolume));
+  if (params.startOffsetSeconds) commandArgs.push("--start-offset-seconds", String(params.startOffsetSeconds));
+  if (params.endDays) commandArgs.push("--end-days", String(params.endDays));
+  if (params.confirmRun || params.confirm || args.confirm) commandArgs.push("--confirm-run");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function regressRaceCompetitionUniversalFromScratchCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.requiredVolume) commandArgs.push("--required-volume", String(params.requiredVolume));
+  if (params.startOffsetSeconds) commandArgs.push("--start-offset-seconds", String(params.startOffsetSeconds));
+  if (params.endDays) commandArgs.push("--end-days", String(params.endDays));
+  if (params.confirmRun || params.confirm || args.confirm) commandArgs.push("--confirm-run");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function regressTraceProUniversalFromScratchCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.requiredVolume) commandArgs.push("--required-volume", String(params.requiredVolume));
+  if (params.resourceCards) commandArgs.push("--resource-cards", String(params.resourceCards));
+  if (params.startOffsetSeconds) commandArgs.push("--start-offset-seconds", String(params.startOffsetSeconds));
+  if (params.endDays) commandArgs.push("--end-days", String(params.endDays));
+  if (params.confirmRun || params.confirm || args.confirm) commandArgs.push("--confirm-run");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function regressAgentTraceProUniversalFromScratchCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.requiredVolume) commandArgs.push("--required-volume", String(params.requiredVolume));
+  if (params.resourceCards) commandArgs.push("--resource-cards", String(params.resourceCards));
+  if (params.startOffsetSeconds) commandArgs.push("--start-offset-seconds", String(params.startOffsetSeconds));
+  if (params.endDays) commandArgs.push("--end-days", String(params.endDays));
+  if (params.confirmRun || params.confirm || args.confirm) commandArgs.push("--confirm-run");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function regressGuessUniversalFromScratchCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.requiredVolume) commandArgs.push("--required-volume", String(params.requiredVolume));
+  if (params.requiredIntegral) commandArgs.push("--required-integral", String(params.requiredIntegral));
+  if (params.startOffsetSeconds) commandArgs.push("--start-offset-seconds", String(params.startOffsetSeconds));
+  if (params.endDays) commandArgs.push("--end-days", String(params.endDays));
+  if (params.confirmRun || params.confirm || args.confirm) commandArgs.push("--confirm-run");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function regressRechargeTransUniversalFromScratchCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.requiredVolume) commandArgs.push("--required-volume", String(params.requiredVolume));
+  if (params.startOffsetSeconds) commandArgs.push("--start-offset-seconds", String(params.startOffsetSeconds));
+  if (params.endDays) commandArgs.push("--end-days", String(params.endDays));
+  if (params.confirmRun || params.confirm || args.confirm) commandArgs.push("--confirm-run");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function regressAgentUniversalFromScratchCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.awardAmount) commandArgs.push("--award-amount", String(params.awardAmount));
+  if (params.inviteTradingVolume) commandArgs.push("--invite-trading-volume", String(params.inviteTradingVolume));
+  if (params.inviteNetRecharge) commandArgs.push("--invite-net-recharge", String(params.inviteNetRecharge));
+  if (params.startOffsetSeconds) commandArgs.push("--start-offset-seconds", String(params.startOffsetSeconds));
+  if (params.endDays) commandArgs.push("--end-days", String(params.endDays));
+  if (params.confirmRun || params.confirm || args.confirm) commandArgs.push("--confirm-run");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function regressContractMiningUniversalFromScratchCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.titlePrefix) commandArgs.push("--title-prefix", String(params.titlePrefix));
+  if (params.aliasPrefix) commandArgs.push("--alias-prefix", String(params.aliasPrefix));
+  if (params.awardAmount) commandArgs.push("--award-amount", String(params.awardAmount));
+  if (params.productCode) commandArgs.push("--product-code", String(params.productCode));
+  if (params.miningReward) commandArgs.push("--mining-reward", String(params.miningReward));
+  if (params.startOffsetSeconds) commandArgs.push("--start-offset-seconds", String(params.startOffsetSeconds));
+  if (params.endDays) commandArgs.push("--end-days", String(params.endDays));
+  if (params.confirmRun || params.confirm || args.confirm) commandArgs.push("--confirm-run");
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
   return { script, commandArgs };
 }
 

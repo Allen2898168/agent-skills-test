@@ -1,0 +1,4541 @@
+{
+  "type": "GUESS",
+  "channelCategory": "UNIVERSAL",
+  "startTime": "2026-05-20 14:17:56",
+  "endTime": "2026-06-06 10:32:03",
+  "stage": "IN_PROGRESS",
+  "multiLanguageTemplateId": null,
+  "taskPackageId": null,
+  "routineTaskPackageId": null,
+  "title": "复制从 复制从 复制从 复制从 西甲25/26 赛季竞猜狂欢（跑马灯测试）",
+  "subTitle": "加入预测",
+  "webBannerUrl": "",
+  "webThumbnailUrl": "",
+  "webAnimationFlag": null,
+  "appBannerUrl": "",
+  "appAnimationFlag": null,
+  "applyConfig": {
+    "id": 2787,
+    "name": "test",
+    "allowRange": "ALLOW_WEBSITE_AND_AGENT_DIRECT_CLIENT",
+    "limitRange": [
+      "LIMIT_AGENT",
+      "LIMIT_ALL_LEVEL_AGENT",
+      "LIMIT_APPLY_COUNT"
+    ],
+    "limitPermissions": [
+      "APPLY"
+    ],
+    "participantMode": [
+      "REGISTERED",
+      "MANUAL",
+      "REGISTERED_MANUAL"
+    ],
+    "status": null,
+    "operator": "shang",
+    "createTime": "2026-05-20 11:17:27",
+    "updateTime": "2026-05-20 11:42:40",
+    "conditions": {
+      "type": null,
+      "allowAgentList": [],
+      "allowUserList": [],
+      "allowAreaList": [],
+      "limitAgentList": [
+        123
+      ],
+      "limitAgentDirectList": [],
+      "limitUserList": [],
+      "limitUserLabelList": [],
+      "limitAreaList": [],
+      "limitKyc": false,
+      "limitKycList": [],
+      "limitBackupChannel": false,
+      "limitDeviceList": [],
+      "allowAgencyGroupList": [],
+      "allowAgentRoleDivideList": [
+        "NONE"
+      ],
+      "allowChannelCodeList": [],
+      "allowInviteCodeList": [],
+      "mixedType": null,
+      "limitApplyCount": 12,
+      "tradeTypeList": [],
+      "userRegion": "",
+      "limitVipLevelList": [],
+      "limitVipWhiteType": "",
+      "limitRiskLabelList": [],
+      "contractAccountValue": 0,
+      "registerTimeStart": null,
+      "registerTimeEnd": null,
+      "limitChannelCodeList": [],
+      "limitInviteCodeList": []
+    },
+    "maxParticipant": 12,
+    "minTeamSize": null
+  },
+  "applyConfigId": 2787,
+  "guideTemplateId": 25,
+  "preApplyConfig": null,
+  "preApplyConfigId": null,
+  "isPreApply": 0,
+  "preApplyStartTime": null,
+  "preApplyEndTime": null,
+  "showCountdown": true,
+  "activityConfigI18n": [
+    {
+      "lang": "en_US",
+      "title": "La Liga 25/26 Season Prediction Carnival",
+      "subTitle": "Join the Prediction",
+      "webBannerUrl": "https://s3.weexstg.com/otc/images/banner/3230366a9dc914f0b911c38a39ff0505ab8b66afc2dc3f8137c8f7a0540fdeee.webp",
+      "webThumbnailUrl": "",
+      "appBannerUrl": "https://s3.weexstg.com/otc/images/banner/bad4fee4013caa6e36fa3d3bee4b944dc2244468fbc413d8dd7c1ae7e807d32c.webp",
+      "webShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "appShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "webScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "appScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "myShareContent": null,
+      "myShareUrl": null,
+      "webMp4Files": "",
+      "appMp4Files": "",
+      "createTime": "2026-05-20 14:14:19",
+      "updateTime": "2026-05-20 14:14:19",
+      "daytimeModeWebBannerUrl": "",
+      "shareContent": "Redeem points for Rewards",
+      "agentShareContent": "Redeem points for Rewards",
+      "intro": "<p><strong class=\"ql-size-huge\">RULe</strong></p><p>dsfsdfsdf</p>",
+      "prizePoolIntro": "Redeem points for Rewards",
+      "demoPrizePoolIntro": "",
+      "questions": [],
+      "ruleTitle": null,
+      "activityIntro": null,
+      "activityLabelList": [],
+      "ogImageUrl": "",
+      "projectName": null,
+      "projectRule": null,
+      "raceShareContent": "",
+      "activityTags": [],
+      "introTitle": null,
+      "introContent": null
+    },
+    {
+      "lang": "ko_KR",
+      "title": "kr",
+      "subTitle": "kr",
+      "webBannerUrl": "https://s3.weexstg.com/otc/images/banner/3230366a9dc914f0b911c38a39ff0505ab8b66afc2dc3f8137c8f7a0540fdeee.webp",
+      "webThumbnailUrl": "",
+      "appBannerUrl": "https://s3.weexstg.com/otc/images/banner/bad4fee4013caa6e36fa3d3bee4b944dc2244468fbc413d8dd7c1ae7e807d32c.webp",
+      "webShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "appShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "webScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "appScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "myShareContent": null,
+      "myShareUrl": null,
+      "webMp4Files": "",
+      "appMp4Files": "",
+      "createTime": "2026-05-20 14:14:19",
+      "updateTime": "2026-05-20 14:14:19",
+      "daytimeModeWebBannerUrl": "",
+      "shareContent": "",
+      "agentShareContent": "",
+      "intro": "<p>serwer</p>",
+      "prizePoolIntro": "1111",
+      "demoPrizePoolIntro": "",
+      "questions": [],
+      "ruleTitle": null,
+      "activityIntro": null,
+      "activityLabelList": [],
+      "ogImageUrl": "",
+      "projectName": null,
+      "projectRule": null,
+      "raceShareContent": "",
+      "activityTags": [],
+      "introTitle": null,
+      "introContent": null
+    },
+    {
+      "lang": "vi_VN",
+      "title": "vvv",
+      "subTitle": "vvv",
+      "webBannerUrl": "https://s3.weexstg.com/otc/images/banner/3230366a9dc914f0b911c38a39ff0505ab8b66afc2dc3f8137c8f7a0540fdeee.webp",
+      "webThumbnailUrl": "",
+      "appBannerUrl": "https://s3.weexstg.com/otc/images/banner/bad4fee4013caa6e36fa3d3bee4b944dc2244468fbc413d8dd7c1ae7e807d32c.webp",
+      "webShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "appShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "webScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "appScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "myShareContent": null,
+      "myShareUrl": null,
+      "webMp4Files": "",
+      "appMp4Files": "",
+      "createTime": "2026-05-20 14:14:19",
+      "updateTime": "2026-05-20 14:14:19",
+      "daytimeModeWebBannerUrl": "",
+      "shareContent": "",
+      "agentShareContent": "",
+      "intro": "<p>serwer</p>",
+      "prizePoolIntro": "111",
+      "demoPrizePoolIntro": "",
+      "questions": [],
+      "ruleTitle": null,
+      "activityIntro": null,
+      "activityLabelList": [],
+      "ogImageUrl": "",
+      "projectName": null,
+      "projectRule": null,
+      "raceShareContent": "",
+      "activityTags": [],
+      "introTitle": null,
+      "introContent": null
+    },
+    {
+      "lang": "zh_TW",
+      "title": "tw",
+      "subTitle": "tw",
+      "webBannerUrl": "https://s3.weexstg.com/otc/images/banner/3230366a9dc914f0b911c38a39ff0505ab8b66afc2dc3f8137c8f7a0540fdeee.webp",
+      "webThumbnailUrl": "",
+      "appBannerUrl": "https://s3.weexstg.com/otc/images/banner/bad4fee4013caa6e36fa3d3bee4b944dc2244468fbc413d8dd7c1ae7e807d32c.webp",
+      "webShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "appShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "webScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "appScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "myShareContent": null,
+      "myShareUrl": null,
+      "webMp4Files": "",
+      "appMp4Files": "",
+      "createTime": "2026-05-20 14:14:19",
+      "updateTime": "2026-05-20 14:14:19",
+      "daytimeModeWebBannerUrl": "",
+      "shareContent": "",
+      "agentShareContent": "",
+      "intro": "<p>serwer</p>",
+      "prizePoolIntro": "111",
+      "demoPrizePoolIntro": "",
+      "questions": [],
+      "ruleTitle": null,
+      "activityIntro": null,
+      "activityLabelList": [],
+      "ogImageUrl": "",
+      "projectName": null,
+      "projectRule": null,
+      "raceShareContent": "",
+      "activityTags": [],
+      "introTitle": null,
+      "introContent": null
+    },
+    {
+      "lang": "zh_CN",
+      "title": "复制从 复制从 复制从 复制从 西甲25/26 赛季竞猜狂欢（跑马灯测试）",
+      "subTitle": "加入预测",
+      "webBannerUrl": "https://s3.weexstg.com/otc/images/banner/3230366a9dc914f0b911c38a39ff0505ab8b66afc2dc3f8137c8f7a0540fdeee.webp",
+      "webThumbnailUrl": "",
+      "appBannerUrl": "https://s3.weexstg.com/otc/images/banner/bad4fee4013caa6e36fa3d3bee4b944dc2244468fbc413d8dd7c1ae7e807d32c.webp",
+      "webShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "appShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "webScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "appScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "myShareContent": null,
+      "myShareUrl": null,
+      "webMp4Files": "",
+      "appMp4Files": "",
+      "createTime": "2026-05-20 14:14:19",
+      "updateTime": "2026-05-20 14:14:19",
+      "daytimeModeWebBannerUrl": "",
+      "shareContent": "赛季竞猜狂欢",
+      "agentShareContent": "赛季竞猜狂欢",
+      "intro": "<p><strong class=\"ql-size-large\">活动规则</strong></p><p>dsfsdfsdf</p>",
+      "prizePoolIntro": "获得竞猜积分",
+      "demoPrizePoolIntro": "",
+      "questions": [],
+      "ruleTitle": null,
+      "activityIntro": null,
+      "activityLabelList": [],
+      "ogImageUrl": "",
+      "projectName": null,
+      "projectRule": null,
+      "raceShareContent": "",
+      "activityTags": [],
+      "introTitle": null,
+      "introContent": null
+    },
+    {
+      "lang": "fa_IR",
+      "title": "bosi",
+      "subTitle": "bosi",
+      "webBannerUrl": "https://s3.weexstg.com/otc/images/banner/3230366a9dc914f0b911c38a39ff0505ab8b66afc2dc3f8137c8f7a0540fdeee.webp",
+      "webThumbnailUrl": "",
+      "appBannerUrl": "https://s3.weexstg.com/otc/images/banner/bad4fee4013caa6e36fa3d3bee4b944dc2244468fbc413d8dd7c1ae7e807d32c.webp",
+      "webShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "appShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "webScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "appScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "myShareContent": null,
+      "myShareUrl": null,
+      "webMp4Files": "",
+      "appMp4Files": "",
+      "createTime": "2026-05-20 14:14:19",
+      "updateTime": "2026-05-20 14:14:19",
+      "daytimeModeWebBannerUrl": "",
+      "shareContent": "",
+      "agentShareContent": "",
+      "intro": "<p>serwer</p>",
+      "prizePoolIntro": "111",
+      "demoPrizePoolIntro": "",
+      "questions": [],
+      "ruleTitle": null,
+      "activityIntro": null,
+      "activityLabelList": [],
+      "ogImageUrl": "",
+      "projectName": null,
+      "projectRule": null,
+      "raceShareContent": "",
+      "activityTags": [],
+      "introTitle": null,
+      "introContent": null
+    },
+    {
+      "lang": "ar_AR",
+      "title": "ar",
+      "subTitle": "ar",
+      "webBannerUrl": "https://s3.weexstg.com/otc/images/banner/3230366a9dc914f0b911c38a39ff0505ab8b66afc2dc3f8137c8f7a0540fdeee.webp",
+      "webThumbnailUrl": "",
+      "appBannerUrl": "https://s3.weexstg.com/otc/images/banner/bad4fee4013caa6e36fa3d3bee4b944dc2244468fbc413d8dd7c1ae7e807d32c.webp",
+      "webShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "appShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "webScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "appScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "myShareContent": null,
+      "myShareUrl": null,
+      "webMp4Files": "",
+      "appMp4Files": "",
+      "createTime": "2026-05-20 14:14:19",
+      "updateTime": "2026-05-20 14:14:19",
+      "daytimeModeWebBannerUrl": "",
+      "shareContent": "",
+      "agentShareContent": "",
+      "intro": "<p>serwer</p>",
+      "prizePoolIntro": "111",
+      "demoPrizePoolIntro": "",
+      "questions": [],
+      "ruleTitle": null,
+      "activityIntro": null,
+      "activityLabelList": [],
+      "ogImageUrl": "",
+      "projectName": null,
+      "projectRule": null,
+      "raceShareContent": "",
+      "activityTags": [],
+      "introTitle": null,
+      "introContent": null
+    },
+    {
+      "lang": "ru_RU",
+      "title": "La Liga 25/26 Season Prediction Carnival",
+      "subTitle": "Join the Prediction",
+      "webBannerUrl": "https://s3.weexstg.com/otc/images/banner/3230366a9dc914f0b911c38a39ff0505ab8b66afc2dc3f8137c8f7a0540fdeee.webp",
+      "webThumbnailUrl": "",
+      "appBannerUrl": "https://s3.weexstg.com/otc/images/banner/bad4fee4013caa6e36fa3d3bee4b944dc2244468fbc413d8dd7c1ae7e807d32c.webp",
+      "webShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "appShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "webScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "appScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "myShareContent": null,
+      "myShareUrl": null,
+      "webMp4Files": "",
+      "appMp4Files": "",
+      "createTime": "2026-05-20 14:14:19",
+      "updateTime": "2026-05-20 14:14:19",
+      "daytimeModeWebBannerUrl": "",
+      "shareContent": "Redeem points for Rewards",
+      "agentShareContent": "Redeem points for Rewards",
+      "intro": "<p>1. Нажмите «Выбрать сейчас», чтобы принять участие. Каждый аккаунт может сделать один выбор за матч. Результаты будут обновлены на следующий день после окончания матча.</p><p>2. Зарабатывайте очки, выполняя задания на странице акции, включая выбор команды, торговые задания и другие активности.</p><p>3. Для выполнения некоторых заданий может потребоваться соблюдение условий торговли фьючерсами. В объем торгов засчитываются только сделки с фьючерсами, по которым взимаются комиссии. Задания по торговле сбрасываются ежедневно в 00:00 (UTC+8).</p><p>4. Очки действительны только в течение периода проведения акции и будут обнулены после ее окончания.</p><p>5. Маркет-мейкеры, институциональные пользователи, партнеры и субсчета не имеют права участвовать. WEEX оставляет за собой право дисквалифицировать пользователей, совершающих мошеннические действия, и сохраняет за собой право окончательной интерпретации правил акции.</p><p>6. Количество друзей, которых вы можете пригласить с одного аккаунта, не ограничено. После того, как друзья присоединятся по вашей пригласительной ссылке, вы будете получать комиссионные от их фьючерсных сделок (за исключением спотовых и фиатных сделок).</p><p>7. Само-приглашения с использованием нескольких аккаунтов строго запрещены. В случае обнаружения такого факта все соответствующие комиссионные будут аннулированы.</p><p>8. Реферальные комиссионные возвращаются на следующий день. Аккаунты, зарегистрированные менее одного дня назад, не участвуют.</p><p>9. Если WEEX обнаружит сговор в торговых операциях, все участвующие в нем аккаунты будут дисквалифицированы из акции.</p><p>10. Все участники обязаны соблюдать Условия и положения WEEX. Любое поведение, включая массовую регистрацию аккаунтов, фиктивные сделки, мошенничество, обман или другие злонамеренные действия, приведет к дисквалификации и аннулированию вознаграждения.</p><p>11. В связи с рыночными условиями или потенциальными рисками мошенничества, WEEX оставляет за собой право в любое время без предварительного уведомления изменять правила данной акции.</p><p>12. Компания WEEX оставляет за собой право окончательной интерпретации данной акции. По любым вопросам обращайтесь в службу поддержки клиентов.</p><p>13. Торговый объем, сгенерированный через API, не учитывается в этой акции и будет исключен из окончательного расчета.</p><p>14. В этой акции могут принять участие исключительно жители Гонконга и Тайваня («Регионы, имеющие право на участие»). Участие за пределами этих регионов не допускается.</p><p>15. WEEX может ограничить или отозвать право на получение наград для аккаунтов, отмеченных нашей системой контроля рисков.</p>",
+      "prizePoolIntro": "Redeem points for Rewards",
+      "demoPrizePoolIntro": "",
+      "questions": [],
+      "ruleTitle": null,
+      "activityIntro": null,
+      "activityLabelList": [],
+      "ogImageUrl": "",
+      "projectName": null,
+      "projectRule": null,
+      "raceShareContent": "",
+      "activityTags": [],
+      "introTitle": null,
+      "introContent": null
+    },
+    {
+      "lang": "uk_UK",
+      "title": "wukelan",
+      "subTitle": "wukelan",
+      "webBannerUrl": "https://s3.weexstg.com/otc/images/banner/3230366a9dc914f0b911c38a39ff0505ab8b66afc2dc3f8137c8f7a0540fdeee.webp",
+      "webThumbnailUrl": "",
+      "appBannerUrl": "https://s3.weexstg.com/otc/images/banner/bad4fee4013caa6e36fa3d3bee4b944dc2244468fbc413d8dd7c1ae7e807d32c.webp",
+      "webShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "appShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "webScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "appScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "myShareContent": null,
+      "myShareUrl": null,
+      "webMp4Files": "",
+      "appMp4Files": "",
+      "createTime": "2026-05-20 14:14:19",
+      "updateTime": "2026-05-20 14:14:19",
+      "daytimeModeWebBannerUrl": "",
+      "shareContent": "",
+      "agentShareContent": "",
+      "intro": "<p>serwer</p>",
+      "prizePoolIntro": "11",
+      "demoPrizePoolIntro": "",
+      "questions": [],
+      "ruleTitle": null,
+      "activityIntro": null,
+      "activityLabelList": [],
+      "ogImageUrl": "",
+      "projectName": null,
+      "projectRule": null,
+      "raceShareContent": "",
+      "activityTags": [],
+      "introTitle": null,
+      "introContent": null
+    },
+    {
+      "lang": "de_DE",
+      "title": "de",
+      "subTitle": "de",
+      "webBannerUrl": "https://s3.weexstg.com/otc/images/banner/3230366a9dc914f0b911c38a39ff0505ab8b66afc2dc3f8137c8f7a0540fdeee.webp",
+      "webThumbnailUrl": "",
+      "appBannerUrl": "https://s3.weexstg.com/otc/images/banner/bad4fee4013caa6e36fa3d3bee4b944dc2244468fbc413d8dd7c1ae7e807d32c.webp",
+      "webShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "appShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "webScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "appScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "myShareContent": null,
+      "myShareUrl": null,
+      "webMp4Files": "",
+      "appMp4Files": "",
+      "createTime": "2026-05-20 14:14:19",
+      "updateTime": "2026-05-20 14:14:19",
+      "daytimeModeWebBannerUrl": "",
+      "shareContent": "",
+      "agentShareContent": "",
+      "intro": "<p>serwer</p>",
+      "prizePoolIntro": "dd",
+      "demoPrizePoolIntro": "",
+      "questions": [],
+      "ruleTitle": null,
+      "activityIntro": null,
+      "activityLabelList": [],
+      "ogImageUrl": "",
+      "projectName": null,
+      "projectRule": null,
+      "raceShareContent": "",
+      "activityTags": [],
+      "introTitle": null,
+      "introContent": null
+    },
+    {
+      "lang": "es_ES",
+      "title": "swerwer",
+      "subTitle": "swerwerswerwer",
+      "webBannerUrl": "https://s3.weexstg.com/otc/images/banner/3230366a9dc914f0b911c38a39ff0505ab8b66afc2dc3f8137c8f7a0540fdeee.webp",
+      "webThumbnailUrl": "",
+      "appBannerUrl": "https://s3.weexstg.com/otc/images/banner/bad4fee4013caa6e36fa3d3bee4b944dc2244468fbc413d8dd7c1ae7e807d32c.webp",
+      "webShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "appShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "webScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "appScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "myShareContent": null,
+      "myShareUrl": null,
+      "webMp4Files": "",
+      "appMp4Files": "",
+      "createTime": "2026-05-20 14:14:19",
+      "updateTime": "2026-05-20 14:14:19",
+      "daytimeModeWebBannerUrl": "",
+      "shareContent": "",
+      "agentShareContent": "",
+      "intro": "<p>swerwer</p>",
+      "prizePoolIntro": "swerwer",
+      "demoPrizePoolIntro": "",
+      "questions": [],
+      "ruleTitle": null,
+      "activityIntro": null,
+      "activityLabelList": [],
+      "ogImageUrl": "",
+      "projectName": null,
+      "projectRule": null,
+      "raceShareContent": "",
+      "activityTags": [],
+      "introTitle": null,
+      "introContent": null
+    },
+    {
+      "lang": "es_419",
+      "title": "swerwer",
+      "subTitle": "swerwer",
+      "webBannerUrl": "https://s3.weexstg.com/otc/images/banner/3230366a9dc914f0b911c38a39ff0505ab8b66afc2dc3f8137c8f7a0540fdeee.webp",
+      "webThumbnailUrl": "",
+      "appBannerUrl": "https://s3.weexstg.com/otc/images/banner/bad4fee4013caa6e36fa3d3bee4b944dc2244468fbc413d8dd7c1ae7e807d32c.webp",
+      "webShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "appShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "webScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "appScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "myShareContent": null,
+      "myShareUrl": null,
+      "webMp4Files": "",
+      "appMp4Files": "",
+      "createTime": "2026-05-20 14:14:19",
+      "updateTime": "2026-05-20 14:14:19",
+      "daytimeModeWebBannerUrl": "",
+      "shareContent": "swerwer",
+      "agentShareContent": "",
+      "intro": "<p>swerwer</p>",
+      "prizePoolIntro": "swerwer",
+      "demoPrizePoolIntro": "",
+      "questions": [],
+      "ruleTitle": null,
+      "activityIntro": null,
+      "activityLabelList": [],
+      "ogImageUrl": "",
+      "projectName": null,
+      "projectRule": null,
+      "raceShareContent": "",
+      "activityTags": [],
+      "introTitle": null,
+      "introContent": null
+    },
+    {
+      "lang": "es_AR",
+      "title": "swerwer",
+      "subTitle": "swerwer",
+      "webBannerUrl": "https://s3.weexstg.com/otc/images/banner/3230366a9dc914f0b911c38a39ff0505ab8b66afc2dc3f8137c8f7a0540fdeee.webp",
+      "webThumbnailUrl": "",
+      "appBannerUrl": "https://s3.weexstg.com/otc/images/banner/bad4fee4013caa6e36fa3d3bee4b944dc2244468fbc413d8dd7c1ae7e807d32c.webp",
+      "webShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "appShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "webScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "appScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "myShareContent": null,
+      "myShareUrl": null,
+      "webMp4Files": "",
+      "appMp4Files": "",
+      "createTime": "2026-05-20 14:14:19",
+      "updateTime": "2026-05-20 14:14:19",
+      "daytimeModeWebBannerUrl": "",
+      "shareContent": "",
+      "agentShareContent": "",
+      "intro": "<p>swerwer</p>",
+      "prizePoolIntro": "swerwer",
+      "demoPrizePoolIntro": "",
+      "questions": [],
+      "ruleTitle": null,
+      "activityIntro": null,
+      "activityLabelList": [],
+      "ogImageUrl": "",
+      "projectName": null,
+      "projectRule": null,
+      "raceShareContent": "",
+      "activityTags": [],
+      "introTitle": null,
+      "introContent": null
+    },
+    {
+      "lang": "fr_FR",
+      "title": "fr",
+      "subTitle": "fr",
+      "webBannerUrl": "https://s3.weexstg.com/otc/images/banner/3230366a9dc914f0b911c38a39ff0505ab8b66afc2dc3f8137c8f7a0540fdeee.webp",
+      "webThumbnailUrl": "",
+      "appBannerUrl": "https://s3.weexstg.com/otc/images/banner/bad4fee4013caa6e36fa3d3bee4b944dc2244468fbc413d8dd7c1ae7e807d32c.webp",
+      "webShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "appShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "webScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "appScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "myShareContent": null,
+      "myShareUrl": null,
+      "webMp4Files": "",
+      "appMp4Files": "",
+      "createTime": "2026-05-20 14:14:19",
+      "updateTime": "2026-05-20 14:14:19",
+      "daytimeModeWebBannerUrl": "",
+      "shareContent": "",
+      "agentShareContent": "",
+      "intro": "<p>serwer</p>",
+      "prizePoolIntro": "fr",
+      "demoPrizePoolIntro": "",
+      "questions": [],
+      "ruleTitle": null,
+      "activityIntro": null,
+      "activityLabelList": [],
+      "ogImageUrl": "",
+      "projectName": null,
+      "projectRule": null,
+      "raceShareContent": "",
+      "activityTags": [],
+      "introTitle": null,
+      "introContent": null
+    },
+    {
+      "lang": "pl_PL",
+      "title": "bolan",
+      "subTitle": "bolan",
+      "webBannerUrl": "https://s3.weexstg.com/otc/images/banner/3230366a9dc914f0b911c38a39ff0505ab8b66afc2dc3f8137c8f7a0540fdeee.webp",
+      "webThumbnailUrl": "",
+      "appBannerUrl": "https://s3.weexstg.com/otc/images/banner/bad4fee4013caa6e36fa3d3bee4b944dc2244468fbc413d8dd7c1ae7e807d32c.webp",
+      "webShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "appShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "webScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "appScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "myShareContent": null,
+      "myShareUrl": null,
+      "webMp4Files": "",
+      "appMp4Files": "",
+      "createTime": "2026-05-20 14:14:19",
+      "updateTime": "2026-05-20 14:14:19",
+      "daytimeModeWebBannerUrl": "",
+      "shareContent": "",
+      "agentShareContent": "",
+      "intro": "<p>serwer</p>",
+      "prizePoolIntro": "bolan",
+      "demoPrizePoolIntro": "",
+      "questions": [],
+      "ruleTitle": null,
+      "activityIntro": null,
+      "activityLabelList": [],
+      "ogImageUrl": "",
+      "projectName": null,
+      "projectRule": null,
+      "raceShareContent": "",
+      "activityTags": [],
+      "introTitle": null,
+      "introContent": null
+    },
+    {
+      "lang": "pt_PT",
+      "title": "pt",
+      "subTitle": "pt",
+      "webBannerUrl": "https://s3.weexstg.com/otc/images/banner/3230366a9dc914f0b911c38a39ff0505ab8b66afc2dc3f8137c8f7a0540fdeee.webp",
+      "webThumbnailUrl": "",
+      "appBannerUrl": "https://s3.weexstg.com/otc/images/banner/bad4fee4013caa6e36fa3d3bee4b944dc2244468fbc413d8dd7c1ae7e807d32c.webp",
+      "webShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "appShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "webScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "appScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "myShareContent": null,
+      "myShareUrl": null,
+      "webMp4Files": "",
+      "appMp4Files": "",
+      "createTime": "2026-05-20 14:14:19",
+      "updateTime": "2026-05-20 14:14:19",
+      "daytimeModeWebBannerUrl": "",
+      "shareContent": "",
+      "agentShareContent": "",
+      "intro": "<p>serwer</p>",
+      "prizePoolIntro": "pt",
+      "demoPrizePoolIntro": "",
+      "questions": [],
+      "ruleTitle": null,
+      "activityIntro": null,
+      "activityLabelList": [],
+      "ogImageUrl": "",
+      "projectName": null,
+      "projectRule": null,
+      "raceShareContent": "",
+      "activityTags": [],
+      "introTitle": null,
+      "introContent": null
+    },
+    {
+      "lang": "pt_BR",
+      "title": "pt b",
+      "subTitle": "pt b",
+      "webBannerUrl": "https://s3.weexstg.com/otc/images/banner/3230366a9dc914f0b911c38a39ff0505ab8b66afc2dc3f8137c8f7a0540fdeee.webp",
+      "webThumbnailUrl": "",
+      "appBannerUrl": "https://s3.weexstg.com/otc/images/banner/bad4fee4013caa6e36fa3d3bee4b944dc2244468fbc413d8dd7c1ae7e807d32c.webp",
+      "webShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "appShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "webScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "appScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "myShareContent": null,
+      "myShareUrl": null,
+      "webMp4Files": "",
+      "appMp4Files": "",
+      "createTime": "2026-05-20 14:14:19",
+      "updateTime": "2026-05-20 14:14:19",
+      "daytimeModeWebBannerUrl": "",
+      "shareContent": "",
+      "agentShareContent": "",
+      "intro": "<p>serwer</p>",
+      "prizePoolIntro": "pt b",
+      "demoPrizePoolIntro": "",
+      "questions": [],
+      "ruleTitle": null,
+      "activityIntro": null,
+      "activityLabelList": [],
+      "ogImageUrl": "",
+      "projectName": null,
+      "projectRule": null,
+      "raceShareContent": "",
+      "activityTags": [],
+      "introTitle": null,
+      "introContent": null
+    },
+    {
+      "lang": "it_IT",
+      "title": "itali",
+      "subTitle": "itali",
+      "webBannerUrl": "https://s3.weexstg.com/otc/images/banner/3230366a9dc914f0b911c38a39ff0505ab8b66afc2dc3f8137c8f7a0540fdeee.webp",
+      "webThumbnailUrl": "",
+      "appBannerUrl": "https://s3.weexstg.com/otc/images/banner/bad4fee4013caa6e36fa3d3bee4b944dc2244468fbc413d8dd7c1ae7e807d32c.webp",
+      "webShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "appShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "webScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "appScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "myShareContent": null,
+      "myShareUrl": null,
+      "webMp4Files": "",
+      "appMp4Files": "",
+      "createTime": "2026-05-20 14:14:19",
+      "updateTime": "2026-05-20 14:14:19",
+      "daytimeModeWebBannerUrl": "",
+      "shareContent": "",
+      "agentShareContent": "",
+      "intro": "<p>serwer</p>",
+      "prizePoolIntro": "itali",
+      "demoPrizePoolIntro": "",
+      "questions": [],
+      "ruleTitle": null,
+      "activityIntro": null,
+      "activityLabelList": [],
+      "ogImageUrl": "",
+      "projectName": null,
+      "projectRule": null,
+      "raceShareContent": "",
+      "activityTags": [],
+      "introTitle": null,
+      "introContent": null
+    },
+    {
+      "lang": "ja_JP",
+      "title": "1111",
+      "subTitle": "2222",
+      "webBannerUrl": "https://s3.weexstg.com/otc/images/banner/3230366a9dc914f0b911c38a39ff0505ab8b66afc2dc3f8137c8f7a0540fdeee.webp",
+      "webThumbnailUrl": "",
+      "appBannerUrl": "https://s3.weexstg.com/otc/images/banner/bad4fee4013caa6e36fa3d3bee4b944dc2244468fbc413d8dd7c1ae7e807d32c.webp",
+      "webShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "appShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "webScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "appScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "myShareContent": null,
+      "myShareUrl": null,
+      "webMp4Files": "",
+      "appMp4Files": "",
+      "createTime": "2026-05-20 14:14:19",
+      "updateTime": "2026-05-20 14:14:19",
+      "daytimeModeWebBannerUrl": "",
+      "shareContent": "4444",
+      "agentShareContent": "5555",
+      "intro": "<p>12312312312</p>",
+      "prizePoolIntro": "3333",
+      "demoPrizePoolIntro": "",
+      "questions": [],
+      "ruleTitle": null,
+      "activityIntro": null,
+      "activityLabelList": [],
+      "ogImageUrl": "",
+      "projectName": null,
+      "projectRule": null,
+      "raceShareContent": "",
+      "activityTags": [],
+      "introTitle": null,
+      "introContent": null
+    },
+    {
+      "lang": "en_TR",
+      "title": "en-tr",
+      "subTitle": "en-tr",
+      "webBannerUrl": "https://s3.weexstg.com/otc/images/banner/3230366a9dc914f0b911c38a39ff0505ab8b66afc2dc3f8137c8f7a0540fdeee.webp",
+      "webThumbnailUrl": "",
+      "appBannerUrl": "https://s3.weexstg.com/otc/images/banner/bad4fee4013caa6e36fa3d3bee4b944dc2244468fbc413d8dd7c1ae7e807d32c.webp",
+      "webShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "appShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "webScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "appScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "myShareContent": null,
+      "myShareUrl": null,
+      "webMp4Files": "",
+      "appMp4Files": "",
+      "createTime": "2026-05-20 14:14:19",
+      "updateTime": "2026-05-20 14:14:19",
+      "daytimeModeWebBannerUrl": "",
+      "shareContent": "",
+      "agentShareContent": "",
+      "intro": "<p>serwer</p>",
+      "prizePoolIntro": "en-tr",
+      "demoPrizePoolIntro": "",
+      "questions": [],
+      "ruleTitle": null,
+      "activityIntro": null,
+      "activityLabelList": [],
+      "ogImageUrl": "",
+      "projectName": null,
+      "projectRule": null,
+      "raceShareContent": "",
+      "activityTags": [],
+      "introTitle": null,
+      "introContent": null
+    },
+    {
+      "lang": "tr_CT",
+      "title": "tuerqi-ct",
+      "subTitle": "tuerqi-ct",
+      "webBannerUrl": "https://s3.weexstg.com/otc/images/banner/3230366a9dc914f0b911c38a39ff0505ab8b66afc2dc3f8137c8f7a0540fdeee.webp",
+      "webThumbnailUrl": "",
+      "appBannerUrl": "https://s3.weexstg.com/otc/images/banner/bad4fee4013caa6e36fa3d3bee4b944dc2244468fbc413d8dd7c1ae7e807d32c.webp",
+      "webShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "appShareUrl": "https://s3.weexstg.com/otc/images/banner/03fa883904db62e885c05af3532b18d7f8edf983e38b3d0a2bee21bccdeb03ff.webp",
+      "webScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "appScoreUrl": "https://s3.weexstg.com/otc/images/banner/edd36d0525a851ee6493119499a4073727deda5b48fa98bae74c7cdf2e588f6e.webp",
+      "myShareContent": null,
+      "myShareUrl": null,
+      "webMp4Files": "",
+      "appMp4Files": "",
+      "createTime": "2026-05-20 14:14:19",
+      "updateTime": "2026-05-20 14:14:19",
+      "daytimeModeWebBannerUrl": "",
+      "shareContent": "",
+      "agentShareContent": "",
+      "intro": "<p>serwer</p>",
+      "prizePoolIntro": "tuerqi-ct",
+      "demoPrizePoolIntro": "",
+      "questions": [],
+      "ruleTitle": null,
+      "activityIntro": null,
+      "activityLabelList": [],
+      "ogImageUrl": "",
+      "projectName": null,
+      "projectRule": null,
+      "raceShareContent": "",
+      "activityTags": [],
+      "introTitle": null,
+      "introContent": null
+    }
+  ],
+  "lang": null,
+  "showPublic": true,
+  "daytimeModeWebBannerUrl": "",
+  "periodValidity": null,
+  "applicationMode": "MANUAL",
+  "webShareUrl": "",
+  "appShareUrl": "",
+  "webScoreUrl": "",
+  "appScoreUrl": "",
+  "myShareContent": null,
+  "myShareUrl": null,
+  "intro": null,
+  "prizePoolIntro": "tuerqi-ct",
+  "demoPrizePoolIntro": null,
+  "taskConfig": [],
+  "routineTaskConfig": [],
+  "taskConfigIds": [],
+  "questions": [
+    {
+      "lang": "en",
+      "list": [
+        {
+          "title": "qqqq",
+          "content": "<p>dfwerwrwerl</p>"
+        },
+        {
+          "title": "",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "lang": "cn",
+      "list": [
+        {
+          "title": "qqqq",
+          "content": "<p>俄方 were 我认为</p>"
+        }
+      ]
+    },
+    {
+      "lang": "ru",
+      "list": [
+        {
+          "title": "qqqq",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "lang": "jp",
+      "list": [
+        {
+          "title": "1111",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "lang": "mx",
+      "list": [
+        {
+          "title": "swerwer",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "lang": "es_AR",
+      "list": [
+        {
+          "title": "swerwer",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "lang": "es",
+      "list": [
+        {
+          "title": "swerwer",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "lang": "ko",
+      "list": [
+        {
+          "title": "",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "lang": "vi",
+      "list": [
+        {
+          "title": "",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "lang": "tw",
+      "list": [
+        {
+          "title": "",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "lang": "fa",
+      "list": [
+        {
+          "title": "",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "lang": "ar",
+      "list": [
+        {
+          "title": "",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "lang": "uk",
+      "list": [
+        {
+          "title": "",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "lang": "de",
+      "list": [
+        {
+          "title": "",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "lang": "it",
+      "list": [
+        {
+          "title": "",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "lang": "id",
+      "list": [
+        {
+          "title": "",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "lang": "pt",
+      "list": [
+        {
+          "title": "",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "lang": "pt_PT",
+      "list": [
+        {
+          "title": "",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "lang": "pl",
+      "list": [
+        {
+          "title": "",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "lang": "fr",
+      "list": [
+        {
+          "title": "",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "lang": "en_TR",
+      "list": [
+        {
+          "title": "",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "lang": "tr_CT",
+      "list": [
+        {
+          "title": "",
+          "content": ""
+        }
+      ]
+    }
+  ],
+  "questionsI18n": [],
+  "shareContent": null,
+  "agentShareContent": null,
+  "showUrl": "geek-guess-ui-50",
+  "configType": 1,
+  "activityOwner": "geek",
+  "priority": null,
+  "miniActivity": [],
+  "isShowActivityTime": null,
+  "isShowH5TopCol": null,
+  "activityData": [],
+  "userData": [],
+  "rules": [],
+  "expanded": 0,
+  "portalInfo": [],
+  "smallActivityType": null,
+  "coinSort": null,
+  "activityType": null,
+  "subActivityType": null,
+  "tradeSymbolInfo": [],
+  "tradeSpotInfo": [],
+  "landingPageType": null,
+  "remark": null,
+  "periods": 0,
+  "totp": null,
+  "ruleTitle": null,
+  "webMp4Files": null,
+  "appMp4Files": null,
+  "ogImageUrl": "",
+  "materialInfoList": [],
+  "signId": null,
+  "activityIntro": null,
+  "showBeginCountdown": true,
+  "showEndCountdown": true,
+  "guessActivityType": "INTEGRAL_MODE",
+  "extraInfo": null,
+  "beginnerLinkId": null,
+  "routineTitle": null,
+  "routineTitleI18n": [],
+  "routineSubTitle": null,
+  "routineSubTitleI18n": [],
+  "activityLabelList": [],
+  "showRegion": [],
+  "showMerryRound": 0,
+  "showResource": 0,
+  "resourceConfig": [],
+  "showResourceModel": 0,
+  "resourceModel": null,
+  "showIntroFlag": 0,
+  "projectName": null,
+  "projectRule": null,
+  "raceShareContent": null,
+  "showSchedule": "NO",
+  "activitySchedule": null,
+  "tradingPriority": null,
+  "rewardAmount": null,
+  "virtualApplyNum": null,
+  "virtualTradingVolume": null,
+  "showActivityCalendar": 0,
+  "versionEdit": 1,
+  "activityTags": [],
+  "introTitle": null,
+  "introContent": null,
+  "tradingType": null,
+  "requirements": [],
+  "bonusPoolType": null,
+  "fixedTotalBonusAmount": null,
+  "fixedBonusSharingParams": [],
+  "dynamicBonusPoolParams": [],
+  "dynamicBonusSharingParams": [],
+  "hasConsolationBonus": false,
+  "consolationBonusParams": null,
+  "virtualRankingParams": [],
+  "prizePool": [],
+  "prizePoolIds": [],
+  "rankingParams": null,
+  "rankingParamsMap": null,
+  "rankingRatioMap": null,
+  "bonusPoolAmount": null,
+  "prizePoolIntroI18": [],
+  "totalTradeAmount": null,
+  "participantCount": null,
+  "appLottieFiles": null,
+  "webLottieFiles": null,
+  "domain": "https://www.weikestg.info",
+  "taskRequirement": [],
+  "taskPackage": null,
+  "applyTime": null,
+  "prize": [],
+  "prizeLimited": [],
+  "prizeWeight": [],
+  "prizeWeightConfig": [],
+  "prizeColorTagWeightConfig": [],
+  "raffleStyle": null,
+  "showBeginnerTaskConfig": [],
+  "teamStatsParams": [],
+  "teamBonusSharingParams": [],
+  "teamRewardParams": null,
+  "becomeLeaderIntro": null,
+  "becomeLeaderIntroI18": [],
+  "quitTeamType": null,
+  "visible": null,
+  "removeFlag": true,
+  "activityTaskTabConfig": [],
+  "activityTaskGroupConfig": [],
+  "activityTaskTabConfigIds": [],
+  "activityShowType": null,
+  "subActivityList": [],
+  "subTeamActivityList": [],
+  "productItemMap": null,
+  "newUserRankingParamsMap": null,
+  "newUserRankingRatioMap": null,
+  "newUserFixedBonusSharingParams": [],
+  "newUserDynamicBonusSharingParams": [],
+  "mining": null,
+  "miningList": [],
+  "flip": null,
+  "flips": [],
+  "raceParams": null,
+  "raceRankingParams": null,
+  "raceFixBonusPoolParams": [],
+  "initBonusValue": null,
+  "isPart": null,
+  "demoBonusPoolType": null,
+  "demoTradingType": null,
+  "syncCalendarFlag": 0,
+  "syncCalendarDto": null,
+  "guess": {
+    "channelType": null,
+    "taskConfig": [],
+    "guessPeriod": [
+      {
+        "periodId": 1,
+        "priority": 5,
+        "title": "赛期 35",
+        "titleI18": [
+          {
+            "lang": "zh_CN",
+            "name": "赛期 35"
+          },
+          {
+            "lang": "en_US",
+            "name": "round 1"
+          },
+          {
+            "lang": "ru_RU",
+            "name": "555"
+          },
+          {
+            "lang": "ja_JP",
+            "name": "111166"
+          },
+          {
+            "lang": "es_ES",
+            "name": "swerwer"
+          },
+          {
+            "lang": "es_419",
+            "name": "swerwer"
+          },
+          {
+            "lang": "es_AR",
+            "name": "swerwer"
+          },
+          {
+            "lang": "ko_KR",
+            "name": "1"
+          },
+          {
+            "lang": "vi_VN",
+            "name": "2"
+          },
+          {
+            "lang": "zh_TW",
+            "name": "3"
+          },
+          {
+            "lang": "fa_IR",
+            "name": "4"
+          },
+          {
+            "lang": "ar_AR",
+            "name": "5"
+          },
+          {
+            "lang": "uk_UK",
+            "name": "66"
+          },
+          {
+            "lang": "de_DE",
+            "name": "77"
+          },
+          {
+            "lang": "fr_FR",
+            "name": "88"
+          },
+          {
+            "lang": "pl_PL",
+            "name": "99"
+          },
+          {
+            "lang": "pt_PT",
+            "name": "11122"
+          },
+          {
+            "lang": "pt_BR",
+            "name": "3333"
+          },
+          {
+            "lang": "it_IT",
+            "name": "4444"
+          },
+          {
+            "lang": "en_TR",
+            "name": "666666"
+          },
+          {
+            "lang": "tr_CT",
+            "name": "234234"
+          }
+        ],
+        "startTime": "2026-03-10 19:05:59",
+        "taskConfig": [
+          {
+            "id": 4083,
+            "taskType": null,
+            "order": 2,
+            "toTopFlag": 0
+          }
+        ]
+      },
+      {
+        "periodId": 2,
+        "priority": 4,
+        "title": "赛期 34",
+        "titleI18": [
+          {
+            "lang": "zh_CN",
+            "name": "赛期 34"
+          },
+          {
+            "lang": "en_US",
+            "name": "round 2"
+          },
+          {
+            "lang": "ru_RU",
+            "name": "555226"
+          },
+          {
+            "lang": "ja_JP",
+            "name": "222"
+          },
+          {
+            "lang": "es_AR",
+            "name": "swerwer2"
+          },
+          {
+            "lang": "es_419",
+            "name": "swerwer1"
+          },
+          {
+            "lang": "es_ES",
+            "name": "swerwer"
+          },
+          {
+            "lang": "ko_KR",
+            "name": "1"
+          },
+          {
+            "lang": "vi_VN",
+            "name": "2"
+          },
+          {
+            "lang": "zh_TW",
+            "name": "3"
+          },
+          {
+            "lang": "fa_IR",
+            "name": "4"
+          },
+          {
+            "lang": "ar_AR",
+            "name": "5"
+          },
+          {
+            "lang": "uk_UK",
+            "name": "6"
+          },
+          {
+            "lang": "de_DE",
+            "name": "7"
+          },
+          {
+            "lang": "fr_FR",
+            "name": "333"
+          },
+          {
+            "lang": "pl_PL",
+            "name": "1111"
+          },
+          {
+            "lang": "pt_PT",
+            "name": "222"
+          },
+          {
+            "lang": "pt_BR",
+            "name": "4444"
+          },
+          {
+            "lang": "it_IT",
+            "name": "5555"
+          },
+          {
+            "lang": "en_TR",
+            "name": "777345"
+          },
+          {
+            "lang": "tr_CT",
+            "name": "234234"
+          }
+        ],
+        "startTime": "2026-03-11 19:30:09",
+        "taskConfig": [
+          {
+            "id": 4067,
+            "taskType": null,
+            "order": 1,
+            "toTopFlag": 0
+          },
+          {
+            "id": 4045,
+            "taskType": null,
+            "order": 2,
+            "toTopFlag": 0
+          },
+          {
+            "id": 4043,
+            "taskType": null,
+            "order": 8,
+            "toTopFlag": 0
+          },
+          {
+            "id": 4215,
+            "taskType": null,
+            "order": 5,
+            "toTopFlag": 0
+          },
+          {
+            "id": 4062,
+            "taskType": null,
+            "order": 3,
+            "toTopFlag": 1
+          }
+        ]
+      },
+      {
+        "periodId": 3,
+        "priority": 3,
+        "title": "赛期33",
+        "titleI18": [
+          {
+            "lang": "zh_CN",
+            "name": "赛期33"
+          },
+          {
+            "lang": "en_US",
+            "name": "1"
+          },
+          {
+            "lang": "ko_KR",
+            "name": "2"
+          },
+          {
+            "lang": "vi_VN",
+            "name": "3"
+          },
+          {
+            "lang": "zh_TW",
+            "name": "4"
+          },
+          {
+            "lang": "fa_IR",
+            "name": "5"
+          },
+          {
+            "lang": "ar_AR",
+            "name": "6"
+          },
+          {
+            "lang": "ru_RU",
+            "name": "7"
+          },
+          {
+            "lang": "uk_UK",
+            "name": "8"
+          },
+          {
+            "lang": "de_DE",
+            "name": "9"
+          },
+          {
+            "lang": "es_ES",
+            "name": "11"
+          },
+          {
+            "lang": "es_419",
+            "name": "12"
+          },
+          {
+            "lang": "es_AR",
+            "name": "12"
+          },
+          {
+            "lang": "fr_FR",
+            "name": "12"
+          },
+          {
+            "lang": "pl_PL",
+            "name": "14"
+          },
+          {
+            "lang": "pt_BR",
+            "name": "33"
+          },
+          {
+            "lang": "it_IT",
+            "name": "45"
+          },
+          {
+            "lang": "ja_JP",
+            "name": "66"
+          },
+          {
+            "lang": "en_TR",
+            "name": "77"
+          },
+          {
+            "lang": "tr_CT",
+            "name": "77"
+          },
+          {
+            "lang": "pt_PT",
+            "name": "66"
+          }
+        ],
+        "startTime": "2026-04-30 14:25:34",
+        "taskConfig": [
+          {
+            "id": 4671,
+            "taskType": null,
+            "order": 1,
+            "toTopFlag": 0
+          }
+        ]
+      },
+      {
+        "periodId": 4,
+        "priority": 6,
+        "title": "alice赛期",
+        "titleI18": [
+          {
+            "lang": "zh_CN",
+            "name": "alice赛期"
+          },
+          {
+            "lang": "en_US",
+            "name": "1"
+          },
+          {
+            "lang": "ko_KR",
+            "name": "1"
+          },
+          {
+            "lang": "vi_VN",
+            "name": "1"
+          },
+          {
+            "lang": "zh_TW",
+            "name": "2"
+          },
+          {
+            "lang": "fa_IR",
+            "name": "1"
+          },
+          {
+            "lang": "ar_AR",
+            "name": "11"
+          },
+          {
+            "lang": "ru_RU",
+            "name": "111"
+          },
+          {
+            "lang": "uk_UK",
+            "name": "111"
+          },
+          {
+            "lang": "de_DE",
+            "name": "111"
+          },
+          {
+            "lang": "es_ES",
+            "name": "111"
+          },
+          {
+            "lang": "es_419",
+            "name": "111"
+          },
+          {
+            "lang": "fr_FR",
+            "name": "11"
+          },
+          {
+            "lang": "pl_PL",
+            "name": "11"
+          },
+          {
+            "lang": "pt_PT",
+            "name": "11"
+          },
+          {
+            "lang": "pt_BR",
+            "name": "111"
+          },
+          {
+            "lang": "it_IT",
+            "name": "11"
+          },
+          {
+            "lang": "ja_JP",
+            "name": "1"
+          },
+          {
+            "lang": "en_TR",
+            "name": "1"
+          },
+          {
+            "lang": "tr_CT",
+            "name": "1"
+          },
+          {
+            "lang": "es_AR",
+            "name": "1"
+          }
+        ],
+        "startTime": "2026-05-07 09:30:06",
+        "taskConfig": [
+          {
+            "id": 4836,
+            "taskType": null,
+            "order": 1,
+            "toTopFlag": 0
+          },
+          {
+            "id": 4867,
+            "taskType": null,
+            "order": 2,
+            "toTopFlag": 0
+          }
+        ]
+      },
+      {
+        "periodId": 5,
+        "priority": 7,
+        "title": "alice2赛期",
+        "titleI18": [
+          {
+            "lang": "zh_CN",
+            "name": "alice2赛期"
+          },
+          {
+            "lang": "en_US",
+            "name": "1"
+          },
+          {
+            "lang": "ko_KR",
+            "name": "2"
+          },
+          {
+            "lang": "vi_VN",
+            "name": "3"
+          },
+          {
+            "lang": "zh_TW",
+            "name": "4"
+          },
+          {
+            "lang": "fa_IR",
+            "name": "5"
+          },
+          {
+            "lang": "ar_AR",
+            "name": "6"
+          },
+          {
+            "lang": "ru_RU",
+            "name": "7"
+          },
+          {
+            "lang": "uk_UK",
+            "name": "8"
+          },
+          {
+            "lang": "de_DE",
+            "name": "9"
+          },
+          {
+            "lang": "es_ES",
+            "name": "11"
+          },
+          {
+            "lang": "es_419",
+            "name": "11"
+          },
+          {
+            "lang": "es_AR",
+            "name": "11"
+          },
+          {
+            "lang": "fr_FR",
+            "name": "11"
+          },
+          {
+            "lang": "pl_PL",
+            "name": "11"
+          },
+          {
+            "lang": "pt_PT",
+            "name": "11"
+          },
+          {
+            "lang": "pt_BR",
+            "name": "11"
+          },
+          {
+            "lang": "it_IT",
+            "name": "11"
+          },
+          {
+            "lang": "ja_JP",
+            "name": "11"
+          },
+          {
+            "lang": "en_TR",
+            "name": "11"
+          },
+          {
+            "lang": "tr_CT",
+            "name": "11"
+          }
+        ],
+        "startTime": "2026-05-12 15:00:05",
+        "taskConfig": [
+          {
+            "id": 4938,
+            "taskType": null,
+            "order": 1,
+            "toTopFlag": 0
+          },
+          {
+            "id": 4974,
+            "taskType": null,
+            "order": 2,
+            "toTopFlag": 0
+          }
+        ]
+      }
+    ],
+    "guessTicket": [
+      {
+        "periodId": 1,
+        "taskTicket": [
+          {
+            "taskId": 4083,
+            "guessStatus": "FINISHED",
+            "showTicket": {
+              "a": 50,
+              "b": 50,
+              "equal": 100,
+              "equalRatio": 50,
+              "aRatio": 25,
+              "bRatio": 25
+            },
+            "realTicket": null,
+            "updateTicket": null,
+            "finalTicket": null,
+            "virtualPartitionFlag": null,
+            "autoAlignmentFlag": null
+          }
+        ]
+      },
+      {
+        "periodId": 2,
+        "taskTicket": [
+          {
+            "taskId": 4067,
+            "guessStatus": "AWAITING_RESULT",
+            "showTicket": {
+              "a": 50,
+              "b": 50,
+              "equal": 100,
+              "equalRatio": 50,
+              "aRatio": 25,
+              "bRatio": 25
+            },
+            "realTicket": null,
+            "updateTicket": null,
+            "finalTicket": null,
+            "virtualPartitionFlag": null,
+            "autoAlignmentFlag": null
+          },
+          {
+            "taskId": 4045,
+            "guessStatus": "FINISHED",
+            "showTicket": {
+              "a": 50,
+              "b": 50,
+              "equal": 100,
+              "equalRatio": 50,
+              "aRatio": 25,
+              "bRatio": 25
+            },
+            "realTicket": null,
+            "updateTicket": null,
+            "finalTicket": null,
+            "virtualPartitionFlag": null,
+            "autoAlignmentFlag": null
+          },
+          {
+            "taskId": 4043,
+            "guessStatus": "AWAITING_RESULT",
+            "showTicket": {
+              "a": 50,
+              "b": 50,
+              "equal": 100,
+              "equalRatio": 50,
+              "aRatio": 25,
+              "bRatio": 25
+            },
+            "realTicket": null,
+            "updateTicket": null,
+            "finalTicket": null,
+            "virtualPartitionFlag": null,
+            "autoAlignmentFlag": null
+          },
+          {
+            "taskId": 4215,
+            "guessStatus": "FINISHED",
+            "showTicket": {
+              "a": 50,
+              "b": 50,
+              "equal": 100,
+              "equalRatio": 50,
+              "aRatio": 25,
+              "bRatio": 25
+            },
+            "realTicket": null,
+            "updateTicket": null,
+            "finalTicket": null,
+            "virtualPartitionFlag": null,
+            "autoAlignmentFlag": null
+          },
+          {
+            "taskId": 4062,
+            "guessStatus": "FINISHED",
+            "showTicket": {
+              "a": 100,
+              "b": 500,
+              "equal": 0,
+              "equalRatio": 0,
+              "aRatio": 16.67,
+              "bRatio": 83.33
+            },
+            "realTicket": null,
+            "updateTicket": null,
+            "finalTicket": null,
+            "virtualPartitionFlag": null,
+            "autoAlignmentFlag": null
+          }
+        ]
+      },
+      {
+        "periodId": 3,
+        "taskTicket": [
+          {
+            "taskId": 4671,
+            "guessStatus": "AWAITING_RESULT",
+            "showTicket": {
+              "a": 50,
+              "b": 50,
+              "equal": 100,
+              "equalRatio": 50,
+              "aRatio": 25,
+              "bRatio": 25
+            },
+            "realTicket": null,
+            "updateTicket": null,
+            "finalTicket": null,
+            "virtualPartitionFlag": null,
+            "autoAlignmentFlag": null
+          }
+        ]
+      },
+      {
+        "periodId": 4,
+        "taskTicket": [
+          {
+            "taskId": 4836,
+            "guessStatus": "AWAITING_RESULT",
+            "showTicket": {
+              "a": 1,
+              "b": 2,
+              "equal": 0,
+              "equalRatio": 0,
+              "aRatio": 33.33,
+              "bRatio": 66.67
+            },
+            "realTicket": null,
+            "updateTicket": null,
+            "finalTicket": null,
+            "virtualPartitionFlag": null,
+            "autoAlignmentFlag": null
+          },
+          {
+            "taskId": 4867,
+            "guessStatus": "AWAITING_RESULT",
+            "showTicket": {
+              "a": 1,
+              "b": 2,
+              "equal": 0,
+              "equalRatio": 0,
+              "aRatio": 33.33,
+              "bRatio": 66.67
+            },
+            "realTicket": null,
+            "updateTicket": null,
+            "finalTicket": null,
+            "virtualPartitionFlag": null,
+            "autoAlignmentFlag": null
+          }
+        ]
+      },
+      {
+        "periodId": 5,
+        "taskTicket": [
+          {
+            "taskId": 4938,
+            "guessStatus": "FINISHED",
+            "showTicket": {
+              "a": 1,
+              "b": 2,
+              "equal": 0,
+              "equalRatio": 0,
+              "aRatio": 33.33,
+              "bRatio": 66.67
+            },
+            "realTicket": null,
+            "updateTicket": null,
+            "finalTicket": null,
+            "virtualPartitionFlag": null,
+            "autoAlignmentFlag": null
+          },
+          {
+            "taskId": 4974,
+            "guessStatus": "FINISHED",
+            "showTicket": {
+              "a": 1,
+              "b": 2,
+              "equal": 0,
+              "equalRatio": 0,
+              "aRatio": 33.33,
+              "bRatio": 66.67
+            },
+            "realTicket": null,
+            "updateTicket": null,
+            "finalTicket": null,
+            "virtualPartitionFlag": null,
+            "autoAlignmentFlag": null
+          }
+        ]
+      }
+    ],
+    "prizeConfig": null
+  },
+  "guessList": [
+    {
+      "channelType": "OFFICIAL_WEBSITE",
+      "taskConfig": [
+        {
+          "id": 3939,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 4,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        },
+        {
+          "id": 3938,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 3,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        },
+        {
+          "id": 3940,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 5,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        },
+        {
+          "id": 3941,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 6,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        },
+        {
+          "id": 3942,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 7,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        },
+        {
+          "id": 3933,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 44,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        },
+        {
+          "id": 3934,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 45,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        },
+        {
+          "id": 3928,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 13,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        },
+        {
+          "id": 3929,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 14,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        },
+        {
+          "id": 3932,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 15,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        },
+        {
+          "id": 3931,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 16,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        },
+        {
+          "id": 4104,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 17,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        },
+        {
+          "id": 3841,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 33,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        },
+        {
+          "id": 4251,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 18,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        },
+        {
+          "id": 4253,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 21,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        },
+        {
+          "id": 4252,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 23,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        },
+        {
+          "id": 4254,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 22,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        },
+        {
+          "id": 4310,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 1,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        },
+        {
+          "id": 4841,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 60,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        },
+        {
+          "id": 4843,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 61,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        },
+        {
+          "id": 4845,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 62,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        },
+        {
+          "id": 4846,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 63,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        },
+        {
+          "id": 3930,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 100,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        }
+      ],
+      "guessPeriod": [
+        {
+          "periodId": 1,
+          "priority": 5,
+          "title": "赛期 35",
+          "titleI18": [
+            {
+              "lang": "zh_CN",
+              "name": "赛期 35"
+            },
+            {
+              "lang": "en_US",
+              "name": "round 1"
+            },
+            {
+              "lang": "ru_RU",
+              "name": "555"
+            },
+            {
+              "lang": "ja_JP",
+              "name": "111166"
+            },
+            {
+              "lang": "es_ES",
+              "name": "swerwer"
+            },
+            {
+              "lang": "es_419",
+              "name": "swerwer"
+            },
+            {
+              "lang": "es_AR",
+              "name": "swerwer"
+            },
+            {
+              "lang": "ko_KR",
+              "name": "1"
+            },
+            {
+              "lang": "vi_VN",
+              "name": "2"
+            },
+            {
+              "lang": "zh_TW",
+              "name": "3"
+            },
+            {
+              "lang": "fa_IR",
+              "name": "4"
+            },
+            {
+              "lang": "ar_AR",
+              "name": "5"
+            },
+            {
+              "lang": "uk_UK",
+              "name": "66"
+            },
+            {
+              "lang": "de_DE",
+              "name": "77"
+            },
+            {
+              "lang": "fr_FR",
+              "name": "88"
+            },
+            {
+              "lang": "pl_PL",
+              "name": "99"
+            },
+            {
+              "lang": "pt_PT",
+              "name": "11122"
+            },
+            {
+              "lang": "pt_BR",
+              "name": "3333"
+            },
+            {
+              "lang": "it_IT",
+              "name": "4444"
+            },
+            {
+              "lang": "en_TR",
+              "name": "666666"
+            },
+            {
+              "lang": "tr_CT",
+              "name": "234234"
+            }
+          ],
+          "startTime": "2026-03-10 19:05:59",
+          "taskConfig": [
+            {
+              "id": 4083,
+              "taskType": null,
+              "order": 2,
+              "toTopFlag": 0
+            }
+          ]
+        },
+        {
+          "periodId": 2,
+          "priority": 4,
+          "title": "赛期 34",
+          "titleI18": [
+            {
+              "lang": "zh_CN",
+              "name": "赛期 34"
+            },
+            {
+              "lang": "en_US",
+              "name": "round 2"
+            },
+            {
+              "lang": "ru_RU",
+              "name": "555226"
+            },
+            {
+              "lang": "ja_JP",
+              "name": "222"
+            },
+            {
+              "lang": "es_AR",
+              "name": "swerwer2"
+            },
+            {
+              "lang": "es_419",
+              "name": "swerwer1"
+            },
+            {
+              "lang": "es_ES",
+              "name": "swerwer"
+            },
+            {
+              "lang": "ko_KR",
+              "name": "1"
+            },
+            {
+              "lang": "vi_VN",
+              "name": "2"
+            },
+            {
+              "lang": "zh_TW",
+              "name": "3"
+            },
+            {
+              "lang": "fa_IR",
+              "name": "4"
+            },
+            {
+              "lang": "ar_AR",
+              "name": "5"
+            },
+            {
+              "lang": "uk_UK",
+              "name": "6"
+            },
+            {
+              "lang": "de_DE",
+              "name": "7"
+            },
+            {
+              "lang": "fr_FR",
+              "name": "333"
+            },
+            {
+              "lang": "pl_PL",
+              "name": "1111"
+            },
+            {
+              "lang": "pt_PT",
+              "name": "222"
+            },
+            {
+              "lang": "pt_BR",
+              "name": "4444"
+            },
+            {
+              "lang": "it_IT",
+              "name": "5555"
+            },
+            {
+              "lang": "en_TR",
+              "name": "777345"
+            },
+            {
+              "lang": "tr_CT",
+              "name": "234234"
+            }
+          ],
+          "startTime": "2026-03-11 19:30:09",
+          "taskConfig": [
+            {
+              "id": 4067,
+              "taskType": null,
+              "order": 1,
+              "toTopFlag": 0
+            },
+            {
+              "id": 4045,
+              "taskType": null,
+              "order": 2,
+              "toTopFlag": 0
+            },
+            {
+              "id": 4043,
+              "taskType": null,
+              "order": 8,
+              "toTopFlag": 0
+            },
+            {
+              "id": 4215,
+              "taskType": null,
+              "order": 5,
+              "toTopFlag": 0
+            },
+            {
+              "id": 4062,
+              "taskType": null,
+              "order": 3,
+              "toTopFlag": 1
+            }
+          ]
+        },
+        {
+          "periodId": 3,
+          "priority": 3,
+          "title": "赛期33",
+          "titleI18": [
+            {
+              "lang": "zh_CN",
+              "name": "赛期33"
+            },
+            {
+              "lang": "en_US",
+              "name": "1"
+            },
+            {
+              "lang": "ko_KR",
+              "name": "2"
+            },
+            {
+              "lang": "vi_VN",
+              "name": "3"
+            },
+            {
+              "lang": "zh_TW",
+              "name": "4"
+            },
+            {
+              "lang": "fa_IR",
+              "name": "5"
+            },
+            {
+              "lang": "ar_AR",
+              "name": "6"
+            },
+            {
+              "lang": "ru_RU",
+              "name": "7"
+            },
+            {
+              "lang": "uk_UK",
+              "name": "8"
+            },
+            {
+              "lang": "de_DE",
+              "name": "9"
+            },
+            {
+              "lang": "es_ES",
+              "name": "11"
+            },
+            {
+              "lang": "es_419",
+              "name": "12"
+            },
+            {
+              "lang": "es_AR",
+              "name": "12"
+            },
+            {
+              "lang": "fr_FR",
+              "name": "12"
+            },
+            {
+              "lang": "pl_PL",
+              "name": "14"
+            },
+            {
+              "lang": "pt_BR",
+              "name": "33"
+            },
+            {
+              "lang": "it_IT",
+              "name": "45"
+            },
+            {
+              "lang": "ja_JP",
+              "name": "66"
+            },
+            {
+              "lang": "en_TR",
+              "name": "77"
+            },
+            {
+              "lang": "tr_CT",
+              "name": "77"
+            },
+            {
+              "lang": "pt_PT",
+              "name": "66"
+            }
+          ],
+          "startTime": "2026-04-30 14:25:34",
+          "taskConfig": [
+            {
+              "id": 4671,
+              "taskType": null,
+              "order": 1,
+              "toTopFlag": 0
+            }
+          ]
+        },
+        {
+          "periodId": 4,
+          "priority": 6,
+          "title": "alice赛期",
+          "titleI18": [
+            {
+              "lang": "zh_CN",
+              "name": "alice赛期"
+            },
+            {
+              "lang": "en_US",
+              "name": "1"
+            },
+            {
+              "lang": "ko_KR",
+              "name": "1"
+            },
+            {
+              "lang": "vi_VN",
+              "name": "1"
+            },
+            {
+              "lang": "zh_TW",
+              "name": "2"
+            },
+            {
+              "lang": "fa_IR",
+              "name": "1"
+            },
+            {
+              "lang": "ar_AR",
+              "name": "11"
+            },
+            {
+              "lang": "ru_RU",
+              "name": "111"
+            },
+            {
+              "lang": "uk_UK",
+              "name": "111"
+            },
+            {
+              "lang": "de_DE",
+              "name": "111"
+            },
+            {
+              "lang": "es_ES",
+              "name": "111"
+            },
+            {
+              "lang": "es_419",
+              "name": "111"
+            },
+            {
+              "lang": "fr_FR",
+              "name": "11"
+            },
+            {
+              "lang": "pl_PL",
+              "name": "11"
+            },
+            {
+              "lang": "pt_PT",
+              "name": "11"
+            },
+            {
+              "lang": "pt_BR",
+              "name": "111"
+            },
+            {
+              "lang": "it_IT",
+              "name": "11"
+            },
+            {
+              "lang": "ja_JP",
+              "name": "1"
+            },
+            {
+              "lang": "en_TR",
+              "name": "1"
+            },
+            {
+              "lang": "tr_CT",
+              "name": "1"
+            },
+            {
+              "lang": "es_AR",
+              "name": "1"
+            }
+          ],
+          "startTime": "2026-05-07 09:30:06",
+          "taskConfig": [
+            {
+              "id": 4836,
+              "taskType": null,
+              "order": 1,
+              "toTopFlag": 0
+            },
+            {
+              "id": 4867,
+              "taskType": null,
+              "order": 2,
+              "toTopFlag": 0
+            }
+          ]
+        },
+        {
+          "periodId": 5,
+          "priority": 7,
+          "title": "alice2赛期",
+          "titleI18": [
+            {
+              "lang": "zh_CN",
+              "name": "alice2赛期"
+            },
+            {
+              "lang": "en_US",
+              "name": "1"
+            },
+            {
+              "lang": "ko_KR",
+              "name": "2"
+            },
+            {
+              "lang": "vi_VN",
+              "name": "3"
+            },
+            {
+              "lang": "zh_TW",
+              "name": "4"
+            },
+            {
+              "lang": "fa_IR",
+              "name": "5"
+            },
+            {
+              "lang": "ar_AR",
+              "name": "6"
+            },
+            {
+              "lang": "ru_RU",
+              "name": "7"
+            },
+            {
+              "lang": "uk_UK",
+              "name": "8"
+            },
+            {
+              "lang": "de_DE",
+              "name": "9"
+            },
+            {
+              "lang": "es_ES",
+              "name": "11"
+            },
+            {
+              "lang": "es_419",
+              "name": "11"
+            },
+            {
+              "lang": "es_AR",
+              "name": "11"
+            },
+            {
+              "lang": "fr_FR",
+              "name": "11"
+            },
+            {
+              "lang": "pl_PL",
+              "name": "11"
+            },
+            {
+              "lang": "pt_PT",
+              "name": "11"
+            },
+            {
+              "lang": "pt_BR",
+              "name": "11"
+            },
+            {
+              "lang": "it_IT",
+              "name": "11"
+            },
+            {
+              "lang": "ja_JP",
+              "name": "11"
+            },
+            {
+              "lang": "en_TR",
+              "name": "11"
+            },
+            {
+              "lang": "tr_CT",
+              "name": "11"
+            }
+          ],
+          "startTime": "2026-05-12 15:00:05",
+          "taskConfig": [
+            {
+              "id": 4938,
+              "taskType": null,
+              "order": 1,
+              "toTopFlag": 0
+            },
+            {
+              "id": 4974,
+              "taskType": null,
+              "order": 2,
+              "toTopFlag": 0
+            }
+          ]
+        }
+      ],
+      "guessTicket": [],
+      "prizeConfig": {
+        "showFlag": "YES",
+        "exchangeStartTime": null,
+        "exchangeEndTime": null,
+        "prize": [
+          {
+            "prizeId": 234,
+            "prizeName": null,
+            "prizeNameI18n": [],
+            "picture": null,
+            "prizeType": null,
+            "prizeSubType": null,
+            "prizeScale": null,
+            "prizeUnit": null,
+            "integralCount": 100,
+            "prizeCount": 100,
+            "prizeLimit": null,
+            "userLimit": null,
+            "label": "GRAND"
+          },
+          {
+            "prizeId": 347,
+            "prizeName": null,
+            "prizeNameI18n": [],
+            "picture": null,
+            "prizeType": null,
+            "prizeSubType": null,
+            "prizeScale": null,
+            "prizeUnit": null,
+            "integralCount": 50,
+            "prizeCount": 1,
+            "prizeLimit": 10,
+            "userLimit": 2,
+            "label": "GRAND"
+          },
+          {
+            "prizeId": 348,
+            "prizeName": null,
+            "prizeNameI18n": [],
+            "picture": null,
+            "prizeType": null,
+            "prizeSubType": null,
+            "prizeScale": null,
+            "prizeUnit": null,
+            "integralCount": 19,
+            "prizeCount": 1,
+            "prizeLimit": null,
+            "userLimit": null,
+            "label": "MIDDLE"
+          },
+          {
+            "prizeId": 357,
+            "prizeName": null,
+            "prizeNameI18n": [],
+            "picture": null,
+            "prizeType": null,
+            "prizeSubType": null,
+            "prizeScale": null,
+            "prizeUnit": null,
+            "integralCount": 15,
+            "prizeCount": 2,
+            "prizeLimit": 100,
+            "userLimit": null,
+            "label": "MIDDLE"
+          },
+          {
+            "prizeId": 340,
+            "prizeName": null,
+            "prizeNameI18n": [],
+            "picture": null,
+            "prizeType": null,
+            "prizeSubType": null,
+            "prizeScale": null,
+            "prizeUnit": null,
+            "integralCount": 100,
+            "prizeCount": 1,
+            "prizeLimit": 100,
+            "userLimit": 1,
+            "label": "SMALL"
+          },
+          {
+            "prizeId": 386,
+            "prizeName": null,
+            "prizeNameI18n": [],
+            "picture": null,
+            "prizeType": null,
+            "prizeSubType": null,
+            "prizeScale": null,
+            "prizeUnit": null,
+            "integralCount": 22,
+            "prizeCount": 11,
+            "prizeLimit": null,
+            "userLimit": null,
+            "label": "SMALL"
+          },
+          {
+            "prizeId": 314,
+            "prizeName": null,
+            "prizeNameI18n": [],
+            "picture": null,
+            "prizeType": null,
+            "prizeSubType": null,
+            "prizeScale": null,
+            "prizeUnit": null,
+            "integralCount": 22,
+            "prizeCount": 1,
+            "prizeLimit": null,
+            "userLimit": null,
+            "label": "SMALL"
+          }
+        ]
+      }
+    },
+    {
+      "channelType": "CHANNEL",
+      "taskConfig": [
+        {
+          "id": 4641,
+          "name": null,
+          "nameI18": [],
+          "allowRange": [],
+          "activityType": null,
+          "taskType": null,
+          "completeTaskGroupCount": null,
+          "taskGroupType": null,
+          "resetType": null,
+          "taskGroupId": null,
+          "taskGroup": null,
+          "resetDay": null,
+          "resetTime": null,
+          "taskAward": null,
+          "isLivenessEnabled": null,
+          "livenessConfig": null,
+          "label": null,
+          "labelI18": [],
+          "labelDesc": null,
+          "labelDescI18": [],
+          "incompleteButton": null,
+          "incompleteButtonI18": [],
+          "taskUrlWeb": null,
+          "taskUrlApp": null,
+          "taskRisk": [],
+          "kycRiskAreaIds": [],
+          "dynamicAuditConfig": null,
+          "status": null,
+          "operator": null,
+          "createTime": null,
+          "updateTime": null,
+          "content": null,
+          "contentI18": [],
+          "remark": null,
+          "conditions": null,
+          "requirement": [],
+          "order": 1,
+          "prizeInventoryQuantity": null,
+          "hisId": null,
+          "version": 0,
+          "isShowLeaderBoard": null,
+          "stock": null,
+          "configStock": false,
+          "limitRewardNumber": null,
+          "guessConfig": null,
+          "guessResult": null,
+          "guessStatus": null,
+          "isSameLinkUrl": null,
+          "awardImage": null,
+          "linkTaskId": null,
+          "isTaskCoupon": null,
+          "versionEdit": null
+        }
+      ],
+      "guessPeriod": [
+        {
+          "periodId": 1,
+          "priority": 5,
+          "title": "赛期 35",
+          "titleI18": [
+            {
+              "lang": "zh_CN",
+              "name": "赛期 35"
+            },
+            {
+              "lang": "en_US",
+              "name": "round 1"
+            },
+            {
+              "lang": "ru_RU",
+              "name": "555"
+            },
+            {
+              "lang": "ja_JP",
+              "name": "111166"
+            },
+            {
+              "lang": "es_ES",
+              "name": "swerwer"
+            },
+            {
+              "lang": "es_419",
+              "name": "swerwer"
+            },
+            {
+              "lang": "es_AR",
+              "name": "swerwer"
+            },
+            {
+              "lang": "ko_KR",
+              "name": "1"
+            },
+            {
+              "lang": "vi_VN",
+              "name": "2"
+            },
+            {
+              "lang": "zh_TW",
+              "name": "3"
+            },
+            {
+              "lang": "fa_IR",
+              "name": "4"
+            },
+            {
+              "lang": "ar_AR",
+              "name": "5"
+            },
+            {
+              "lang": "uk_UK",
+              "name": "66"
+            },
+            {
+              "lang": "de_DE",
+              "name": "77"
+            },
+            {
+              "lang": "fr_FR",
+              "name": "88"
+            },
+            {
+              "lang": "pl_PL",
+              "name": "99"
+            },
+            {
+              "lang": "pt_PT",
+              "name": "11122"
+            },
+            {
+              "lang": "pt_BR",
+              "name": "3333"
+            },
+            {
+              "lang": "it_IT",
+              "name": "4444"
+            },
+            {
+              "lang": "en_TR",
+              "name": "666666"
+            },
+            {
+              "lang": "tr_CT",
+              "name": "234234"
+            }
+          ],
+          "startTime": "2026-03-10 19:05:59",
+          "taskConfig": [
+            {
+              "id": 4083,
+              "taskType": null,
+              "order": 2,
+              "toTopFlag": 0
+            }
+          ]
+        },
+        {
+          "periodId": 2,
+          "priority": 4,
+          "title": "赛期 34",
+          "titleI18": [
+            {
+              "lang": "zh_CN",
+              "name": "赛期 34"
+            },
+            {
+              "lang": "en_US",
+              "name": "round 2"
+            },
+            {
+              "lang": "ru_RU",
+              "name": "555226"
+            },
+            {
+              "lang": "ja_JP",
+              "name": "222"
+            },
+            {
+              "lang": "es_AR",
+              "name": "swerwer2"
+            },
+            {
+              "lang": "es_419",
+              "name": "swerwer1"
+            },
+            {
+              "lang": "es_ES",
+              "name": "swerwer"
+            },
+            {
+              "lang": "ko_KR",
+              "name": "1"
+            },
+            {
+              "lang": "vi_VN",
+              "name": "2"
+            },
+            {
+              "lang": "zh_TW",
+              "name": "3"
+            },
+            {
+              "lang": "fa_IR",
+              "name": "4"
+            },
+            {
+              "lang": "ar_AR",
+              "name": "5"
+            },
+            {
+              "lang": "uk_UK",
+              "name": "6"
+            },
+            {
+              "lang": "de_DE",
+              "name": "7"
+            },
+            {
+              "lang": "fr_FR",
+              "name": "333"
+            },
+            {
+              "lang": "pl_PL",
+              "name": "1111"
+            },
+            {
+              "lang": "pt_PT",
+              "name": "222"
+            },
+            {
+              "lang": "pt_BR",
+              "name": "4444"
+            },
+            {
+              "lang": "it_IT",
+              "name": "5555"
+            },
+            {
+              "lang": "en_TR",
+              "name": "777345"
+            },
+            {
+              "lang": "tr_CT",
+              "name": "234234"
+            }
+          ],
+          "startTime": "2026-03-11 19:30:09",
+          "taskConfig": [
+            {
+              "id": 4067,
+              "taskType": null,
+              "order": 1,
+              "toTopFlag": 0
+            },
+            {
+              "id": 4045,
+              "taskType": null,
+              "order": 2,
+              "toTopFlag": 0
+            },
+            {
+              "id": 4043,
+              "taskType": null,
+              "order": 8,
+              "toTopFlag": 0
+            },
+            {
+              "id": 4215,
+              "taskType": null,
+              "order": 5,
+              "toTopFlag": 0
+            },
+            {
+              "id": 4062,
+              "taskType": null,
+              "order": 3,
+              "toTopFlag": 1
+            }
+          ]
+        },
+        {
+          "periodId": 3,
+          "priority": 3,
+          "title": "赛期33",
+          "titleI18": [
+            {
+              "lang": "zh_CN",
+              "name": "赛期33"
+            },
+            {
+              "lang": "en_US",
+              "name": "1"
+            },
+            {
+              "lang": "ko_KR",
+              "name": "2"
+            },
+            {
+              "lang": "vi_VN",
+              "name": "3"
+            },
+            {
+              "lang": "zh_TW",
+              "name": "4"
+            },
+            {
+              "lang": "fa_IR",
+              "name": "5"
+            },
+            {
+              "lang": "ar_AR",
+              "name": "6"
+            },
+            {
+              "lang": "ru_RU",
+              "name": "7"
+            },
+            {
+              "lang": "uk_UK",
+              "name": "8"
+            },
+            {
+              "lang": "de_DE",
+              "name": "9"
+            },
+            {
+              "lang": "es_ES",
+              "name": "11"
+            },
+            {
+              "lang": "es_419",
+              "name": "12"
+            },
+            {
+              "lang": "es_AR",
+              "name": "12"
+            },
+            {
+              "lang": "fr_FR",
+              "name": "12"
+            },
+            {
+              "lang": "pl_PL",
+              "name": "14"
+            },
+            {
+              "lang": "pt_BR",
+              "name": "33"
+            },
+            {
+              "lang": "it_IT",
+              "name": "45"
+            },
+            {
+              "lang": "ja_JP",
+              "name": "66"
+            },
+            {
+              "lang": "en_TR",
+              "name": "77"
+            },
+            {
+              "lang": "tr_CT",
+              "name": "77"
+            },
+            {
+              "lang": "pt_PT",
+              "name": "66"
+            }
+          ],
+          "startTime": "2026-04-30 14:25:34",
+          "taskConfig": [
+            {
+              "id": 4671,
+              "taskType": null,
+              "order": 1,
+              "toTopFlag": 0
+            }
+          ]
+        },
+        {
+          "periodId": 4,
+          "priority": 6,
+          "title": "alice赛期",
+          "titleI18": [
+            {
+              "lang": "zh_CN",
+              "name": "alice赛期"
+            },
+            {
+              "lang": "en_US",
+              "name": "1"
+            },
+            {
+              "lang": "ko_KR",
+              "name": "1"
+            },
+            {
+              "lang": "vi_VN",
+              "name": "1"
+            },
+            {
+              "lang": "zh_TW",
+              "name": "2"
+            },
+            {
+              "lang": "fa_IR",
+              "name": "1"
+            },
+            {
+              "lang": "ar_AR",
+              "name": "11"
+            },
+            {
+              "lang": "ru_RU",
+              "name": "111"
+            },
+            {
+              "lang": "uk_UK",
+              "name": "111"
+            },
+            {
+              "lang": "de_DE",
+              "name": "111"
+            },
+            {
+              "lang": "es_ES",
+              "name": "111"
+            },
+            {
+              "lang": "es_419",
+              "name": "111"
+            },
+            {
+              "lang": "fr_FR",
+              "name": "11"
+            },
+            {
+              "lang": "pl_PL",
+              "name": "11"
+            },
+            {
+              "lang": "pt_PT",
+              "name": "11"
+            },
+            {
+              "lang": "pt_BR",
+              "name": "111"
+            },
+            {
+              "lang": "it_IT",
+              "name": "11"
+            },
+            {
+              "lang": "ja_JP",
+              "name": "1"
+            },
+            {
+              "lang": "en_TR",
+              "name": "1"
+            },
+            {
+              "lang": "tr_CT",
+              "name": "1"
+            },
+            {
+              "lang": "es_AR",
+              "name": "1"
+            }
+          ],
+          "startTime": "2026-05-07 09:30:06",
+          "taskConfig": [
+            {
+              "id": 4836,
+              "taskType": null,
+              "order": 1,
+              "toTopFlag": 0
+            },
+            {
+              "id": 4867,
+              "taskType": null,
+              "order": 2,
+              "toTopFlag": 0
+            }
+          ]
+        },
+        {
+          "periodId": 5,
+          "priority": 7,
+          "title": "alice2赛期",
+          "titleI18": [
+            {
+              "lang": "zh_CN",
+              "name": "alice2赛期"
+            },
+            {
+              "lang": "en_US",
+              "name": "1"
+            },
+            {
+              "lang": "ko_KR",
+              "name": "2"
+            },
+            {
+              "lang": "vi_VN",
+              "name": "3"
+            },
+            {
+              "lang": "zh_TW",
+              "name": "4"
+            },
+            {
+              "lang": "fa_IR",
+              "name": "5"
+            },
+            {
+              "lang": "ar_AR",
+              "name": "6"
+            },
+            {
+              "lang": "ru_RU",
+              "name": "7"
+            },
+            {
+              "lang": "uk_UK",
+              "name": "8"
+            },
+            {
+              "lang": "de_DE",
+              "name": "9"
+            },
+            {
+              "lang": "es_ES",
+              "name": "11"
+            },
+            {
+              "lang": "es_419",
+              "name": "11"
+            },
+            {
+              "lang": "es_AR",
+              "name": "11"
+            },
+            {
+              "lang": "fr_FR",
+              "name": "11"
+            },
+            {
+              "lang": "pl_PL",
+              "name": "11"
+            },
+            {
+              "lang": "pt_PT",
+              "name": "11"
+            },
+            {
+              "lang": "pt_BR",
+              "name": "11"
+            },
+            {
+              "lang": "it_IT",
+              "name": "11"
+            },
+            {
+              "lang": "ja_JP",
+              "name": "11"
+            },
+            {
+              "lang": "en_TR",
+              "name": "11"
+            },
+            {
+              "lang": "tr_CT",
+              "name": "11"
+            }
+          ],
+          "startTime": "2026-05-12 15:00:05",
+          "taskConfig": [
+            {
+              "id": 4938,
+              "taskType": null,
+              "order": 1,
+              "toTopFlag": 0
+            },
+            {
+              "id": 4974,
+              "taskType": null,
+              "order": 2,
+              "toTopFlag": 0
+            }
+          ]
+        }
+      ],
+      "guessTicket": [],
+      "prizeConfig": {
+        "showFlag": "YES",
+        "exchangeStartTime": null,
+        "exchangeEndTime": null,
+        "prize": [
+          {
+            "prizeId": 234,
+            "prizeName": null,
+            "prizeNameI18n": [],
+            "picture": null,
+            "prizeType": null,
+            "prizeSubType": null,
+            "prizeScale": null,
+            "prizeUnit": null,
+            "integralCount": 100,
+            "prizeCount": 100,
+            "prizeLimit": null,
+            "userLimit": null,
+            "label": "GRAND"
+          },
+          {
+            "prizeId": 347,
+            "prizeName": null,
+            "prizeNameI18n": [],
+            "picture": null,
+            "prizeType": null,
+            "prizeSubType": null,
+            "prizeScale": null,
+            "prizeUnit": null,
+            "integralCount": 50,
+            "prizeCount": 1,
+            "prizeLimit": 10,
+            "userLimit": 2,
+            "label": "GRAND"
+          },
+          {
+            "prizeId": 348,
+            "prizeName": null,
+            "prizeNameI18n": [],
+            "picture": null,
+            "prizeType": null,
+            "prizeSubType": null,
+            "prizeScale": null,
+            "prizeUnit": null,
+            "integralCount": 19,
+            "prizeCount": 1,
+            "prizeLimit": null,
+            "userLimit": null,
+            "label": "MIDDLE"
+          },
+          {
+            "prizeId": 357,
+            "prizeName": null,
+            "prizeNameI18n": [],
+            "picture": null,
+            "prizeType": null,
+            "prizeSubType": null,
+            "prizeScale": null,
+            "prizeUnit": null,
+            "integralCount": 15,
+            "prizeCount": 2,
+            "prizeLimit": 100,
+            "userLimit": null,
+            "label": "MIDDLE"
+          },
+          {
+            "prizeId": 340,
+            "prizeName": null,
+            "prizeNameI18n": [],
+            "picture": null,
+            "prizeType": null,
+            "prizeSubType": null,
+            "prizeScale": null,
+            "prizeUnit": null,
+            "integralCount": 100,
+            "prizeCount": 1,
+            "prizeLimit": 100,
+            "userLimit": 1,
+            "label": "SMALL"
+          },
+          {
+            "prizeId": 386,
+            "prizeName": null,
+            "prizeNameI18n": [],
+            "picture": null,
+            "prizeType": null,
+            "prizeSubType": null,
+            "prizeScale": null,
+            "prizeUnit": null,
+            "integralCount": 22,
+            "prizeCount": 11,
+            "prizeLimit": null,
+            "userLimit": null,
+            "label": "SMALL"
+          },
+          {
+            "prizeId": 314,
+            "prizeName": null,
+            "prizeNameI18n": [],
+            "picture": null,
+            "prizeType": null,
+            "prizeSubType": null,
+            "prizeScale": null,
+            "prizeUnit": null,
+            "integralCount": 22,
+            "prizeCount": 1,
+            "prizeLimit": null,
+            "userLimit": null,
+            "label": "SMALL"
+          }
+        ]
+      }
+    }
+  ],
+  "monopoly": null,
+  "monopolyList": [],
+  "contractTradingVolumeTaskId": null,
+  "multiLanguageTemplateTitle": null,
+  "newUser": false
+}

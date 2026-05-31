@@ -230,3 +230,12 @@
 - 验证结果：修复后 `minimal_create_verify_delete` 成功跑通，活动 `9701 / sw51783658` 创建、更新、回查、删除全通过；`full_create_verify_delete` 也通过，活动 `9702 / sx51798404` 无残留。
 - 关联流程或脚本：`skills/weex-admin-ops/scripts/race-config-wizard-api.mjs`。
 - 后续处理：已吸收到固定执行路径。
+
+## 2026-05-31 大富翁世界杯活动创建提示“仅支持用户手动点击报名”
+
+- 业务线：活动列表 / 大富翁世界杯（MONOPOLY_WORLD_CUP）。
+- 场景：从零创建大富翁通用回归活动时，使用默认报名模板 participantMode（如 `REGISTERED_MANUAL`）。
+- 失败表现：`POST /prod-api/activity/config` 返回 `code=500`，`msg=大富翁活动用户报名模板仅支持用户手动点击报名`。
+- 失败原因：该活动类型对报名模板的 `participantMode` 有硬性约束，仅允许 `MANUAL`（用户手动点击报名）。
+- 解决方式：创建报名模板时指定 `participantMode=["MANUAL"]`（或直接复用一个符合该约束的模板）。
+- 验证结果：通用回归脚本 `skills/weex-admin-ops/scripts/regression-monopoly-worldcup-universal-from-scratch.mjs` 已改为创建 `MANUAL` 报名模板并跑通。

@@ -38,3 +38,20 @@
 - 解决方式：当模板含 `linkTaskId` 时，先 clone 创建新的 `INVITED` 被邀请任务，再创建 `INVITE_FRIEND` 邀请任务并把 `linkTaskId` 指向新建任务；清理时需要删除两条任务。
 - 验证结果：已沉淀到脚本，待在 staging 跑 `verify-nonlottery-api-full-config-staging.mjs --only agent` 验证 min/full/cleanup 闭环。
 - 关联文件：`scripts/create-agent-invite-task-fast-api.mjs`、`scripts/create-agent-full-config-explicit-deps-fast-api.mjs`。
+
+## 2026-05-31 大富翁每日骰子任务“从零创建”接口返回 system error
+- 业务线：活动任务管理。
+- 场景：用于 MONOPOLY_WORLD_CUP 的“每日合约交易量→发骰子”任务，尝试用最小 payload 直接 `POST /prod-api/activity/task`（不 clone 模板）。
+- 失败表现：业务响应 `code=500`，`msg=system error`。
+- 失败原因：payload 缺少后端依赖字段（如 `conditions`、`labelDescI18`、以及更完整的 `taskAward` 结构），触发后端空指针/反序列化异常。
+- 解决方式：按已存在的大富翁 DAILY/TRADING_VOLUME 任务结构补齐缺省字段（但仍保持“从零构造 payload”），并把 `requirement.isMultiplierCoupon` 设为 `0`。
+- 验证结果：修复后该任务可稳定创建并回查；用于通用回归脚本 `regression-monopoly-worldcup-universal-from-scratch.mjs` 已跑通并可清理。
+- 关联脚本：`skills/weex-admin-ops/scripts/create-monopoly-worldcup-daily-dice-task-from-scratch-fast-api.mjs`。
+
+## 2026-05-31 小丑牌 INVITE_FRIEND 任务“从零创建”字段缺省风险
+- 业务线：活动任务管理。
+- 场景：用于 FLIP 通用回归脚本，新增 `INVITE_FRIEND` 任务并绑定虚拟奖品（FLIP_CARD/FLIP_INTEGRAL）。
+- 风险点：`POST /prod-api/activity/task` 对 INVITE_FRIEND 的字段容忍度低（如缺少 `conditions.allowRangeLogic`、`labelDescI18`、或 `taskAward.invitePrizeId` 等），可能触发 `code=500 system error`。
+- 固定路径：按已存在 FLIP 任务结构补齐 `conditions.allowRangeLogic=\"UNION\"`、完整 `taskAward`（含 invite* 字段）与基础 i18n 字段；保持 payload 由脚本显式构造（不 clone 模板）。
+- 验证结果：`skills/weex-admin-ops/scripts/regression-flip-universal-from-scratch.mjs` 已跑通创建/校验/清理闭环。
+- 关联脚本：`skills/weex-admin-ops/scripts/create-flip-invite-task-from-scratch-fast-api.mjs`。
