@@ -45,14 +45,19 @@ const skillDefs = {
 };
 
 function parseArgs(argv) {
-  const args = { skill: "all", installDeps: true, checkFinAuth: true };
+  const args = { skill: "all", installDeps: true, checkFinAuth: false, checkFinAuthExplicit: false };
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--skill") args.skill = argv[++index] || "all";
     else if (arg === "--no-install") args.installDeps = false;
     else if (arg === "--skip-fin-auth") args.checkFinAuth = false;
+    else if (arg === "--check-fin-auth") {
+      args.checkFinAuth = true;
+      args.checkFinAuthExplicit = true;
+    }
     else if (arg === "--help" || arg === "-h") args.help = true;
   }
+  if (!args.checkFinAuthExplicit) args.checkFinAuth = args.skill === "fin";
   return args;
 }
 
@@ -167,7 +172,9 @@ function help() {
   return `Usage:
   node tools/first-run-check.mjs
   node tools/first-run-check.mjs --skill frontend
-  node tools/first-run-check.mjs --skill fin --skip-fin-auth
+  node tools/first-run-check.mjs --skill fin
+  node tools/first-run-check.mjs --skill all --check-fin-auth
+  node tools/first-run-check.mjs --skill all --skip-fin-auth
 
 Checks project dependencies, skill-local .env.local readiness, and FIN login state when applicable.`;
 }
