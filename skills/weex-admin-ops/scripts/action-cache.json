@@ -3,6 +3,21 @@
   "updatedAt": "2026-05-31",
   "actions": [
     {
+      "id": "regress_full_test_cases",
+      "status": "candidate",
+      "script": "scripts/regress-full-test-cases.mjs",
+      "description": "Run supported full regression test cases across lottery regression (doc 140) and universal regression (script sub-cases 141), then aggregate a single report.",
+      "domains": ["跨域回归", "转盘抽奖", "通用回归"],
+      "intentKeywords": ["回归", "执行", "跑", "全量"],
+      "objectKeywords": ["全量用例", "全部用例", "用例库", "回归用例"],
+      "scopeKeywords": ["全量", "全部"],
+      "defaultMode": "invisible",
+      "verifiedModes": ["dry_run"],
+      "lastVerifiedAt": "2026-05-31",
+      "visibleModeKeywords": ["浏览器模式", "可见", "打开浏览器", "让我看着"],
+      "fallback": "If full regression fails, run lottery regression and universal regression suites separately and compare their reports."
+    },
+    {
       "id": "lottery_admin_main_regression",
       "status": "candidate",
       "script": "scripts/lottery-admin-main-regression.mjs",

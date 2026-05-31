@@ -48,6 +48,7 @@ export function commandFor(match, args, skillRoot) {
   if (match.action.id === "verify_guide_template_row_actions") return guideTemplateRowActionsCommand(match, args, skillRoot);
   if (match.action.id === "create_lottery_activity_draft") return createLotteryActivityDraftCommand(match, args, skillRoot);
   if (match.action.id === "online_lottery_activity") return onlineLotteryActivityCommand(match, args, skillRoot);
+  if (match.action.id === "regress_full_test_cases") return regressFullTestCasesCommand(match, args, skillRoot);
   if (match.action.id === "regress_newbie_activity_universal_from_scratch") return regressNewbieUniversalFromScratchCommand(match, args, skillRoot);
   if (match.action.id === "regress_lottery_activity_universal_from_scratch") return regressLotteryUniversalFromScratchCommand(match, args, skillRoot);
   if (match.action.id === "regress_monopoly_world_cup_activity_universal_from_scratch") return regressMonopolyWorldCupUniversalFromScratchCommand(match, args, skillRoot);
@@ -907,6 +908,20 @@ function resourceCardFromScratchCommand(match, args, skillRoot) {
   if (params.introduction) commandArgs.push("--introduction", String(params.introduction));
   if (params.confirmCreate || params.confirm || args.confirm) commandArgs.push("--confirm-create");
   if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  return { script, commandArgs };
+}
+
+function regressFullTestCasesCommand(match, args, skillRoot) {
+  const params = { ...match.inferred, ...args.passthrough };
+  const script = path.join(skillRoot, match.action.script);
+  const commandArgs = [script];
+  if (params.selection) commandArgs.push("--selection", String(params.selection));
+  if (params.includeOrchestration) commandArgs.push("--include-orchestration");
+  if (params.noCleanup || params.noCleanUp) commandArgs.push("--no-cleanup");
+  if (params.rechargeAmount) commandArgs.push("--recharge-amount", String(params.rechargeAmount));
+  if (params.waitForStartMs) commandArgs.push("--wait-for-start-ms", String(params.waitForStartMs));
+  if (args.dryRun || params.dryRun) commandArgs.push("--dry-run");
+  if (params.confirmRun || params.confirm || args.confirm) commandArgs.push("--confirm-run");
   return { script, commandArgs };
 }
 

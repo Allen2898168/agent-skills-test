@@ -74,6 +74,8 @@ function scoreAction(action, query) {
   if (action.id === "create_lottery_activity_draft" && /转盘抽奖.{0,8}活动|活动.{0,8}转盘抽奖/.test(query) && /新增|创建|生成|草稿|配置|全配置|权重配置|走一下|尝试/.test(query)) score += 14;
   if (action.id === "lottery_admin_main_regression" && /转盘抽奖/.test(query) && /后管|后台|活动后台/.test(query) && /主回归|回归/.test(query)) score += 18;
   if (action.id === "lottery_admin_main_regression" && /自动化/.test(query) && /跑|执行|开始做/.test(query)) score += 8;
+  if (action.id === "regress_full_test_cases" && /(回归|用例|用例库)/.test(query) && /(全量|全部|全套)/.test(query)) score += 60;
+  if (action.id === "regress_full_test_cases" && /回归全量用例/.test(query)) score += 80;
   if (action.id === "online_lottery_activity" && /活动列表|转盘抽奖|抽奖活动|活动/.test(query) && /上线|发布/.test(query)) score += 16;
   if (action.id === "online_lottery_activity" && /活动ID|活动id|活动别名|showUrl|别名/.test(query) && /上线|发布/.test(query)) score += 12;
   if (action.id === "regress_newbie_activity_universal_from_scratch" && /(新手活动|BEGINNER_TASK)/.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
