@@ -16,6 +16,23 @@ The action cache is the first execution layer for workflows that have already be
    - execute manually with browser automation;
    - update the cache if the fix is reusable.
 
+## Test Case Counting (用例统计口径)
+
+When a user asks for the **total number of test cases** in the activity system, always count **all sub-cases** (细分子用例), not only the number of cached actions.
+
+Counting rules:
+- **Unit = sub-case**.
+- For any workflow script that records execution steps via `steps.push({ name: ... })`, count **1 sub-case per `steps.push`** (this is how the universal regressions output numbered `TC-01/02/...`).
+- For cached actions whose scripts do **not** expose `steps.push`, count them as **1 sub-case** until the script is refactored to emit step-level results.
+- For system-wide totals, sum across the action caches of each domain skill:
+  - activity admin: `skills/weex-admin-ops/scripts/action-cache.json`
+  - FIN admin: `skills/weex-fin-admin-ops/scripts/action-cache.json`
+  - frontend ops: `skills/weex-frontend-ops/scripts/action-cache.json`
+
+Notes:
+- Current state: only the 13 `regress_*_universal_from_scratch` scripts are step-countable; other cached actions default to 1 sub-case each.
+- This rule is for **reporting/metrics**. It does not change execution flow.
+
 ## Cached Actions
 
 | Action ID | Script | Status | Purpose |
