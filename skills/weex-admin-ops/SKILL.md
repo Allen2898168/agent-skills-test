@@ -152,6 +152,16 @@ Before adding or updating a workflow, check whether the flow reveals a reusable 
 - If the reusable operation is scripted, put the helper in `scripts/lib/` and keep business orchestration under `scripts/business/<business-domain>/`.
 - Record whether the proven path used visible browser mode or default invisible mode. Treat untested mode variants as unverified until they are run and checked.
 
+## Regression Test Case Library (Required)
+
+When an API chain (headed browser or headless/API-assisted) is proven runnable and verifiable, it must be standardized into the regression test case library:
+
+- Every runnable regression/verify script must call `tools/lib/result-md.mjs` `writeResultMarkdown({ testCase, steps })` and provide:
+  - `testCase.number` (stable case number), `description`, `preconditions`, `tags`
+  - `steps.push({ name })` for each sub-step; **sub-step = test case** by the default counting rule
+- If a new `steps.push({ name })` is introduced, add friendly `desc/expected` in `tools/lib/result-md.mjs` `DEFAULT_STEP_META_ZH` when appropriate.
+- After the flow is proven, regenerate and sync the case library by running: `npm run generate:test-cases` (outputs `docs/test-cases/index.md` and suite libraries).
+
 ## Growth Management
 
 Keep the skill small, searchable, and organized by business domain.

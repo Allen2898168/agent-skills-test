@@ -7,6 +7,7 @@
     "install:deps": "npm install --no-audit --no-fund",
     "first-run": "node tools/first-run-check.mjs",
     "configure:env": "node tools/configure-skill-env.mjs",
+    "generate:test-cases": "node tools/generate-automation-test-cases.mjs && node tools/generate-test-cases-index.mjs",
     "check:frontend": "node skills/weex-frontend-ops/scripts/maintenance/validate-knowledge-structure.mjs",
     "check:fin": "node skills/weex-fin-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs",
     "check:admin": "node skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs",

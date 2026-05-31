@@ -81,6 +81,15 @@ When a FIN route or operation is proven:
 
 Use `candidate` for first-time or dry-run-only flows. Promote to `verified` only after a real staging execution is completed and independently checked.
 
+## Regression Test Case Library (Required)
+
+When a FIN API chain (headed browser or headless/CDP/API-assisted) is proven runnable and verifiable, it must be standardized into the regression test case library:
+
+- The runnable script should output standardized result markdown via `tools/lib/result-md.mjs` `writeResultMarkdown({ testCase, steps })`.
+- `testCase.number/description/preconditions/tags` must be stable and safe (no secrets).
+- Each `steps.push({ name })` counts as 1 sub-testcase by the default library counting rule; add friendly `desc/expected` into `tools/lib/result-md.mjs` `DEFAULT_STEP_META_ZH` when new step names are introduced.
+- After the flow is proven, run `npm run generate:test-cases` to sync `docs/test-cases/index.md` and the suite libraries.
+
 ## Failure Reviews
 
 - `FAILURES.md` is the failure index.

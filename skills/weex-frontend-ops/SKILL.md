@@ -105,6 +105,15 @@ If a workflow fails, update failure review docs:
 - `failure-reviews/common.md` for browser, login/session, rendering, network, selector, cache, or environment failures.
 - `failure-reviews/<domain>.md` for page-specific failures.
 
+## Regression Test Case Library (Required)
+
+When a frontend chain (headed browser or headless) is proven runnable and verifiable, it must be standardized into the regression test case library:
+
+- The runnable script should output standardized result markdown via `tools/lib/result-md.mjs` `writeResultMarkdown({ testCase, steps })`.
+- `testCase.number/description/preconditions/tags` must be stable and safe (no secrets).
+- Each `steps.push({ name })` counts as 1 sub-testcase by the default library counting rule; add friendly `desc/expected` into `tools/lib/result-md.mjs` `DEFAULT_STEP_META_ZH` when new step names are introduced.
+- After the flow is proven, run `npm run generate:test-cases` to sync `docs/test-cases/index.md` and the suite libraries.
+
 ## Growth Management
 
 - Keep `SKILL.md` focused on workflow rules and reference navigation.

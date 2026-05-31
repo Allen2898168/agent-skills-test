@@ -6,7 +6,7 @@
 - 活动后台权威 skill：`skills/weex-admin-ops/`，默认 staging：`https://stg-activity.weex.tech`。
 - FIN Admin 权威 skill：`skills/weex-fin-admin-ops/`，默认 staging：`https://stg-admin-web-fin.weex.tech`。
 - 前端权威 skill：`skills/weex-frontend-ops/`，目标 URL 按用户输入或 `references/routes.md`。
-- 最近更新时间：2026-05-29。
+- 最近更新时间：2026-05-31。
 - 历史交接索引：`docs/session-handoffs/README.md`。
 
 ## 必读入口
@@ -25,6 +25,9 @@
 - 2026-05-31 回归产物 Markdown 标准化：`tools/lib/result-md.mjs` 新增 `testCase` 入参，支持输出“标准测试用例 MD”（用例编号/名称/描述/前置条件/子用例编号与结果）；并已让 13 条通用回归脚本默认写入该标准格式（仍保留未传 `testCase` 时的旧格式兼容）。
   - 结果生成工具：`tools/lib/result-md.mjs`
   - 回归脚本接入：`skills/weex-admin-ops/scripts/regression-*-universal-from-scratch.mjs`
+
+- 2026-05-31 用例库统一口径与自动化纳入：新增“用例库总览”入口 `docs/test-cases/index.md`（由 `npm run generate:test-cases` 生成），并把 13 条通用回归脚本按子用例拆分沉淀到 `docs/test-cases/universal-regression/`（统计：子用例 141 条；生成入口：`npm run generate:test-cases`）。
+  - 2026-05-31 “总用例数”默认口径调整：用户问总用例数时，按“可自动化回归用例总数”汇总（文档用例 140 + 已落地自动化子用例：脚本 141 + 编排 4 = 285）；统计入口仍为 `docs/test-cases/index.md`。
 
 - 2026-05-31 通用回归用例/脚本骨架：新增 `result/` 下的“执行产物 Markdown”写入工具，并打通两条“从零配置（不 clone 活动模板）”通用回归脚本（均会创建依赖→创建活动→验证→解绑依赖→清理→输出 md）：
   - BEGINNER_TASK（新手活动）：`skills/weex-admin-ops/scripts/regression-newbie-universal-from-scratch.mjs`；产物示例：`result/universal-regression/20260531_043955/BEGINNER_TASK_universal_from_scratch.md`。

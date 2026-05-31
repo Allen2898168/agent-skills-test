@@ -45,22 +45,57 @@ function statusText(ok) {
   return "UNKNOWN";
 }
 
-const DEFAULT_STEP_META_ZH = {
+export const DEFAULT_STEP_META_ZH = {
   upload_banner: { desc: "上传活动 Banner/资源图，获取可用于活动配置的图片 URL。", expected: "上传成功并返回可访问的资源 URL。" },
   refresh_api_session_before_activity_create: { desc: "刷新后管 API 会话，确保后续创建接口具备有效登录态。", expected: "会话刷新成功，后续创建接口不再出现登录态/权限错误。" },
   auth_refresh_before_create_retry: { desc: "当创建接口失败时刷新鉴权并重试，提升稳定性。", expected: "鉴权刷新成功，重试路径可继续执行后续步骤。" },
+
+  create_newbie_activity: { desc: "从零创建新手活动(BEGINNER_TASK)草稿。", expected: "创建成功并获得 activityId/activityAlias；可进入草稿检查/上下线流程。" },
+  create_trace_pro_activity: { desc: "从零创建小活动(TRACE_PRO)草稿。", expected: "创建成功并获得 activityId/activityAlias；可进入草稿检查/上下线流程。" },
+  create_agent_trace_pro_activity: { desc: "从零创建代理小活动(AGENT_TRACE_PRO)草稿。", expected: "创建成功并获得 activityId/activityAlias；可进入草稿检查/上下线流程。" },
+  create_race_activity: { desc: "从零创建交易竞速赛(RACE_COMPETITION)草稿。", expected: "创建成功并获得 activityId/activityAlias；可进入草稿检查/上下线流程。" },
+  create_competition_activity: { desc: "从零创建交易大赛(TRADING_COMPETITION)草稿。", expected: "创建成功并获得 activityId/activityAlias；可进入草稿检查/上下线流程。" },
+  create_lottery_activity: { desc: "从零创建转盘抽奖(LOTTERY)草稿。", expected: "创建成功并获得 activityId/activityAlias；可进入草稿检查/上下线流程。" },
+  create_flip_activity: { desc: "从零创建小丑牌活动(FLIP)草稿。", expected: "创建成功并获得 activityId/activityAlias；可进入草稿检查/上下线流程。" },
+  create_monopoly_activity: { desc: "从零创建大富翁世界杯(MONOPOLY_WORLD_CUP)草稿。", expected: "创建成功并获得 activityId/activityAlias；可进入草稿检查/上下线流程。" },
+  create_guess_activity: { desc: "从零创建竞猜大赛(GUESS)草稿。", expected: "创建成功并获得 activityId/activityAlias；可进入草稿检查/上下线流程。" },
+  create_customized_activity: { desc: "从零创建定制化活动(CUSTOMIZED)草稿。", expected: "创建成功并获得 activityId/activityAlias；可进入草稿检查/上下线流程。" },
+  create_agent_activity: { desc: "从零创建人人代理(AGENT)草稿。", expected: "创建成功并获得 activityId/activityAlias；可进入草稿检查/上下线流程。" },
+  create_recharge_trans_activity: { desc: "从零创建充值交易活动(RECHARGE_TRANS_TASK)草稿。", expected: "创建成功并获得 activityId/activityAlias；可进入草稿检查/上下线流程。" },
+  create_contract_mining_activity: { desc: "从零创建合约挖矿(CONTRACT_MINING)草稿。", expected: "创建成功并获得 activityId/activityAlias；可进入草稿检查/上下线流程。" },
 
   create_register_template_from_scratch: { desc: "从零创建报名模板（不 clone），作为活动依赖。", expected: "创建成功并获得模板 ID；活动创建时可绑定该模板。" },
   create_multilanguage_template: { desc: "创建多语言模板（i18n），用于活动文案/FAQ 等多语言配置。", expected: "创建成功并获得模板 ID；活动创建/编辑可引用。" },
   create_task_package: { desc: "创建任务包（普通任务包）。", expected: "创建成功并获得任务包 ID；活动创建时可绑定。" },
   create_routine_task_package: { desc: "创建日常任务包（routine）。", expected: "创建成功并获得任务包 ID；活动创建时可绑定。" },
 
+  create_tracepro_trading_volume_task_from_scratch: { desc: "从零创建小活动(TRACE_PRO)依赖：交易量任务。", expected: "创建成功并获得 taskId；可绑定到活动任务配置。" },
+  create_agent_tracepro_order_volume_task_from_scratch: { desc: "从零创建代理小活动(AGENT_TRACE_PRO)依赖：订单量任务。", expected: "创建成功并获得 taskId；可绑定到活动任务配置。" },
+  create_race_trading_volume_task_from_scratch: { desc: "从零创建交易竞速赛(RACE_COMPETITION)依赖：交易量任务。", expected: "创建成功并获得 taskId；可绑定到活动任务配置。" },
+  create_competition_trading_volume_task_from_scratch: { desc: "从零创建交易大赛(TRADING_COMPETITION)依赖：交易量任务。", expected: "创建成功并获得 taskId；可绑定到活动任务配置。" },
+  create_guess_trading_volume_task_from_scratch: { desc: "从零创建竞猜大赛(GUESS)依赖：交易量任务。", expected: "创建成功并获得 taskId；可绑定到活动任务配置。" },
+  create_guess_task_from_scratch: { desc: "从零创建竞猜大赛(GUESS)依赖：竞猜任务。", expected: "创建成功并获得 taskId；可绑定到活动任务配置。" },
+  create_flip_card_task_from_scratch: { desc: "从零创建小丑牌活动(FLIP)依赖：翻牌/卡牌任务。", expected: "创建成功并获得 taskId；可绑定到活动任务配置。" },
+  create_flip_integral_task_from_scratch: { desc: "从零创建小丑牌活动(FLIP)依赖：积分/集卡任务。", expected: "创建成功并获得 taskId；可绑定到活动任务配置。" },
+  create_daily_dice_task_from_scratch: { desc: "从零创建大富翁世界杯(MONOPOLY_WORLD_CUP)依赖：每日骰子任务。", expected: "创建成功并获得 taskId；可绑定到活动任务配置。" },
+  create_customized_trading_volume_task_from_scratch: { desc: "从零创建定制化活动(CUSTOMIZED)依赖：交易量任务。", expected: "创建成功并获得 taskId；可绑定到活动任务配置。" },
+  create_agent_invite_task_from_scratch: { desc: "从零创建人人代理(AGENT)依赖：邀请任务。", expected: "创建成功并获得 taskId；可绑定到活动任务配置。" },
+  create_recharge_trans_trading_volume_task_from_scratch: { desc: "从零创建充值交易活动(RECHARGE_TRANS_TASK)依赖：交易量任务。", expected: "创建成功并获得 taskId；可绑定到活动任务配置。" },
+  create_contract_mining_trading_mining_task_from_scratch: { desc: "从零创建合约挖矿(CONTRACT_MINING)依赖：交易挖矿任务。", expected: "创建成功并获得 taskId；可绑定到活动任务配置。" },
+  create_contract_volume_task_from_scratch: { desc: "从零创建合约交易量任务（合约 volume）。", expected: "创建成功并获得 taskId；可绑定到活动任务配置。" },
+  create_spot_volume_task_from_scratch: { desc: "从零创建现货交易量任务（现货 volume）。", expected: "创建成功并获得 taskId；可绑定到活动任务配置。" },
+
   create_gift_cash_prize_from_scratch: { desc: "从零创建赠金类奖品（不 clone），作为活动依赖。", expected: "创建成功并获得奖品 ID；活动创建时可配置该奖品。" },
+  create_gift_cash_prize_1_from_scratch: { desc: "从零创建赠金类奖品（第 1 个奖品位）。", expected: "创建成功并获得 prizeId；后续可绑定到活动奖池/奖品配置。" },
+  create_gift_cash_prize_2_from_scratch: { desc: "从零创建赠金类奖品（第 2 个奖品位）。", expected: "创建成功并获得 prizeId；后续可绑定到活动奖池/奖品配置。" },
   create_position_airdrop_prize: { desc: "创建仓位空投奖品（position airdrop）。", expected: "创建成功并获得奖品/奖池配置；可被活动引用发放。" },
   create_resource_cards_from_scratch: { desc: "从零创建资源卡/道具卡类依赖。", expected: "创建成功并获得资源卡 ID；活动创建时可绑定/引用。" },
+  create_resource_cards: { desc: "创建资源卡/道具卡依赖（可能含多张）。", expected: "创建成功并获得资源卡 ID 列表；可用于活动配置绑定。" },
 
   pick_task_ids: { desc: "从任务列表中挑选/定位需要绑定到活动的任务 ID。", expected: "获得有效 taskId 列表，后续可用于活动任务配置。" },
   create_virtual_prizes: { desc: "创建虚拟奖品配置（用于展示/奖池占位）。", expected: "创建成功并可用于活动奖池/奖品配置。" },
+  create_flip_virtual_prizes: { desc: "创建小丑牌(FLIP)虚拟奖品配置（展示/占位）。", expected: "创建成功；活动奖池/奖品配置可引用并正确回显。" },
+  create_lottery_count_prize_from_scratch: { desc: "从零创建转盘抽奖(LOTTERY)依赖：抽奖次数奖品/补次数配置。", expected: "创建成功并获得奖品 ID；可用于活动配置抽奖次数奖励。" },
 
   draft_checks: { desc: "执行草稿态检查（draft-checks），校验活动配置完整性与必填项。", expected: "检查通过；fullConfigChecks 无阻塞项。" },
   online: { desc: "将活动上线（发布），用于验证上线状态与前端可用性。", expected: "上线成功；活动状态变为在线/进行中/待开始（取决于时间窗口）。" },
@@ -76,6 +111,10 @@ function stepMetaZh(stepName, overrides) {
     desc: (custom && custom.desc) || (base && base.desc) || `执行子步骤：${stepName}`,
     expected: (custom && custom.expected) || (base && base.expected) || "接口返回成功并通过回查验证。",
   };
+}
+
+export function resolveStepMetaZh(stepName, overrides) {
+  return stepMetaZh(stepName, overrides);
 }
 
 export function writeResultMarkdown({

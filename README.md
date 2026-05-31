@@ -9,6 +9,7 @@
 - 当前接力摘要：`docs/session-handoff.md`
 - 后管操作 skill：`skills/weex-admin-ops/SKILL.md`
 - 操作流程索引：`skills/weex-admin-ops/references/operations/index.md`
+- 用例库总览（统一口径）：`docs/test-cases/index.md`
 - 动作缓存说明：`skills/weex-admin-ops/references/action-cache.md`
 - 失败复盘入口：`skills/weex-admin-ops/FAILURES.md`
 - 暂存流程说明：`temp/README.md`
@@ -82,6 +83,12 @@ node skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs
 
 ```bash
 node -e "JSON.parse(require('fs').readFileSync('skills/weex-admin-ops/scripts/action-cache.json','utf8')); console.log('action-cache json ok')"
+```
+
+生成通用回归（从零配置）自动化用例库文档：
+
+```bash
+npm run generate:test-cases
 ```
 
 Git 空白检查：
