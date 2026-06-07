@@ -1,0 +1,99 @@
+{
+  "total": 141,
+  "pass": 11,
+  "fail": 2,
+  "rows": [
+    {
+      "script": "regression-agent-tracepro-universal-from-scratch",
+      "ok": false,
+      "exitCode": 1,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_202407/AGENT_TRACE_PRO_universal_from_scratch_failed.md",
+      "error": "resource cards create failed: Created resource card not found in list: 资源卡_从零_20260607182403_2"
+    },
+    {
+      "script": "regression-agent-universal-from-scratch",
+      "ok": false,
+      "exitCode": 1,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_202428/AGENT_universal_from_scratch_failed.md",
+      "error": "precondition failed: existing online AGENT activity 9978 (allming-6233470)"
+    },
+    {
+      "script": "regression-competition-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_202449/TRADING_COMPETITION_universal_from_scratch.md",
+      "error": ""
+    },
+    {
+      "script": "regression-contract-mining-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_202508/CONTRACT_MINING_universal_from_scratch.md",
+      "error": ""
+    },
+    {
+      "script": "regression-customized-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_202541/CUSTOMIZED_universal_from_scratch.md",
+      "error": ""
+    },
+    {
+      "script": "regression-flip-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_202606/FLIP_universal_from_scratch.md",
+      "error": ""
+    },
+    {
+      "script": "regression-guess-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_202628/GUESS_universal_from_scratch.md",
+      "error": ""
+    },
+    {
+      "script": "regression-lottery-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_202656/LOTTERY_universal_from_scratch.md",
+      "error": ""
+    },
+    {
+      "script": "regression-monopoly-worldcup-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_202715/MONOPOLY_WORLD_CUP_universal_from_scratch.md",
+      "error": ""
+    },
+    {
+      "script": "regression-newbie-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_202755/BEGINNER_TASK_universal_from_scratch.md",
+      "error": ""
+    },
+    {
+      "script": "regression-race-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_202813/RACE_COMPETITION_universal_from_scratch.md",
+      "error": ""
+    },
+    {
+      "script": "regression-recharge-trans-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_202829/RECHARGE_TRANS_TASK_universal_from_scratch.md",
+      "error": ""
+    },
+    {
+      "script": "regression-tracepro-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_202855/TRACE_PRO_universal_from_scratch.md",
+      "error": ""
+    }
+  ],
+  "scriptCount": 13
+}

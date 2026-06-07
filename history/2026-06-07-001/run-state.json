@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "runId": "2026-06-07-001",
+  "title": "活动后管全量回归",
+  "requirement": "全量回归活动后管",
+  "tags": [],
+  "historyDir": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001",
+  "createdAt": "2026-06-07T18:09:34.760Z",
+  "updatedAt": "2026-06-07T18:32:54.348Z",
+  "overallStatus": "FAIL",
+  "currentStageId": "execution_run",
+  "nextStageId": "",
+  "stages": {
+    "linkage_analysis": {
+      "stageId": "linkage_analysis",
+      "stageName": "链路分析",
+      "status": "PASS",
+      "decision": "PARTIAL_COVERAGE_REUSE_WITH_GAP_FIXES",
+      "reportMarkdown": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/01-链路分析报告.md",
+      "reportJson": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/01-链路分析报告.json",
+      "recordedAt": "2026-06-07T18:12:11Z"
+    },
+    "coverage_review": {
+      "stageId": "coverage_review",
+      "stageName": "覆盖审阅",
+      "status": "PASS",
+      "decision": "APPROVE_PARTIAL_COVERAGE_FOR_SCRIPT_INTEGRATION",
+      "reportMarkdown": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/02-覆盖审阅报告.md",
+      "reportJson": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/02-覆盖审阅报告.json",
+      "recordedAt": "2026-06-07T18:14:07Z"
+    },
+    "rework_advice": {
+      "stageId": "rework_advice",
+      "stageName": "返工建议",
+      "status": "SKIPPED",
+      "decision": "未进入该阶段",
+      "reportMarkdown": "",
+      "reportJson": "",
+      "recordedAt": "2026-06-07T18:32:54.348Z"
+    },
+    "script_integration": {
+      "stageId": "script_integration",
+      "stageName": "脚本整合",
+      "status": "PASS",
+      "decision": "REUSE_READY_WITH_PREEXEC_FIX_GATES",
+      "reportMarkdown": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/04-脚本整合报告.md",
+      "reportJson": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/04-脚本整合报告.json",
+      "recordedAt": "2026-06-07T18:30:00Z"
+    },
+    "validation_review": {
+      "stageId": "validation_review",
+      "stageName": "校验审阅",
+      "status": "PASS",
+      "decision": "APPROVE_READY_FOR_EXECUTION_RUN",
+      "reportMarkdown": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/05-校验审阅报告.md",
+      "reportJson": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/05-校验审阅报告.json",
+      "recordedAt": "2026-06-07T18:21:41Z"
+    },
+    "execution_run": {
+      "stageId": "execution_run",
+      "stageName": "执行落地",
+      "status": "FAIL",
+      "decision": "EXECUTED_ONCE_WITH_REPORTED_FAILURES",
+      "reportMarkdown": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/06-执行报告.md",
+      "reportJson": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/06-执行报告.json",
+      "recordedAt": "2026-06-07T18:32:01Z"
+    }
+  }
+}

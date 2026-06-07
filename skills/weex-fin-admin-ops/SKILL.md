@@ -87,7 +87,8 @@ When a FIN API chain (headed browser or headless/CDP/API-assisted) is proven run
 
 - The runnable script should output standardized result markdown via `tools/lib/result-md.mjs` `writeResultMarkdown({ testCase, steps })`.
 - `testCase.number/description/preconditions/tags` must be stable and safe (no secrets).
-- Each `steps.push({ name })` counts as 1 sub-testcase by the default library counting rule; add friendly `desc/expected` into `tools/lib/result-md.mjs` `DEFAULT_STEP_META_ZH` when new step names are introduced.
+- Each `steps.push({ name })` counts as 1 sub-testcase by the default library counting rule; sub-testcase output must include a brief Chinese description (`子用例描述`), not only raw English step names.
+- Add friendly `desc/expected` into `tools/lib/result-md.mjs` `DEFAULT_STEP_META_ZH` when new step names are introduced; do not keep long-term fallback text like `执行子步骤：<step>`.
 - After the flow is proven, run `npm run generate:test-cases` to sync `docs/test-cases/index.md` and the suite libraries.
 
 ## Failure Reviews

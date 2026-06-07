@@ -1,0 +1,187 @@
+{
+  "ok": false,
+  "stamp": "20260607_194419",
+  "env": {
+    "target": "staging"
+  },
+  "totals": {
+    "total": 285,
+    "pass": 141,
+    "fail": 6,
+    "skipped": 10
+  },
+  "suites": {
+    "lottery_doc_140": {
+      "total": 140,
+      "pass": 129,
+      "fail": 5,
+      "skipped": 6,
+      "failedCases": [
+        {
+          "caseId": "FE-56",
+          "caseName": "奖品弹窗与奖励记录结果一致"
+        },
+        {
+          "caseId": "FE-68",
+          "caseName": "H5页面展示正常"
+        },
+        {
+          "caseId": "FE-69",
+          "caseName": "常见移动端宽度下布局正常"
+        },
+        {
+          "caseId": "FE-73",
+          "caseName": "后管活动标题改动后前端展示正确"
+        },
+        {
+          "caseId": "FE-75",
+          "caseName": "后管多语言配置后前端切语言展示正确"
+        }
+      ],
+      "skippedCases": [
+        {
+          "caseId": "FE-04",
+          "caseName": "活动副标题展示正确",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-18",
+          "caseName": "活动未开始态展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-20",
+          "caseName": "活动已结束态展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-30",
+          "caseName": "我的奖品入口可点击",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-31",
+          "caseName": "弹窗关闭交互正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-80",
+          "caseName": "活动未开始时显示即将开始",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        }
+      ],
+      "reportRoot": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/orchestrations/lottery-regression/artifacts/reports/20260607_194419"
+    },
+    "universal_regression_141": {
+      "total": 141,
+      "pass": 12,
+      "fail": 1,
+      "rows": [
+        {
+          "script": "regression-agent-tracepro-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_201127/AGENT_TRACE_PRO_universal_from_scratch.md",
+          "error": ""
+        },
+        {
+          "script": "regression-agent-universal-from-scratch",
+          "ok": false,
+          "exitCode": 1,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_201146/AGENT_universal_from_scratch_failed.md",
+          "error": "online failed: {\"code\":500,\"msg\":\"已有上线状态的人人代理活动\"}"
+        },
+        {
+          "script": "regression-competition-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_201206/TRADING_COMPETITION_universal_from_scratch.md",
+          "error": ""
+        },
+        {
+          "script": "regression-contract-mining-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_201225/CONTRACT_MINING_universal_from_scratch.md",
+          "error": ""
+        },
+        {
+          "script": "regression-customized-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_201258/CUSTOMIZED_universal_from_scratch.md",
+          "error": ""
+        },
+        {
+          "script": "regression-flip-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_201323/FLIP_universal_from_scratch.md",
+          "error": ""
+        },
+        {
+          "script": "regression-guess-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_201345/GUESS_universal_from_scratch.md",
+          "error": ""
+        },
+        {
+          "script": "regression-lottery-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_201412/LOTTERY_universal_from_scratch.md",
+          "error": ""
+        },
+        {
+          "script": "regression-monopoly-worldcup-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_201432/MONOPOLY_WORLD_CUP_universal_from_scratch.md",
+          "error": ""
+        },
+        {
+          "script": "regression-newbie-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_201513/BEGINNER_TASK_universal_from_scratch.md",
+          "error": ""
+        },
+        {
+          "script": "regression-race-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_201531/RACE_COMPETITION_universal_from_scratch.md",
+          "error": ""
+        },
+        {
+          "script": "regression-recharge-trans-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_201548/RECHARGE_TRANS_TASK_universal_from_scratch.md",
+          "error": ""
+        },
+        {
+          "script": "regression-tracepro-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_201614/TRACE_PRO_universal_from_scratch.md",
+          "error": ""
+        }
+      ]
+    },
+    "orchestration_4": {
+      "total": 4,
+      "pass": 0,
+      "fail": 0,
+      "skipped": 4,
+      "details": [
+        {
+          "caseId": "ALL",
+          "status": "SKIPPED",
+          "note": "默认关闭：避免状态污染与额外耗时；如需执行请加 --include-orchestration"
+        }
+      ]
+    }
+  }
+}

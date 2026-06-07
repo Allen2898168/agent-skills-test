@@ -1,0 +1,116 @@
+{
+  "ok": true,
+  "caseId": "BEGINNER_TASK_universal_from_scratch",
+  "created": {
+    "registerTemplateId": "3587",
+    "multilanguageTemplateId": "116",
+    "resourceCardIds": [
+      "227",
+      "228",
+      "229"
+    ],
+    "taskPackageId": "116",
+    "routineTaskPackageId": "117",
+    "activityIds": [
+      "10063"
+    ],
+    "activityId": "10063",
+    "activityAlias": "nbreg53847759",
+    "activityTitle": "新手通用回归847759"
+  },
+  "links": [
+    {
+      "label": "后台新手活动列表",
+      "url": "https://stg-activity.weex.tech/activities/newbie"
+    }
+  ],
+  "durationMs": 36205,
+  "cleanup": {
+    "activity": {
+      "ok": true,
+      "deletes": [
+        {
+          "ok": true,
+          "status": 200,
+          "body": {
+            "code": 200,
+            "msg": "操作成功"
+          }
+        }
+      ]
+    },
+    "unbindActivities": [
+      {
+        "id": "10063",
+        "ok": true,
+        "status": 200,
+        "body": {
+          "code": 200,
+          "msg": "操作成功"
+        }
+      }
+    ],
+    "taskPackage": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "routineTaskPackage": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "resourceCards": [
+      {
+        "id": "227",
+        "ok": true,
+        "status": 200,
+        "body": {
+          "code": 200,
+          "msg": "操作成功"
+        }
+      },
+      {
+        "id": "228",
+        "ok": true,
+        "status": 200,
+        "body": {
+          "code": 200,
+          "msg": "操作成功"
+        }
+      },
+      {
+        "id": "229",
+        "ok": true,
+        "status": 200,
+        "body": {
+          "code": 200,
+          "msg": "操作成功"
+        }
+      }
+    ],
+    "multilanguageTemplate": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "registerTemplate": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    }
+  },
+  "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_193741/BEGINNER_TASK_universal_from_scratch.md"
+}

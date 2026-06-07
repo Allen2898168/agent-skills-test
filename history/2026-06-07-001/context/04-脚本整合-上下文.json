@@ -1,0 +1,81 @@
+{
+  "runId": "2026-06-07-001",
+  "title": "活动后管全量回归",
+  "requirement": "全量回归活动后管",
+  "tags": [],
+  "historyDir": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001",
+  "overallStatus": "IN_PROGRESS",
+  "currentStageId": "coverage_review",
+  "nextStageId": "script_integration",
+  "nextStageName": "脚本整合",
+  "terminal": false,
+  "finalizeReady": false,
+  "stagePromptPath": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/orchestrations/automation-review-pipeline/prompts/04-脚本整合.md",
+  "stagePromptText": "# 脚本整合 Subagent 模板\n\n你当前负责 **脚本整合** 阶段。\n\n## 目标\n\n- 将已通过的覆盖结论落成具体脚本整合方案\n- 明确应该复用哪些入口、补哪些脚本、产出哪些证据\n- 不做模糊描述，直接给可执行整合计划\n- 如果当前没有完整现成覆盖，也要给出新增用例设计/脚本补齐方案，而不是停在“暂无支持”\n\n## 输入\n\n- `00-任务说明.md`\n- `01-链路分析报告.*`\n- `02-覆盖审阅报告.*`\n- 当前 `run-state.json`\n\n## 输出要求\n\n必须产出两份内容：\n\n1. 中文 Markdown 报告\n2. 符合 `stage-report.schema.json` 的 JSON 报告\n\n固定字段：\n\n- `stageId=script_integration`\n- `stageName=脚本整合`\n- `agentRole=脚本整合 subagent`\n\n阶段特有字段：\n\n- `integrationDecision`\n- `scriptPlan`\n- `artifactPlan`\n\n通过规则：\n\n- `integrationDecision=READY`\n- `status=PASS`\n\nMarkdown 必须包含：\n\n- 复用入口\n- 需新增/修改的脚本整合点\n- 若 `existingCoverage=NONE/PARTIAL`，明确新增用例设计、脚本补齐范围和落地顺序\n- 执行产物计划\n- 下一步\n",
+  "schemaPath": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/orchestrations/automation-review-pipeline/schemas/stage-report.schema.json",
+  "schemaRef": "stage-report.schema.json",
+  "contextFiles": [
+    "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/00-任务说明.md",
+    "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/run-state.json",
+    "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/run-index.json",
+    "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/01-链路分析报告.md",
+    "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/01-链路分析报告.json",
+    "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/02-覆盖审阅报告.md",
+    "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/02-覆盖审阅报告.json"
+  ],
+  "outputTargets": {
+    "markdown": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/04-脚本整合报告.md",
+    "json": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/04-脚本整合报告.json"
+  },
+  "reportSkeleton": {
+    "runId": "2026-06-07-001",
+    "stageId": "script_integration",
+    "stageName": "脚本整合",
+    "agentRole": "脚本整合 subagent",
+    "status": "",
+    "decision": "",
+    "summary": "",
+    "inputs": [],
+    "findings": [],
+    "evidence": [],
+    "risks": [],
+    "nextAction": "",
+    "relatedCommands": [],
+    "relatedFiles": [],
+    "timestamp": ""
+  },
+  "stageSpecificHints": [
+    "必须给出 integrationDecision: READY | NOT_READY",
+    "必须给出 scriptPlan / artifactPlan",
+    "若覆盖审阅已通过但 existingCoverage=NONE，则 scriptPlan 必须包含新增用例设计、脚本补齐和执行入口。",
+    "若覆盖审阅已通过但 existingCoverage=PARTIAL，则 scriptPlan 必须拆出复用部分与待补缺口，不能只写复用现有脚本。",
+    "当前链路分析已判定 existingCoverage=PARTIAL：本次需求允许在复用已有覆盖的基础上补齐缺口，不应被误判为“已覆盖完成”。"
+  ],
+  "parentInstructions": [
+    "读取本次阶段 prompt 和 contextFiles。",
+    "调用对应 subagent 完成当前阶段。",
+    "要求 subagent 输出中文 Markdown 报告和 machine-readable JSON。",
+    "JSON 必须符合 stage-report.schema.json，并写入 outputTargets 指向的文件。",
+    "完成后调用 record-stage.mjs 记录当前阶段。",
+    "若 nextStageId 为空且 overallStatus 非 IN_PROGRESS，则调用 finalize-run.mjs。",
+    "当前需求虽缺少完整现成覆盖，但已被批准纳入自动化；不得因无现成脚本直接终止，必须先补覆盖设计再整合。"
+  ],
+  "recordedStages": [
+    {
+      "stageId": "linkage_analysis",
+      "stageName": "链路分析",
+      "status": "PASS",
+      "recordedAt": "2026-06-07T18:12:11Z"
+    },
+    {
+      "stageId": "coverage_review",
+      "stageName": "覆盖审阅",
+      "status": "PASS",
+      "recordedAt": "2026-06-07T18:14:07Z"
+    }
+  ],
+  "pipelineSignals": {
+    "existingCoverage": "PARTIAL",
+    "coverageDecision": "APPROVE"
+  }
+}

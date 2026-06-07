@@ -8,10 +8,16 @@
     "first-run": "node tools/first-run-check.mjs",
     "configure:env": "node tools/configure-skill-env.mjs",
     "generate:test-cases": "node tools/generate-automation-test-cases.mjs && node tools/generate-test-cases-index.mjs",
+    "generate:test-cases:all": "node tools/generate-all-test-cases-list.mjs",
+    "prepare:automation-review-run": "node orchestrations/automation-review-pipeline/scripts/prepare-run.mjs",
+    "build:automation-review-context": "node orchestrations/automation-review-pipeline/scripts/build-stage-context.mjs",
+    "record:automation-review-stage": "node orchestrations/automation-review-pipeline/scripts/record-stage.mjs",
+    "finalize:automation-review-run": "node orchestrations/automation-review-pipeline/scripts/finalize-run.mjs",
     "check:frontend": "node skills/weex-frontend-ops/scripts/maintenance/validate-knowledge-structure.mjs",
     "check:fin": "node skills/weex-fin-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs",
     "check:admin": "node skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs",
-    "check:orchestration": "node --test skills/weex-admin-ops/scripts/__tests__/lottery-regression-dispatcher.test.mjs skills/weex-admin-ops/scripts/__tests__/lottery-frontend-main-regression.test.mjs"
+    "check:orchestration": "node --test skills/weex-admin-ops/scripts/__tests__/lottery-regression-dispatcher.test.mjs skills/weex-admin-ops/scripts/__tests__/lottery-frontend-main-regression.test.mjs",
+    "check:automation-review-pipeline": "node --test orchestrations/automation-review-pipeline/__tests__/automation-review-pipeline.test.mjs"
   },
   "dependencies": {
     "playwright": "^1.59.1",

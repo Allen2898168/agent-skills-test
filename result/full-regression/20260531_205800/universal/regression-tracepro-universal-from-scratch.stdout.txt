@@ -1,0 +1,93 @@
+{
+  "ok": true,
+  "caseId": "TRACE_PRO_universal_from_scratch",
+  "created": {
+    "registerTemplateId": "3496",
+    "prizeId": "1318",
+    "taskId": "6451",
+    "resourceCardIds": [
+      "192",
+      "193",
+      "194"
+    ],
+    "activityId": "9889",
+    "activityAlias": "tpr55641045",
+    "activityTitle": "小活动通用回归192721"
+  },
+  "links": [
+    {
+      "label": "后台小活动列表",
+      "url": "https://stg-activity.weex.tech/activities/tracePro"
+    }
+  ],
+  "durationMs": 22013,
+  "cleanup": {
+    "unbind": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteActivity": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteTask": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deletePrize": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteRegisterTemplate": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteResourceCards": [
+      {
+        "ok": true,
+        "status": 200,
+        "body": {
+          "code": 200,
+          "msg": "操作成功"
+        }
+      },
+      {
+        "ok": true,
+        "status": 200,
+        "body": {
+          "code": 200,
+          "msg": "操作成功"
+        }
+      },
+      {
+        "ok": true,
+        "status": 200,
+        "body": {
+          "code": 200,
+          "msg": "操作成功"
+        }
+      }
+    ]
+  },
+  "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260531_212729/TRACE_PRO_universal_from_scratch.md"
+}

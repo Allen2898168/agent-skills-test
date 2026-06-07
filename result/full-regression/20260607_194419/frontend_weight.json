@@ -1,0 +1,1357 @@
+{
+  "ok": true,
+  "actionId": "lottery_frontend_main_regression",
+  "mode": "headless_ui",
+  "requestedCaseIds": [
+    "FE-64",
+    "FE-65",
+    "FE-66",
+    "FE-67"
+  ],
+  "selectedCaseIds": [
+    "FE-64",
+    "FE-65",
+    "FE-66",
+    "FE-67"
+  ],
+  "executionSelection": {
+    "requestedCaseIds": [
+      "FE-64",
+      "FE-65",
+      "FE-66",
+      "FE-67"
+    ],
+    "expandedCaseIds": [
+      "FE-64",
+      "FE-65",
+      "FE-66",
+      "FE-67"
+    ],
+    "selectedEntries": [
+      {
+        "caseId": "FE-64",
+        "caseName": "二次权重专项校验-N+1生效",
+        "module": "二次权重与专项校验",
+        "priority": "P0",
+        "packId": "frontend_weight_special",
+        "scenarioKey": "WEIGHT_ACTIVITY_DRAW_GE3"
+      },
+      {
+        "caseId": "FE-65",
+        "caseName": "未配置二次权重场景不做专项校验",
+        "module": "二次权重与专项校验",
+        "priority": "P1",
+        "packId": "frontend_weight_special",
+        "scenarioKey": "NORMAL_ACTIVITY_DRAW_GE1"
+      },
+      {
+        "caseId": "FE-66",
+        "caseName": "需要验证二次权重时使用专项活动",
+        "module": "二次权重与专项校验",
+        "priority": "P1",
+        "packId": "frontend_weight_special",
+        "scenarioKey": "WEIGHT_ACTIVITY_ONLINE"
+      },
+      {
+        "caseId": "FE-67",
+        "caseName": "二次权重命中后奖励记录正确",
+        "module": "二次权重与专项校验",
+        "priority": "P1",
+        "packId": "frontend_weight_special",
+        "scenarioKey": "WEIGHT_ACTIVITY_DRAW_GE3"
+      }
+    ],
+    "forceFreshActivity": false,
+    "effectiveActivityAlias": "w54265462",
+    "ignoredActivityAlias": ""
+  },
+  "createdActivity": {
+    "activityId": "",
+    "activityAlias": "w54265462",
+    "adminSnapshotPath": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/orchestrations/lottery-regression/artifacts/tmp/admin-snapshot-w54265462.json",
+    "prestartActivityId": "",
+    "prestartActivityAlias": "",
+    "drawPayloadPath": ""
+  },
+  "timings": {
+    "totalDurationMs": 314519,
+    "phases": [
+      {
+        "id": "admin_activity_snapshot",
+        "ok": true,
+        "durationMs": 2710,
+        "childCount": 1,
+        "childDurationsMs": [
+          2706
+        ]
+      },
+      {
+        "id": "frontend_readonly_checks",
+        "ok": true,
+        "durationMs": 151797,
+        "childCount": 1,
+        "childDurationsMs": [
+          151794
+        ]
+      },
+      {
+        "id": "frontend_recharge_prepare",
+        "ok": true,
+        "durationMs": 68129,
+        "childCount": 1,
+        "childDurationsMs": [
+          68128
+        ]
+      },
+      {
+        "id": "frontend_weight_special",
+        "ok": true,
+        "durationMs": 91878,
+        "childCount": 1,
+        "childDurationsMs": [
+          91876
+        ]
+      }
+    ]
+  },
+  "phaseResults": [
+    {
+      "phaseId": "admin_activity_snapshot",
+      "description": "Fetch admin snapshot for frontend consistency assertions.",
+      "caseIds": [],
+      "cases": [],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs",
+          "--action",
+          "snapshot",
+          "--activity-alias",
+          "w54265462"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "mode": "headless_api",
+        "finalUrl": "/activities/lottery",
+        "target": {
+          "activityId": "10069",
+          "activityAlias": "w54265462"
+        },
+        "activityId": "10069",
+        "alias": "w54265462",
+        "snapshot": {
+          "title": "9107自动化测试抽奖活动",
+          "subtitle": "多语任务奖品",
+          "rules": "",
+          "raffleStyle": "CIRCLE",
+          "prizeCount": 8
+        },
+        "snapshotMeta": {
+          "i18nLangUsed": "zh_CN",
+          "i18nAvailableLangs": [
+            "en_US",
+            "zh_CN"
+          ]
+        },
+        "durationMs": 2606,
+        "adminSnapshotPath": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/orchestrations/lottery-regression/artifacts/tmp/admin-snapshot-w54265462.json"
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs",
+            "--action",
+            "snapshot",
+            "--activity-alias",
+            "w54265462"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "mode": "headless_api",
+            "finalUrl": "/activities/lottery",
+            "target": {
+              "activityId": "10069",
+              "activityAlias": "w54265462"
+            },
+            "activityId": "10069",
+            "alias": "w54265462",
+            "snapshot": {
+              "title": "9107自动化测试抽奖活动",
+              "subtitle": "多语任务奖品",
+              "rules": "",
+              "raffleStyle": "CIRCLE",
+              "prizeCount": 8
+            },
+            "snapshotMeta": {
+              "i18nLangUsed": "zh_CN",
+              "i18nAvailableLangs": [
+                "en_US",
+                "zh_CN"
+              ]
+            },
+            "durationMs": 2606,
+            "adminSnapshotPath": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/orchestrations/lottery-regression/artifacts/tmp/admin-snapshot-w54265462.json"
+          },
+          "attempt": 1,
+          "exitCode": 0,
+          "durationMs": 2706
+        }
+      ],
+      "durationMs": 2710
+    },
+    {
+      "phaseId": "frontend_readonly_checks",
+      "description": "Open the draw page and verify readonly logged-in frontend signals.",
+      "caseIds": [],
+      "cases": [],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+          "--phase",
+          "readonly",
+          "--activity-alias",
+          "w54265462",
+          "--admin-snapshot-path",
+          "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/orchestrations/lottery-regression/artifacts/tmp/admin-snapshot-w54265462.json",
+          "--wait-for-start-ms",
+          "60000"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "phase": "readonly",
+        "assertCaseIds": [],
+        "account": {
+          "alias": "DEFAULT",
+          "username": "8186595891@weex.com",
+          "uid": "8186595891"
+        },
+        "page": {
+          "activityAlias": "w54265462",
+          "url": "https://stg-www.weex.tech/zh-CN/events/draw/w54265462",
+          "urlMatchesAlias": true,
+          "opened": true,
+          "loginFormVisible": false,
+          "myPrizeVisible": true,
+          "mainButtonState": "立即报名",
+          "drawButtonVariant": "",
+          "drawCount": null,
+          "guestVisible": false,
+          "activityTitle": "9107自动化测试抽奖活动",
+          "activityTitleVisible": true,
+          "activitySubtitle": "100 USDT 合约赠金",
+          "activitySubtitleVisible": true,
+          "rulesText": "",
+          "rulesVisible": false,
+          "prizeCount": 8,
+          "prizeAreaVisible": false,
+          "mainVisualVisible": true,
+          "horizontalOverflow": false,
+          "countdownText": "距离结束：29天:23时:38分:9秒",
+          "countdownVisible": true,
+          "countdownTicking": true,
+          "pageErrorVisible": false,
+          "buttons": [
+            "合约交易",
+            "打开",
+            "充币",
+            "立即报名",
+            "去充值",
+            "去交易",
+            "去交易"
+          ],
+          "bodySnippet": "买币\n市场\n合约交易\n现货交易\n理财\n产品验收0210222\n更多\n充币\n活动日历\n我的奖品\n分享\n9107自动化测试抽奖活动\n06/07 19:44:28 - 07/07 19:44:28 (UTC+2)\n\n100 USDT 合约赠金\n\n0.01 自动化测试BTC001\n\n0.1 自动化测试ETH01\n\n跑车\n\n100 USDT 合约赠金\n\n0.01 自动化测试BTC001\n\n0.1 自动化测试ETH01\n\n跑车\n\n立即报名\n距离结束：\n29\n天\n:\n23\n时\n:\n38\n分\n:\n9\n秒\n净充值\n充值任务\n去充值\n首次\n\n0\n净充值 ≥100 USDT\n×\n10\n现货交易\n现货交易量\n去交易\n累计\n\n0\n现货交易量 ≥100 USDT\n×\n10\n合约交易\n合约交易量\n去交易\n累计\n\n0\n合约交易量 ≥100 USDT\n×\n10\n关于\n关于我们\n品牌信息\n官方博客\n就业机会\n媒体报道\n加入 WEEX 社群\nWXT专区\nWEEX × LALIGA\n帮助\n帮助中心\n费率标准\n交易规则\n常见问题\n官方验证渠道\n合规性\n法律声明\n风险提示\n条款与协议\n隐私说明\n廉正举报\n反洗钱政策\n执法请求指南\n联系我们\n联系客服Bot\nVIP服务\n产品\n合约交易\n现货交易\n一键跟单\n市场\nWEEX商城\n服务\n储备金证明\n邀请好友\nOTC\n下载\n合伙人\nVIP服务\nAPI\n经纪商\n上币申请\n网站地图\n资源\n教程中心\n学习\nQ&A\n现货交易\n合约交易\n名词解释\n加密货币价格\n货币预测\nWXT 价格\nBTC 价格\nETH 价格\nDOGE 价格\n如何购买加密货币\n如何购买 WXT\n如何购买 BTC\n如何购买 ETH\n如何购买 DOGE\n\n财富自由之路\n\n扫码下载\n\n更多下载方式"
+        },
+        "adminSnapshotPath": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/orchestrations/lottery-regression/artifacts/tmp/admin-snapshot-w54265462.json",
+        "expected": {
+          "title": "9107自动化测试抽奖活动",
+          "subtitle": "多语任务奖品",
+          "rules": "",
+          "raffleStyle": "CIRCLE",
+          "prizeCount": 8
+        },
+        "consistency": {
+          "titleMatched": true,
+          "subtitleMatched": false,
+          "rulesMatched": true,
+          "prizeCountMatched": true,
+          "expectedPrizeCount": 8,
+          "detectedPrizeCount": 8,
+          "basicModulesVisible": true
+        },
+        "assertionOk": true,
+        "linkageReadonly": {
+          "languageSwitch": null,
+          "faq": null,
+          "calendarTab": null
+        },
+        "readonlyCasePass": {
+          "FE-79": true,
+          "FE-01": true,
+          "FE-02": true,
+          "FE-03": true,
+          "FE-04": false,
+          "FE-05": true,
+          "FE-06": true,
+          "FE-07": true,
+          "FE-08": true,
+          "FE-75": true,
+          "FE-76": true,
+          "FE-77": true,
+          "FE-78": true,
+          "FE-17": true,
+          "FE-19": true
+        },
+        "screenshotPath": null,
+        "failedResponses": [
+          {
+            "status": 429,
+            "url": "https://weexsupporten.zendesk.com/sc/sdk/v2/apps/61970b570d7c4300e9cd698d/login"
+          }
+        ]
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+            "--phase",
+            "readonly",
+            "--activity-alias",
+            "w54265462",
+            "--admin-snapshot-path",
+            "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/orchestrations/lottery-regression/artifacts/tmp/admin-snapshot-w54265462.json",
+            "--wait-for-start-ms",
+            "60000"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "phase": "readonly",
+            "assertCaseIds": [],
+            "account": {
+              "alias": "DEFAULT",
+              "username": "8186595891@weex.com",
+              "uid": "8186595891"
+            },
+            "page": {
+              "activityAlias": "w54265462",
+              "url": "https://stg-www.weex.tech/zh-CN/events/draw/w54265462",
+              "urlMatchesAlias": true,
+              "opened": true,
+              "loginFormVisible": false,
+              "myPrizeVisible": true,
+              "mainButtonState": "立即报名",
+              "drawButtonVariant": "",
+              "drawCount": null,
+              "guestVisible": false,
+              "activityTitle": "9107自动化测试抽奖活动",
+              "activityTitleVisible": true,
+              "activitySubtitle": "100 USDT 合约赠金",
+              "activitySubtitleVisible": true,
+              "rulesText": "",
+              "rulesVisible": false,
+              "prizeCount": 8,
+              "prizeAreaVisible": false,
+              "mainVisualVisible": true,
+              "horizontalOverflow": false,
+              "countdownText": "距离结束：29天:23时:38分:9秒",
+              "countdownVisible": true,
+              "countdownTicking": true,
+              "pageErrorVisible": false,
+              "buttons": [
+                "合约交易",
+                "打开",
+                "充币",
+                "立即报名",
+                "去充值",
+                "去交易",
+                "去交易"
+              ],
+              "bodySnippet": "买币\n市场\n合约交易\n现货交易\n理财\n产品验收0210222\n更多\n充币\n活动日历\n我的奖品\n分享\n9107自动化测试抽奖活动\n06/07 19:44:28 - 07/07 19:44:28 (UTC+2)\n\n100 USDT 合约赠金\n\n0.01 自动化测试BTC001\n\n0.1 自动化测试ETH01\n\n跑车\n\n100 USDT 合约赠金\n\n0.01 自动化测试BTC001\n\n0.1 自动化测试ETH01\n\n跑车\n\n立即报名\n距离结束：\n29\n天\n:\n23\n时\n:\n38\n分\n:\n9\n秒\n净充值\n充值任务\n去充值\n首次\n\n0\n净充值 ≥100 USDT\n×\n10\n现货交易\n现货交易量\n去交易\n累计\n\n0\n现货交易量 ≥100 USDT\n×\n10\n合约交易\n合约交易量\n去交易\n累计\n\n0\n合约交易量 ≥100 USDT\n×\n10\n关于\n关于我们\n品牌信息\n官方博客\n就业机会\n媒体报道\n加入 WEEX 社群\nWXT专区\nWEEX × LALIGA\n帮助\n帮助中心\n费率标准\n交易规则\n常见问题\n官方验证渠道\n合规性\n法律声明\n风险提示\n条款与协议\n隐私说明\n廉正举报\n反洗钱政策\n执法请求指南\n联系我们\n联系客服Bot\nVIP服务\n产品\n合约交易\n现货交易\n一键跟单\n市场\nWEEX商城\n服务\n储备金证明\n邀请好友\nOTC\n下载\n合伙人\nVIP服务\nAPI\n经纪商\n上币申请\n网站地图\n资源\n教程中心\n学习\nQ&A\n现货交易\n合约交易\n名词解释\n加密货币价格\n货币预测\nWXT 价格\nBTC 价格\nETH 价格\nDOGE 价格\n如何购买加密货币\n如何购买 WXT\n如何购买 BTC\n如何购买 ETH\n如何购买 DOGE\n\n财富自由之路\n\n扫码下载\n\n更多下载方式"
+            },
+            "adminSnapshotPath": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/orchestrations/lottery-regression/artifacts/tmp/admin-snapshot-w54265462.json",
+            "expected": {
+              "title": "9107自动化测试抽奖活动",
+              "subtitle": "多语任务奖品",
+              "rules": "",
+              "raffleStyle": "CIRCLE",
+              "prizeCount": 8
+            },
+            "consistency": {
+              "titleMatched": true,
+              "subtitleMatched": false,
+              "rulesMatched": true,
+              "prizeCountMatched": true,
+              "expectedPrizeCount": 8,
+              "detectedPrizeCount": 8,
+              "basicModulesVisible": true
+            },
+            "assertionOk": true,
+            "linkageReadonly": {
+              "languageSwitch": null,
+              "faq": null,
+              "calendarTab": null
+            },
+            "readonlyCasePass": {
+              "FE-79": true,
+              "FE-01": true,
+              "FE-02": true,
+              "FE-03": true,
+              "FE-04": false,
+              "FE-05": true,
+              "FE-06": true,
+              "FE-07": true,
+              "FE-08": true,
+              "FE-75": true,
+              "FE-76": true,
+              "FE-77": true,
+              "FE-78": true,
+              "FE-17": true,
+              "FE-19": true
+            },
+            "screenshotPath": null,
+            "failedResponses": [
+              {
+                "status": 429,
+                "url": "https://weexsupporten.zendesk.com/sc/sdk/v2/apps/61970b570d7c4300e9cd698d/login"
+              }
+            ]
+          },
+          "attempt": 1,
+          "exitCode": 0,
+          "durationMs": 151794
+        }
+      ],
+      "durationMs": 151797
+    },
+    {
+      "phaseId": "frontend_recharge_prepare",
+      "description": "Prepare draw count through recharge task linkage.",
+      "caseIds": [],
+      "cases": [],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+          "--phase",
+          "recharge",
+          "--activity-alias",
+          "w54265462",
+          "--recharge-amount",
+          "1000",
+          "--wait-for-start-ms",
+          "60000"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "phase": "recharge",
+        "account": {
+          "alias": "DEFAULT",
+          "username": "8186595891@weex.com",
+          "uid": "8186595891"
+        },
+        "page": {
+          "activityAlias": "w54265462",
+          "url": "https://stg-www.weex.tech/zh-CN/events/draw/w54265462",
+          "urlMatchesAlias": true,
+          "opened": true,
+          "loginFormVisible": false,
+          "myPrizeVisible": true,
+          "mainButtonState": "立即报名",
+          "drawButtonVariant": "",
+          "drawCount": null,
+          "guestVisible": false,
+          "activityTitle": "9107自动化测试抽奖活动",
+          "activityTitleVisible": true,
+          "activitySubtitle": "",
+          "activitySubtitleVisible": false,
+          "rulesText": "",
+          "rulesVisible": false,
+          "prizeCount": null,
+          "prizeAreaVisible": false,
+          "mainVisualVisible": false,
+          "horizontalOverflow": false,
+          "countdownText": "距离结束：29天:23时:35分:40秒",
+          "countdownVisible": true,
+          "countdownTicking": true,
+          "pageErrorVisible": false,
+          "buttons": [
+            "合约交易",
+            "打开",
+            "充币",
+            "立即报名",
+            "去充值",
+            "去交易",
+            "去交易"
+          ],
+          "bodySnippet": "买币\n市场\n合约交易\n现货交易\n理财\n产品验收0210222\n更多\n充币\n活动日历\n我的奖品\n分享\n9107自动化测试抽奖活动\n06/07 19:44:28 - 07/07 19:44:28 (UTC+2)\n\n100 USDT 合约赠金\n\n0.01 自动化测试BTC001\n\n0.1 自动化测试ETH01\n\n跑车\n\n100 USDT 合约赠金\n\n0.01 自动化测试BTC001\n\n0.1 自动化测试ETH01\n\n跑车\n\n立即报名\n距离结束：\n29\n天\n:\n23\n时\n:\n35\n分\n:\n40\n秒\n净充值\n充值任务\n去充值\n首次\n\n0\n净充值 ≥100 USDT\n×\n10\n现货交易\n现货交易量\n去交易\n累计\n\n0\n现货交易量 ≥100 USDT\n×\n10\n合约交易\n合约交易量\n去交易\n累计\n\n0\n合约交易量 ≥100 USDT\n×\n10\n关于\n关于我们\n品牌信息\n官方博客\n就业机会\n媒体报道\n加入 WEEX 社群\nWXT专区\nWEEX × LALIGA\n帮助\n帮助中心\n费率标准\n交易规则\n常见问题\n官方验证渠道\n合规性\n法律声明\n风险提示\n条款与协议\n隐私说明\n廉正举报\n反洗钱政策\n执法请求指南\n联系我们\n联系客服Bot\nVIP服务\n产品\n合约交易\n现货交易\n一键跟单\n市场\nWEEX商城\n服务\n储备金证明\n邀请好友\nOTC\n下载\n合伙人\nVIP服务\nAPI\n经纪商\n上币申请\n网站地图\n资源\n教程中心\n学习\nQ&A\n现货交易\n合约交易\n名词解释\n加密货币价格\n货币预测\nWXT 价格\nBTC 价格\nETH 价格\nDOGE 价格\n如何购买加密货币\n如何购买 WXT\n如何购买 BTC\n如何购买 ETH\n如何购买 DOGE\n\n财富自由之路\n\n扫码下载\n\n更多下载方式"
+        },
+        "signup": {
+          "initialState": "立即报名",
+          "finalState": "抽奖",
+          "reopenedState": "抽奖",
+          "done": true
+        },
+        "mqRecharge": {
+          "ok": true,
+          "sent": true,
+          "uid": "8186595891",
+          "amount": "1000",
+          "countBefore": 0,
+          "countAfter": 10
+        },
+        "screenshotPath": null,
+        "failedResponses": []
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+            "--phase",
+            "recharge",
+            "--activity-alias",
+            "w54265462",
+            "--recharge-amount",
+            "1000",
+            "--wait-for-start-ms",
+            "60000"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "phase": "recharge",
+            "account": {
+              "alias": "DEFAULT",
+              "username": "8186595891@weex.com",
+              "uid": "8186595891"
+            },
+            "page": {
+              "activityAlias": "w54265462",
+              "url": "https://stg-www.weex.tech/zh-CN/events/draw/w54265462",
+              "urlMatchesAlias": true,
+              "opened": true,
+              "loginFormVisible": false,
+              "myPrizeVisible": true,
+              "mainButtonState": "立即报名",
+              "drawButtonVariant": "",
+              "drawCount": null,
+              "guestVisible": false,
+              "activityTitle": "9107自动化测试抽奖活动",
+              "activityTitleVisible": true,
+              "activitySubtitle": "",
+              "activitySubtitleVisible": false,
+              "rulesText": "",
+              "rulesVisible": false,
+              "prizeCount": null,
+              "prizeAreaVisible": false,
+              "mainVisualVisible": false,
+              "horizontalOverflow": false,
+              "countdownText": "距离结束：29天:23时:35分:40秒",
+              "countdownVisible": true,
+              "countdownTicking": true,
+              "pageErrorVisible": false,
+              "buttons": [
+                "合约交易",
+                "打开",
+                "充币",
+                "立即报名",
+                "去充值",
+                "去交易",
+                "去交易"
+              ],
+              "bodySnippet": "买币\n市场\n合约交易\n现货交易\n理财\n产品验收0210222\n更多\n充币\n活动日历\n我的奖品\n分享\n9107自动化测试抽奖活动\n06/07 19:44:28 - 07/07 19:44:28 (UTC+2)\n\n100 USDT 合约赠金\n\n0.01 自动化测试BTC001\n\n0.1 自动化测试ETH01\n\n跑车\n\n100 USDT 合约赠金\n\n0.01 自动化测试BTC001\n\n0.1 自动化测试ETH01\n\n跑车\n\n立即报名\n距离结束：\n29\n天\n:\n23\n时\n:\n35\n分\n:\n40\n秒\n净充值\n充值任务\n去充值\n首次\n\n0\n净充值 ≥100 USDT\n×\n10\n现货交易\n现货交易量\n去交易\n累计\n\n0\n现货交易量 ≥100 USDT\n×\n10\n合约交易\n合约交易量\n去交易\n累计\n\n0\n合约交易量 ≥100 USDT\n×\n10\n关于\n关于我们\n品牌信息\n官方博客\n就业机会\n媒体报道\n加入 WEEX 社群\nWXT专区\nWEEX × LALIGA\n帮助\n帮助中心\n费率标准\n交易规则\n常见问题\n官方验证渠道\n合规性\n法律声明\n风险提示\n条款与协议\n隐私说明\n廉正举报\n反洗钱政策\n执法请求指南\n联系我们\n联系客服Bot\nVIP服务\n产品\n合约交易\n现货交易\n一键跟单\n市场\nWEEX商城\n服务\n储备金证明\n邀请好友\nOTC\n下载\n合伙人\nVIP服务\nAPI\n经纪商\n上币申请\n网站地图\n资源\n教程中心\n学习\nQ&A\n现货交易\n合约交易\n名词解释\n加密货币价格\n货币预测\nWXT 价格\nBTC 价格\nETH 价格\nDOGE 价格\n如何购买加密货币\n如何购买 WXT\n如何购买 BTC\n如何购买 ETH\n如何购买 DOGE\n\n财富自由之路\n\n扫码下载\n\n更多下载方式"
+            },
+            "signup": {
+              "initialState": "立即报名",
+              "finalState": "抽奖",
+              "reopenedState": "抽奖",
+              "done": true
+            },
+            "mqRecharge": {
+              "ok": true,
+              "sent": true,
+              "uid": "8186595891",
+              "amount": "1000",
+              "countBefore": 0,
+              "countAfter": 10
+            },
+            "screenshotPath": null,
+            "failedResponses": []
+          },
+          "attempt": 1,
+          "exitCode": 0,
+          "durationMs": 68128
+        }
+      ],
+      "durationMs": 68129
+    },
+    {
+      "phaseId": "frontend_weight_special",
+      "description": "Run cumulative re-weighting frontend checks.",
+      "caseIds": [
+        "FE-64",
+        "FE-65",
+        "FE-66",
+        "FE-67"
+      ],
+      "cases": [
+        {
+          "caseId": "FE-64",
+          "caseName": "二次权重专项校验-N+1生效",
+          "module": "二次权重与专项校验",
+          "priority": "P0",
+          "packId": "frontend_weight_special",
+          "scenarioKey": "WEIGHT_ACTIVITY_DRAW_GE3"
+        },
+        {
+          "caseId": "FE-65",
+          "caseName": "未配置二次权重场景不做专项校验",
+          "module": "二次权重与专项校验",
+          "priority": "P1",
+          "packId": "frontend_weight_special",
+          "scenarioKey": "NORMAL_ACTIVITY_DRAW_GE1"
+        },
+        {
+          "caseId": "FE-66",
+          "caseName": "需要验证二次权重时使用专项活动",
+          "module": "二次权重与专项校验",
+          "priority": "P1",
+          "packId": "frontend_weight_special",
+          "scenarioKey": "WEIGHT_ACTIVITY_ONLINE"
+        },
+        {
+          "caseId": "FE-67",
+          "caseName": "二次权重命中后奖励记录正确",
+          "module": "二次权重与专项校验",
+          "priority": "P1",
+          "packId": "frontend_weight_special",
+          "scenarioKey": "WEIGHT_ACTIVITY_DRAW_GE3"
+        }
+      ],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-frontend-ops/scripts/frontend-draw-weight-special-verify.mjs",
+          "--activity-alias",
+          "w54265462",
+          "--expected-prize-text",
+          "100 USDT 合约赠金",
+          "--draw-times",
+          "6",
+          "--timeout-ms",
+          "60000"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "activityAlias": "w54265462",
+        "activityUrl": "https://stg-www.weex.tech/zh-CN/events/draw/w54265462",
+        "viewport": "desktop 1440x1000",
+        "account": {
+          "alias": "DEFAULT",
+          "username": "8186595891@weex.com",
+          "uid": "8186595891"
+        },
+        "signup": {
+          "initialState": "抽奖",
+          "finalState": "抽奖",
+          "reopenedState": "抽奖",
+          "done": true
+        },
+        "countBefore": 10,
+        "countAfter": 4,
+        "drawTimes": 6,
+        "expectedPrizeId": "5",
+        "expectedPrizeText": "100 USDT 合约赠金",
+        "targetDraw": {
+          "drawNo": 6,
+          "beforeCount": 5,
+          "afterCount": 5,
+          "popupVisible": true,
+          "popupPrizeText": "100 USDT 合约赠金",
+          "luckDraw": {
+            "code": "00000",
+            "msg": "success",
+            "dataKeys": [],
+            "directPrizeId": null,
+            "prizeName": "",
+            "collectedPrizeIds": []
+          }
+        },
+        "assertions": {
+          "allApiSuccess": true,
+          "allPopupVisible": true,
+          "targetDrawContainsExpectedPrizeId": false,
+          "targetDrawContainsExpectedPrizeText": true
+        },
+        "rewardRecord": {
+          "opened": true,
+          "dialogVisible": true,
+          "fieldHeaders": [
+            "活动名称",
+            "奖励金额",
+            "获奖时间",
+            "备注"
+          ],
+          "hasActivityTitle": false,
+          "hasRewardRow": true,
+          "hasReadableRewardValue": true,
+          "latestRewardText": "0.1 ETH0",
+          "allRewardText": "9107自动化测试抽奖活动 0.1 ETH0 2026/06/07 20:10:30 -- 9107自动化测试抽奖活动 0.01 BTC 2026/06/07 20:10:30 -- 9107自动化测试抽奖活动 0.01 BTC 2026/06/07 20:10:01 -- 小库存模板20260525122120 自动化测试 - 实物_20260525041425 × 1 2026/06/07 20:05:19 -- 1 2 3 4 ... 28",
+          "dataLineCount": 22
+        },
+        "draws": [
+          {
+            "drawNo": 1,
+            "beforeCount": 10,
+            "afterCount": 9,
+            "popupVisible": true,
+            "popupPrizeText": "0.01 自动化测试BTC001",
+            "luckDraw": {
+              "code": "00000",
+              "msg": "success",
+              "dataKeys": [],
+              "directPrizeId": null,
+              "prizeName": "",
+              "collectedPrizeIds": []
+            }
+          },
+          {
+            "drawNo": 2,
+            "beforeCount": 9,
+            "afterCount": 9,
+            "popupVisible": true,
+            "popupPrizeText": "0.1 自动化测试ETH01",
+            "luckDraw": {
+              "code": "00000",
+              "msg": "success",
+              "dataKeys": [],
+              "directPrizeId": null,
+              "prizeName": "",
+              "collectedPrizeIds": []
+            }
+          },
+          {
+            "drawNo": 3,
+            "beforeCount": 8,
+            "afterCount": 8,
+            "popupVisible": true,
+            "popupPrizeText": "0.01 自动化测试BTC001",
+            "luckDraw": {
+              "code": "00000",
+              "msg": "success",
+              "dataKeys": [],
+              "directPrizeId": null,
+              "prizeName": "",
+              "collectedPrizeIds": []
+            }
+          },
+          {
+            "drawNo": 4,
+            "beforeCount": 7,
+            "afterCount": 6,
+            "popupVisible": true,
+            "popupPrizeText": "跑车",
+            "luckDraw": {
+              "code": "00000",
+              "msg": "success",
+              "dataKeys": [],
+              "directPrizeId": null,
+              "prizeName": "",
+              "collectedPrizeIds": []
+            }
+          },
+          {
+            "drawNo": 5,
+            "beforeCount": 6,
+            "afterCount": 6,
+            "popupVisible": true,
+            "popupPrizeText": "100 USDT 合约赠金",
+            "luckDraw": {
+              "code": "00000",
+              "msg": "success",
+              "dataKeys": [],
+              "directPrizeId": null,
+              "prizeName": "",
+              "collectedPrizeIds": []
+            }
+          },
+          {
+            "drawNo": 6,
+            "beforeCount": 5,
+            "afterCount": 5,
+            "popupVisible": true,
+            "popupPrizeText": "100 USDT 合约赠金",
+            "luckDraw": {
+              "code": "00000",
+              "msg": "success",
+              "dataKeys": [],
+              "directPrizeId": null,
+              "prizeName": "",
+              "collectedPrizeIds": []
+            }
+          }
+        ],
+        "failedResponses": []
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-frontend-ops/scripts/frontend-draw-weight-special-verify.mjs",
+            "--activity-alias",
+            "w54265462",
+            "--expected-prize-text",
+            "100 USDT 合约赠金",
+            "--draw-times",
+            "6",
+            "--timeout-ms",
+            "60000"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "activityAlias": "w54265462",
+            "activityUrl": "https://stg-www.weex.tech/zh-CN/events/draw/w54265462",
+            "viewport": "desktop 1440x1000",
+            "account": {
+              "alias": "DEFAULT",
+              "username": "8186595891@weex.com",
+              "uid": "8186595891"
+            },
+            "signup": {
+              "initialState": "抽奖",
+              "finalState": "抽奖",
+              "reopenedState": "抽奖",
+              "done": true
+            },
+            "countBefore": 10,
+            "countAfter": 4,
+            "drawTimes": 6,
+            "expectedPrizeId": "5",
+            "expectedPrizeText": "100 USDT 合约赠金",
+            "targetDraw": {
+              "drawNo": 6,
+              "beforeCount": 5,
+              "afterCount": 5,
+              "popupVisible": true,
+              "popupPrizeText": "100 USDT 合约赠金",
+              "luckDraw": {
+                "code": "00000",
+                "msg": "success",
+                "dataKeys": [],
+                "directPrizeId": null,
+                "prizeName": "",
+                "collectedPrizeIds": []
+              }
+            },
+            "assertions": {
+              "allApiSuccess": true,
+              "allPopupVisible": true,
+              "targetDrawContainsExpectedPrizeId": false,
+              "targetDrawContainsExpectedPrizeText": true
+            },
+            "rewardRecord": {
+              "opened": true,
+              "dialogVisible": true,
+              "fieldHeaders": [
+                "活动名称",
+                "奖励金额",
+                "获奖时间",
+                "备注"
+              ],
+              "hasActivityTitle": false,
+              "hasRewardRow": true,
+              "hasReadableRewardValue": true,
+              "latestRewardText": "0.1 ETH0",
+              "allRewardText": "9107自动化测试抽奖活动 0.1 ETH0 2026/06/07 20:10:30 -- 9107自动化测试抽奖活动 0.01 BTC 2026/06/07 20:10:30 -- 9107自动化测试抽奖活动 0.01 BTC 2026/06/07 20:10:01 -- 小库存模板20260525122120 自动化测试 - 实物_20260525041425 × 1 2026/06/07 20:05:19 -- 1 2 3 4 ... 28",
+              "dataLineCount": 22
+            },
+            "draws": [
+              {
+                "drawNo": 1,
+                "beforeCount": 10,
+                "afterCount": 9,
+                "popupVisible": true,
+                "popupPrizeText": "0.01 自动化测试BTC001",
+                "luckDraw": {
+                  "code": "00000",
+                  "msg": "success",
+                  "dataKeys": [],
+                  "directPrizeId": null,
+                  "prizeName": "",
+                  "collectedPrizeIds": []
+                }
+              },
+              {
+                "drawNo": 2,
+                "beforeCount": 9,
+                "afterCount": 9,
+                "popupVisible": true,
+                "popupPrizeText": "0.1 自动化测试ETH01",
+                "luckDraw": {
+                  "code": "00000",
+                  "msg": "success",
+                  "dataKeys": [],
+                  "directPrizeId": null,
+                  "prizeName": "",
+                  "collectedPrizeIds": []
+                }
+              },
+              {
+                "drawNo": 3,
+                "beforeCount": 8,
+                "afterCount": 8,
+                "popupVisible": true,
+                "popupPrizeText": "0.01 自动化测试BTC001",
+                "luckDraw": {
+                  "code": "00000",
+                  "msg": "success",
+                  "dataKeys": [],
+                  "directPrizeId": null,
+                  "prizeName": "",
+                  "collectedPrizeIds": []
+                }
+              },
+              {
+                "drawNo": 4,
+                "beforeCount": 7,
+                "afterCount": 6,
+                "popupVisible": true,
+                "popupPrizeText": "跑车",
+                "luckDraw": {
+                  "code": "00000",
+                  "msg": "success",
+                  "dataKeys": [],
+                  "directPrizeId": null,
+                  "prizeName": "",
+                  "collectedPrizeIds": []
+                }
+              },
+              {
+                "drawNo": 5,
+                "beforeCount": 6,
+                "afterCount": 6,
+                "popupVisible": true,
+                "popupPrizeText": "100 USDT 合约赠金",
+                "luckDraw": {
+                  "code": "00000",
+                  "msg": "success",
+                  "dataKeys": [],
+                  "directPrizeId": null,
+                  "prizeName": "",
+                  "collectedPrizeIds": []
+                }
+              },
+              {
+                "drawNo": 6,
+                "beforeCount": 5,
+                "afterCount": 5,
+                "popupVisible": true,
+                "popupPrizeText": "100 USDT 合约赠金",
+                "luckDraw": {
+                  "code": "00000",
+                  "msg": "success",
+                  "dataKeys": [],
+                  "directPrizeId": null,
+                  "prizeName": "",
+                  "collectedPrizeIds": []
+                }
+              }
+            ],
+            "failedResponses": []
+          },
+          "attempt": 1,
+          "exitCode": 0,
+          "durationMs": 91876
+        }
+      ],
+      "durationMs": 91878
+    }
+  ],
+  "caseResults": [
+    {
+      "caseId": "FE-64",
+      "caseName": "二次权重专项校验-N+1生效",
+      "module": "二次权重与专项校验",
+      "priority": "P0",
+      "phaseId": "frontend_weight_special",
+      "status": "PASS",
+      "evidence": {
+        "page": null,
+        "consistency": null,
+        "signup": {
+          "initialState": "抽奖",
+          "finalState": "抽奖",
+          "reopenedState": "抽奖",
+          "done": true
+        },
+        "mqRecharge": null,
+        "draw": null,
+        "fiveDraw": null,
+        "fiveDrawRewardRecord": null,
+        "lowStockSingleDraw": null,
+        "styleDisplay": null,
+        "exceptionUi": null,
+        "rewardRecordExtended": null,
+        "responsiveUi": null,
+        "weightSpecial": {
+          "activityAlias": "w54265462",
+          "drawTimes": 6,
+          "expectedPrizeId": "5",
+          "expectedPrizeText": "100 USDT 合约赠金",
+          "countBefore": 10,
+          "countAfter": 4,
+          "targetDraw": {
+            "drawNo": 6,
+            "beforeCount": 5,
+            "afterCount": 5,
+            "popupVisible": true,
+            "popupPrizeText": "100 USDT 合约赠金",
+            "luckDraw": {
+              "code": "00000",
+              "msg": "success",
+              "dataKeys": [],
+              "directPrizeId": null,
+              "prizeName": "",
+              "collectedPrizeIds": []
+            }
+          },
+          "assertions": {
+            "allApiSuccess": true,
+            "allPopupVisible": true,
+            "targetDrawContainsExpectedPrizeId": false,
+            "targetDrawContainsExpectedPrizeText": true
+          },
+          "rewardRecord": {
+            "opened": true,
+            "dialogVisible": true,
+            "fieldHeaders": [
+              "活动名称",
+              "奖励金额",
+              "获奖时间",
+              "备注"
+            ],
+            "hasActivityTitle": false,
+            "hasRewardRow": true,
+            "hasReadableRewardValue": true,
+            "latestRewardText": "0.1 ETH0",
+            "allRewardText": "9107自动化测试抽奖活动 0.1 ETH0 2026/06/07 20:10:30 -- 9107自动化测试抽奖活动 0.01 BTC 2026/06/07 20:10:30 -- 9107自动化测试抽奖活动 0.01 BTC 2026/06/07 20:10:01 -- 小库存模板20260525122120 自动化测试 - 实物_20260525041425 × 1 2026/06/07 20:05:19 -- 1 2 3 4 ... 28",
+            "dataLineCount": 22
+          }
+        },
+        "rewardRecord": {
+          "opened": true,
+          "dialogVisible": true,
+          "fieldHeaders": [
+            "活动名称",
+            "奖励金额",
+            "获奖时间",
+            "备注"
+          ],
+          "hasRewardRow": true,
+          "hasReadableRewardValue": true,
+          "latestRewardText": "0.1 ETH0",
+          "allRewardText": "9107自动化测试抽奖活动 0.1 ETH0 2026/06/07 20:10:30 -- 9107自动化测试抽奖活动 0.01 BTC 2026/06/07 20:10:30 -- 9107自动化测试抽奖活动 0.01 BTC 2026/06/07 20:10:01 -- 小库存模板20260525122120 自动化测试 - 实物_20260525041425 × 1 2026/06/07 20:05:19 -- 1 2 3 4 ... 28",
+          "closedOk": false,
+          "prizeMatchesPopup": false,
+          "expectedPopupPrizeText": "",
+          "dataLineCount": 22
+        },
+        "linkage": null,
+        "linkageReadonly": null
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "FE-65",
+      "caseName": "未配置二次权重场景不做专项校验",
+      "module": "二次权重与专项校验",
+      "priority": "P1",
+      "phaseId": "frontend_weight_special",
+      "status": "PASS",
+      "evidence": {
+        "page": null,
+        "consistency": null,
+        "signup": {
+          "initialState": "抽奖",
+          "finalState": "抽奖",
+          "reopenedState": "抽奖",
+          "done": true
+        },
+        "mqRecharge": null,
+        "draw": null,
+        "fiveDraw": null,
+        "fiveDrawRewardRecord": null,
+        "lowStockSingleDraw": null,
+        "styleDisplay": null,
+        "exceptionUi": null,
+        "rewardRecordExtended": null,
+        "responsiveUi": null,
+        "weightSpecial": {
+          "activityAlias": "w54265462",
+          "drawTimes": 6,
+          "expectedPrizeId": "5",
+          "expectedPrizeText": "100 USDT 合约赠金",
+          "countBefore": 10,
+          "countAfter": 4,
+          "targetDraw": {
+            "drawNo": 6,
+            "beforeCount": 5,
+            "afterCount": 5,
+            "popupVisible": true,
+            "popupPrizeText": "100 USDT 合约赠金",
+            "luckDraw": {
+              "code": "00000",
+              "msg": "success",
+              "dataKeys": [],
+              "directPrizeId": null,
+              "prizeName": "",
+              "collectedPrizeIds": []
+            }
+          },
+          "assertions": {
+            "allApiSuccess": true,
+            "allPopupVisible": true,
+            "targetDrawContainsExpectedPrizeId": false,
+            "targetDrawContainsExpectedPrizeText": true
+          },
+          "rewardRecord": {
+            "opened": true,
+            "dialogVisible": true,
+            "fieldHeaders": [
+              "活动名称",
+              "奖励金额",
+              "获奖时间",
+              "备注"
+            ],
+            "hasActivityTitle": false,
+            "hasRewardRow": true,
+            "hasReadableRewardValue": true,
+            "latestRewardText": "0.1 ETH0",
+            "allRewardText": "9107自动化测试抽奖活动 0.1 ETH0 2026/06/07 20:10:30 -- 9107自动化测试抽奖活动 0.01 BTC 2026/06/07 20:10:30 -- 9107自动化测试抽奖活动 0.01 BTC 2026/06/07 20:10:01 -- 小库存模板20260525122120 自动化测试 - 实物_20260525041425 × 1 2026/06/07 20:05:19 -- 1 2 3 4 ... 28",
+            "dataLineCount": 22
+          }
+        },
+        "rewardRecord": {
+          "opened": true,
+          "dialogVisible": true,
+          "fieldHeaders": [
+            "活动名称",
+            "奖励金额",
+            "获奖时间",
+            "备注"
+          ],
+          "hasRewardRow": true,
+          "hasReadableRewardValue": true,
+          "latestRewardText": "0.1 ETH0",
+          "allRewardText": "9107自动化测试抽奖活动 0.1 ETH0 2026/06/07 20:10:30 -- 9107自动化测试抽奖活动 0.01 BTC 2026/06/07 20:10:30 -- 9107自动化测试抽奖活动 0.01 BTC 2026/06/07 20:10:01 -- 小库存模板20260525122120 自动化测试 - 实物_20260525041425 × 1 2026/06/07 20:05:19 -- 1 2 3 4 ... 28",
+          "closedOk": false,
+          "prizeMatchesPopup": false,
+          "expectedPopupPrizeText": "",
+          "dataLineCount": 22
+        },
+        "linkage": null,
+        "linkageReadonly": null
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "FE-66",
+      "caseName": "需要验证二次权重时使用专项活动",
+      "module": "二次权重与专项校验",
+      "priority": "P1",
+      "phaseId": "frontend_weight_special",
+      "status": "PASS",
+      "evidence": {
+        "page": null,
+        "consistency": null,
+        "signup": {
+          "initialState": "抽奖",
+          "finalState": "抽奖",
+          "reopenedState": "抽奖",
+          "done": true
+        },
+        "mqRecharge": null,
+        "draw": null,
+        "fiveDraw": null,
+        "fiveDrawRewardRecord": null,
+        "lowStockSingleDraw": null,
+        "styleDisplay": null,
+        "exceptionUi": null,
+        "rewardRecordExtended": null,
+        "responsiveUi": null,
+        "weightSpecial": {
+          "activityAlias": "w54265462",
+          "drawTimes": 6,
+          "expectedPrizeId": "5",
+          "expectedPrizeText": "100 USDT 合约赠金",
+          "countBefore": 10,
+          "countAfter": 4,
+          "targetDraw": {
+            "drawNo": 6,
+            "beforeCount": 5,
+            "afterCount": 5,
+            "popupVisible": true,
+            "popupPrizeText": "100 USDT 合约赠金",
+            "luckDraw": {
+              "code": "00000",
+              "msg": "success",
+              "dataKeys": [],
+              "directPrizeId": null,
+              "prizeName": "",
+              "collectedPrizeIds": []
+            }
+          },
+          "assertions": {
+            "allApiSuccess": true,
+            "allPopupVisible": true,
+            "targetDrawContainsExpectedPrizeId": false,
+            "targetDrawContainsExpectedPrizeText": true
+          },
+          "rewardRecord": {
+            "opened": true,
+            "dialogVisible": true,
+            "fieldHeaders": [
+              "活动名称",
+              "奖励金额",
+              "获奖时间",
+              "备注"
+            ],
+            "hasActivityTitle": false,
+            "hasRewardRow": true,
+            "hasReadableRewardValue": true,
+            "latestRewardText": "0.1 ETH0",
+            "allRewardText": "9107自动化测试抽奖活动 0.1 ETH0 2026/06/07 20:10:30 -- 9107自动化测试抽奖活动 0.01 BTC 2026/06/07 20:10:30 -- 9107自动化测试抽奖活动 0.01 BTC 2026/06/07 20:10:01 -- 小库存模板20260525122120 自动化测试 - 实物_20260525041425 × 1 2026/06/07 20:05:19 -- 1 2 3 4 ... 28",
+            "dataLineCount": 22
+          }
+        },
+        "rewardRecord": {
+          "opened": true,
+          "dialogVisible": true,
+          "fieldHeaders": [
+            "活动名称",
+            "奖励金额",
+            "获奖时间",
+            "备注"
+          ],
+          "hasRewardRow": true,
+          "hasReadableRewardValue": true,
+          "latestRewardText": "0.1 ETH0",
+          "allRewardText": "9107自动化测试抽奖活动 0.1 ETH0 2026/06/07 20:10:30 -- 9107自动化测试抽奖活动 0.01 BTC 2026/06/07 20:10:30 -- 9107自动化测试抽奖活动 0.01 BTC 2026/06/07 20:10:01 -- 小库存模板20260525122120 自动化测试 - 实物_20260525041425 × 1 2026/06/07 20:05:19 -- 1 2 3 4 ... 28",
+          "closedOk": false,
+          "prizeMatchesPopup": false,
+          "expectedPopupPrizeText": "",
+          "dataLineCount": 22
+        },
+        "linkage": null,
+        "linkageReadonly": null
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "FE-67",
+      "caseName": "二次权重命中后奖励记录正确",
+      "module": "二次权重与专项校验",
+      "priority": "P1",
+      "phaseId": "frontend_weight_special",
+      "status": "PASS",
+      "evidence": {
+        "page": null,
+        "consistency": null,
+        "signup": {
+          "initialState": "抽奖",
+          "finalState": "抽奖",
+          "reopenedState": "抽奖",
+          "done": true
+        },
+        "mqRecharge": null,
+        "draw": null,
+        "fiveDraw": null,
+        "fiveDrawRewardRecord": null,
+        "lowStockSingleDraw": null,
+        "styleDisplay": null,
+        "exceptionUi": null,
+        "rewardRecordExtended": null,
+        "responsiveUi": null,
+        "weightSpecial": {
+          "activityAlias": "w54265462",
+          "drawTimes": 6,
+          "expectedPrizeId": "5",
+          "expectedPrizeText": "100 USDT 合约赠金",
+          "countBefore": 10,
+          "countAfter": 4,
+          "targetDraw": {
+            "drawNo": 6,
+            "beforeCount": 5,
+            "afterCount": 5,
+            "popupVisible": true,
+            "popupPrizeText": "100 USDT 合约赠金",
+            "luckDraw": {
+              "code": "00000",
+              "msg": "success",
+              "dataKeys": [],
+              "directPrizeId": null,
+              "prizeName": "",
+              "collectedPrizeIds": []
+            }
+          },
+          "assertions": {
+            "allApiSuccess": true,
+            "allPopupVisible": true,
+            "targetDrawContainsExpectedPrizeId": false,
+            "targetDrawContainsExpectedPrizeText": true
+          },
+          "rewardRecord": {
+            "opened": true,
+            "dialogVisible": true,
+            "fieldHeaders": [
+              "活动名称",
+              "奖励金额",
+              "获奖时间",
+              "备注"
+            ],
+            "hasActivityTitle": false,
+            "hasRewardRow": true,
+            "hasReadableRewardValue": true,
+            "latestRewardText": "0.1 ETH0",
+            "allRewardText": "9107自动化测试抽奖活动 0.1 ETH0 2026/06/07 20:10:30 -- 9107自动化测试抽奖活动 0.01 BTC 2026/06/07 20:10:30 -- 9107自动化测试抽奖活动 0.01 BTC 2026/06/07 20:10:01 -- 小库存模板20260525122120 自动化测试 - 实物_20260525041425 × 1 2026/06/07 20:05:19 -- 1 2 3 4 ... 28",
+            "dataLineCount": 22
+          }
+        },
+        "rewardRecord": {
+          "opened": true,
+          "dialogVisible": true,
+          "fieldHeaders": [
+            "活动名称",
+            "奖励金额",
+            "获奖时间",
+            "备注"
+          ],
+          "hasRewardRow": true,
+          "hasReadableRewardValue": true,
+          "latestRewardText": "0.1 ETH0",
+          "allRewardText": "9107自动化测试抽奖活动 0.1 ETH0 2026/06/07 20:10:30 -- 9107自动化测试抽奖活动 0.01 BTC 2026/06/07 20:10:30 -- 9107自动化测试抽奖活动 0.01 BTC 2026/06/07 20:10:01 -- 小库存模板20260525122120 自动化测试 - 实物_20260525041425 × 1 2026/06/07 20:05:19 -- 1 2 3 4 ... 28",
+          "closedOk": false,
+          "prizeMatchesPopup": false,
+          "expectedPopupPrizeText": "",
+          "dataLineCount": 22
+        },
+        "linkage": null,
+        "linkageReadonly": null
+      },
+      "errorMessage": ""
+    }
+  ]
+}

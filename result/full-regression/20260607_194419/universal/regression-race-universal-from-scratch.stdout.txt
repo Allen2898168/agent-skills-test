@@ -1,0 +1,62 @@
+{
+  "ok": true,
+  "caseId": "RACE_COMPETITION_universal_from_scratch",
+  "created": {
+    "registerTemplateId": "3636",
+    "prizeId": "1523",
+    "taskId": "7120",
+    "activityId": "10098",
+    "activityAlias": "rcr56124994",
+    "activityTitle": "竞速赛通用回归181524"
+  },
+  "links": [
+    {
+      "label": "后台交易竞速赛列表",
+      "url": "https://stg-activity.weex.tech/activities/speedRace"
+    }
+  ],
+  "durationMs": 15937,
+  "cleanup": {
+    "unbind": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteActivity": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteTask": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deletePrize": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteRegisterTemplate": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    }
+  },
+  "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_201531/RACE_COMPETITION_universal_from_scratch.md"
+}

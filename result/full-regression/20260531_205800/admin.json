@@ -1,0 +1,3743 @@
+{
+  "ok": true,
+  "actionId": "lottery_admin_main_regression",
+  "mode": "headless_api",
+  "selectedCaseIds": [
+    "AL-01",
+    "AL-02",
+    "AL-03",
+    "AL-04",
+    "AL-05",
+    "AL-06",
+    "AL-07",
+    "RT-01",
+    "RT-02",
+    "RT-03",
+    "RT-04",
+    "RT-05",
+    "RT-06",
+    "RT-07",
+    "RT-08",
+    "RT-09",
+    "TM-01",
+    "TM-02",
+    "TM-03",
+    "TM-04",
+    "TM-05",
+    "TM-06",
+    "TM-07",
+    "TM-08",
+    "TM-09",
+    "TM-10",
+    "TM-11",
+    "PM-01",
+    "PM-02",
+    "PM-03",
+    "PM-04",
+    "PM-05",
+    "PM-06",
+    "PM-07",
+    "PM-08",
+    "PM-09",
+    "PM-10",
+    "PM-11",
+    "AC-01",
+    "AC-02",
+    "AC-03",
+    "AC-04",
+    "AC-05",
+    "AC-06",
+    "AC-07",
+    "AC-08",
+    "AC-09",
+    "AC-10",
+    "AC-11",
+    "AC-12",
+    "AC-13",
+    "AC-14",
+    "AC-15",
+    "ST-01",
+    "ST-02",
+    "ST-03"
+  ],
+  "createdActivity": {
+    "activityId": "9874",
+    "activityAlias": "ln53952453"
+  },
+  "phaseResults": [
+    {
+      "phaseId": "create_regression_prizes",
+      "description": "Create stable admin regression prizes.",
+      "caseIds": [
+        "PM-01",
+        "PM-02",
+        "PM-03",
+        "PM-04",
+        "PM-05",
+        "PM-06",
+        "PM-07"
+      ],
+      "cases": [
+        {
+          "caseId": "PM-01",
+          "caseName": "奖品列表搜索-奖品ID",
+          "module": "奖品管理",
+          "priority": "P0",
+          "packId": "admin_prize_readonly",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "PM-02",
+          "caseName": "奖品列表搜索-奖品分类/子分类",
+          "module": "奖品管理",
+          "priority": "P0",
+          "packId": "admin_prize_readonly",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "PM-03",
+          "caseName": "奖品列表搜索-奖品名称/别名",
+          "module": "奖品管理",
+          "priority": "P1",
+          "packId": "admin_prize_readonly",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "PM-04",
+          "caseName": "新增奖品-赠金",
+          "module": "奖品管理",
+          "priority": "P0",
+          "packId": "admin_prize_write",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "PM-05",
+          "caseName": "新增奖品-币种BTC",
+          "module": "奖品管理",
+          "priority": "P0",
+          "packId": "admin_prize_write",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "PM-06",
+          "caseName": "新增奖品-实物",
+          "module": "奖品管理",
+          "priority": "P0",
+          "packId": "admin_prize_write",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "PM-07",
+          "caseName": "新增奖品-虚拟积分或资格",
+          "module": "奖品管理",
+          "priority": "P1",
+          "packId": "admin_prize_write",
+          "scenarioKey": "ADMIN_SESSION"
+        }
+      ],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-admin-ops/scripts/create-regression-prizes-fast-api.mjs"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "error": "",
+        "finalUrl": "https://stg-activity.weex.tech/activity/prize",
+        "title": "",
+        "alias": "",
+        "activityId": "",
+        "status": "",
+        "verifyTotal": 0,
+        "createStatus": null,
+        "createBody": null,
+        "onlineBody": null,
+        "offlineBody": null,
+        "verifyFirst": null,
+        "verifyItem": null,
+        "searchChecks": {
+          "byId": {
+            "ok": true,
+            "searchedPrizeId": "1296",
+            "returnedRow": [
+              "1296",
+              "赠金",
+              "赠金",
+              "自动化测试 - 赠金_20260531185809",
+              "api_bonus_20260531185809"
+            ]
+          },
+          "byCategorySubtype": {
+            "ok": true,
+            "category": "赠金",
+            "subtype": "赠金",
+            "matchedPrizeIds": [
+              "1296",
+              "1297",
+              "1298",
+              "1299"
+            ]
+          },
+          "byName": {
+            "ok": true,
+            "keyword": "自动化测试",
+            "matchedPrizeIds": [
+              "1296",
+              "1297",
+              "1298",
+              "1299"
+            ]
+          },
+          "byAlias": {
+            "ok": true,
+            "keyword": "api_",
+            "matchedPrizeIds": [
+              "1296",
+              "1297",
+              "1298",
+              "1299"
+            ],
+            "exactMatched": true
+          }
+        },
+        "draftRowActions": null,
+        "onlineRowActions": null,
+        "copyCheck": null,
+        "deleteCopiedDraft": null,
+        "responses": [],
+        "errors": null
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-admin-ops/scripts/create-regression-prizes-fast-api.mjs"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "error": "",
+            "finalUrl": "https://stg-activity.weex.tech/activity/prize",
+            "title": "",
+            "alias": "",
+            "activityId": "",
+            "status": "",
+            "verifyTotal": 0,
+            "createStatus": null,
+            "createBody": null,
+            "onlineBody": null,
+            "offlineBody": null,
+            "verifyFirst": null,
+            "verifyItem": null,
+            "searchChecks": {
+              "byId": {
+                "ok": true,
+                "searchedPrizeId": "1296",
+                "returnedRow": [
+                  "1296",
+                  "赠金",
+                  "赠金",
+                  "自动化测试 - 赠金_20260531185809",
+                  "api_bonus_20260531185809"
+                ]
+              },
+              "byCategorySubtype": {
+                "ok": true,
+                "category": "赠金",
+                "subtype": "赠金",
+                "matchedPrizeIds": [
+                  "1296",
+                  "1297",
+                  "1298",
+                  "1299"
+                ]
+              },
+              "byName": {
+                "ok": true,
+                "keyword": "自动化测试",
+                "matchedPrizeIds": [
+                  "1296",
+                  "1297",
+                  "1298",
+                  "1299"
+                ]
+              },
+              "byAlias": {
+                "ok": true,
+                "keyword": "api_",
+                "matchedPrizeIds": [
+                  "1296",
+                  "1297",
+                  "1298",
+                  "1299"
+                ],
+                "exactMatched": true
+              }
+            },
+            "draftRowActions": null,
+            "onlineRowActions": null,
+            "copyCheck": null,
+            "deleteCopiedDraft": null,
+            "responses": [],
+            "errors": null
+          }
+        }
+      ]
+    },
+    {
+      "phaseId": "prize_row_actions",
+      "description": "Verify prize row actions view/modify/copy/delete by creating a temporary prize and performing operations.",
+      "caseIds": [
+        "PM-08",
+        "PM-09",
+        "PM-10",
+        "PM-11"
+      ],
+      "cases": [
+        {
+          "caseId": "PM-08",
+          "caseName": "奖品行操作-查看",
+          "module": "奖品管理",
+          "priority": "P0",
+          "packId": "admin_prize_write",
+          "scenarioKey": "PRIZE_SET_READY"
+        },
+        {
+          "caseId": "PM-09",
+          "caseName": "奖品行操作-修改",
+          "module": "奖品管理",
+          "priority": "P0",
+          "packId": "admin_prize_write",
+          "scenarioKey": "PRIZE_SET_READY"
+        },
+        {
+          "caseId": "PM-10",
+          "caseName": "奖品行操作-复制",
+          "module": "奖品管理",
+          "priority": "P0",
+          "packId": "admin_prize_write",
+          "scenarioKey": "PRIZE_SET_READY"
+        },
+        {
+          "caseId": "PM-11",
+          "caseName": "奖品行操作-删除",
+          "module": "奖品管理",
+          "priority": "P0",
+          "packId": "admin_prize_write",
+          "scenarioKey": "PRIZE_SET_READY"
+        }
+      ],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-admin-ops/scripts/prize-row-actions-fast-api.mjs",
+          "--category",
+          "赠金",
+          "--subtype",
+          "赠金",
+          "--count",
+          "1",
+          "--name-prefix",
+          "操作列临时奖品",
+          "--alias-prefix",
+          "prize_row_action_temp"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "error": "",
+        "finalUrl": "https://stg-activity.weex.tech/activity/prize",
+        "title": "",
+        "alias": "",
+        "activityId": "",
+        "status": "",
+        "verifyTotal": 0,
+        "createStatus": null,
+        "createBody": null,
+        "onlineBody": null,
+        "offlineBody": null,
+        "verifyFirst": null,
+        "verifyItem": null,
+        "searchChecks": null,
+        "draftRowActions": null,
+        "onlineRowActions": null,
+        "copyCheck": null,
+        "deleteCopiedDraft": null,
+        "responses": [],
+        "errors": null
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-admin-ops/scripts/prize-row-actions-fast-api.mjs",
+            "--category",
+            "赠金",
+            "--subtype",
+            "赠金",
+            "--count",
+            "1",
+            "--name-prefix",
+            "操作列临时奖品",
+            "--alias-prefix",
+            "prize_row_action_temp"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "error": "",
+            "finalUrl": "https://stg-activity.weex.tech/activity/prize",
+            "title": "",
+            "alias": "",
+            "activityId": "",
+            "status": "",
+            "verifyTotal": 0,
+            "createStatus": null,
+            "createBody": null,
+            "onlineBody": null,
+            "offlineBody": null,
+            "verifyFirst": null,
+            "verifyItem": null,
+            "searchChecks": null,
+            "draftRowActions": null,
+            "onlineRowActions": null,
+            "copyCheck": null,
+            "deleteCopiedDraft": null,
+            "responses": [],
+            "errors": null
+          }
+        }
+      ]
+    },
+    {
+      "phaseId": "create_register_templates",
+      "description": "Create stable registration templates for admin regression.",
+      "caseIds": [
+        "RT-03",
+        "RT-04",
+        "RT-05",
+        "RT-06"
+      ],
+      "cases": [
+        {
+          "caseId": "RT-03",
+          "caseName": "模版新增-最小主链路（全平台用户）",
+          "module": "报名模版",
+          "priority": "P0",
+          "packId": "admin_register_template_write",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "RT-04",
+          "caseName": "模版新增-全平台用户+用户手动点击报名",
+          "module": "报名模版",
+          "priority": "P1",
+          "packId": "admin_register_template_write",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "RT-05",
+          "caseName": "模版新增-平台用户参与范围分支",
+          "module": "报名模版",
+          "priority": "P1",
+          "packId": "admin_register_template_write",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "RT-06",
+          "caseName": "模版新增-可参与注册时间范围",
+          "module": "报名模版",
+          "priority": "P1",
+          "packId": "admin_register_template_write",
+          "scenarioKey": "ADMIN_SESSION"
+        }
+      ],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs",
+          "--signup-modes",
+          "auto",
+          "--name-prefix",
+          "自动化报名模板"
+        ],
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs",
+          "--signup-modes",
+          "manual",
+          "--name-prefix",
+          "自动化报名模板"
+        ],
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs",
+          "--signup-modes",
+          "team",
+          "--name-prefix",
+          "自动化报名模板",
+          "--min-team",
+          "2"
+        ],
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs",
+          "--signup-modes",
+          "auto_manual",
+          "--name-prefix",
+          "自动化报名模板"
+        ],
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs",
+          "--signup-modes",
+          "auto",
+          "--platform-scopes",
+          "channel_invite,natural,non_active,mixed,fake_money",
+          "--name-prefix",
+          "自动化报名模板"
+        ],
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs",
+          "--signup-modes",
+          "auto",
+          "--platform-scopes",
+          "non_active",
+          "--register-start",
+          "2026-06-01 03:28:09",
+          "--register-end",
+          "2027-06-01 03:28:09",
+          "--name-prefix",
+          "自动化报名模板"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "error": "",
+        "finalUrl": "https://stg-activity.weex.tech/activity/register",
+        "title": "",
+        "alias": "",
+        "activityId": "",
+        "status": "",
+        "verifyTotal": 0,
+        "createStatus": null,
+        "createBody": null,
+        "onlineBody": null,
+        "offlineBody": null,
+        "verifyFirst": null,
+        "verifyItem": null,
+        "searchChecks": null,
+        "draftRowActions": null,
+        "onlineRowActions": null,
+        "copyCheck": null,
+        "deleteCopiedDraft": null,
+        "responses": [],
+        "errors": null
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs",
+            "--signup-modes",
+            "auto",
+            "--name-prefix",
+            "自动化报名模板"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "error": "",
+            "finalUrl": "https://stg-activity.weex.tech/activity/register",
+            "title": "",
+            "alias": "",
+            "activityId": "",
+            "status": "",
+            "verifyTotal": 0,
+            "createStatus": null,
+            "createBody": null,
+            "onlineBody": null,
+            "offlineBody": null,
+            "verifyFirst": null,
+            "verifyItem": null,
+            "searchChecks": null,
+            "draftRowActions": null,
+            "onlineRowActions": null,
+            "copyCheck": null,
+            "deleteCopiedDraft": null,
+            "responses": [],
+            "errors": null
+          }
+        },
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs",
+            "--signup-modes",
+            "manual",
+            "--name-prefix",
+            "自动化报名模板"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "error": "",
+            "finalUrl": "https://stg-activity.weex.tech/activity/register",
+            "title": "",
+            "alias": "",
+            "activityId": "",
+            "status": "",
+            "verifyTotal": 0,
+            "createStatus": null,
+            "createBody": null,
+            "onlineBody": null,
+            "offlineBody": null,
+            "verifyFirst": null,
+            "verifyItem": null,
+            "searchChecks": null,
+            "draftRowActions": null,
+            "onlineRowActions": null,
+            "copyCheck": null,
+            "deleteCopiedDraft": null,
+            "responses": [],
+            "errors": null
+          }
+        },
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs",
+            "--signup-modes",
+            "team",
+            "--name-prefix",
+            "自动化报名模板",
+            "--min-team",
+            "2"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "error": "",
+            "finalUrl": "https://stg-activity.weex.tech/activity/register",
+            "title": "",
+            "alias": "",
+            "activityId": "",
+            "status": "",
+            "verifyTotal": 0,
+            "createStatus": null,
+            "createBody": null,
+            "onlineBody": null,
+            "offlineBody": null,
+            "verifyFirst": null,
+            "verifyItem": null,
+            "searchChecks": null,
+            "draftRowActions": null,
+            "onlineRowActions": null,
+            "copyCheck": null,
+            "deleteCopiedDraft": null,
+            "responses": [],
+            "errors": null
+          }
+        },
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs",
+            "--signup-modes",
+            "auto_manual",
+            "--name-prefix",
+            "自动化报名模板"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "error": "",
+            "finalUrl": "https://stg-activity.weex.tech/activity/register",
+            "title": "",
+            "alias": "",
+            "activityId": "",
+            "status": "",
+            "verifyTotal": 0,
+            "createStatus": null,
+            "createBody": null,
+            "onlineBody": null,
+            "offlineBody": null,
+            "verifyFirst": null,
+            "verifyItem": null,
+            "searchChecks": null,
+            "draftRowActions": null,
+            "onlineRowActions": null,
+            "copyCheck": null,
+            "deleteCopiedDraft": null,
+            "responses": [],
+            "errors": null
+          }
+        },
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs",
+            "--signup-modes",
+            "auto",
+            "--platform-scopes",
+            "channel_invite,natural,non_active,mixed,fake_money",
+            "--name-prefix",
+            "自动化报名模板"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "error": "",
+            "finalUrl": "https://stg-activity.weex.tech/activity/register",
+            "title": "",
+            "alias": "",
+            "activityId": "",
+            "status": "",
+            "verifyTotal": 0,
+            "createStatus": null,
+            "createBody": null,
+            "onlineBody": null,
+            "offlineBody": null,
+            "verifyFirst": null,
+            "verifyItem": null,
+            "searchChecks": null,
+            "draftRowActions": null,
+            "onlineRowActions": null,
+            "copyCheck": null,
+            "deleteCopiedDraft": null,
+            "responses": [],
+            "errors": null
+          }
+        },
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs",
+            "--signup-modes",
+            "auto",
+            "--platform-scopes",
+            "non_active",
+            "--register-start",
+            "2026-06-01 03:28:09",
+            "--register-end",
+            "2027-06-01 03:28:09",
+            "--name-prefix",
+            "自动化报名模板"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "error": "",
+            "finalUrl": "https://stg-activity.weex.tech/activity/register",
+            "title": "",
+            "alias": "",
+            "activityId": "",
+            "status": "",
+            "verifyTotal": 0,
+            "createStatus": null,
+            "createBody": null,
+            "onlineBody": null,
+            "offlineBody": null,
+            "verifyFirst": null,
+            "verifyItem": null,
+            "searchChecks": null,
+            "draftRowActions": null,
+            "onlineRowActions": null,
+            "copyCheck": null,
+            "deleteCopiedDraft": null,
+            "responses": [],
+            "errors": null
+          }
+        }
+      ]
+    },
+    {
+      "phaseId": "verify_register_template_search",
+      "description": "Verify registration template search by name and template id.",
+      "caseIds": [
+        "RT-01",
+        "RT-02"
+      ],
+      "cases": [
+        {
+          "caseId": "RT-01",
+          "caseName": "模版列表搜索-模版名称",
+          "module": "报名模版",
+          "priority": "P0",
+          "packId": "admin_register_template_readonly",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "RT-02",
+          "caseName": "模版列表搜索-模版ID",
+          "module": "报名模版",
+          "priority": "P0",
+          "packId": "admin_register_template_readonly",
+          "scenarioKey": "ADMIN_SESSION"
+        }
+      ],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-admin-ops/scripts/register-template-search-checks-fast-api.mjs",
+          "--name-prefix",
+          "自动化报名模板"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "error": "",
+        "finalUrl": "https://stg-activity.weex.tech/activity/register",
+        "title": "",
+        "alias": "",
+        "activityId": "",
+        "status": "",
+        "verifyTotal": 0,
+        "createStatus": null,
+        "createBody": null,
+        "onlineBody": null,
+        "offlineBody": null,
+        "verifyFirst": null,
+        "verifyItem": null,
+        "searchChecks": {
+          "byName": {
+            "ok": true,
+            "recordType": "register_template_search",
+            "searchBy": "name",
+            "templateId": "3482",
+            "templateName": "自动化报名模板_非活跃用户_20260531185839_api_5840",
+            "searchedValue": "自动化报名模板_非活跃用户_20260531185839_api_5840",
+            "requestUrl": "/prod-api/activity/apply/list",
+            "rowCount": 1,
+            "matchedTemplateIds": [
+              "3482"
+            ]
+          },
+          "byId": {
+            "ok": true,
+            "recordType": "register_template_search",
+            "searchBy": "id",
+            "templateId": "3482",
+            "templateName": "自动化报名模板_非活跃用户_20260531185839_api_5840",
+            "searchedValue": "3482",
+            "requestUrl": "/prod-api/activity/apply/3482",
+            "rowCount": 1,
+            "matchedTemplateIds": [
+              "3482"
+            ]
+          }
+        },
+        "draftRowActions": null,
+        "onlineRowActions": null,
+        "copyCheck": null,
+        "deleteCopiedDraft": null,
+        "responses": [],
+        "errors": null
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-admin-ops/scripts/register-template-search-checks-fast-api.mjs",
+            "--name-prefix",
+            "自动化报名模板"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "error": "",
+            "finalUrl": "https://stg-activity.weex.tech/activity/register",
+            "title": "",
+            "alias": "",
+            "activityId": "",
+            "status": "",
+            "verifyTotal": 0,
+            "createStatus": null,
+            "createBody": null,
+            "onlineBody": null,
+            "offlineBody": null,
+            "verifyFirst": null,
+            "verifyItem": null,
+            "searchChecks": {
+              "byName": {
+                "ok": true,
+                "recordType": "register_template_search",
+                "searchBy": "name",
+                "templateId": "3482",
+                "templateName": "自动化报名模板_非活跃用户_20260531185839_api_5840",
+                "searchedValue": "自动化报名模板_非活跃用户_20260531185839_api_5840",
+                "requestUrl": "/prod-api/activity/apply/list",
+                "rowCount": 1,
+                "matchedTemplateIds": [
+                  "3482"
+                ]
+              },
+              "byId": {
+                "ok": true,
+                "recordType": "register_template_search",
+                "searchBy": "id",
+                "templateId": "3482",
+                "templateName": "自动化报名模板_非活跃用户_20260531185839_api_5840",
+                "searchedValue": "3482",
+                "requestUrl": "/prod-api/activity/apply/3482",
+                "rowCount": 1,
+                "matchedTemplateIds": [
+                  "3482"
+                ]
+              }
+            },
+            "draftRowActions": null,
+            "onlineRowActions": null,
+            "copyCheck": null,
+            "deleteCopiedDraft": null,
+            "responses": [],
+            "errors": null
+          }
+        }
+      ]
+    },
+    {
+      "phaseId": "verify_register_template_row_actions",
+      "description": "Verify registration template row actions view/modify/delete.",
+      "caseIds": [
+        "RT-07",
+        "RT-08",
+        "RT-09"
+      ],
+      "cases": [
+        {
+          "caseId": "RT-07",
+          "caseName": "模版行操作-查看",
+          "module": "报名模版",
+          "priority": "P0",
+          "packId": "admin_register_template_write",
+          "scenarioKey": "REGISTER_TEMPLATE_READY"
+        },
+        {
+          "caseId": "RT-08",
+          "caseName": "模版行操作-修改",
+          "module": "报名模版",
+          "priority": "P0",
+          "packId": "admin_register_template_write",
+          "scenarioKey": "REGISTER_TEMPLATE_READY"
+        },
+        {
+          "caseId": "RT-09",
+          "caseName": "模版行操作-删除",
+          "module": "报名模版",
+          "priority": "P0",
+          "packId": "admin_register_template_write",
+          "scenarioKey": "REGISTER_TEMPLATE_READY"
+        }
+      ],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-admin-ops/scripts/register-template-row-actions-fast-api.mjs",
+          "--name-prefix",
+          "操作列临时模板"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "error": "",
+        "finalUrl": "https://stg-activity.weex.tech/activity/register",
+        "title": "",
+        "alias": "",
+        "activityId": "",
+        "status": "",
+        "verifyTotal": 0,
+        "createStatus": null,
+        "createBody": null,
+        "onlineBody": null,
+        "offlineBody": null,
+        "verifyFirst": null,
+        "verifyItem": null,
+        "searchChecks": null,
+        "draftRowActions": null,
+        "onlineRowActions": null,
+        "copyCheck": null,
+        "deleteCopiedDraft": null,
+        "responses": [],
+        "errors": null
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-admin-ops/scripts/register-template-row-actions-fast-api.mjs",
+            "--name-prefix",
+            "操作列临时模板"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "error": "",
+            "finalUrl": "https://stg-activity.weex.tech/activity/register",
+            "title": "",
+            "alias": "",
+            "activityId": "",
+            "status": "",
+            "verifyTotal": 0,
+            "createStatus": null,
+            "createBody": null,
+            "onlineBody": null,
+            "offlineBody": null,
+            "verifyFirst": null,
+            "verifyItem": null,
+            "searchChecks": null,
+            "draftRowActions": null,
+            "onlineRowActions": null,
+            "copyCheck": null,
+            "deleteCopiedDraft": null,
+            "responses": [],
+            "errors": null
+          }
+        }
+      ]
+    },
+    {
+      "phaseId": "create_roulette_tasks",
+      "description": "Create roulette tasks for representative participant scopes.",
+      "caseIds": [
+        "TM-01",
+        "TM-02",
+        "TM-03",
+        "TM-04",
+        "TM-05",
+        "TM-06",
+        "TM-07",
+        "TM-09"
+      ],
+      "cases": [
+        {
+          "caseId": "TM-01",
+          "caseName": "任务列表搜索-任务编号",
+          "module": "任务管理",
+          "priority": "P0",
+          "packId": "admin_task_readonly",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "TM-02",
+          "caseName": "任务列表搜索-任务别名",
+          "module": "任务管理",
+          "priority": "P0",
+          "packId": "admin_task_readonly",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "TM-03",
+          "caseName": "任务列表搜索-任务标签",
+          "module": "任务管理",
+          "priority": "P0",
+          "packId": "admin_task_readonly",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "TM-04",
+          "caseName": "任务列表搜索-备注",
+          "module": "任务管理",
+          "priority": "P1",
+          "packId": "admin_task_readonly",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "TM-05",
+          "caseName": "任务列表搜索-开始时间",
+          "module": "任务管理",
+          "priority": "P1",
+          "packId": "admin_task_readonly",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "TM-06",
+          "caseName": "任务列表搜索-结束时间",
+          "module": "任务管理",
+          "priority": "P1",
+          "packId": "admin_task_readonly",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "TM-07",
+          "caseName": "新增任务-最小必填链路",
+          "module": "任务管理",
+          "priority": "P0",
+          "packId": "admin_task_write",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "TM-09",
+          "caseName": "奖励模式-单一奖励",
+          "module": "任务管理",
+          "priority": "P0",
+          "packId": "admin_task_write",
+          "scenarioKey": "ADMIN_SESSION"
+        }
+      ],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-admin-ops/scripts/create-roulette-participant-scope-tasks-fast-api.mjs",
+          "--scopes",
+          "all,vip,newuser,nocharge,olduser,agent,user,country",
+          "--uid",
+          "9881271952",
+          "--country",
+          "中国",
+          "--reward-max",
+          "100"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "error": "",
+        "finalUrl": "https://stg-activity.weex.tech/activity/task",
+        "title": "",
+        "alias": "",
+        "activityId": "",
+        "status": "",
+        "verifyTotal": 0,
+        "createStatus": null,
+        "createBody": null,
+        "onlineBody": null,
+        "offlineBody": null,
+        "verifyFirst": null,
+        "verifyItem": null,
+        "searchChecks": {
+          "byId": {
+            "ok": true,
+            "recordType": "task_search",
+            "searchBy": "id",
+            "taskId": "6422",
+            "taskAlias": "转盘抽奖_all_20260531185848",
+            "rowCount": 1,
+            "matchedTaskIds": [
+              "6422"
+            ]
+          },
+          "byAlias": {
+            "ok": true,
+            "recordType": "task_search",
+            "searchBy": "alias",
+            "taskId": "6422",
+            "taskAlias": "转盘抽奖_all_20260531185848",
+            "rowCount": 1,
+            "matchedTaskIds": [
+              "6422"
+            ]
+          },
+          "byTag": {
+            "ok": true,
+            "recordType": "task_search",
+            "searchBy": "tag",
+            "taskId": "6422",
+            "taskAlias": "转盘抽奖_all_20260531185848",
+            "rowCount": 1,
+            "matchedTaskIds": [
+              "6422"
+            ]
+          },
+          "byRemark": {
+            "ok": true,
+            "recordType": "task_search",
+            "searchBy": "remark",
+            "taskId": "6422",
+            "taskAlias": "转盘抽奖_all_20260531185848",
+            "rowCount": 1,
+            "matchedTaskIds": [
+              "6422"
+            ]
+          },
+          "byStartTime": {
+            "ok": true,
+            "recordType": "task_search",
+            "searchBy": "beginTime",
+            "taskId": "6422",
+            "taskAlias": "转盘抽奖_all_20260531185848",
+            "rowCount": 1,
+            "matchedTaskIds": [
+              "6422"
+            ]
+          },
+          "byEndTime": {
+            "ok": true,
+            "recordType": "task_search",
+            "searchBy": "endTime",
+            "taskId": "6422",
+            "taskAlias": "转盘抽奖_all_20260531185848",
+            "rowCount": 1,
+            "matchedTaskIds": [
+              "6422"
+            ]
+          }
+        },
+        "draftRowActions": null,
+        "onlineRowActions": null,
+        "copyCheck": null,
+        "deleteCopiedDraft": null,
+        "responses": [],
+        "errors": null
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-admin-ops/scripts/create-roulette-participant-scope-tasks-fast-api.mjs",
+            "--scopes",
+            "all,vip,newuser,nocharge,olduser,agent,user,country",
+            "--uid",
+            "9881271952",
+            "--country",
+            "中国",
+            "--reward-max",
+            "100"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "error": "",
+            "finalUrl": "https://stg-activity.weex.tech/activity/task",
+            "title": "",
+            "alias": "",
+            "activityId": "",
+            "status": "",
+            "verifyTotal": 0,
+            "createStatus": null,
+            "createBody": null,
+            "onlineBody": null,
+            "offlineBody": null,
+            "verifyFirst": null,
+            "verifyItem": null,
+            "searchChecks": {
+              "byId": {
+                "ok": true,
+                "recordType": "task_search",
+                "searchBy": "id",
+                "taskId": "6422",
+                "taskAlias": "转盘抽奖_all_20260531185848",
+                "rowCount": 1,
+                "matchedTaskIds": [
+                  "6422"
+                ]
+              },
+              "byAlias": {
+                "ok": true,
+                "recordType": "task_search",
+                "searchBy": "alias",
+                "taskId": "6422",
+                "taskAlias": "转盘抽奖_all_20260531185848",
+                "rowCount": 1,
+                "matchedTaskIds": [
+                  "6422"
+                ]
+              },
+              "byTag": {
+                "ok": true,
+                "recordType": "task_search",
+                "searchBy": "tag",
+                "taskId": "6422",
+                "taskAlias": "转盘抽奖_all_20260531185848",
+                "rowCount": 1,
+                "matchedTaskIds": [
+                  "6422"
+                ]
+              },
+              "byRemark": {
+                "ok": true,
+                "recordType": "task_search",
+                "searchBy": "remark",
+                "taskId": "6422",
+                "taskAlias": "转盘抽奖_all_20260531185848",
+                "rowCount": 1,
+                "matchedTaskIds": [
+                  "6422"
+                ]
+              },
+              "byStartTime": {
+                "ok": true,
+                "recordType": "task_search",
+                "searchBy": "beginTime",
+                "taskId": "6422",
+                "taskAlias": "转盘抽奖_all_20260531185848",
+                "rowCount": 1,
+                "matchedTaskIds": [
+                  "6422"
+                ]
+              },
+              "byEndTime": {
+                "ok": true,
+                "recordType": "task_search",
+                "searchBy": "endTime",
+                "taskId": "6422",
+                "taskAlias": "转盘抽奖_all_20260531185848",
+                "rowCount": 1,
+                "matchedTaskIds": [
+                  "6422"
+                ]
+              }
+            },
+            "draftRowActions": null,
+            "onlineRowActions": null,
+            "copyCheck": null,
+            "deleteCopiedDraft": null,
+            "responses": [],
+            "errors": null
+          }
+        }
+      ]
+    },
+    {
+      "phaseId": "create_roulette_condition_tasks",
+      "description": "Create roulette tasks for representative task-condition branches.",
+      "caseIds": [
+        "TM-08"
+      ],
+      "cases": [
+        {
+          "caseId": "TM-08",
+          "caseName": "任务条件分支覆盖",
+          "module": "任务管理",
+          "priority": "P0",
+          "packId": "admin_task_write",
+          "scenarioKey": "ADMIN_SESSION"
+        }
+      ],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-admin-ops/scripts/create-roulette-condition-tasks-fast-api.mjs",
+          "--conditions",
+          "kol,contract,spot,recharge"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "error": "",
+        "finalUrl": "https://stg-activity.weex.tech/activity/task",
+        "title": "",
+        "alias": "",
+        "activityId": "",
+        "status": "",
+        "verifyTotal": 0,
+        "createStatus": null,
+        "createBody": null,
+        "onlineBody": null,
+        "offlineBody": null,
+        "verifyFirst": null,
+        "verifyItem": null,
+        "searchChecks": null,
+        "draftRowActions": null,
+        "onlineRowActions": null,
+        "copyCheck": null,
+        "deleteCopiedDraft": null,
+        "responses": [],
+        "errors": null
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-admin-ops/scripts/create-roulette-condition-tasks-fast-api.mjs",
+            "--conditions",
+            "kol,contract,spot,recharge"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "error": "",
+            "finalUrl": "https://stg-activity.weex.tech/activity/task",
+            "title": "",
+            "alias": "",
+            "activityId": "",
+            "status": "",
+            "verifyTotal": 0,
+            "createStatus": null,
+            "createBody": null,
+            "onlineBody": null,
+            "offlineBody": null,
+            "verifyFirst": null,
+            "verifyItem": null,
+            "searchChecks": null,
+            "draftRowActions": null,
+            "onlineRowActions": null,
+            "copyCheck": null,
+            "deleteCopiedDraft": null,
+            "responses": [],
+            "errors": null
+          }
+        }
+      ]
+    },
+    {
+      "phaseId": "create_roulette_reward_mode_tasks",
+      "description": "Create roulette tasks for limited and normal+rights reward modes.",
+      "caseIds": [
+        "TM-10",
+        "TM-11"
+      ],
+      "cases": [
+        {
+          "caseId": "TM-10",
+          "caseName": "奖励模式-限时奖励不同",
+          "module": "任务管理",
+          "priority": "P1",
+          "packId": "admin_task_write",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "TM-11",
+          "caseName": "奖励模式-正常奖励+权益奖励",
+          "module": "任务管理",
+          "priority": "P1",
+          "packId": "admin_task_write",
+          "scenarioKey": "ADMIN_SESSION"
+        }
+      ],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-admin-ops/scripts/create-roulette-reward-mode-tasks-fast-api.mjs",
+          "--modes",
+          "limited,rights"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "error": "",
+        "finalUrl": "https://stg-activity.weex.tech/activity/task",
+        "title": "",
+        "alias": "",
+        "activityId": "",
+        "status": "",
+        "verifyTotal": 0,
+        "createStatus": null,
+        "createBody": null,
+        "onlineBody": null,
+        "offlineBody": null,
+        "verifyFirst": null,
+        "verifyItem": null,
+        "searchChecks": null,
+        "draftRowActions": null,
+        "onlineRowActions": null,
+        "copyCheck": null,
+        "deleteCopiedDraft": null,
+        "responses": [],
+        "errors": null
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-admin-ops/scripts/create-roulette-reward-mode-tasks-fast-api.mjs",
+            "--modes",
+            "limited,rights"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "error": "",
+            "finalUrl": "https://stg-activity.weex.tech/activity/task",
+            "title": "",
+            "alias": "",
+            "activityId": "",
+            "status": "",
+            "verifyTotal": 0,
+            "createStatus": null,
+            "createBody": null,
+            "onlineBody": null,
+            "offlineBody": null,
+            "verifyFirst": null,
+            "verifyItem": null,
+            "searchChecks": null,
+            "draftRowActions": null,
+            "onlineRowActions": null,
+            "copyCheck": null,
+            "deleteCopiedDraft": null,
+            "responses": [],
+            "errors": null
+          }
+        }
+      ]
+    },
+    {
+      "phaseId": "create_lottery_activity_draft",
+      "description": "Create the main regression lottery draft with the verified template chain.",
+      "caseIds": [
+        "AC-01",
+        "AC-02",
+        "AC-03",
+        "AC-04",
+        "AC-05",
+        "AC-06",
+        "AC-07",
+        "AC-08",
+        "AC-09",
+        "AC-10",
+        "AC-11",
+        "AC-12",
+        "AC-13",
+        "AC-14"
+      ],
+      "cases": [
+        {
+          "caseId": "AC-01",
+          "caseName": "新增活动-最小必填草稿",
+          "module": "活动配置/活动信息",
+          "priority": "P0",
+          "packId": "admin_activity_draft_core",
+          "scenarioKey": "PRIZE_SET_READY"
+        },
+        {
+          "caseId": "AC-02",
+          "caseName": "长度限制-活动标题/副标题",
+          "module": "活动配置/活动信息",
+          "priority": "P0",
+          "packId": "admin_activity_draft_core",
+          "scenarioKey": "NORMAL_ACTIVITY_DRAFT"
+        },
+        {
+          "caseId": "AC-03",
+          "caseName": "活动别名规则",
+          "module": "活动配置/活动信息",
+          "priority": "P0",
+          "packId": "admin_activity_draft_core",
+          "scenarioKey": "NORMAL_ACTIVITY_DRAFT"
+        },
+        {
+          "caseId": "AC-04",
+          "caseName": "是否支持预报名-支持",
+          "module": "活动配置/活动信息",
+          "priority": "P0",
+          "packId": "admin_activity_draft_core",
+          "scenarioKey": "NORMAL_ACTIVITY_DRAFT"
+        },
+        {
+          "caseId": "AC-05",
+          "caseName": "是否支持预报名-不支持",
+          "module": "活动配置/活动信息",
+          "priority": "P0",
+          "packId": "admin_activity_draft_core",
+          "scenarioKey": "NORMAL_ACTIVITY_DRAFT"
+        },
+        {
+          "caseId": "AC-06",
+          "caseName": "是否显示活动日历入口",
+          "module": "活动配置/活动信息",
+          "priority": "P1",
+          "packId": "admin_activity_extended_config",
+          "scenarioKey": "NORMAL_ACTIVITY_DRAFT"
+        },
+        {
+          "caseId": "AC-07",
+          "caseName": "奖品配置区",
+          "module": "活动配置/活动信息",
+          "priority": "P0",
+          "packId": "admin_activity_draft_core",
+          "scenarioKey": "NORMAL_ACTIVITY_DRAFT"
+        },
+        {
+          "caseId": "AC-08",
+          "caseName": "活动任务信息绑定",
+          "module": "活动配置/活动信息",
+          "priority": "P0",
+          "packId": "admin_activity_draft_core",
+          "scenarioKey": "NORMAL_ACTIVITY_DRAFT"
+        },
+        {
+          "caseId": "AC-09",
+          "caseName": "多语言配置-文本",
+          "module": "活动配置/活动信息",
+          "priority": "P1",
+          "packId": "admin_activity_extended_config",
+          "scenarioKey": "NORMAL_ACTIVITY_DRAFT"
+        },
+        {
+          "caseId": "AC-10",
+          "caseName": "多语言配置-图片",
+          "module": "活动配置/活动信息",
+          "priority": "P1",
+          "packId": "admin_activity_extended_config",
+          "scenarioKey": "NORMAL_ACTIVITY_DRAFT"
+        },
+        {
+          "caseId": "AC-11",
+          "caseName": "常见问题配置",
+          "module": "活动配置/活动信息",
+          "priority": "P1",
+          "packId": "admin_activity_extended_config",
+          "scenarioKey": "NORMAL_ACTIVITY_DRAFT"
+        },
+        {
+          "caseId": "AC-12",
+          "caseName": "颜色签配置",
+          "module": "活动配置/活动信息",
+          "priority": "P1",
+          "packId": "admin_activity_extended_config",
+          "scenarioKey": "NORMAL_ACTIVITY_DRAFT"
+        },
+        {
+          "caseId": "AC-13",
+          "caseName": "奖品每日限制配置",
+          "module": "活动配置/活动信息",
+          "priority": "P1",
+          "packId": "admin_activity_extended_config",
+          "scenarioKey": "NORMAL_ACTIVITY_DRAFT"
+        },
+        {
+          "caseId": "AC-14",
+          "caseName": "累计次数再权重配置",
+          "module": "活动配置/活动信息",
+          "priority": "P1",
+          "packId": "admin_activity_extended_config",
+          "scenarioKey": "WEIGHT_ACTIVITY_ONLINE"
+        }
+      ],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs",
+          "--action",
+          "create-draft",
+          "--title-prefix",
+          "后管主回归",
+          "--alias-prefix",
+          "ln"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "error": "",
+        "finalUrl": "/activities/lottery",
+        "title": "后管主回归185912",
+        "alias": "ln53952453",
+        "activityId": "9874",
+        "status": "DRAFT",
+        "verifyTotal": 1,
+        "createStatus": null,
+        "createBody": {
+          "code": 200,
+          "msg": "操作成功"
+        },
+        "onlineBody": null,
+        "offlineBody": null,
+        "verifyFirst": {
+          "activityId": 9874,
+          "showUrl": "ln53952453",
+          "title": "后管主回归185912",
+          "status": "DRAFT",
+          "prizeCount": 8,
+          "taskCount": 4
+        },
+        "verifyItem": null,
+        "searchChecks": null,
+        "draftRowActions": null,
+        "onlineRowActions": null,
+        "copyCheck": null,
+        "deleteCopiedDraft": null,
+        "responses": [],
+        "errors": null
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs",
+            "--action",
+            "create-draft",
+            "--title-prefix",
+            "后管主回归",
+            "--alias-prefix",
+            "ln"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "error": "",
+            "finalUrl": "/activities/lottery",
+            "title": "后管主回归185912",
+            "alias": "ln53952453",
+            "activityId": "9874",
+            "status": "DRAFT",
+            "verifyTotal": 1,
+            "createStatus": null,
+            "createBody": {
+              "code": 200,
+              "msg": "操作成功"
+            },
+            "onlineBody": null,
+            "offlineBody": null,
+            "verifyFirst": {
+              "activityId": 9874,
+              "showUrl": "ln53952453",
+              "title": "后管主回归185912",
+              "status": "DRAFT",
+              "prizeCount": 8,
+              "taskCount": 4
+            },
+            "verifyItem": null,
+            "searchChecks": null,
+            "draftRowActions": null,
+            "onlineRowActions": null,
+            "copyCheck": null,
+            "deleteCopiedDraft": null,
+            "responses": [],
+            "errors": null
+          }
+        }
+      ]
+    },
+    {
+      "phaseId": "verify_activity_list_draft",
+      "description": "Verify draft activity list search filters and draft-row action visibility.",
+      "caseIds": [
+        "AL-01",
+        "AL-02",
+        "AL-03",
+        "AL-04",
+        "AL-05",
+        "AL-06"
+      ],
+      "cases": [
+        {
+          "caseId": "AL-01",
+          "caseName": "列表搜索-活动ID",
+          "module": "活动列表",
+          "priority": "P0",
+          "packId": "admin_activity_list_readonly",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "AL-02",
+          "caseName": "列表搜索-活动标题",
+          "module": "活动列表",
+          "priority": "P1",
+          "packId": "admin_activity_list_readonly",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "AL-03",
+          "caseName": "列表搜索-活动别名",
+          "module": "活动列表",
+          "priority": "P0",
+          "packId": "admin_activity_list_readonly",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "AL-04",
+          "caseName": "列表搜索-活动类型",
+          "module": "活动列表",
+          "priority": "P1",
+          "packId": "admin_activity_list_readonly",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "AL-05",
+          "caseName": "列表搜索-活动日期",
+          "module": "活动列表",
+          "priority": "P1",
+          "packId": "admin_activity_list_readonly",
+          "scenarioKey": "ADMIN_SESSION"
+        },
+        {
+          "caseId": "AL-06",
+          "caseName": "草稿活动行操作",
+          "module": "活动列表",
+          "priority": "P0",
+          "packId": "admin_activity_status_flow",
+          "scenarioKey": "NORMAL_ACTIVITY_DRAFT"
+        }
+      ],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs",
+          "--action",
+          "draft-checks",
+          "--activity-alias",
+          "ln53952453"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "error": "",
+        "finalUrl": "/activities/lottery",
+        "title": "后管主回归185912",
+        "alias": "ln53952453",
+        "activityId": "9874",
+        "status": "",
+        "verifyTotal": 0,
+        "createStatus": null,
+        "createBody": null,
+        "onlineBody": null,
+        "offlineBody": null,
+        "verifyFirst": null,
+        "verifyItem": null,
+        "searchChecks": {
+          "byId": {
+            "ok": true,
+            "activityId": "9874"
+          },
+          "byTitle": {
+            "ok": true,
+            "title": "后管主回归185912",
+            "activityId": "9874"
+          },
+          "byAlias": {
+            "ok": true,
+            "alias": "ln53952453",
+            "activityId": "9874"
+          },
+          "byType": {
+            "ok": true,
+            "type": "转盘抽奖",
+            "activityId": "9874"
+          },
+          "byDate": {
+            "ok": true,
+            "start": "2026-06-01 03:29:12",
+            "end": "2026-07-01 03:29:12",
+            "activityId": "9874"
+          }
+        },
+        "draftRowActions": {
+          "ok": true,
+          "actions": [
+            "查看",
+            "修改",
+            "上线",
+            "删除",
+            "复制"
+          ]
+        },
+        "onlineRowActions": null,
+        "copyCheck": null,
+        "deleteCopiedDraft": null,
+        "responses": [],
+        "errors": null
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs",
+            "--action",
+            "draft-checks",
+            "--activity-alias",
+            "ln53952453"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "error": "",
+            "finalUrl": "/activities/lottery",
+            "title": "后管主回归185912",
+            "alias": "ln53952453",
+            "activityId": "9874",
+            "status": "",
+            "verifyTotal": 0,
+            "createStatus": null,
+            "createBody": null,
+            "onlineBody": null,
+            "offlineBody": null,
+            "verifyFirst": null,
+            "verifyItem": null,
+            "searchChecks": {
+              "byId": {
+                "ok": true,
+                "activityId": "9874"
+              },
+              "byTitle": {
+                "ok": true,
+                "title": "后管主回归185912",
+                "activityId": "9874"
+              },
+              "byAlias": {
+                "ok": true,
+                "alias": "ln53952453",
+                "activityId": "9874"
+              },
+              "byType": {
+                "ok": true,
+                "type": "转盘抽奖",
+                "activityId": "9874"
+              },
+              "byDate": {
+                "ok": true,
+                "start": "2026-06-01 03:29:12",
+                "end": "2026-07-01 03:29:12",
+                "activityId": "9874"
+              }
+            },
+            "draftRowActions": {
+              "ok": true,
+              "actions": [
+                "查看",
+                "修改",
+                "上线",
+                "删除",
+                "复制"
+              ]
+            },
+            "onlineRowActions": null,
+            "copyCheck": null,
+            "deleteCopiedDraft": null,
+            "responses": [],
+            "errors": null
+          }
+        }
+      ]
+    },
+    {
+      "phaseId": "online_lottery_activity",
+      "description": "Put the created draft online.",
+      "caseIds": [
+        "ST-01"
+      ],
+      "cases": [
+        {
+          "caseId": "ST-01",
+          "caseName": "草稿上线",
+          "module": "上下线/状态流转",
+          "priority": "P0",
+          "packId": "admin_activity_status_flow",
+          "scenarioKey": "NORMAL_ACTIVITY_DRAFT"
+        }
+      ],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs",
+          "--action",
+          "online",
+          "--activity-alias",
+          "ln53952453"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "error": "",
+        "finalUrl": "/activities/lottery",
+        "title": "",
+        "alias": "ln53952453",
+        "activityId": "9874",
+        "status": "ONLINE",
+        "verifyTotal": 0,
+        "createStatus": null,
+        "createBody": null,
+        "onlineBody": {
+          "code": 200,
+          "msg": "操作成功"
+        },
+        "offlineBody": null,
+        "verifyFirst": null,
+        "verifyItem": {
+          "activityId": 9874,
+          "showUrl": "ln53952453",
+          "title": "后管主回归185912",
+          "status": "ONLINE"
+        },
+        "searchChecks": null,
+        "draftRowActions": null,
+        "onlineRowActions": null,
+        "copyCheck": null,
+        "deleteCopiedDraft": null,
+        "responses": [],
+        "errors": null
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs",
+            "--action",
+            "online",
+            "--activity-alias",
+            "ln53952453"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "error": "",
+            "finalUrl": "/activities/lottery",
+            "title": "",
+            "alias": "ln53952453",
+            "activityId": "9874",
+            "status": "ONLINE",
+            "verifyTotal": 0,
+            "createStatus": null,
+            "createBody": null,
+            "onlineBody": {
+              "code": 200,
+              "msg": "操作成功"
+            },
+            "offlineBody": null,
+            "verifyFirst": null,
+            "verifyItem": {
+              "activityId": 9874,
+              "showUrl": "ln53952453",
+              "title": "后管主回归185912",
+              "status": "ONLINE"
+            },
+            "searchChecks": null,
+            "draftRowActions": null,
+            "onlineRowActions": null,
+            "copyCheck": null,
+            "deleteCopiedDraft": null,
+            "responses": [],
+            "errors": null
+          }
+        }
+      ]
+    },
+    {
+      "phaseId": "verify_activity_list_online",
+      "description": "Verify online activity row actions and copied draft creation from the list.",
+      "caseIds": [
+        "AL-07",
+        "AC-15",
+        "ST-03"
+      ],
+      "cases": [
+        {
+          "caseId": "AL-07",
+          "caseName": "已上线活动行操作",
+          "module": "活动列表",
+          "priority": "P0",
+          "packId": "admin_activity_copy",
+          "scenarioKey": "NORMAL_ACTIVITY_ONLINE"
+        },
+        {
+          "caseId": "AC-15",
+          "caseName": "活动复制",
+          "module": "活动配置/活动信息",
+          "priority": "P0",
+          "packId": "admin_activity_copy",
+          "scenarioKey": "NORMAL_ACTIVITY_ONLINE"
+        },
+        {
+          "caseId": "ST-03",
+          "caseName": "草稿删除",
+          "module": "上下线/状态流转",
+          "priority": "P0",
+          "packId": "admin_activity_status_flow",
+          "scenarioKey": "NORMAL_ACTIVITY_DRAFT"
+        }
+      ],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs",
+          "--action",
+          "online-checks",
+          "--activity-alias",
+          "ln53952453"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "error": "",
+        "finalUrl": "/activities/lottery",
+        "title": "",
+        "alias": "ln53952453",
+        "activityId": "9874",
+        "status": "",
+        "verifyTotal": 0,
+        "createStatus": null,
+        "createBody": null,
+        "onlineBody": null,
+        "offlineBody": null,
+        "verifyFirst": null,
+        "verifyItem": null,
+        "searchChecks": null,
+        "draftRowActions": null,
+        "onlineRowActions": {
+          "ok": true,
+          "actions": [
+            "查看",
+            "修改",
+            "下线",
+            "复制"
+          ]
+        },
+        "copyCheck": {
+          "copiedId": "9875",
+          "copiedAlias": "cp53961383",
+          "submit": {
+            "code": 200,
+            "msg": "操作成功"
+          },
+          "directCopy": {
+            "code": 200,
+            "msg": "API clone replacement for headless mode"
+          }
+        },
+        "deleteCopiedDraft": {
+          "code": 200,
+          "msg": "操作成功",
+          "rowAbsentAfterSearch": true,
+          "alias": "cp53961383"
+        },
+        "responses": [],
+        "errors": null
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs",
+            "--action",
+            "online-checks",
+            "--activity-alias",
+            "ln53952453"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "error": "",
+            "finalUrl": "/activities/lottery",
+            "title": "",
+            "alias": "ln53952453",
+            "activityId": "9874",
+            "status": "",
+            "verifyTotal": 0,
+            "createStatus": null,
+            "createBody": null,
+            "onlineBody": null,
+            "offlineBody": null,
+            "verifyFirst": null,
+            "verifyItem": null,
+            "searchChecks": null,
+            "draftRowActions": null,
+            "onlineRowActions": {
+              "ok": true,
+              "actions": [
+                "查看",
+                "修改",
+                "下线",
+                "复制"
+              ]
+            },
+            "copyCheck": {
+              "copiedId": "9875",
+              "copiedAlias": "cp53961383",
+              "submit": {
+                "code": 200,
+                "msg": "操作成功"
+              },
+              "directCopy": {
+                "code": 200,
+                "msg": "API clone replacement for headless mode"
+              }
+            },
+            "deleteCopiedDraft": {
+              "code": 200,
+              "msg": "操作成功",
+              "rowAbsentAfterSearch": true,
+              "alias": "cp53961383"
+            },
+            "responses": [],
+            "errors": null
+          }
+        }
+      ]
+    },
+    {
+      "phaseId": "offline_lottery_activity",
+      "description": "Take the created online activity offline after copy and draft-delete checks pass.",
+      "caseIds": [
+        "ST-02"
+      ],
+      "cases": [
+        {
+          "caseId": "ST-02",
+          "caseName": "已上线活动下线",
+          "module": "上下线/状态流转",
+          "priority": "P0",
+          "packId": "admin_activity_status_flow",
+          "scenarioKey": "NORMAL_ACTIVITY_ONLINE"
+        }
+      ],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs",
+          "--action",
+          "offline",
+          "--activity-alias",
+          "ln53952453"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "error": "",
+        "finalUrl": "/activities/lottery",
+        "title": "",
+        "alias": "ln53952453",
+        "activityId": "9874",
+        "status": "OFFLINE",
+        "verifyTotal": 0,
+        "createStatus": null,
+        "createBody": null,
+        "onlineBody": null,
+        "offlineBody": {
+          "code": 200,
+          "msg": "操作成功"
+        },
+        "verifyFirst": null,
+        "verifyItem": {
+          "activityId": 9874,
+          "showUrl": "ln53952453",
+          "title": "后管主回归185912",
+          "status": "OFFLINE"
+        },
+        "searchChecks": null,
+        "draftRowActions": null,
+        "onlineRowActions": null,
+        "copyCheck": null,
+        "deleteCopiedDraft": null,
+        "responses": [],
+        "errors": null
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs",
+            "--action",
+            "offline",
+            "--activity-alias",
+            "ln53952453"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "error": "",
+            "finalUrl": "/activities/lottery",
+            "title": "",
+            "alias": "ln53952453",
+            "activityId": "9874",
+            "status": "OFFLINE",
+            "verifyTotal": 0,
+            "createStatus": null,
+            "createBody": null,
+            "onlineBody": null,
+            "offlineBody": {
+              "code": 200,
+              "msg": "操作成功"
+            },
+            "verifyFirst": null,
+            "verifyItem": {
+              "activityId": 9874,
+              "showUrl": "ln53952453",
+              "title": "后管主回归185912",
+              "status": "OFFLINE"
+            },
+            "searchChecks": null,
+            "draftRowActions": null,
+            "onlineRowActions": null,
+            "copyCheck": null,
+            "deleteCopiedDraft": null,
+            "responses": [],
+            "errors": null
+          }
+        }
+      ]
+    }
+  ],
+  "caseResults": [
+    {
+      "caseId": "PM-01",
+      "caseName": "奖品列表搜索-奖品ID",
+      "module": "奖品管理",
+      "priority": "P0",
+      "phaseId": "create_regression_prizes",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "",
+        "activityId": "",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "PM-02",
+      "caseName": "奖品列表搜索-奖品分类/子分类",
+      "module": "奖品管理",
+      "priority": "P0",
+      "phaseId": "create_regression_prizes",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "",
+        "activityId": "",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "prize",
+        "prizeId": "",
+        "category": "赠金",
+        "subtype": "赠金",
+        "name": ""
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "PM-03",
+      "caseName": "奖品列表搜索-奖品名称/别名",
+      "module": "奖品管理",
+      "priority": "P1",
+      "phaseId": "create_regression_prizes",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "",
+        "activityId": "",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "PM-04",
+      "caseName": "新增奖品-赠金",
+      "module": "奖品管理",
+      "priority": "P0",
+      "phaseId": "create_regression_prizes",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "api_bonus_20260531185809",
+        "activityId": "1296",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "prize",
+        "prizeId": "1296",
+        "category": "赠金",
+        "subtype": "赠金",
+        "name": "自动化测试 - 赠金_20260531185809"
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "PM-05",
+      "caseName": "新增奖品-币种BTC",
+      "module": "奖品管理",
+      "priority": "P0",
+      "phaseId": "create_regression_prizes",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "api_btc_20260531185809",
+        "activityId": "1297",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "prize",
+        "prizeId": "1297",
+        "category": "币种",
+        "subtype": "BTC",
+        "name": "自动化测试 - 币对 BTC_20260531185809"
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "PM-06",
+      "caseName": "新增奖品-实物",
+      "module": "奖品管理",
+      "priority": "P0",
+      "phaseId": "create_regression_prizes",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "api_physical_20260531185809",
+        "activityId": "1298",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "prize",
+        "prizeId": "1298",
+        "category": "实物",
+        "subtype": "实物",
+        "name": "自动化测试 - 实物_20260531185809"
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "PM-07",
+      "caseName": "新增奖品-虚拟积分或资格",
+      "module": "奖品管理",
+      "priority": "P1",
+      "phaseId": "create_regression_prizes",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "api_draw_count_20260531185809",
+        "activityId": "1299",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "prize",
+        "prizeId": "1299",
+        "category": "虚拟积分或资格",
+        "subtype": "抽奖次数",
+        "name": "自动化测试 - 抽奖次数_20260531185809"
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "PM-08",
+      "caseName": "奖品行操作-查看",
+      "module": "奖品管理",
+      "priority": "P0",
+      "phaseId": "prize_row_actions",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "prize_row_action_temp_20260531185815",
+        "activityId": "1300",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "prize_row_action",
+        "actionStep": "view",
+        "prizeId": "1300",
+        "copiedPrizeId": "1301",
+        "name": "操作列临时奖品_20260531185815",
+        "modifiedName": "操作列临时奖品_20260531185815_已修改"
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "PM-09",
+      "caseName": "奖品行操作-修改",
+      "module": "奖品管理",
+      "priority": "P0",
+      "phaseId": "prize_row_actions",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "prize_row_action_temp_20260531185815",
+        "activityId": "1300",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "prize_row_action",
+        "actionStep": "modify",
+        "prizeId": "1300",
+        "copiedPrizeId": "1301",
+        "name": "操作列临时奖品_20260531185815",
+        "modifiedName": "操作列临时奖品_20260531185815_已修改"
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "PM-10",
+      "caseName": "奖品行操作-复制",
+      "module": "奖品管理",
+      "priority": "P0",
+      "phaseId": "prize_row_actions",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "prize_row_action_temp_20260531185815",
+        "activityId": "1300",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "prize_row_action",
+        "actionStep": "copy",
+        "prizeId": "1300",
+        "copiedPrizeId": "1301",
+        "name": "操作列临时奖品_20260531185815",
+        "modifiedName": "操作列临时奖品_20260531185815_已修改"
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "PM-11",
+      "caseName": "奖品行操作-删除",
+      "module": "奖品管理",
+      "priority": "P0",
+      "phaseId": "prize_row_actions",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "prize_row_action_temp_20260531185815",
+        "activityId": "1300",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "prize_row_action",
+        "actionStep": "delete",
+        "prizeId": "1300",
+        "copiedPrizeId": "1301",
+        "name": "操作列临时奖品_20260531185815",
+        "modifiedName": "操作列临时奖品_20260531185815_已修改"
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "RT-03",
+      "caseName": "模版新增-最小主链路（全平台用户）",
+      "module": "报名模版",
+      "priority": "P0",
+      "phaseId": "create_register_templates",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "",
+        "activityId": "3473",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "register_template",
+        "templateName": "自动化报名模板_auto_20260531185820_api_5821",
+        "signupMode": "注册即报名",
+        "platformScope": "全平台用户",
+        "restrictScope": "无"
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "RT-04",
+      "caseName": "模版新增-全平台用户+用户手动点击报名",
+      "module": "报名模版",
+      "priority": "P1",
+      "phaseId": "create_register_templates",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "",
+        "activityId": "3474",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "register_template",
+        "templateName": "自动化报名模板_manual_20260531185823_api_5824",
+        "signupMode": "用户手动点击报名",
+        "platformScope": "全平台用户",
+        "restrictScope": "无"
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "RT-05",
+      "caseName": "模版新增-平台用户参与范围分支",
+      "module": "报名模版",
+      "priority": "P1",
+      "phaseId": "create_register_templates",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "",
+        "activityId": "",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "RT-06",
+      "caseName": "模版新增-可参与注册时间范围",
+      "module": "报名模版",
+      "priority": "P1",
+      "phaseId": "create_register_templates",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "",
+        "activityId": "3482",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "register_template",
+        "templateName": "自动化报名模板_非活跃用户_20260531185839_api_5840",
+        "signupMode": "注册即报名",
+        "platformScope": "非活跃用户",
+        "restrictScope": "无"
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "RT-01",
+      "caseName": "模版列表搜索-模版名称",
+      "module": "报名模版",
+      "priority": "P0",
+      "phaseId": "verify_register_template_search",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "",
+        "activityId": "",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "register_template_search",
+        "searchBy": "name",
+        "templateId": "3482",
+        "templateName": "自动化报名模板_非活跃用户_20260531185839_api_5840",
+        "searchedValue": "自动化报名模板_非活跃用户_20260531185839_api_5840",
+        "rowCount": 1
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "RT-02",
+      "caseName": "模版列表搜索-模版ID",
+      "module": "报名模版",
+      "priority": "P0",
+      "phaseId": "verify_register_template_search",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "",
+        "activityId": "",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "register_template_search",
+        "searchBy": "id",
+        "templateId": "3482",
+        "templateName": "自动化报名模板_非活跃用户_20260531185839_api_5840",
+        "searchedValue": "3482",
+        "rowCount": 1
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "RT-07",
+      "caseName": "模版行操作-查看",
+      "module": "报名模版",
+      "priority": "P0",
+      "phaseId": "verify_register_template_row_actions",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "",
+        "activityId": "3483",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "register_template_row_action",
+        "actionStep": "view",
+        "templateId": "3483",
+        "templateName": "操作列临时模板_全平台用户_20260531185844",
+        "modifiedName": "操作列临时模板_全平台用户_20260531185844_已修改"
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "RT-08",
+      "caseName": "模版行操作-修改",
+      "module": "报名模版",
+      "priority": "P0",
+      "phaseId": "verify_register_template_row_actions",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "",
+        "activityId": "3483",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "register_template_row_action",
+        "actionStep": "modify",
+        "templateId": "3483",
+        "templateName": "操作列临时模板_全平台用户_20260531185844",
+        "modifiedName": "操作列临时模板_全平台用户_20260531185844_已修改"
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "RT-09",
+      "caseName": "模版行操作-删除",
+      "module": "报名模版",
+      "priority": "P0",
+      "phaseId": "verify_register_template_row_actions",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "",
+        "activityId": "3483",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "register_template_row_action",
+        "actionStep": "delete",
+        "templateId": "3483",
+        "templateName": "操作列临时模板_全平台用户_20260531185844",
+        "modifiedName": "操作列临时模板_全平台用户_20260531185844_已修改"
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "TM-01",
+      "caseName": "任务列表搜索-任务编号",
+      "module": "任务管理",
+      "priority": "P0",
+      "phaseId": "create_roulette_tasks",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "",
+        "activityId": "",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "task_search",
+        "searchBy": "id",
+        "taskId": "6422",
+        "taskName": "转盘抽奖_all_20260531185848",
+        "searchedValue": "",
+        "rowCount": 1
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "TM-02",
+      "caseName": "任务列表搜索-任务别名",
+      "module": "任务管理",
+      "priority": "P0",
+      "phaseId": "create_roulette_tasks",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "",
+        "activityId": "",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "task_search",
+        "searchBy": "alias",
+        "taskId": "6422",
+        "taskName": "转盘抽奖_all_20260531185848",
+        "searchedValue": "",
+        "rowCount": 1
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "TM-03",
+      "caseName": "任务列表搜索-任务标签",
+      "module": "任务管理",
+      "priority": "P0",
+      "phaseId": "create_roulette_tasks",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "",
+        "activityId": "",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "task_search",
+        "searchBy": "tag",
+        "taskId": "6422",
+        "taskName": "转盘抽奖_all_20260531185848",
+        "searchedValue": "",
+        "rowCount": 1
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "TM-04",
+      "caseName": "任务列表搜索-备注",
+      "module": "任务管理",
+      "priority": "P1",
+      "phaseId": "create_roulette_tasks",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "",
+        "activityId": "",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "task_search",
+        "searchBy": "remark",
+        "taskId": "6422",
+        "taskName": "转盘抽奖_all_20260531185848",
+        "searchedValue": "",
+        "rowCount": 1
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "TM-05",
+      "caseName": "任务列表搜索-开始时间",
+      "module": "任务管理",
+      "priority": "P1",
+      "phaseId": "create_roulette_tasks",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "",
+        "activityId": "",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "task_search",
+        "searchBy": "beginTime",
+        "taskId": "6422",
+        "taskName": "转盘抽奖_all_20260531185848",
+        "searchedValue": "",
+        "rowCount": 1
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "TM-06",
+      "caseName": "任务列表搜索-结束时间",
+      "module": "任务管理",
+      "priority": "P1",
+      "phaseId": "create_roulette_tasks",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "",
+        "activityId": "",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "task_search",
+        "searchBy": "endTime",
+        "taskId": "6422",
+        "taskName": "转盘抽奖_all_20260531185848",
+        "searchedValue": "",
+        "rowCount": 1
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "TM-07",
+      "caseName": "新增任务-最小必填链路",
+      "module": "任务管理",
+      "priority": "P0",
+      "phaseId": "create_roulette_tasks",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "",
+        "activityId": "6422",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "roulette_task",
+        "taskId": "6422",
+        "taskName": "转盘抽奖_all_20260531185848",
+        "scope": "报名的所有用户",
+        "taskCondition": "KOL绑定",
+        "rewardMode": "单一奖励",
+        "rewardMin": "10",
+        "rewardMax": "100"
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "TM-09",
+      "caseName": "奖励模式-单一奖励",
+      "module": "任务管理",
+      "priority": "P0",
+      "phaseId": "create_roulette_tasks",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "",
+        "activityId": "6422",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "roulette_task",
+        "taskId": "6422",
+        "taskName": "转盘抽奖_all_20260531185848",
+        "scope": "报名的所有用户",
+        "taskCondition": "KOL绑定",
+        "rewardMode": "单一奖励",
+        "rewardMin": "10",
+        "rewardMax": "100"
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "TM-08",
+      "caseName": "任务条件分支覆盖",
+      "module": "任务管理",
+      "priority": "P0",
+      "phaseId": "create_roulette_condition_tasks",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "",
+        "activityId": "",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "TM-10",
+      "caseName": "奖励模式-限时奖励不同",
+      "module": "任务管理",
+      "priority": "P1",
+      "phaseId": "create_roulette_reward_mode_tasks",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "",
+        "activityId": "6434",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "roulette_task",
+        "taskId": "6434",
+        "taskName": "转盘抽奖_limited_20260531185906",
+        "scope": "报名的所有用户",
+        "taskCondition": "KOL绑定",
+        "rewardMode": "限时奖励不同",
+        "rewardMin": "10",
+        "rewardMax": "100"
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "TM-11",
+      "caseName": "奖励模式-正常奖励+权益奖励",
+      "module": "任务管理",
+      "priority": "P1",
+      "phaseId": "create_roulette_reward_mode_tasks",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "",
+        "activityId": "6435",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "roulette_task",
+        "taskId": "6435",
+        "taskName": "转盘抽奖_rights_20260531185906",
+        "scope": "报名的所有用户",
+        "taskCondition": "KOL绑定",
+        "rewardMode": "正常奖励+权益奖励",
+        "rewardMin": "10",
+        "rewardMax": "100"
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "AC-01",
+      "caseName": "新增活动-最小必填草稿",
+      "module": "活动配置/活动信息",
+      "priority": "P0",
+      "phaseId": "create_lottery_activity_draft",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "ln53952453",
+        "activityId": 9874,
+        "prizeCount": 8,
+        "taskRequirementCount": 0,
+        "status": "DRAFT",
+        "onlineCode": "",
+        "finalUrl": "/activities/lottery",
+        "pageText": "",
+        "responseCount": 0,
+        "prizeWeightCount": 8,
+        "prizeWeightGroupCount": 1,
+        "prizeWeightTypeCoverage": [
+          "同用户"
+        ],
+        "prizeWeightDeterministicPrizeId": 5
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "AC-02",
+      "caseName": "长度限制-活动标题/副标题",
+      "module": "活动配置/活动信息",
+      "priority": "P0",
+      "phaseId": "create_lottery_activity_draft",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "ln53952453",
+        "activityId": 9874,
+        "prizeCount": 8,
+        "taskRequirementCount": 0,
+        "status": "DRAFT",
+        "onlineCode": "",
+        "finalUrl": "/activities/lottery",
+        "pageText": "",
+        "responseCount": 0,
+        "prizeWeightCount": 8,
+        "prizeWeightGroupCount": 1,
+        "prizeWeightTypeCoverage": [
+          "同用户"
+        ],
+        "prizeWeightDeterministicPrizeId": 5
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "AC-03",
+      "caseName": "活动别名规则",
+      "module": "活动配置/活动信息",
+      "priority": "P0",
+      "phaseId": "create_lottery_activity_draft",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "ln53952453",
+        "activityId": 9874,
+        "prizeCount": 8,
+        "taskRequirementCount": 0,
+        "status": "DRAFT",
+        "onlineCode": "",
+        "finalUrl": "/activities/lottery",
+        "pageText": "",
+        "responseCount": 0,
+        "prizeWeightCount": 8,
+        "prizeWeightGroupCount": 1,
+        "prizeWeightTypeCoverage": [
+          "同用户"
+        ],
+        "prizeWeightDeterministicPrizeId": 5
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "AC-04",
+      "caseName": "是否支持预报名-支持",
+      "module": "活动配置/活动信息",
+      "priority": "P0",
+      "phaseId": "create_lottery_activity_draft",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "ln53952453",
+        "activityId": 9874,
+        "prizeCount": 8,
+        "taskRequirementCount": 0,
+        "status": "DRAFT",
+        "onlineCode": "",
+        "finalUrl": "/activities/lottery",
+        "pageText": "",
+        "responseCount": 0,
+        "prizeWeightCount": 8,
+        "prizeWeightGroupCount": 1,
+        "prizeWeightTypeCoverage": [
+          "同用户"
+        ],
+        "prizeWeightDeterministicPrizeId": 5
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "AC-05",
+      "caseName": "是否支持预报名-不支持",
+      "module": "活动配置/活动信息",
+      "priority": "P0",
+      "phaseId": "create_lottery_activity_draft",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "ln53952453",
+        "activityId": 9874,
+        "prizeCount": 8,
+        "taskRequirementCount": 0,
+        "status": "DRAFT",
+        "onlineCode": "",
+        "finalUrl": "/activities/lottery",
+        "pageText": "",
+        "responseCount": 0,
+        "prizeWeightCount": 8,
+        "prizeWeightGroupCount": 1,
+        "prizeWeightTypeCoverage": [
+          "同用户"
+        ],
+        "prizeWeightDeterministicPrizeId": 5
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "AC-06",
+      "caseName": "是否显示活动日历入口",
+      "module": "活动配置/活动信息",
+      "priority": "P1",
+      "phaseId": "create_lottery_activity_draft",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "ln53952453",
+        "activityId": 9874,
+        "prizeCount": 8,
+        "taskRequirementCount": 0,
+        "status": "DRAFT",
+        "onlineCode": "",
+        "finalUrl": "/activities/lottery",
+        "pageText": "",
+        "responseCount": 0,
+        "prizeWeightCount": 8,
+        "prizeWeightGroupCount": 1,
+        "prizeWeightTypeCoverage": [
+          "同用户"
+        ],
+        "prizeWeightDeterministicPrizeId": 5
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "AC-07",
+      "caseName": "奖品配置区",
+      "module": "活动配置/活动信息",
+      "priority": "P0",
+      "phaseId": "create_lottery_activity_draft",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "ln53952453",
+        "activityId": 9874,
+        "prizeCount": 8,
+        "taskRequirementCount": 0,
+        "status": "DRAFT",
+        "onlineCode": "",
+        "finalUrl": "/activities/lottery",
+        "pageText": "",
+        "responseCount": 0,
+        "prizeWeightCount": 8,
+        "prizeWeightGroupCount": 1,
+        "prizeWeightTypeCoverage": [
+          "同用户"
+        ],
+        "prizeWeightDeterministicPrizeId": 5
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "AC-08",
+      "caseName": "活动任务信息绑定",
+      "module": "活动配置/活动信息",
+      "priority": "P0",
+      "phaseId": "create_lottery_activity_draft",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "ln53952453",
+        "activityId": 9874,
+        "prizeCount": 8,
+        "taskRequirementCount": 0,
+        "status": "DRAFT",
+        "onlineCode": "",
+        "finalUrl": "/activities/lottery",
+        "pageText": "",
+        "responseCount": 0,
+        "prizeWeightCount": 8,
+        "prizeWeightGroupCount": 1,
+        "prizeWeightTypeCoverage": [
+          "同用户"
+        ],
+        "prizeWeightDeterministicPrizeId": 5
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "AC-09",
+      "caseName": "多语言配置-文本",
+      "module": "活动配置/活动信息",
+      "priority": "P1",
+      "phaseId": "create_lottery_activity_draft",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "ln53952453",
+        "activityId": 9874,
+        "prizeCount": 8,
+        "taskRequirementCount": 0,
+        "status": "DRAFT",
+        "onlineCode": "",
+        "finalUrl": "/activities/lottery",
+        "pageText": "",
+        "responseCount": 0,
+        "prizeWeightCount": 8,
+        "prizeWeightGroupCount": 1,
+        "prizeWeightTypeCoverage": [
+          "同用户"
+        ],
+        "prizeWeightDeterministicPrizeId": 5
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "AC-10",
+      "caseName": "多语言配置-图片",
+      "module": "活动配置/活动信息",
+      "priority": "P1",
+      "phaseId": "create_lottery_activity_draft",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "ln53952453",
+        "activityId": 9874,
+        "prizeCount": 8,
+        "taskRequirementCount": 0,
+        "status": "DRAFT",
+        "onlineCode": "",
+        "finalUrl": "/activities/lottery",
+        "pageText": "",
+        "responseCount": 0,
+        "prizeWeightCount": 8,
+        "prizeWeightGroupCount": 1,
+        "prizeWeightTypeCoverage": [
+          "同用户"
+        ],
+        "prizeWeightDeterministicPrizeId": 5
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "AC-11",
+      "caseName": "常见问题配置",
+      "module": "活动配置/活动信息",
+      "priority": "P1",
+      "phaseId": "create_lottery_activity_draft",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "ln53952453",
+        "activityId": 9874,
+        "prizeCount": 8,
+        "taskRequirementCount": 0,
+        "status": "DRAFT",
+        "onlineCode": "",
+        "finalUrl": "/activities/lottery",
+        "pageText": "",
+        "responseCount": 0,
+        "prizeWeightCount": 8,
+        "prizeWeightGroupCount": 1,
+        "prizeWeightTypeCoverage": [
+          "同用户"
+        ],
+        "prizeWeightDeterministicPrizeId": 5
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "AC-12",
+      "caseName": "颜色签配置",
+      "module": "活动配置/活动信息",
+      "priority": "P1",
+      "phaseId": "create_lottery_activity_draft",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "ln53952453",
+        "activityId": 9874,
+        "prizeCount": 8,
+        "taskRequirementCount": 0,
+        "status": "DRAFT",
+        "onlineCode": "",
+        "finalUrl": "/activities/lottery",
+        "pageText": "",
+        "responseCount": 0,
+        "prizeWeightCount": 8,
+        "prizeWeightGroupCount": 1,
+        "prizeWeightTypeCoverage": [
+          "同用户"
+        ],
+        "prizeWeightDeterministicPrizeId": 5
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "AC-13",
+      "caseName": "奖品每日限制配置",
+      "module": "活动配置/活动信息",
+      "priority": "P1",
+      "phaseId": "create_lottery_activity_draft",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "ln53952453",
+        "activityId": 9874,
+        "prizeCount": 8,
+        "taskRequirementCount": 0,
+        "status": "DRAFT",
+        "onlineCode": "",
+        "finalUrl": "/activities/lottery",
+        "pageText": "",
+        "responseCount": 0,
+        "prizeWeightCount": 8,
+        "prizeWeightGroupCount": 1,
+        "prizeWeightTypeCoverage": [
+          "同用户"
+        ],
+        "prizeWeightDeterministicPrizeId": 5
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "AC-14",
+      "caseName": "累计次数再权重配置",
+      "module": "活动配置/活动信息",
+      "priority": "P1",
+      "phaseId": "create_lottery_activity_draft",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "ln53952453",
+        "activityId": 9874,
+        "prizeCount": 8,
+        "taskRequirementCount": 0,
+        "status": "DRAFT",
+        "onlineCode": "",
+        "finalUrl": "/activities/lottery",
+        "pageText": "",
+        "responseCount": 0,
+        "prizeWeightCount": 8,
+        "prizeWeightGroupCount": 1,
+        "prizeWeightTypeCoverage": [
+          "同用户"
+        ],
+        "prizeWeightDeterministicPrizeId": 5
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "AL-01",
+      "caseName": "列表搜索-活动ID",
+      "module": "活动列表",
+      "priority": "P0",
+      "phaseId": "verify_activity_list_draft",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "",
+        "activityId": "",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "AL-02",
+      "caseName": "列表搜索-活动标题",
+      "module": "活动列表",
+      "priority": "P1",
+      "phaseId": "verify_activity_list_draft",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "",
+        "activityId": "",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "AL-03",
+      "caseName": "列表搜索-活动别名",
+      "module": "活动列表",
+      "priority": "P0",
+      "phaseId": "verify_activity_list_draft",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "ln53952453",
+        "activityId": "",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "AL-04",
+      "caseName": "列表搜索-活动类型",
+      "module": "活动列表",
+      "priority": "P1",
+      "phaseId": "verify_activity_list_draft",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "",
+        "activityId": "",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "AL-05",
+      "caseName": "列表搜索-活动日期",
+      "module": "活动列表",
+      "priority": "P1",
+      "phaseId": "verify_activity_list_draft",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "",
+        "activityId": "",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "AL-06",
+      "caseName": "草稿活动行操作",
+      "module": "活动列表",
+      "priority": "P0",
+      "phaseId": "verify_activity_list_draft",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "ln53952453",
+        "activityId": "9874",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "activity_row_action_visibility",
+        "stage": "draft",
+        "actions": [
+          "查看",
+          "修改",
+          "上线",
+          "删除",
+          "复制"
+        ],
+        "copiedActivityId": "",
+        "copiedAlias": ""
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "ST-01",
+      "caseName": "草稿上线",
+      "module": "上下线/状态流转",
+      "priority": "P0",
+      "phaseId": "online_lottery_activity",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "ln53952453",
+        "activityId": 9874,
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "ONLINE",
+        "onlineCode": 200,
+        "finalUrl": "/activities/lottery",
+        "pageText": "",
+        "responseCount": 0
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "AL-07",
+      "caseName": "已上线活动行操作",
+      "module": "活动列表",
+      "priority": "P0",
+      "phaseId": "verify_activity_list_online",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "ln53952453",
+        "activityId": "9874",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "activity_row_action_visibility",
+        "stage": "online",
+        "actions": [
+          "查看",
+          "修改",
+          "下线",
+          "复制"
+        ],
+        "copiedActivityId": "9875",
+        "copiedAlias": "cp53961383"
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "AC-15",
+      "caseName": "活动复制",
+      "module": "活动配置/活动信息",
+      "priority": "P0",
+      "phaseId": "verify_activity_list_online",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "ln53952453",
+        "activityId": "9874",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "activity_copy",
+        "copiedActivityId": "9875",
+        "copiedAlias": "cp53961383"
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "ST-03",
+      "caseName": "草稿删除",
+      "module": "上下线/状态流转",
+      "priority": "P0",
+      "phaseId": "verify_activity_list_online",
+      "status": "PASS",
+      "evidence": {
+        "error": "",
+        "alias": "",
+        "activityId": "",
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "",
+        "onlineCode": "",
+        "finalUrl": "",
+        "pageText": "",
+        "responseCount": 0,
+        "recordType": "activity_delete",
+        "confirmText": "",
+        "copiedActivityId": "9875",
+        "copiedAlias": "cp53961383"
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "ST-02",
+      "caseName": "已上线活动下线",
+      "module": "上下线/状态流转",
+      "priority": "P0",
+      "phaseId": "offline_lottery_activity",
+      "status": "PASS",
+      "evidence": {
+        "ok": true,
+        "error": "",
+        "alias": "ln53952453",
+        "activityId": 9874,
+        "prizeCount": 0,
+        "taskRequirementCount": 0,
+        "status": "OFFLINE",
+        "onlineCode": "",
+        "finalUrl": "/activities/lottery",
+        "pageText": "",
+        "responseCount": 0
+      },
+      "errorMessage": ""
+    }
+  ]
+}

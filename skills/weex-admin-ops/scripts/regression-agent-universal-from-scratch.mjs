@@ -141,6 +141,36 @@ async function resolveTemplate(api, type) {
   return await activityDetail(api, id);
 }
 
+async function findOtherOnlineAgentActivity(api, { excludeActivityId } = {}) {
+  const exclude = excludeActivityId ? String(excludeActivityId) : "";
+  const tryList = async url => {
+    const res = await api.get(url);
+    return Array.isArray(res.body?.rows) ? res.body.rows : [];
+  };
+
+  let rows = [];
+  try {
+    rows = await tryList("/prod-api/activity/config/list?pageNum=1&pageSize=20&type=AGENT&status=ONLINE");
+  } catch {
+    rows = [];
+  }
+  rows = rows.filter(item => String(item?.status || "").toUpperCase() === "ONLINE");
+  if (!rows.length) {
+    rows = await tryList("/prod-api/activity/config/list?pageNum=1&pageSize=50&type=AGENT");
+    rows = rows.filter(item => String(item?.status || "").toUpperCase() === "ONLINE");
+  }
+  const row = rows.find(item => {
+    const id = String(item?.activityId || item?.id || "");
+    return id && (!exclude || id !== exclude);
+  }) || null;
+  if (!row) return null;
+  return {
+    id: String(row.activityId || row.id || ""),
+    alias: String(row.showUrl || ""),
+    status: String(row.status || ""),
+  };
+}
+
 async function createActivityConfigWithRetry(api, payload, { maxRetries = 4 } = {}) {
   let last = null;
   for (let attempt = 1; attempt <= Math.max(1, Number(maxRetries) || 1); attempt++) {
@@ -362,6 +392,13 @@ async function run() {
 
     await api.close().catch(() => {});
     api = await createAdminApiSession({ config, requireApiLogin: true });
+
+    const existingOnline = await findOtherOnlineAgentActivity(api, { excludeActivityId: activityId });
+    const onlinePrecheckOk = !existingOnline;
+    steps.push({ name: "precheck_online_agent_conflict", ok: onlinePrecheckOk, existingOnline });
+    if (!onlinePrecheckOk) {
+      throw new Error(`precondition failed: existing online AGENT activity ${existingOnline.id}${existingOnline.alias ? ` (${existingOnline.alias})` : ""}`);
+    }
 
     const on = await agentOnline(api, config, activityId);
     steps.push({ name: "online", ok: on.ok, response: on.body });

@@ -1,0 +1,91 @@
+{
+  "runId": "2026-06-07-001",
+  "stageId": "script_integration",
+  "stageName": "脚本整合",
+  "agentRole": "脚本整合 subagent",
+  "status": "PASS",
+  "decision": "REUSE_READY_WITH_PREEXEC_FIX_GATES",
+  "summary": "活动后管全量回归已具备可执行整合方案：execution_run 应拆成 lottery 后管子阶段与 13 条 universal 后管子任务，由父编排器统一调度；当前无需新增总入口，但执行前必须先补 lottery 任务阶段稳定性与 AGENT 在线活动前置检查两个固定缺口。",
+  "inputs": [
+    "history/2026-06-07-001/00-任务说明.md",
+    "history/2026-06-07-001/run-state.json",
+    "history/2026-06-07-001/01-链路分析报告.md",
+    "history/2026-06-07-001/01-链路分析报告.json",
+    "history/2026-06-07-001/02-覆盖审阅报告.md",
+    "history/2026-06-07-001/02-覆盖审阅报告.json",
+    "orchestrations/automation-review-pipeline/prompts/04-脚本整合.md",
+    "orchestrations/automation-review-pipeline/schemas/stage-report.schema.json"
+  ],
+  "findings": [
+    "lottery 后管回归入口已存在，可直接复用 orchestrations/lottery-regression/scripts/run-full-headless.mjs 的“后管回归”选择集。",
+    "universal 后管覆盖已由 13 条 regression-*-universal-from-scratch.mjs 提供，不需要再新造总脚本。",
+    "本次整合的关键不是补新入口，而是把 lottery 任务阶段的 7076/reward-mode 回查问题和 AGENT 在线活动前置检查前移为执行门禁。",
+    "execution_run 必须由父编排器拆成至少 1 个 lottery subagent 和 13 个 universal activity-type subagent，不能退化成单 agent 串行执行 run-full-regression。",
+    "run-full-regression --selection '后管回归' 只适合做结果对照或汇总结构参考，不适合替代本次 subagent 调度。"
+  ],
+  "evidence": [
+    "history/2026-06-07-001/01-链路分析报告.json：entrypoints 已明确 lottery 后管入口、13 条 universal 后管脚本和现有 full-regression 对照入口。",
+    "history/2026-06-07-001/02-覆盖审阅报告.json：coverageDecision=APPROVE，要求继续进入 script_integration，而不是因 PARTIAL 停止。",
+    "skills/weex-admin-ops/failure-reviews/activity-task-management.md：2026-06-07 已记录 TM-01~TM-11 因 7076 基线与 reward-mode 回查失真失败。",
+    "skills/weex-admin-ops/failure-reviews/activity-management.md：2026-06-07 已连续记录 AGENT 通用回归因“已有上线状态的人人代理活动”失败。",
+    "orchestrations/automation-review-pipeline/README.md：命中全量回归后必须走固定阶段和 history 落盘，不能只把 worker 并行后直接汇总。"
+  ],
+  "risks": [
+    "若 lottery-admin-main-regression.mjs 不先补稳，lottery 后管子阶段仍可能在任务管理阶段提前失败并跳过后续活动配置用例。",
+    "若 regression-agent-universal-from-scratch.mjs 不先做在线 AGENT 活动前置检查，universal 阶段会继续在环境限制上重复失败。",
+    "若主 agent 直接执行 run-full-regression.mjs 作为主入口，会违反本轮必须走 subagent 编排的约束，并弱化阶段级证据沉淀。"
+  ],
+  "nextAction": "将本整合方案交给 validation_review；若批准，execution_run 先执行 admin first-run-check 与两处脚本补稳，再派发 lottery 后管子阶段和 13 个 universal activity-type 子任务，最后由主 agent 汇总到 history/2026-06-07-001/06-执行报告.*。",
+  "relatedCommands": [
+    "node tools/first-run-check.mjs --skill admin",
+    "node orchestrations/lottery-regression/scripts/run-full-headless.mjs --selection '后管回归' --recharge-amount 1000 --wait-for-start-ms 60000",
+    "node skills/weex-admin-ops/scripts/regression-agent-tracepro-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-agent-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-competition-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-contract-mining-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-customized-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-flip-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-guess-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-lottery-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-monopoly-worldcup-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-newbie-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-race-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-recharge-trans-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-tracepro-universal-from-scratch.mjs --confirm-run",
+    "node orchestrations/full-regression/scripts/run-full-regression.mjs --selection '后管回归' --confirm-run"
+  ],
+  "relatedFiles": [
+    "history/2026-06-07-001/00-任务说明.md",
+    "history/2026-06-07-001/01-链路分析报告.md",
+    "history/2026-06-07-001/01-链路分析报告.json",
+    "history/2026-06-07-001/02-覆盖审阅报告.md",
+    "history/2026-06-07-001/02-覆盖审阅报告.json",
+    "orchestrations/lottery-regression/scripts/run-full-headless.mjs",
+    "orchestrations/full-regression/scripts/run-full-regression.mjs",
+    "skills/weex-admin-ops/scripts/lottery-admin-main-regression.mjs",
+    "skills/weex-admin-ops/scripts/regression-agent-universal-from-scratch.mjs",
+    "skills/weex-admin-ops/failure-reviews/activity-task-management.md",
+    "skills/weex-admin-ops/failure-reviews/activity-management.md",
+    "orchestrations/automation-review-pipeline/README.md"
+  ],
+  "timestamp": "2026-06-07T18:30:00Z",
+  "existingCoverage": "PARTIAL",
+  "coverageDecision": "APPROVE",
+  "integrationDecision": "READY",
+  "scriptPlan": [
+    "保持现有父编排方式，不新增“活动后管全量回归”单总入口；由 execution_run 按 lottery 后管子阶段 + universal 后管子阶段拆分调度。",
+    "执行前先运行 node tools/first-run-check.mjs --skill admin，确认 admin 依赖、.env.local 和登录前提仍可用。",
+    "把 skills/weex-admin-ops/scripts/lottery-admin-main-regression.mjs 的任务详情 7076 基线问题和 reward-mode 列表回查问题作为强制补稳项；未修复前不进入 lottery 子阶段真实执行。",
+    "把 skills/weex-admin-ops/scripts/regression-agent-universal-from-scratch.mjs 的“已有在线 AGENT 活动”检查前移到 online 之前；若环境阻塞则直接以前置条件失败结束该子任务。",
+    "lottery 子阶段由 1 个 lottery 后管 subagent 执行：node orchestrations/lottery-regression/scripts/run-full-headless.mjs --selection '后管回归' --recharge-amount 1000 --wait-for-start-ms 60000。",
+    "universal 子阶段由主 agent 再拆 13 个 activity-type subagent，各自执行 1 条 regression-*-universal-from-scratch.mjs --confirm-run，而不是由同一个 worker 串行跑完整套。",
+    "主 agent 最后统一聚合 lottery 原始报告与 13 条 universal 结果文件；如需对照，可参考 run-full-regression --selection '后管回归' 的汇总结构，但该命令不作为主执行链路。"
+  ],
+  "artifactPlan": [
+    "当前阶段输出写入 history/2026-06-07-001/tmp-script-integration.md 和 history/2026-06-07-001/tmp-script-integration.json。",
+    "lottery 子阶段原始产物落在 orchestrations/lottery-regression/artifacts/reports/<stamp>/，至少保留 admin.json 及其统计结果。",
+    "universal 子阶段原始产物落在 result/universal-regression/<stamp>/，13 条脚本各自产出 *_universal_from_scratch.md。",
+    "validation_review 通过后，execution_run 必须把 lottery 与 universal 的命令、结果统计、失败点和原始路径统一写入 history/2026-06-07-001/06-执行报告.md 与 history/2026-06-07-001/06-执行报告.json。",
+    "若执行阶段使用 run-full-regression 做结果对照，只能把其 summary/report 路径作为附加证据写入 06-执行报告.*，不能替代主执行产物。"
+  ]
+}

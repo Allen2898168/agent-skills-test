@@ -157,3 +157,51 @@
   - 相关语法检查与 `lottery-frontend-main-regression.test.mjs` 通过。
   - 活动已先下线再删除，别名搜索无残留。
 - 后续处理：解决方式已吸收到固定脚本；后续同类执行如复用已报名活动，前置报名/MQ 用例可能按设计 `SKIPPED`，目标 UI 用例仍按实际 phase 结果判断。
+
+## 2026-05-31 全量回归中前后端联动与响应式断言失败
+
+- 日期：2026-05-31
+- 触发入口：`node skills/weex-admin-ops/scripts/regress-full-test-cases.mjs --confirm-run`
+- 环境/viewport：STG，隐藏 Playwright；前端主回归 activityAlias=`n53882896`
+- 失败表现：
+  - 全量结果 `PASS 141 / FAIL 6 / SKIPPED 10 / TOTAL 285`；失败均来自 lottery 文档用例。
+  - 失败用例：`FE-56`、`FE-68`、`FE-69`、`FE-73`、`FE-75`、`FE-76`。
+  - `FE-73`：联动标题断言中 `titleMatched=true`，但 `subtitleMatched=false`（期望副标题为空，页面实际有副标题）。
+  - `FE-75/FE-76`：只读联动阶段 `languageSwitch.switched=false`、`faq.found=false`，语言切换与 FAQ 展示未命中。
+  - `FE-56`：弹窗奖品与奖励记录对比不一致，记录最新命中 `0.1 ETH`，期望来自本次弹窗奖品文本。
+  - `FE-68/FE-69`：响应式断言 `h5Opened=false`、`mobileWidthsOk=false`。
+- 失败原因：
+  - 前后端联动断言对“副标题是否必须为空”的口径与当前活动配置不一致。
+  - 多语言和 FAQ 的前端页面结构/可见性与现有只读检查逻辑存在偏差。
+  - 奖励记录一致性断言仍受列表排序和历史记录干扰。
+  - H5/移动端断言链路未稳定识别当前页面状态。
+- 解决方式：
+  - 先按失败 evidence 复跑四个 phase：`frontend_backend_linkage`、`frontend_backend_linkage_readonly`、`frontend_reward_record`、`frontend_responsive_ui`，逐项校准断言口径和页面定位。
+  - 对 `FE-56` 增加“按本次抽奖时间窗口/活动名过滤记录”或“弹窗奖品与记录集合匹配”的稳定规则，避免被历史记录首行污染。
+  - 对 `FE-68/69` 增加可复用 viewport 断言 helper，拆分“页面可打开”与“布局合规”两个信号，避免单一布尔值误判。
+- 验证结果：
+  - 本次仅完成失败定位和证据采集，未在本轮修复断言后重跑。
+- 关联报告：
+  - `result/full-regression/20260531_205800/summary.json`
+  - `result/full-regression/20260531_205800/frontend_normal.json`
+  - `orchestrations/lottery-regression/artifacts/reports/20260531_205800/`
+
+## 2026-06-07 全量回归复跑仍命中 5 个前端主链路失败
+
+- 日期：2026-06-07
+- 触发入口：`node orchestrations/full-regression/scripts/run-full-regression.mjs --selection '全部' --confirm-run`
+- 环境/viewport：STG，隐藏 Playwright；主前端活动 `10049 / n52012169`；responsive phase 覆盖 `390x844`、`360x640`、`390x568`。
+- 失败表现：
+  - 全量结果 `PASS 141 / FAIL 6 / SKIPPED 10 / TOTAL 285`；lottery 文档用例失败收敛到 `FE-56/68/69/73/75`，`FE-76` 本轮已恢复通过。
+  - `FE-73`：后管联动改标题后，`titleMatched=true`，但 `subtitleMatched=false`；前端 URL 为 `https://stg-www.weex.tech/zh-CN/events/draw/n52012169?__cacheBust=1780852317030_1`。
+  - `FE-75`：语言切换预期英文页 `https://stg-www.weex.tech/events/draw/n52012169`，实际最终仍回到中文页，`enHtmlLang=zh-CN`、`languageSwitch.switched=false`；FAQ 与活动日历已找到，`FE-76/77/78` 通过。
+  - `FE-56`：弹窗期望奖品 `1 USDT 合约赠金`，奖励记录最新命中 `自动化测试 - 实物_20260522070743 × 1`，`prizeMatchesPopup=false`。
+  - `FE-68/69`：responsive phase 三个 viewport 都出现 `opened=false`，但 `buttonVisible=true`、`horizontalOverflow=false`、`mobileDialogWithinViewport=true`，说明更像“打开态识别失败”而非纯布局崩坏。
+- 失败原因：
+  - `FE-73/75` 仍是联动断言口径与当前页面表现不一致：副标题清空未被接受，语言切换后 locale 保持在中文路由。
+  - `FE-56` 仍受历史奖励记录排序/过滤口径影响，未稳定关联到本次抽奖结果。
+  - `FE-68/69` 的 viewport 检测仍未稳定识别移动端打开态。
+- 验证结果：
+  - `frontend_stock.json` 与 `frontend_weight.json` 均 PASS，说明 stock/weight 专项已经稳定；问题集中在 `frontend_normal.json`。
+  - 关联报告：`result/full-regression/20260607_190648/summary.json`、`orchestrations/lottery-regression/artifacts/reports/20260607_190649/frontend_normal.json`。
+- 后续处理：优先按 `frontend_backend_linkage`、`frontend_backend_linkage_readonly`、`frontend_reward_record`、`frontend_responsive_ui` 四个 phase 单独复跑并修正断言；修复后再复跑 `selection '全部'`。

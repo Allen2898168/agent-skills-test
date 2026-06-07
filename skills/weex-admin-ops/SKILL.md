@@ -159,8 +159,10 @@ When an API chain (headed browser or headless/API-assisted) is proven runnable a
 - Every runnable regression/verify script must call `tools/lib/result-md.mjs` `writeResultMarkdown({ testCase, steps })` and provide:
   - `testCase.number` (stable case number), `description`, `preconditions`, `tags`
   - `steps.push({ name })` for each sub-step; **sub-step = test case** by the default counting rule
-- If a new `steps.push({ name })` is introduced, add friendly `desc/expected` in `tools/lib/result-md.mjs` `DEFAULT_STEP_META_ZH` when appropriate.
+- Sub-testcase output must include a brief Chinese description (`子用例描述`) and must not only output raw English step names.
+- If a new `steps.push({ name })` is introduced, add friendly `desc/expected` in `tools/lib/result-md.mjs` `DEFAULT_STEP_META_ZH`; do not keep long-term fallback text like `执行子步骤：<step>`.
 - After the flow is proven, regenerate and sync the case library by running: `npm run generate:test-cases` (outputs `docs/test-cases/index.md` and suite libraries).
+- If the user asks for a full list, run `npm run generate:test-cases:all` and use `result/all-test-cases-285.md` (includes case id, content, and brief Chinese description).
 
 ## Growth Management
 

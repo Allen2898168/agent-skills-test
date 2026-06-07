@@ -1,5 +1,15 @@
 # 活动用户报名管理失败复盘
 
+## 2026-06-07 lottery 后管回归报名模板新增与行操作回查失真
+- 业务线：活动用户报名管理 / 转盘抽奖后管回归。
+- 场景：执行 `node orchestrations/lottery-regression/scripts/run-full-headless.mjs --selection '后管回归' --recharge-amount 1000 --wait-for-start-ms 60000`，进入 `create_register_templates` 和 `verify_register_template_row_actions` 阶段。
+- 失败表现：`RT-03`~`RT-06` 统一失败为 `Created register template not found: 自动化报名模板_auto_20260607182351_api_2353`；`RT-07`~`RT-09` 统一失败为 `code=401 / 请求访问：/activity/apply，认证失败`。
+- 失败原因：报名模板新增脚本在创建后立即按名称回查时未命中目标模板；随后行操作脚本再次写 `/activity/apply` 时出现认证失效，导致查看/修改/删除分支全挂。
+- 解决方式：报名模板快路径需要补创建后列表回查重试；行操作脚本需要在临时报名模板创建前刷新 API session，避免沿用失效授权。
+- 验证结果：本轮报告目录 `orchestrations/lottery-regression/artifacts/reports/20260607_202339/` 中，报名模板模块 `PASS 0 / FAIL 7 / SKIPPED 2`，直接阻断后续活动配置依赖。
+- 关联文件：`skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs`、`skills/weex-admin-ops/scripts/register-template-row-actions-fast-api.mjs`、`orchestrations/lottery-regression/artifacts/reports/20260607_202339/admin.json`。
+- 后续处理：补稳后先单跑 `RT-03`~`RT-09`，通过后再回归 `lottery_admin_main_regression`。
+
 ## 2026-05-05 限制用户权限未进入动作缓存
 - 业务线：活动用户报名管理。
 - 场景：创建报名模板时指定 `限制用户权限=看到和进入页面`。

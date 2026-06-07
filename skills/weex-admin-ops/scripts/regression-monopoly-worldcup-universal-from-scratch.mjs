@@ -189,7 +189,7 @@ async function deleteTask(api, id) {
   return { ok: del.body?.code === 200, status: del.status, body: { code: del.body?.code ?? null, msg: del.body?.msg || "" } };
 }
 
-async function attemptCleanup({ config, created }) {
+async function attemptCleanup({ config, created, skipOffline = false }) {
   const cleanup = {
     offline: null,
     unbindActivity: null,
@@ -202,7 +202,9 @@ async function attemptCleanup({ config, created }) {
   try {
     api = await createAdminApiSession({ config, requireApiLogin: true });
     if (created.activityId) {
-      cleanup.offline = await offline(api, config, created.activityId).catch(err => ({ ok: false, error: err?.message || String(err) }));
+      cleanup.offline = skipOffline
+        ? { ok: true, skipped: true, reason: "activity_already_offline" }
+        : await offline(api, config, created.activityId).catch(err => ({ ok: false, error: err?.message || String(err) }));
       cleanup.unbindActivity = await unbindDependencies(api, created.activityId, { applyConfigId: 2442 }).catch(err => ({ ok: false, error: err?.message || String(err) }));
       cleanup.deleteActivity = await deleteActivity(api, config, created.activityId).catch(err => ({ ok: false, error: err?.message || String(err) }));
     }
@@ -378,7 +380,7 @@ async function run() {
     let cleanup = null;
     if (args.cleanup) {
       await api.close().catch(() => {});
-      cleanup = await attemptCleanup({ config, created });
+      cleanup = await attemptCleanup({ config, created, skipOffline: true });
       const ok = Boolean(
         cleanup.deleteActivity?.ok !== false
           && cleanup.deleteTask?.ok !== false

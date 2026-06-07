@@ -47,13 +47,29 @@ function buildPlan(args) {
 }
 
 async function findTaskTemplate(api, nameHint) {
-  const list = await api.get(`/prod-api/activity/task/list?name=${encodeURIComponent(nameHint)}&pageNum=1&pageSize=1`);
-  const row = firstRow(list);
-  const id = row?.id;
-  if (!id) throw new Error(`Task source not found: ${nameHint}`);
-  const detail = await api.get(`/prod-api/activity/task/${encodeURIComponent(id)}`);
-  if (detail.body?.code !== 200 || !detail.body?.data) throw new Error(`Task detail failed: ${id}`);
-  return detail.body.data;
+  const list = await api.get(`/prod-api/activity/task/list?name=${encodeURIComponent(nameHint)}&pageNum=1&pageSize=20`);
+  const rows = Array.isArray(list.body?.rows) ? list.body.rows : [];
+  if (!rows.length) throw new Error(`Task source not found: ${nameHint}`);
+  let lastError = "";
+  for (const row of rows) {
+    const id = row?.id;
+    if (!id) continue;
+    const detail = await api.get(`/prod-api/activity/task/${encodeURIComponent(id)}`);
+    if (detail.body?.code === 200 && detail.body?.data) return detail.body.data;
+    lastError = `Task detail failed: ${id}`;
+  }
+  throw new Error(lastError || `Task detail failed: ${nameHint}`);
+}
+
+async function findCreatedTaskRow(api, taskName, { attempts = 8, delayMs = 500 } = {}) {
+  for (let attempt = 1; attempt <= Math.max(1, Number(attempts) || 1); attempt += 1) {
+    const verify = await api.get(`/prod-api/activity/task/list?name=${encodeURIComponent(taskName)}&pageNum=1&pageSize=5`);
+    const rows = Array.isArray(verify.body?.rows) ? verify.body.rows : [];
+    const row = rows.find(item => String(item?.name || "") === String(taskName)) || rows[0] || null;
+    if (row?.id) return row;
+    if (attempt < attempts) await new Promise(resolve => setTimeout(resolve, delayMs * attempt));
+  }
+  return null;
 }
 
 function mutateTaskPayload(payload, task) {
@@ -73,8 +89,7 @@ async function createTask(api, task) {
   mutateTaskPayload(payload, task);
   const created = await api.post("/prod-api/activity/task", payload);
   if (created.body?.code !== 200) throw new Error(`Create condition task failed: ${task.name}; body=${JSON.stringify(created.body)}`);
-  const verify = await api.get(`/prod-api/activity/task/list?name=${encodeURIComponent(task.name)}&pageNum=1&pageSize=1`);
-  const row = firstRow(verify);
+  const row = await findCreatedTaskRow(api, task.name);
   if (!row?.id) throw new Error(`Created condition task not found: ${task.name}`);
   return {
     id: String(row.id),

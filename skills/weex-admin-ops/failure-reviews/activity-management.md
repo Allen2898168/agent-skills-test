@@ -218,6 +218,17 @@
 - 失败原因：回归调度里把“上海时区时间窗口”误按 UTC 字段格式化，导致传入的 `startTime` 在后端时区解释下落到过去。
 - 解决方式：时间窗口改为“按真实当前时间戳 + offset 计算”，再用 `Asia/Shanghai` 直接格式化字符串；确保开始时间永远在未来（默认 +30 分钟）。
 - 验证结果：修复后使用同链路创建活动不再命中该后端校验。
+
+## 2026-06-07 人人代理(AGENT) 通用回归上线被现存在线活动拦截
+
+- 业务线：活动列表 / 人人代理(AGENT) / 通用回归。
+- 场景：执行 `node orchestrations/full-regression/scripts/run-full-regression.mjs --selection '后管回归' --confirm-run`，其中 `regression-agent-universal-from-scratch.mjs` 从零创建报名模板、赠金奖品、邀请/被邀请任务与草稿活动后尝试上线。
+- 失败表现：活动 `10036 / agr50994164` 草稿创建与 `draft-checks` 均成功，但 `online` 返回 HTTP 200、业务 `code=500`、`msg=已有上线状态的人人代理活动`，导致整轮活动后管全量回归以 `FAIL 1` 结束。
+- 失败原因：staging 环境同一时刻只允许存在已上线状态的人人代理活动；当前通用回归脚本在上线前未做“现存 AGENT 在线活动”只读前置检查，因此命中后端单活动限制。
+- 解决方式：本次失败后脚本补偿清理成功，已删除活动、任务、奖品和报名模板；后续固定路径应在 `AGENT` 通用回归上线前先回查是否已有在线 `AGENT` 活动，若存在则直接按前置条件失败返回，并在汇总中标记为环境阻塞，而不是创建后再撞后端校验。
+- 验证结果：失败产物 `result/universal-regression/20260607_185002/AGENT_universal_from_scratch_failed.md` 显示 `cleanup_on_failure=PASS`；清理接口 `deleteActivity/deleteInviteTask/deleteInvitedTask/deletePrize/deleteRegisterTemplate` 均返回 `code=200`。同日全量回归 `result/universal-regression/20260607_193419/AGENT_universal_from_scratch_failed.md` 再次复现相同 `code=500 / 已有上线状态的人人代理活动`，说明该前置检查尚未前移到固定路径。
+- 关联流程：`skills/weex-admin-ops/scripts/regression-agent-universal-from-scratch.mjs`、`orchestrations/full-regression/scripts/run-full-regression.mjs`。
+- 后续处理：待把“在线 AGENT 活动存在检查”前置到 `AGENT` 通用回归脚本；完成固定路径验证后，可删除本条失败复盘。
 - 关联流程或脚本：`skills/weex-admin-ops/scripts/lottery-admin-main-regression.mjs`、`skills/weex-admin-ops/scripts/create-lottery-activity-draft.mjs`。
 
 ## 2026-05-29 交易竞速赛总入口未透传 draft-checks 的 activityId
@@ -230,12 +241,3 @@
 - 验证结果：修复后 `minimal_create_verify_delete` 成功跑通，活动 `9701 / sw51783658` 创建、更新、回查、删除全通过；`full_create_verify_delete` 也通过，活动 `9702 / sx51798404` 无残留。
 - 关联流程或脚本：`skills/weex-admin-ops/scripts/race-config-wizard-api.mjs`。
 - 后续处理：已吸收到固定执行路径。
-
-## 2026-05-31 大富翁世界杯活动创建提示“仅支持用户手动点击报名”
-
-- 业务线：活动列表 / 大富翁世界杯（MONOPOLY_WORLD_CUP）。
-- 场景：从零创建大富翁通用回归活动时，使用默认报名模板 participantMode（如 `REGISTERED_MANUAL`）。
-- 失败表现：`POST /prod-api/activity/config` 返回 `code=500`，`msg=大富翁活动用户报名模板仅支持用户手动点击报名`。
-- 失败原因：该活动类型对报名模板的 `participantMode` 有硬性约束，仅允许 `MANUAL`（用户手动点击报名）。
-- 解决方式：创建报名模板时指定 `participantMode=["MANUAL"]`（或直接复用一个符合该约束的模板）。
-- 验证结果：通用回归脚本 `skills/weex-admin-ops/scripts/regression-monopoly-worldcup-universal-from-scratch.mjs` 已改为创建 `MANUAL` 报名模板并跑通。

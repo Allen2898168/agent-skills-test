@@ -1,0 +1,70 @@
+{
+  "ok": true,
+  "caseId": "CUSTOMIZED_universal_from_scratch",
+  "created": {
+    "registerTemplateId": "3582",
+    "prizeId": "1467",
+    "taskId": "7065",
+    "activityId": "10058",
+    "activityAlias": "czr53724935",
+    "activityTitle": "定制活动通用回归173524"
+  },
+  "links": [
+    {
+      "label": "后台定制化列表",
+      "url": "https://stg-activity.weex.tech/activities/commission"
+    }
+  ],
+  "durationMs": 31127,
+  "cleanup": {
+    "offline": {
+      "ok": false,
+      "status": 200,
+      "body": {
+        "code": 500,
+        "msg": "任务不是上线状态不可下线"
+      }
+    },
+    "unbindActivity": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteActivity": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteTask": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deletePrize": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteRegisterTemplate": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    }
+  },
+  "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_193530/CUSTOMIZED_universal_from_scratch.md"
+}

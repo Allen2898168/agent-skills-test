@@ -1,0 +1,86 @@
+{
+  "runId": "2026-06-07-001",
+  "stageId": "validation_review",
+  "stageName": "校验审阅",
+  "agentRole": "校验审阅 subagent",
+  "status": "PASS",
+  "decision": "APPROVE_READY_FOR_EXECUTION_RUN",
+  "summary": "当前已足以进入 execution_run。执行拆分、history 落盘和执行产物路径均已明确；AGENT 在线活动前置检查已前移，roulette 任务模板详情与创建后列表回查也已补上多候选与重试兜底，原先两类 gate 已从“待修复”转为“可在 execution_run 首子阶段验证”。",
+  "inputs": [
+    "history/2026-06-07-001/00-任务说明.md",
+    "history/2026-06-07-001/run-state.json",
+    "history/2026-06-07-001/01-链路分析报告.md",
+    "history/2026-06-07-001/01-链路分析报告.json",
+    "history/2026-06-07-001/02-覆盖审阅报告.md",
+    "history/2026-06-07-001/02-覆盖审阅报告.json",
+    "history/2026-06-07-001/04-脚本整合报告.md",
+    "history/2026-06-07-001/04-脚本整合报告.json",
+    "skills/weex-admin-ops/scripts/create-roulette-participant-scope-tasks-fast-api.mjs",
+    "skills/weex-admin-ops/scripts/create-roulette-condition-tasks-fast-api.mjs",
+    "skills/weex-admin-ops/scripts/create-roulette-reward-mode-tasks-fast-api.mjs",
+    "skills/weex-admin-ops/scripts/regression-agent-universal-from-scratch.mjs"
+  ],
+  "findings": [
+    "execution_run 的拆分已经清晰：preflight_and_fix_gate、lottery_admin_stage、universal_admin_stage、aggregate_and_compare 四段职责明确。",
+    "universal 阶段已经明确要求拆成 13 个 activity-type subagent，不再依赖单总入口串行执行，符合本次 subagent 编排约束。",
+    "history 落盘约定清晰：lottery 原始产物落 orchestrations/lottery-regression/artifacts/reports/<stamp>/admin.json，universal 原始产物落 result/universal-regression/<stamp>/*.md，父编排器最终汇总到 history/2026-06-07-001/06-执行报告.*。",
+    "regression-agent-universal-from-scratch.mjs 已在 online 前增加 existing online AGENT activity 只读前置检查，能够把环境冲突前移为前置条件失败。",
+    "三个 roulette 任务脚本已把模板查找改为 pageSize=20 的多候选详情兜底，并把创建后列表验证改为最多 8 次重试回查，可覆盖此前 7076 详情失败与 reward-mode 单次回查失真问题。"
+  ],
+  "evidence": [
+    "node tools/first-run-check.mjs --skill admin 返回 ok=true，当前 admin 依赖和 .env.local 已就绪。",
+    "history/2026-06-07-001/04-脚本整合报告.md 已明确 execution_run 的四段拆分、lottery/universal 子任务边界和 history 落盘位置。",
+    "git diff 显示 create-roulette-participant-scope-tasks-fast-api.mjs、create-roulette-condition-tasks-fast-api.mjs、create-roulette-reward-mode-tasks-fast-api.mjs 均新增 findCreatedTaskRow 重试回查，并把 findTaskTemplate 改为多候选 detail 兜底。",
+    "git diff 显示 regression-agent-universal-from-scratch.mjs 新增 findOtherOnlineAgentActivity，并在 online 前写入 precheck_online_agent_conflict 步骤。",
+    "node skills/weex-admin-ops/scripts/lottery-admin-main-regression.mjs --dry-run --compact 可正常输出完整 phase 拆分计划。",
+    "node skills/weex-admin-ops/scripts/regression-agent-universal-from-scratch.mjs --dry-run 可正常输出 AGENT 通用回归 dry-run 计划。"
+  ],
+  "risks": [
+    "本轮尚未提供针对 roulette 修复点和 AGENT 前置检查的真实写执行结果，execution_run 仍需先完成最小验证再放量执行。",
+    "run-state.json 仍停留在 script_integration，说明正式 record-stage 与 05/06 正式报告尚未落盘；后续若跳过流水线记录，会导致 history 证据链不完整。"
+  ],
+  "nextAction": "批准进入 execution_run。先执行 preflight_and_fix_gate 子阶段并记录最小验证结果，再派发 lottery 后管子阶段与 13 个 universal 子任务，最后汇总到 history/2026-06-07-001/06-执行报告.*。",
+  "relatedCommands": [
+    "node tools/first-run-check.mjs --skill admin",
+    "node skills/weex-admin-ops/scripts/lottery-admin-main-regression.mjs --dry-run --compact",
+    "node skills/weex-admin-ops/scripts/regression-agent-universal-from-scratch.mjs --dry-run",
+    "node orchestrations/lottery-regression/scripts/run-full-headless.mjs --selection '后管回归' --recharge-amount 1000 --wait-for-start-ms 60000",
+    "node skills/weex-admin-ops/scripts/regression-agent-tracepro-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-agent-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-competition-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-contract-mining-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-customized-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-flip-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-guess-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-lottery-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-monopoly-worldcup-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-newbie-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-race-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-recharge-trans-universal-from-scratch.mjs --confirm-run",
+    "node skills/weex-admin-ops/scripts/regression-tracepro-universal-from-scratch.mjs --confirm-run"
+  ],
+  "relatedFiles": [
+    "history/2026-06-07-001/00-任务说明.md",
+    "history/2026-06-07-001/run-state.json",
+    "history/2026-06-07-001/01-链路分析报告.md",
+    "history/2026-06-07-001/02-覆盖审阅报告.md",
+    "history/2026-06-07-001/04-脚本整合报告.md",
+    "history/2026-06-07-001/context/05-校验审阅-上下文.md",
+    "skills/weex-admin-ops/scripts/create-roulette-participant-scope-tasks-fast-api.mjs",
+    "skills/weex-admin-ops/scripts/create-roulette-condition-tasks-fast-api.mjs",
+    "skills/weex-admin-ops/scripts/create-roulette-reward-mode-tasks-fast-api.mjs",
+    "skills/weex-admin-ops/scripts/regression-agent-universal-from-scratch.mjs",
+    "skills/weex-admin-ops/scripts/lottery-admin-main-regression.mjs",
+    "orchestrations/lottery-regression/scripts/run-full-headless.mjs"
+  ],
+  "timestamp": "2026-06-07T18:21:41Z",
+  "existingCoverage": "PARTIAL",
+  "coverageDecision": "APPROVE",
+  "integrationDecision": "READY",
+  "validationDecision": "APPROVE",
+  "gaps": [
+    "尚未看到本轮针对 AGENT 前置检查与 roulette 任务回查修复点的真实写执行证据，当前主要是代码审阅和 dry-run 级证据。",
+    "正式 stage record 与 05/06 报告尚未落盘；后续必须由父编排器继续 record-stage/finalize-run，补齐 history 证据链。"
+  ],
+  "requiredFixes": []
+}

@@ -1,0 +1,98 @@
+{
+  "ok": true,
+  "caseId": "LOTTERY_universal_from_scratch",
+  "created": {
+    "registerTemplateId": "3561",
+    "prizeId": "1449",
+    "lotteryCountPrizeId": "1450",
+    "taskIds": [
+      "7040",
+      "7041"
+    ],
+    "activityId": "10042",
+    "activityAlias": "lr51146755",
+    "activityTitle": "转盘通用回归146755"
+  },
+  "links": [
+    {
+      "label": "后台转盘抽奖列表",
+      "url": "https://stg-activity.weex.tech/activities/lottery"
+    },
+    {
+      "label": "前台转盘抽奖页",
+      "url": "https://stg-www.weex.tech/zh-CN/events/draw/lr51146755"
+    }
+  ],
+  "durationMs": 25066,
+  "cleanup": {
+    "unbindActivity": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "offline": {
+      "ok": false,
+      "status": 200,
+      "body": {
+        "code": 500,
+        "msg": "任务不是上线状态不可下线"
+      }
+    },
+    "deleteActivity": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteTasks": [
+      {
+        "id": "7040",
+        "ok": true,
+        "status": 200,
+        "body": {
+          "code": 200,
+          "msg": "操作成功"
+        }
+      },
+      {
+        "id": "7041",
+        "ok": true,
+        "status": 200,
+        "body": {
+          "code": 200,
+          "msg": "操作成功"
+        }
+      }
+    ],
+    "deletePrize": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteLotteryCountPrize": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteRegisterTemplate": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    }
+  },
+  "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185235/LOTTERY_universal_from_scratch.md"
+}

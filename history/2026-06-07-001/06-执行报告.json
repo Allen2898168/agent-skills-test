@@ -1,0 +1,89 @@
+{
+  "runId": "2026-06-07-001",
+  "stageId": "execution_run",
+  "stageName": "执行落地",
+  "agentRole": "执行落地 subagent",
+  "status": "FAIL",
+  "decision": "EXECUTED_ONCE_WITH_REPORTED_FAILURES",
+  "summary": "已按 automation_review_pipeline 执行一次“活动后管全量回归”。preflight 通过；lottery 后管子阶段结果为 PASS 7 / FAIL 22 / SKIPPED 27；universal 后管子阶段结果为 11 PASS / 2 FAIL。按项目约定，本轮只汇总失败与证据，不做自动重试。",
+  "inputs": [
+    "history/2026-06-07-001/00-任务说明.md",
+    "history/2026-06-07-001/01-链路分析报告.md",
+    "history/2026-06-07-001/02-覆盖审阅报告.md",
+    "history/2026-06-07-001/04-脚本整合报告.md",
+    "history/2026-06-07-001/05-校验审阅报告.md"
+  ],
+  "findings": [
+    "admin preflight 和 dry-run gate 均通过，说明本地依赖与配置仍可用。",
+    "lottery 后管子阶段在奖品行操作、报名模板和任务管理三个模块集中失败，导致后续活动配置/活动列表/上下线 27 条 case 全部跳过。",
+    "universal 后管子阶段 13 条脚本通过 11 条；失败集中在 AGENT_TRACE_PRO 的资源卡列表回查，以及 AGENT 的在线活动环境阻塞。",
+    "AGENT 通用回归的新前置检查已生效：本轮直接以 `precondition failed: existing online AGENT activity 9978 (allming-6233470)` 结束，没有再次撞上线接口。",
+    "本轮失败复盘和交接已同步更新，且未触发自动重试。"
+  ],
+  "evidence": [
+    "node tools/first-run-check.mjs --skill admin 返回 ok=true。",
+    "orchestrations/lottery-regression/artifacts/reports/20260607_202339/summary.json：lottery 子阶段 PASS 7 / FAIL 22 / SKIPPED 27。",
+    "orchestrations/lottery-regression/artifacts/reports/20260607_202339/admin.json：失败集中在 PM-08~PM-11、RT-03~RT-09、TM-01~TM-11；AC/AL/ST 共 27 条 skipped。",
+    "result/full-regression/20260607_202349/summary.json：universal 子阶段 11 PASS / 2 FAIL，lottery suite disabled。",
+    "result/full-regression/20260607_202349/universal-summary.json：失败脚本为 regression-agent-tracepro-universal-from-scratch 与 regression-agent-universal-from-scratch。",
+    "result/universal-regression/20260607_202428/AGENT_universal_from_scratch_failed.md：记录前置检查命中在线 AGENT 活动 9978 / allming-6233470。",
+    "result/universal-regression/20260607_202407/AGENT_TRACE_PRO_universal_from_scratch_failed.md：记录资源卡创建后列表回查失败。"
+  ],
+  "risks": [
+    "lottery 后管主回归当前已不是单点 reward-mode 问题，而是扩展到奖品行操作、报名模板和任务模板发现/认证三类失败，当前不宜视为稳定入口。",
+    "universal 阶段虽然大部分通过，但 AGENT_TRACE_PRO 依赖资源卡的回查稳定性仍未解决；AGENT 环境阻塞需要人工清理在线活动后再复跑。",
+    "按项目规则，本轮未自动重试；若继续修复或复跑，需要用户明确确认。"
+  ],
+  "nextAction": "停止在本轮执行阶段继续重试。等待用户确认是否进入失败修复/单模块复跑；若继续，优先顺序为 lottery 主回归失败模块 -> AGENT_TRACE_PRO 资源卡依赖 -> AGENT 环境清理后复跑。",
+  "relatedCommands": [
+    "node tools/first-run-check.mjs --skill admin",
+    "node skills/weex-admin-ops/scripts/lottery-admin-main-regression.mjs --dry-run --compact",
+    "node skills/weex-admin-ops/scripts/regression-agent-universal-from-scratch.mjs --dry-run",
+    "node orchestrations/lottery-regression/scripts/run-full-headless.mjs --selection '后管回归' --recharge-amount 1000 --wait-for-start-ms 60000",
+    "node orchestrations/full-regression/scripts/run-full-regression.mjs --selection '后管回归' --no-include-lottery --confirm-run"
+  ],
+  "relatedFiles": [
+    "history/2026-06-07-001/00-任务说明.md",
+    "history/2026-06-07-001/05-校验审阅报告.md",
+    "orchestrations/lottery-regression/artifacts/reports/20260607_202339/summary.json",
+    "orchestrations/lottery-regression/artifacts/reports/20260607_202339/admin.json",
+    "result/full-regression/20260607_202349/summary.json",
+    "result/full-regression/20260607_202349/universal-summary.json",
+    "result/universal-regression/20260607_202407/AGENT_TRACE_PRO_universal_from_scratch_failed.md",
+    "result/universal-regression/20260607_202428/AGENT_universal_from_scratch_failed.md",
+    "docs/session-handoff.md",
+    "skills/weex-admin-ops/failure-reviews/prize-management.md",
+    "skills/weex-admin-ops/failure-reviews/activity-register-management.md",
+    "skills/weex-admin-ops/failure-reviews/activity-task-management.md",
+    "skills/weex-admin-ops/failure-reviews/common.md",
+    "skills/weex-admin-ops/failure-reviews/activity-management-agent.md"
+  ],
+  "timestamp": "2026-06-07T18:32:01Z",
+  "existingCoverage": "PARTIAL",
+  "coverageDecision": "APPROVE",
+  "integrationDecision": "READY",
+  "validationDecision": "APPROVE",
+  "executionDecision": "FAIL",
+  "executedCommands": [
+    "node tools/first-run-check.mjs --skill admin",
+    "node skills/weex-admin-ops/scripts/lottery-admin-main-regression.mjs --dry-run --compact",
+    "node skills/weex-admin-ops/scripts/regression-agent-universal-from-scratch.mjs --dry-run",
+    "node orchestrations/lottery-regression/scripts/run-full-headless.mjs --selection '后管回归' --recharge-amount 1000 --wait-for-start-ms 60000",
+    "node orchestrations/full-regression/scripts/run-full-regression.mjs --selection '后管回归' --no-include-lottery --confirm-run"
+  ],
+  "outputArtifacts": [
+    "history/2026-06-07-001/",
+    "orchestrations/lottery-regression/artifacts/reports/20260607_202339/summary.json",
+    "orchestrations/lottery-regression/artifacts/reports/20260607_202339/admin.json",
+    "result/full-regression/20260607_202349/summary.json",
+    "result/full-regression/20260607_202349/universal-summary.json",
+    "result/universal-regression/20260607_202407/AGENT_TRACE_PRO_universal_from_scratch_failed.md",
+    "result/universal-regression/20260607_202428/AGENT_universal_from_scratch_failed.md"
+  ],
+  "verificationEvidence": [
+    "lottery 子阶段统计：PASS 7 / FAIL 22 / SKIPPED 27",
+    "universal 子阶段统计：11 PASS / 2 FAIL",
+    "AGENT 前置检查已前移为 precondition failed，而非上线接口 code=500",
+    "知识结构校验：node skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs 返回 valid"
+  ]
+}

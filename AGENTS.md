@@ -57,6 +57,16 @@
 - FIN Admin / 财务管理后台相关操作优先使用项目内 `skills/weex-fin-admin-ops/`，它是财务后台团队协作的权威版本。
 - 前端页面打开、点击、表单操作、页面检查、响应式检查、截图证据、console/network 验证和前端流程沉淀，优先使用项目内 `skills/weex-frontend-ops/`，它是前端页面操作与检查的权威版本。
 - 跨多个 skill 的回归场景选择、依赖排序、阶段调度和结果聚合，优先使用 `orchestrations/<workflow>/`；不得把跨域总调度新增到某个单一业务 skill。
+- 单活动、单后管、单链路回归默认使用单 agent 串行执行；除非用户明确要求多 agent，或执行中发现实际已跨多个 skill。
+- 全量回归、全链路回归、跨活动后台/FIN Admin/前端的组合回归默认使用多 subagent 协同；主 agent 负责调度、阶段收敛、结果聚合和沉淀。
+- 设计超过 `10` 个用例的回归任务时，默认必须先进入 `orchestrations/` 编排流程；不得直接按单脚本或单 agent 顺序堆跑。
+- 超过 `10` 个用例的回归任务如果已有可复用编排，必须优先复用现有编排；只有现有编排无法覆盖目标范围时，才允许新增或扩展编排。
+- 上述“编排流程”指主 agent 的阶段拆分、依赖调度、结果聚合链路；当阶段跨域、可并行或吞吐较高时，默认由主 agent 调度 subagent 执行子任务。
+- 命中“多 subagent 协同”规则的任务时，即使仓库中已经存在可直接执行的总入口脚本（例如 `orchestrations/*/scripts/run-*.mjs`），也不得由主 agent 直接单 agent 串行执行总入口来替代调度；主 agent 必须先按阶段拆分、分发 subagent，再汇总结果。总入口脚本只可作为某个阶段的子任务入口，不能代替多 agent 调度本身。
+- 用户需求中只要出现 `subagent链路`、`按子agent`、`按subagent`、`多 subagent`、`全量回归`、`全链路回归`、`组合回归`、`跨域回归`，或已知跨多个 skill、或已知用例数 `>10`，默认视为“必须走 subagent 编排协议”，不是“可以并行执行就算完成”。
+- 上述任务默认先走 `orchestrations/automation-review-pipeline/`；主 agent 必须先运行 `node orchestrations/automation-review-pipeline/scripts/resolve-entry-mode.mjs --requirement <原始需求>`（或做等价判定），结果为 `automation_review_pipeline` 后再进入正式执行。
+- 一旦进入 `automation_review_pipeline`，必须至少完成：`prepare-run`、`build-stage-context`、分阶段 subagent 执行、`record-stage`、`finalize-run`，并把阶段上下文与报告落到 `history/<runId>/`；缺少 `history` 产物时，不得声称“已走 subagent 链路”。
+- 当任务命中上述强制编排信号时，禁止只把执行拆成几个 worker 并行后直接汇总；这种做法只能算并行执行，不算合规的 subagent 链路。
 - 本机 `$CODEX_HOME/skills/weex-admin-ops` 只是可选安装副本；如果缺失，先读取项目内 skill。
 - 本机 `$CODEX_HOME/skills/weex-fin-admin-ops` 只是可选安装副本；如果缺失，先读取项目内 skill。
 - 本机 `$CODEX_HOME/skills/weex-frontend-ops` 只是可选安装副本；如果缺失，先读取项目内 skill。
@@ -79,6 +89,7 @@
 
 ## Execution Principles
 - 开始编码、补链路、改脚本或更新流程前，先明确目标结果、完成标准、非目标范围；如果用户需求里缺关键条件，先列缺口，不凭感觉补全高风险配置。
+- 对命中强制编排信号的任务，完成标准必须包含 `history/<runId>/` 产物、阶段报告、最终结论报告；“脚本跑完”不构成完成。
 - 默认优先最小有效改动：先复用现有 reference、helper、缓存脚本和已验证链路，只补当前目标缺失的部分，不顺手改无关文件、命名或结构。
 - 新增逻辑前，先检查当前 skill 的 `references/`、`scripts/lib/`、`scripts/business/` 和动作缓存；能扩展就不要重写，能抽共性就不要在业务脚本里复制。
 - 任何改动都必须有可执行验证路径；没有页面证据、接口回包、结果查询、断言或脚本校验的，不算完成。

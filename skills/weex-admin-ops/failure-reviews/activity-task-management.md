@@ -55,3 +55,23 @@
 - 固定路径：按已存在 FLIP 任务结构补齐 `conditions.allowRangeLogic=\"UNION\"`、完整 `taskAward`（含 invite* 字段）与基础 i18n 字段；保持 payload 由脚本显式构造（不 clone 模板）。
 - 验证结果：`skills/weex-admin-ops/scripts/regression-flip-universal-from-scratch.mjs` 已跑通创建/校验/清理闭环。
 - 关联脚本：`skills/weex-admin-ops/scripts/create-flip-invite-task-from-scratch-fast-api.mjs`。
+
+## 2026-06-07 lottery 后管回归任务管理阶段详情/列表校验失真
+- 业务线：活动任务管理 / 转盘抽奖后管回归。
+- 场景：按 subagent 链路执行 `node orchestrations/lottery-regression/scripts/run-full-headless.mjs --selection '后管回归' --recharge-amount 1000 --wait-for-start-ms 60000`。
+- 失败表现：`TM-01~TM-09` 全部失败，统一报错 `Task detail failed: 7076`；`TM-10~TM-11` 失败为 `Created reward-mode task not found: 转盘抽奖_limited_20260607174906`。对应报告目录：`orchestrations/lottery-regression/artifacts/reports/20260607_194818/`。
+- 失败原因：当前任务管理阶段对任务详情 `7076` 和 reward-mode 新建任务列表回查的稳定性不足，导致回归在任务阶段中断，后续活动配置相关 `AC/AL/ST` 用例被整体跳过。
+- 解决方式：后续需要先核对 `lottery_admin_main_regression` 任务阶段使用的任务 ID `7076` 是否仍为有效测试基线，并补强 reward-mode 创建后的列表回查逻辑，避免只凭单次列表结果判失败。
+- 验证结果：本轮 lottery 后管子阶段结果为 `PASS 19 / FAIL 12 / SKIPPED 25`，未进入活动创建，因此无新增活动残留。
+- 关联文件：`orchestrations/lottery-regression/artifacts/reports/20260607_194818/admin.json`、`skills/weex-admin-ops/scripts/lottery-admin-main-regression.mjs`。
+- 后续处理：修正后需先复跑 `后管回归` 选择集，再决定是否提升为固定执行路径。
+
+## 2026-06-07 lottery 后管回归任务模板命名与认证再次漂移
+- 业务线：活动任务管理 / 转盘抽奖后管回归。
+- 场景：在补入“多候选详情兜底 + 新建后列表回查重试”后，再次执行 `node orchestrations/lottery-regression/scripts/run-full-headless.mjs --selection '后管回归' --recharge-amount 1000 --wait-for-start-ms 60000`。
+- 失败表现：`TM-01`~`TM-07`、`TM-09` 统一失败为 `Task source not found: 转盘抽奖_all_`；`TM-08` 失败为 `Create condition task failed ... code=401`；`TM-10`~`TM-11` 失败为 `Task detail failed: 5801`。对应报告目录：`orchestrations/lottery-regression/artifacts/reports/20260607_202339/`。
+- 失败原因：当前 staging 可复用的转盘任务模板已不再匹配脚本假设的 `转盘抽奖_all_` 前缀；reward-mode 候选详情也漂移到新的失效 ID `5801`。此外，任务条件分支在当前回归链路中仍会触发一次认证失效。
+- 解决方式：不能继续只靠固定 `nameHint`；后续应按活动类型/任务条件重新枚举可用模板，并在 task 子脚本内部对 `401` 做 session 刷新或重登兜底。
+- 验证结果：本轮任务管理模块 `PASS 0 / FAIL 11 / SKIPPED 0`，直接阻断活动配置与上下线相关 `27` 条 case。
+- 关联文件：`skills/weex-admin-ops/scripts/create-roulette-participant-scope-tasks-fast-api.mjs`、`skills/weex-admin-ops/scripts/create-roulette-condition-tasks-fast-api.mjs`、`skills/weex-admin-ops/scripts/create-roulette-reward-mode-tasks-fast-api.mjs`、`orchestrations/lottery-regression/artifacts/reports/20260607_202339/admin.json`。
+- 后续处理：需要把任务模板发现从“前缀猜测”改成“列表枚举 + 条件筛选”固定路径；修复前不要再把 lottery 后管任务阶段视为稳定入口。

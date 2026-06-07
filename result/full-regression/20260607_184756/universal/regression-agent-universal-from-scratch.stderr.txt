@@ -1,0 +1,15 @@
+{
+  "ok": false,
+  "mode": "headless_api",
+  "error": "online failed: {\"code\":500,\"msg\":\"已有上线状态的人人代理活动\"}",
+  "created": {
+    "registerTemplateId": "3555",
+    "prizeId": "1440",
+    "invitedTaskId": "7031",
+    "inviteTaskId": "7032",
+    "activityId": "10036",
+    "activityAlias": "agr50994164",
+    "activityTitle": "人人代理通用回归164954"
+  },
+  "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185002/AGENT_universal_from_scratch_failed.md"
+}

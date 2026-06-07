@@ -89,6 +89,16 @@
 - 验证结果：小活动(TRACE_PRO) 通用回归脚本在“依赖创建完成→创建活动”前刷新 session 后稳定通过。
 - 关联脚本：`scripts/regression-tracepro-universal-from-scratch.mjs`。
 
+## 2026-06-07 资源卡从零创建后列表回查丢失
+- 业务线：通用依赖脚本 / 资源位信息卡片。
+- 场景：执行 `node orchestrations/full-regression/scripts/run-full-regression.mjs --selection '后管回归' --no-include-lottery --confirm-run`，其中 `regression-agent-tracepro-universal-from-scratch.mjs` 创建 `AGENT_TRACE_PRO` 依赖资源卡。
+- 失败表现：`regression-agent-tracepro-universal-from-scratch` 失败为 `resource cards create failed: Created resource card not found in list: 资源卡_从零_20260607182403_2`；失败产物：`result/universal-regression/20260607_202407/AGENT_TRACE_PRO_universal_from_scratch_failed.md`。
+- 失败原因：资源卡从零创建后立即按名称回查时未稳定命中第二张资源卡，当前脚本缺少列表回查重试与精确匹配兜底。
+- 解决方式：`create-resource-card-from-scratch-fast-api.mjs` 需要补创建后列表重试，并优先按精确名称/创建 ID 命中，避免把列表瞬时空窗当作创建失败。
+- 验证结果：同一轮 universal 后管回归其余 `11` 条脚本通过，仅 `AGENT_TRACE_PRO` 因资源卡回查失败中断。
+- 关联文件：`skills/weex-admin-ops/scripts/create-resource-card-from-scratch-fast-api.mjs`、`skills/weex-admin-ops/scripts/regression-agent-tracepro-universal-from-scratch.mjs`。
+- 后续处理：补稳后需先单跑 `regression-agent-tracepro-universal-from-scratch.mjs` 再恢复到全量后管回归。
+
 ## 2026-05-05 staging 登录页普通验证码误判
 - 业务线：通用登录。
 - 场景：脚本登录 staging 后台时，页面短暂出现 `placeholder="验证码"`。

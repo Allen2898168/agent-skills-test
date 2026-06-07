@@ -22,6 +22,73 @@
 
 ## 最近完成
 
+- 2026-06-07 按 `automation_review_pipeline` 执行“全量回归活动后管”：
+  - runId：`history/2026-06-07-001/`；已完成 `链路分析 -> 覆盖审阅 -> 脚本整合 -> 校验审阅`，执行阶段真实拆成 `lottery` 后管子阶段与 `universal` 后管子阶段。
+  - 执行前补 gate：`create-roulette-participant-scope-tasks-fast-api.mjs`、`create-roulette-condition-tasks-fast-api.mjs`、`create-roulette-reward-mode-tasks-fast-api.mjs` 增加“多候选模板详情 + 创建后回查重试”；`regression-agent-universal-from-scratch.mjs` 增加在线 `AGENT` 活动前置检查。
+  - `lottery` 子阶段失败：报告目录 `orchestrations/lottery-regression/artifacts/reports/20260607_202339/`，结果 `PASS 7 / FAIL 22 / SKIPPED 27`；失败集中在奖品行操作 `PM-08~11`、报名模板 `RT-03~09`、任务管理 `TM-01~11`，后续 `AC/AL/ST` 共 `27` 条全部跳过。
+  - `universal` 子阶段失败：报告目录 `result/full-regression/20260607_202349/`，脚本口径 `11 PASS / 2 FAIL`；失败为 `AGENT_TRACE_PRO` 资源卡回查丢失、`AGENT` 前置检查命中在线活动 `9978 / allming-6233470`。
+  - 本轮按规则只跑一次、不重试；已补失败复盘到 `skills/weex-admin-ops/failure-reviews/prize-management.md`、`activity-register-management.md`、`activity-task-management.md`、`common.md`，并更新 `activity-management-agent.md` 的固定前置检查口径。
+
+- 2026-06-07 按 subagent 链路执行“活动后管全量回归”：
+  - 主 agent 先完成启动检查，再拆成两个子阶段并行：`lottery-regression --selection '后管回归'` 与 13 条 `regression-*-universal-from-scratch.mjs`。
+  - lottery 后管子阶段：`PASS 19 / FAIL 12 / SKIPPED 25`，报告目录 `orchestrations/lottery-regression/artifacts/reports/20260607_194818/`；失败集中在 `RT-09`、`TM-01~TM-11`，其中 `TM-01~TM-09` 为 `Task detail failed: 7076`，`TM-10~TM-11` 为 `Created reward-mode task not found: 转盘抽奖_limited_20260607174906`。
+  - universal 通用活动子阶段：脚本口径 `12 PASS / 1 FAIL`，子用例口径 `125 PASS / 1 FAIL / TOTAL 126`；唯一失败为 `result/universal-regression/20260607_194944/AGENT_universal_from_scratch_failed.md`，原因为 `已有上线状态的人人代理活动`。
+  - 本轮合并口径：`PASS 144 / FAIL 13 / SKIPPED 25 / TOTAL 182`。
+  - 失败 AGENT 补偿清理重新执行后，活动 `10074 / agr54577099` 状态为 `DELETED`；任务 `7092/7093`、报名模板 `3614` 已不在列表结果中，奖品 `1492` 删除接口返回 `code=200`，但详情接口仍可读，疑似软删保留。
+
+- 2026-06-07 执行“活动后管 + 完整前端链路”全量回归：
+  - 执行：`node orchestrations/full-regression/scripts/run-full-regression.mjs --selection '全部' --confirm-run`
+  - 汇总：`result/full-regression/20260607_190648/summary.json`，结果 `PASS 141 / FAIL 6 / SKIPPED 10 / TOTAL 285`。
+  - lottery 文档用例：`129 PASS / 5 FAIL / 6 SKIPPED`；失败为 `FE-56/68/69/73/75`，详情见 `orchestrations/lottery-regression/artifacts/reports/20260607_190649/frontend_normal.json`。
+  - frontend stock/weight 专项均通过：`frontend_stock.json`、`frontend_weight.json` 已落盘。
+  - 通用回归脚本：`12 PASS / 1 FAIL`；唯一失败仍是 `AGENT`，失败产物 `result/universal-regression/20260607_193419/AGENT_universal_from_scratch_failed.md`，原因为 staging 已存在在线 `AGENT` 活动。
+  - 报告：`result/full-regression/20260607_190648/report.md`。
+
+- 2026-06-07 基于需求单补充大富翁世界杯后管需求测试用例设计：
+  - 来源：`/Users/gabriel/Downloads/WWLD-13435【大富翁】世界杯.md`
+  - 新增文档：`docs/test-cases/monopoly-worldcup-admin-requirement-cases.md`
+  - 结论：本轮以后管配置与状态流转为主，共整理 39 条用例，覆盖基本信息、报名、未登录说明、配置管理、棋盘、奖励列表、任务、风控、FAQ/活动日历、上下线/审计；未纳入前端交互和 FIN 发奖审核。
+
+- 2026-06-07 执行活动后管全量回归（仅后管范围）：
+  - 执行：`node orchestrations/full-regression/scripts/run-full-regression.mjs --selection '后管回归' --confirm-run`
+  - 汇总：`result/full-regression/20260607_184756/summary.json`，结果 `PASS 68 / FAIL 1 / SKIPPED 88`。
+  - lottery 后管回归：`56 PASS / 0 FAIL / 84 SKIPPED`；本轮只选 `后管回归`，前端 `FE-*` 用例全部按“未纳入当前自动化回归输出口径”跳过。
+  - 通用活动回归：13 条里 `12 PASS / 1 FAIL`；唯一失败为 `AGENT`，失败产物 `result/universal-regression/20260607_185002/AGENT_universal_from_scratch_failed.md`。
+  - 失败原因：`AGENT` 上线返回 `code=500 / 已有上线状态的人人代理活动`，说明 staging 存在其他在线 `AGENT` 活动；本次失败后补偿清理成功，已删除活动 `10036 / agr50994164` 及其依赖。
+  - 已补失败复盘：`skills/weex-admin-ops/failure-reviews/activity-management.md`（2026-06-07 条目）；后续需把“在线 AGENT 活动存在检查”前置到 `regression-agent-universal-from-scratch.mjs`。
+
+- 2026-06-07 已沉淀默认协同规则：
+  - 单活动、单后管、单链路回归：默认单 agent。
+  - 全量回归、全链路回归、跨 `admin/fin/frontend` 回归：默认多 subagent。
+  - 超过 `10` 个用例的回归：默认必须先进入 `orchestrations/` 编排流程；如已有可复用编排，优先直接复用。
+  - 这里的“编排流程”指主 agent 的阶段拆分、依赖调度、结果聚合链路；跨域、可并行或高吞吐阶段默认由主 agent 调度 subagent 执行。
+  - 如果任务表面是单链路，但执行中确认跨多个 skill，允许从单 agent 自动升级为多 subagent。
+  - 2026-06-07 补充约束：命中多 subagent 规则时，不能因为仓库已有 `orchestrations/*/scripts/run-*.mjs` 总入口就让主 agent 直接串行跑完全流程；总入口只能作为阶段子任务入口，不能替代主 agent 的 subagent 调度。
+
+- 2026-06-07 大富翁后管通用回归复跑与 cleanup 修正：
+  - 执行：`node skills/weex-admin-ops/scripts/regression-monopoly-worldcup-universal-from-scratch.mjs --confirm-run`
+  - 首次结果：活动 `10022 / mwcr50227192` 创建、草稿检查、上线、下线、删除均成功；结果文件 `result/universal-regression/20260607_183714/MONOPOLY_WORLD_CUP_universal_from_scratch.md`。
+  - 发现 cleanup 冗余下线：主流程已完成 `offline`，cleanup 再次调用 `/prod-api/activity/monopoly/offline` 返回 `code=500 / 任务不是上线状态不可下线`，但后续解绑和删除仍成功，活动别名回查为空，无残留。
+  - 已修复脚本：`skills/weex-admin-ops/scripts/regression-monopoly-worldcup-universal-from-scratch.mjs` 的 cleanup 支持 `skipOffline`，主流程 offline 成功后跳过重复下线；失败复盘已补 `skills/weex-admin-ops/failure-reviews/activity-management.md`（2026-06-07 条目）。
+
+- 2026-06-07 新增多阶段自动化治理流水线骨架：`orchestrations/automation-review-pipeline/`
+  - 目录包含 `prepare-run / record-stage / finalize-run / build-stage-context`、固定 schema、阶段 prompt 与 `history/` 落盘约定。
+  - 当前仓库版本负责“状态机 + 报告协议 + context packet”；真实 subagent 仍由 Codex 会话层执行。
+  - 2026-06-07 已补入口路由：新增 `resolve-entry-mode.mjs`，把 `subagent链路 / 全量回归 / 全链路回归 / 组合回归 / 跨域回归 / >10 用例` 固定映射到 `automation_review_pipeline`，并要求结果必须落到 `history/<runId>/`。
+  - 已补 12 条自动化测试，并修复首轮高优先级问题：目录缺口撞号、`report.runId` 漏校验、覆盖审阅 rejectReason 误要求、执行阶段 `BLOCKED` 合同缺失。
+  - 已支持 `existingCoverage=NONE/PARTIAL` 且审阅通过时继续进入“补覆盖/补脚本”分支。
+
+- 2026-05-31 子用例“简要中文描述”沉淀完成：
+  - 新增全量导出脚本：`tools/generate-all-test-cases-list.mjs`，可输出 `result/all-test-cases-285.md`，包含 `序号/用例编号/用例内容/简要中文描述`。
+  - 新增命令：`npm run generate:test-cases:all`。
+  - skill 规则已同步到 `skills/weex-admin-ops/SKILL.md`、`skills/weex-fin-admin-ops/SKILL.md`、`skills/weex-frontend-ops/SKILL.md`：子用例输出必须包含中文描述，新增 step name 需补 `tools/lib/result-md.mjs` 的 `DEFAULT_STEP_META_ZH`，不允许长期保留 `执行子步骤：<step>` fallback。
+
+- 2026-05-31 执行“全量用例回归”真实跑批：`node skills/weex-admin-ops/scripts/regress-full-test-cases.mjs --confirm-run`。
+  - 汇总：`result/full-regression/20260531_205800/summary.json`，口径 `285`（140+141+4），结果 `PASS 141 / FAIL 6 / SKIPPED 10`。
+  - 失败集中在 lottery 文档用例前端阶段：`FE-56/68/69/73/75/76`；失败证据见 `result/full-regression/20260531_205800/frontend_normal.json`。
+  - `universal-regression` 13 条脚本均 PASS，产物在 `result/universal-regression/20260531_2123xx~2127xx/*.md`。
+  - 已补充失败复盘：`skills/weex-frontend-ops/failure-reviews/lottery-regression.md`（2026-05-31 条目）。
+
 - 2026-05-31 回归产物 Markdown 标准化：`tools/lib/result-md.mjs` 新增 `testCase` 入参，支持输出“标准测试用例 MD”（用例编号/名称/描述/前置条件/子用例编号与结果）；并已让 13 条通用回归脚本默认写入该标准格式（仍保留未传 `testCase` 时的旧格式兼容）。
   - 结果生成工具：`tools/lib/result-md.mjs`
   - 回归脚本接入：`skills/weex-admin-ops/scripts/regression-*-universal-from-scratch.mjs`
@@ -153,14 +220,6 @@
   - 显式依赖全配脚本（min/full verify + cleanup）：`skills/weex-admin-ops/scripts/create-monopoly-worldcup-full-config-explicit-deps-fast-api.mjs`
   - modules 全量配置脚本：`skills/weex-admin-ops/scripts/monopoly-worldcup-activity-module-config-fast-api.mjs`
   - operations：`skills/weex-admin-ops/references/operations/activity-management-monopoly-worldcup.md`
-
-- 2026-05-29 代理小活动（AGENT_TRACE_PRO）API 全配置沉淀补齐（已可 dry-run 命中；待写操作验证）：
-  - 中文映射：`skills/weex-admin-ops/references/mappings/agent-tracepro-activity-modules.md`、`skills/weex-admin-ops/references/mappings/agent-tracepro-activity-fields.md`
-  - NL/action-cache：`configure_agent_trace_pro_activity`、`configure_agent_trace_pro_activity_modules`
-  - 显式依赖全配脚本（min/full verify + cleanup）：`skills/weex-admin-ops/scripts/create-agent-tracepro-full-config-explicit-deps-fast-api.mjs`
-  - 依赖项脚本：`skills/weex-admin-ops/scripts/create-agent-tracepro-trading-volume-task-with-bonus-prize-fast-api.mjs`
-  - 模块级自由配置脚本：`skills/weex-admin-ops/scripts/agent-tracepro-activity-module-config-fast-api.mjs`
-  - operations：`skills/weex-admin-ops/references/operations/activity-management-agent-tracepro.md`
 
 - 2026-05-28 及更早交接记录已归档：`docs/session-handoffs/2026-05-26-to-2026-05-28-and-earlier.md`
 - 2026-05-11 至 2026-05-22 抽奖、FIN、前端运行时与历史链路摘要已归档：`docs/session-handoffs/2026-05-11-to-22-lottery-and-runtime.md`

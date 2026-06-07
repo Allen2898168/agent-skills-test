@@ -1,0 +1,107 @@
+{
+  "ok": true,
+  "caseId": "FLIP_universal_from_scratch",
+  "created": {
+    "registerTemplateId": "3583",
+    "applyConfigId": "3583",
+    "giftCashPrizeId": "1468",
+    "virtualFlipCardPrizeId": "1469",
+    "virtualFlipIntegralPrizeId": "1470",
+    "cardTaskId": "7066",
+    "integralTaskId": "7067",
+    "activityId": "10059",
+    "activityAlias": "flipr53748960",
+    "activityTitle": "小丑牌通用回归173548"
+  },
+  "links": [
+    {
+      "label": "后台小丑牌列表",
+      "url": "https://stg-activity.weex.tech/activities/jokerCard/index"
+    }
+  ],
+  "durationMs": 22925,
+  "cleanup": {
+    "offline": {
+      "ok": false,
+      "status": 200,
+      "body": {
+        "code": 500,
+        "msg": "任务不是上线状态不可下线"
+      }
+    },
+    "unbindActivity": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteActivity": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteTasks": [
+      {
+        "id": "7066",
+        "ok": true,
+        "status": 200,
+        "body": {
+          "code": 200,
+          "msg": "操作成功"
+        }
+      },
+      {
+        "id": "7067",
+        "ok": true,
+        "status": 200,
+        "body": {
+          "code": 200,
+          "msg": "操作成功"
+        }
+      }
+    ],
+    "deletePrizes": [
+      {
+        "id": "1468",
+        "ok": true,
+        "status": 200,
+        "body": {
+          "code": 200,
+          "msg": "操作成功"
+        }
+      },
+      {
+        "id": "1469",
+        "ok": true,
+        "status": 200,
+        "body": {
+          "code": 200,
+          "msg": "操作成功"
+        }
+      },
+      {
+        "id": "1470",
+        "ok": true,
+        "status": 200,
+        "body": {
+          "code": 200,
+          "msg": "操作成功"
+        }
+      }
+    ],
+    "deleteRegisterTemplate": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    }
+  },
+  "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_193555/FLIP_universal_from_scratch.md"
+}
