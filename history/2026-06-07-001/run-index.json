@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "runId": "2026-06-07-001",
+  "title": "活动后管全量回归",
+  "historyDir": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001",
+  "createdAt": "2026-06-07T18:09:34.760Z",
+  "updatedAt": "2026-06-07T18:32:54.348Z",
+  "files": {
+    "task": "00-任务说明.md",
+    "final": "07-最终结论报告.md",
+    "runState": "run-state.json",
+    "runIndex": "run-index.json"
+  },
+  "stages": [
+    {
+      "stageId": "linkage_analysis",
+      "stageName": "链路分析",
+      "status": "PASS",
+      "markdownFile": "01-链路分析报告.md",
+      "jsonFile": "01-链路分析报告.json",
+      "recordedAt": "2026-06-07T18:12:11Z"
+    },
+    {
+      "stageId": "coverage_review",
+      "stageName": "覆盖审阅",
+      "status": "PASS",
+      "markdownFile": "02-覆盖审阅报告.md",
+      "jsonFile": "02-覆盖审阅报告.json",
+      "recordedAt": "2026-06-07T18:14:07Z"
+    },
+    {
+      "stageId": "rework_advice",
+      "stageName": "返工建议",
+      "status": "SKIPPED",
+      "markdownFile": "03-返工建议报告.md",
+      "jsonFile": "03-返工建议报告.json",
+      "recordedAt": "2026-06-07T18:32:54.348Z"
+    },
+    {
+      "stageId": "script_integration",
+      "stageName": "脚本整合",
+      "status": "PASS",
+      "markdownFile": "04-脚本整合报告.md",
+      "jsonFile": "04-脚本整合报告.json",
+      "recordedAt": "2026-06-07T18:30:00Z"
+    },
+    {
+      "stageId": "validation_review",
+      "stageName": "校验审阅",
+      "status": "PASS",
+      "markdownFile": "05-校验审阅报告.md",
+      "jsonFile": "05-校验审阅报告.json",
+      "recordedAt": "2026-06-07T18:21:41Z"
+    },
+    {
+      "stageId": "execution_run",
+      "stageName": "执行落地",
+      "status": "FAIL",
+      "markdownFile": "06-执行报告.md",
+      "jsonFile": "06-执行报告.json",
+      "recordedAt": "2026-06-07T18:32:01Z"
+    }
+  ],
+  "stageTimeline": [
+    {
+      "stageId": "linkage_analysis",
+      "stageName": "链路分析",
+      "status": "PASS",
+      "recordedAt": "2026-06-07T18:12:11Z"
+    },
+    {
+      "stageId": "coverage_review",
+      "stageName": "覆盖审阅",
+      "status": "PASS",
+      "recordedAt": "2026-06-07T18:14:07Z"
+    },
+    {
+      "stageId": "script_integration",
+      "stageName": "脚本整合",
+      "status": "PASS",
+      "recordedAt": "2026-06-07T18:30:00Z"
+    },
+    {
+      "stageId": "validation_review",
+      "stageName": "校验审阅",
+      "status": "PASS",
+      "recordedAt": "2026-06-07T18:21:41Z"
+    },
+    {
+      "stageId": "execution_run",
+      "stageName": "执行落地",
+      "status": "FAIL",
+      "recordedAt": "2026-06-07T18:32:01Z"
+    }
+  ]
+}

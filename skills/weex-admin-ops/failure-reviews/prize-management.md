@@ -1,5 +1,15 @@
 # 奖品管理失败复盘
 
+## 2026-06-07 lottery 后管回归奖品行操作目标行丢失
+- 业务线：奖品管理 / 转盘抽奖后管回归。
+- 场景：执行 `node orchestrations/lottery-regression/scripts/run-full-headless.mjs --selection '后管回归' --recharge-amount 1000 --wait-for-start-ms 60000`，进入 `prize_row_actions` 阶段。
+- 失败表现：`PM-08`~`PM-11` 全部失败，统一报错 `Cannot read properties of null (reading 'id')`；报告目录：`orchestrations/lottery-regression/artifacts/reports/20260607_202339/`。
+- 失败原因：`prize-row-actions-fast-api.mjs` 在读取临时奖品行操作目标时直接访问空对象的 `id`，当前行回查缺少空值保护与重试。
+- 解决方式：后续需要先补临时奖品创建后的列表回查重试，并在进入查看/修改/复制/删除前对目标行做 null guard。
+- 验证结果：本轮 `create_regression_prizes` 仍通过，但奖品行操作 4 条 case 全部失败，后续活动配置链路未受该阶段影响。
+- 关联文件：`skills/weex-admin-ops/scripts/prize-row-actions-fast-api.mjs`、`orchestrations/lottery-regression/artifacts/reports/20260607_202339/admin.json`。
+- 后续处理：补稳后需先单跑 `PM-08`~`PM-11` 再恢复到后管主回归固定路径。
+
 ## 2026-05-04 仓位空投交易对未落值
 - 业务线：奖品管理。
 - 场景：新增 `虚拟积分或资格 / 仓位空投` 奖品。

@@ -1,0 +1,85 @@
+{
+  "ok": true,
+  "caseId": "TRADING_COMPETITION_universal_from_scratch",
+  "created": {
+    "registerTemplateId": "3556",
+    "prizeIds": [
+      "1441",
+      "1442"
+    ],
+    "taskId": "7033",
+    "activityId": "10037",
+    "activityAlias": "tcr51015981",
+    "activityTitle": "交易大赛通用回归165015"
+  },
+  "links": [
+    {
+      "label": "后台交易大赛列表",
+      "url": "https://stg-activity.weex.tech/activities/competition"
+    }
+  ],
+  "durationMs": 18366,
+  "cleanup": {
+    "offline": {
+      "ok": false,
+      "status": 200,
+      "body": {
+        "code": 500,
+        "msg": "任务不是上线状态不可下线"
+      }
+    },
+    "unbindActivity": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteActivity": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteTask": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deletePrizes": [
+      {
+        "id": "1441",
+        "ok": true,
+        "status": 200,
+        "body": {
+          "code": 200,
+          "msg": "操作成功"
+        }
+      },
+      {
+        "id": "1442",
+        "ok": true,
+        "status": 200,
+        "body": {
+          "code": 200,
+          "msg": "操作成功"
+        }
+      }
+    ],
+    "deleteRegisterTemplate": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    }
+  },
+  "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185022/TRADING_COMPETITION_universal_from_scratch.md"
+}

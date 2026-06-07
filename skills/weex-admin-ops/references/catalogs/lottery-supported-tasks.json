@@ -1,0 +1,61 @@
+{
+  "source": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/activity-web/activity-ui/src/views/activity/const/index.js",
+  "tasks": [
+    {
+      "key": "KYC_PASS",
+      "label": "KYC_PASS"
+    },
+    {
+      "key": "REGISTER_PASS",
+      "label": "REGISTER_PASS"
+    },
+    {
+      "key": "TRANSFER_AND_TRADING",
+      "label": "TRANSFER_AND_TRADING"
+    },
+    {
+      "key": "RECHARGE",
+      "label": "RECHARGE"
+    },
+    {
+      "key": "INVITE_FRIEND",
+      "label": "INVITE_FRIEND"
+    },
+    {
+      "key": "TRADING_VOLUME",
+      "label": "TRADING_VOLUME"
+    },
+    {
+      "key": "SPOT_TRADING_VOLUME",
+      "label": "SPOT_TRADING_VOLUME"
+    },
+    {
+      "key": "SPOT_HOLDS",
+      "label": "SPOT_HOLDS"
+    },
+    {
+      "key": "EARNINGS",
+      "label": "EARNINGS"
+    },
+    {
+      "key": "KOL_BIND",
+      "label": "KOL_BIND"
+    },
+    {
+      "key": "SHARE_LINK",
+      "label": "SHARE_LINK"
+    },
+    {
+      "key": "TOTAL_TRADING_VOLUME",
+      "label": "TOTAL_TRADING_VOLUME"
+    },
+    {
+      "key": "OLD_NEW_SPOT_TRANSFER",
+      "label": "OLD_NEW_SPOT_TRANSFER"
+    },
+    {
+      "key": "DOWNLOAD_APP",
+      "label": "DOWNLOAD_APP"
+    }
+  ]
+}

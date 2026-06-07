@@ -46,7 +46,7 @@
   - 已扩展动作缓存自然语言解析：`非活跃用户`、`可参与注册时间范围今天到明天`、`浏览器模式` 可解析为 `--platform-scopes non_active --register-start <today 00:00:00> --register-end <tomorrow 23:59:59> --visible`。
   - 已拆分报名模板 operation 文档，避免 `activity-register-management.md` 超过 250 行阈值。
   - 已新增 `activity-register-management-date-range.md` 和 `activity-register-management-platform-scopes.md`，并更新 operations index、action-cache 和页面组件 reference。
-  - 已按用户确认继续拆分公共组件 helper：`scripts/lib/element-ui.mjs` 现在是 6 行兼容导出入口，具体实现拆到 `scripts/lib/element-ui/common.mjs`、`form.mjs`、`select.mjs`、`choice.mjs`、`actions.mjs`、`table.mjs`；新增日期范围 helper 保持在 `scripts/lib/element-ui-datetime.mjs`。
+  - 已按用户确认继续拆分公共组件 helper：`scripts/lib/element-ui.mjs` 现在是 6 行兼容导出入口，具体实现拆到 `scripts/lib/element-ui-common.mjs`、`scripts/lib/element-ui-form.mjs`、`scripts/lib/element-ui-select.mjs`、`scripts/lib/element-ui-choice.mjs`、`scripts/lib/element-ui-actions.mjs`、`scripts/lib/element-ui-table.mjs`；新增日期范围 helper 保持在 `scripts/lib/element-ui-datetime.mjs`。
   - 拆分后最大脚本文件为 `scripts/cache/matcher.mjs`，199 行；业务脚本 import 仍通过 `scripts/lib/element-ui.mjs` 兼容入口工作。
 
 ## 下一步建议

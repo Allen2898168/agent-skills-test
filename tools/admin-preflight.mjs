@@ -1,0 +1,46 @@
+#!/usr/bin/env node
+import { spawnSync } from "node:child_process";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+
+function run(command, args) {
+  const result = spawnSync(command, args, { cwd: repoRoot, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+  const stdout = (result.stdout || "").trim();
+  const stderr = (result.stderr || "").trim();
+  let parsed = null;
+  try { parsed = stdout ? JSON.parse(stdout) : null; } catch { parsed = null; }
+  return {
+    ok: result.status === 0 && parsed?.ok !== false,
+    status: result.status,
+    stdout,
+    stderr,
+    json: parsed,
+  };
+}
+
+function main() {
+  const argv = process.argv.slice(2);
+  if (argv.includes("--help") || argv.includes("-h")) {
+    process.stdout.write("Usage:\n  node tools/admin-preflight.mjs\n");
+    return 0;
+  }
+  const firstRun = run(process.execPath, ["tools/first-run-check.mjs", "--skill", "admin"]);
+  const audit = run(process.execPath, ["skills/weex-admin-ops/scripts/maintenance/audit-headless-api.mjs"]);
+  const apiSurface = run(process.execPath, ["skills/weex-admin-ops/scripts/maintenance/validate-admin-api-surface.mjs"]);
+
+  const ok = Boolean(firstRun.ok && audit.ok && apiSurface.ok);
+  process.stdout.write(JSON.stringify({
+    ok,
+    firstRunAdmin: firstRun.json || { ok: firstRun.ok, status: firstRun.status },
+    auditHeadlessApi: audit.json || { ok: audit.ok, status: audit.status },
+    validateApiSurface: apiSurface.json || { ok: apiSurface.ok, status: apiSurface.status },
+    nextStep: ok
+      ? "后管 preflight 通过，可继续执行无头 API 自动化。"
+      : "先处理配置/无头链路审计/API surface 校验的失败项，再执行无头自动化。",
+  }, null, 2));
+  return ok ? 0 : 2;
+}
+
+process.exitCode = main();

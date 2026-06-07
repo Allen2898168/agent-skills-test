@@ -1,0 +1,556 @@
+{
+  "ok": false,
+  "stamp": "20260607_184756",
+  "env": {
+    "target": "staging"
+  },
+  "totals": {
+    "total": 285,
+    "pass": 68,
+    "fail": 1,
+    "skipped": 88
+  },
+  "suites": {
+    "lottery_doc_140": {
+      "total": 140,
+      "pass": 56,
+      "fail": 0,
+      "skipped": 84,
+      "failedCases": [],
+      "skippedCases": [
+        {
+          "caseId": "FE-01",
+          "caseName": "落地页打开正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-02",
+          "caseName": "首屏主视觉展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-03",
+          "caseName": "活动标题展示正确",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-04",
+          "caseName": "活动副标题展示正确",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-05",
+          "caseName": "活动规则展示正确",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-06",
+          "caseName": "奖池区域展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-07",
+          "caseName": "我的奖品入口展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-08",
+          "caseName": "页面基础模块无错位",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-09",
+          "caseName": "圆形转盘样式展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-10",
+          "caseName": "飞镖转盘样式展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-11",
+          "caseName": "彩蛋样式展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-12",
+          "caseName": "跑马灯样式展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-13",
+          "caseName": "足球射门样式展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-14",
+          "caseName": "奖池图片与奖品名称展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-15",
+          "caseName": "非转盘样式不展示五连抽按钮",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-16",
+          "caseName": "未登录态页面展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-17",
+          "caseName": "已登录态页面展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-18",
+          "caseName": "活动未开始态展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-19",
+          "caseName": "活动进行中展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-20",
+          "caseName": "活动已结束态展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-21",
+          "caseName": "抽奖次数为0展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-22",
+          "caseName": "抽奖次数大于0展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-23",
+          "caseName": "库存不足时五连抽返回固定提示且不扣次数",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-24",
+          "caseName": "单抽按钮可点击",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-25",
+          "caseName": "可用次数大于5时展示并可点击五连抽按钮",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-26",
+          "caseName": "抽奖旋转期间再次点击仍只生效一次",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-27",
+          "caseName": "抽奖结束后按钮恢复正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-28",
+          "caseName": "单抽按钮防重复点击",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-29",
+          "caseName": "五连抽按钮防重复点击",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-30",
+          "caseName": "我的奖品入口可点击",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-31",
+          "caseName": "弹窗关闭交互正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-32",
+          "caseName": "单抽接口正常请求",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-33",
+          "caseName": "单抽成功展示奖品弹窗",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-34",
+          "caseName": "单抽成功后可用次数消耗",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-35",
+          "caseName": "单抽成功后优先按次数扣减确认成功",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-36",
+          "caseName": "单抽成功后奖励记录可回查",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-37",
+          "caseName": "单抽成功后奖品信息符合预期",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-38",
+          "caseName": "单抽失败不展示错误奖品内容",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-39",
+          "caseName": "单抽失败不消耗次数",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-40",
+          "caseName": "五连抽接口正常请求",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-41",
+          "caseName": "五连抽成功展示奖品弹窗",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-42",
+          "caseName": "五连抽成功后抽奖次数消耗5次",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-43",
+          "caseName": "五连抽成功后奖励记录可回查",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-44",
+          "caseName": "五连抽奖励记录字段正确",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-45",
+          "caseName": "小库存模板下五连抽可能被库存规则拦截",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-46",
+          "caseName": "五连抽失败不消耗次数",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-47",
+          "caseName": "五连抽结果展示完整",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-48",
+          "caseName": "我的奖品入口打开奖励记录弹窗",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-49",
+          "caseName": "奖励记录弹窗基础UI正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-50",
+          "caseName": "奖励记录字段展示正确",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-51",
+          "caseName": "奖励记录空数据态展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-52",
+          "caseName": "奖励记录有数据态展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-53",
+          "caseName": "奖励记录时间筛选可操作",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-54",
+          "caseName": "奖励记录滚动展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-55",
+          "caseName": "弹窗关闭后页面状态正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-56",
+          "caseName": "奖品弹窗与奖励记录结果一致",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-57",
+          "caseName": "小库存模板下五连抽库存不足提示正确",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-58",
+          "caseName": "抽奖失败提示展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-59",
+          "caseName": "接口超时提示展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-60",
+          "caseName": "网络异常提示展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-61",
+          "caseName": "异常后按钮恢复正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-62",
+          "caseName": "异常后不出现重复弹窗",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-63",
+          "caseName": "异常后页面不崩溃",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-64",
+          "caseName": "二次权重专项校验-N+1生效",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-65",
+          "caseName": "未配置二次权重场景不做专项校验",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-66",
+          "caseName": "需要验证二次权重时使用专项活动",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-67",
+          "caseName": "二次权重命中后奖励记录正确",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-68",
+          "caseName": "H5页面展示正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-69",
+          "caseName": "常见移动端宽度下布局正常",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-70",
+          "caseName": "不同屏高下主按钮不被遮挡",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-71",
+          "caseName": "弹窗在移动端不超出屏幕",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-72",
+          "caseName": "长文案或长奖品名不破版",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-73",
+          "caseName": "后管活动标题改动后前端展示正确",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-75",
+          "caseName": "后管多语言配置后前端切语言展示正确",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-76",
+          "caseName": "后管FAQ配置后前端展示正确",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-77",
+          "caseName": "后管奖池配置后前端奖品展示正确",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-78",
+          "caseName": "后管活动日历入口开启后前端显示正确",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-84",
+          "caseName": "充值任务-报名后发送MQ回调",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-85",
+          "caseName": "小库存单抽首次成功后再次提示库存不足",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-79",
+          "caseName": "活动别名URL打开正确活动页",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-80",
+          "caseName": "活动未开始时显示即将开始",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-81",
+          "caseName": "活动开始后未报名显示立即报名",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-82",
+          "caseName": "点击立即报名后切换为抽奖状态",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        },
+        {
+          "caseId": "FE-83",
+          "caseName": "已报名账号再次进入活动页直显抽奖",
+          "reason": "未纳入当前自动化回归输出口径/无可执行 phase 映射"
+        }
+      ],
+      "reportRoot": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/orchestrations/lottery-regression/artifacts/reports/20260607_184756"
+    },
+    "universal_regression_141": {
+      "total": 141,
+      "pass": 12,
+      "fail": 1,
+      "rows": [
+        {
+          "script": "regression-agent-tracepro-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_184941/AGENT_TRACE_PRO_universal_from_scratch.md",
+          "error": ""
+        },
+        {
+          "script": "regression-agent-universal-from-scratch",
+          "ok": false,
+          "exitCode": 1,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185002/AGENT_universal_from_scratch_failed.md",
+          "error": "online failed: {\"code\":500,\"msg\":\"已有上线状态的人人代理活动\"}"
+        },
+        {
+          "script": "regression-competition-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185022/TRADING_COMPETITION_universal_from_scratch.md",
+          "error": ""
+        },
+        {
+          "script": "regression-contract-mining-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185041/CONTRACT_MINING_universal_from_scratch.md",
+          "error": ""
+        },
+        {
+          "script": "regression-customized-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185115/CUSTOMIZED_universal_from_scratch.md",
+          "error": ""
+        },
+        {
+          "script": "regression-flip-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185142/FLIP_universal_from_scratch.md",
+          "error": ""
+        },
+        {
+          "script": "regression-guess-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185208/GUESS_universal_from_scratch.md",
+          "error": ""
+        },
+        {
+          "script": "regression-lottery-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185235/LOTTERY_universal_from_scratch.md",
+          "error": ""
+        },
+        {
+          "script": "regression-monopoly-worldcup-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185255/MONOPOLY_WORLD_CUP_universal_from_scratch.md",
+          "error": ""
+        },
+        {
+          "script": "regression-newbie-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185335/BEGINNER_TASK_universal_from_scratch.md",
+          "error": ""
+        },
+        {
+          "script": "regression-race-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185353/RACE_COMPETITION_universal_from_scratch.md",
+          "error": ""
+        },
+        {
+          "script": "regression-recharge-trans-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185408/RECHARGE_TRANS_TASK_universal_from_scratch.md",
+          "error": ""
+        },
+        {
+          "script": "regression-tracepro-universal-from-scratch",
+          "ok": true,
+          "exitCode": 0,
+          "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185433/TRACE_PRO_universal_from_scratch.md",
+          "error": ""
+        }
+      ]
+    },
+    "orchestration_4": {
+      "total": 4,
+      "pass": 0,
+      "fail": 0,
+      "skipped": 4,
+      "details": [
+        {
+          "caseId": "ALL",
+          "status": "SKIPPED",
+          "note": "默认关闭：避免状态污染与额外耗时；如需执行请加 --include-orchestration"
+        }
+      ]
+    }
+  }
+}

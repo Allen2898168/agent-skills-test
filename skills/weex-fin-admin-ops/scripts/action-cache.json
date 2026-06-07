@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-05-12",
+  "actions": [
+    {
+      "id": "mq_recharge_callback_send",
+      "status": "verified",
+      "script": "scripts/mq-recharge-callback-send.mjs",
+      "description": "Send one staging recharge MQ callback message through the verified Kafka UI page for topic flink.exchange.spot_capital_order_info, using uid plus amount and a generated unique message id.",
+      "domains": ["Kafka UI", "MQ", "充值任务", "WEEX 前端", "测试回调"],
+      "intentKeywords": ["充值", "回调", "mq", "MQ", "kafka", "Kafka"],
+      "objectKeywords": ["uid", "UID", "金额", "amount"],
+      "requiredParams": ["uid", "amount", "confirm-send"],
+      "defaultMode": "headless_playwright_kafka_ui",
+      "verifiedModes": ["dry_run", "staging_uid_5139967417_amount_1000_real_send"],
+      "lastVerifiedAt": "2026-05-19",
+      "fallback": "If the Kafka UI layout changes, inspect the Ace editor ids and the produce request payload before retrying. Do not sediment a null-content request as success."
+    },
+    {
+      "id": "create_api_account_fund_contract_order",
+      "status": "verified",
+      "script": "scripts/create-api-account-fund-contract-order.mjs",
+      "description": "Compound staging flow: create one FIN system/API account, save generated credentials locally, recharge and approve USDT through FIN, transfer spot to contract through frontend assets API, then place a contract Open API order.",
+      "domains": ["FIN Admin", "WEEX 前端", "系统/API账号", "合约Open API", "充值", "划转", "合约下单"],
+      "intentKeywords": ["带API账号", "API账号", "API账户", "创建账号下单", "多单", "空单", "开多", "开空", "下单"],
+      "objectKeywords": ["账号", "ETH", "BTC", "USDT", "合约", "API Key", "Secret", "Passphrase"],
+      "requiredParams": ["fundAmount", "orderNotional or quantity", "symbol", "side", "positionSide", "confirm-create-account", "confirm-recharge", "confirm-transfer", "confirm-order"],
+      "defaultMode": "fin_system_account_then_fin_recharge_then_frontend_transfer_then_contract_order",
+      "verifiedModes": ["dry_run", "staging_ethusdt_long_10u"],
+      "lastVerifiedAt": "2026-05-12",
+      "fallback": "If FIN recharge succeeds but Open API balance remains zero, run frontend spot-to-contract transfer with the generated account password before placing the order. Never print generated API credentials."
+    },
+    {
+      "id": "fin_system_account_create",
+      "status": "verified",
+      "script": "scripts/system-account-create.mjs",
+      "description": "Create FIN Admin system/API accounts through /admin/fin/asset/system/account/add, poll add_progress, and retrieve generated account credentials plus API key, secret, and passphrase from temporary/list. Secrets are saved only to local ignored generated output when --save-secrets is present.",
+      "domains": ["FIN Admin", "系统账户管理", "系统账号", "API账号", "Open API"],
+      "intentKeywords": ["系统账号", "系统账户", "API账号", "API账户", "带API", "api", "申请账号", "生成账号"],
+      "objectKeywords": ["账号", "API Key", "Secret", "Passphrase", "权限", "合约"],
+      "requiredParams": ["count", "userType", "remark", "confirm-create", "save-secrets for local credential output"],
+      "defaultMode": "persistent_cdp_api",
+      "verifiedModes": ["dry_run", "staging_create_one_private_api_balance_verified"],
+      "lastVerifiedAt": "2026-05-12",
+      "fallback": "If add_progress does not finish, inspect the visible FIN System Account Management page and query temporary/list by clientId; do not print generated credentials in chat."
+    },
+    {
+      "id": "register_recharge_transfer_contract",
+      "status": "candidate",
+      "script": "scripts/register-recharge-transfer-contract.mjs",
+      "description": "Compound workflow for requests to create STG frontend account(s), recharge spot through FIN Admin, then transfer the requested USDT amount to the contract account through the frontend asset-transfer API. Supports --concurrency for account-level parallel chains; each account remains register -> approve -> transfer in order. Frontend transfer responses 70008/20105 are retried by default without repeating registration or FIN recharge.",
+      "domains": ["WEEX 前端", "FIN Admin", "注册账号", "充值现货", "划转合约", "目标态编排"],
+      "intentKeywords": ["注册账号", "创建账号", "转进合约", "转入合约", "划转合约", "合约余额", "合约1000u", "合约 1000u"],
+      "objectKeywords": ["账号", "USDT", "U", "合约", "现货", "充值", "划转"],
+      "requiredParams": ["count", "amount", "confirm-register", "confirm-recharge", "confirm-transfer"],
+      "defaultMode": "frontend_register_then_fin_recharge_then_frontend_transfer",
+      "verifiedModes": ["dry_run", "partial_real_run_spot_recharge_success_transfer_failed"],
+      "lastVerifiedAt": "2026-05-08",
+      "fallback": "If frontend transfer still fails after built-in retries and successful registration plus FIN spot recharge, report all created accounts, grant orders, transfer response codes, and stop without retrying duplicate account creation unless the user explicitly confirms a new batch."
+    },
+    {
+      "id": "batch_register_recharge",
+      "status": "candidate",
+      "script": "scripts/batch-register-recharge.mjs",
+      "description": "Batch create STG frontend accounts and recharge each through FIN Admin 空投奖励(产品化活动), using headless FIN auth reuse and visible login fallback only when the session is invalid.",
+      "domains": ["WEEX 前端", "FIN Admin", "批量注册", "批量充值", "空投奖励(产品化活动)"],
+      "intentKeywords": ["创建账号", "注册账号", "批量注册", "充值", "发放", "下发", "无头", "headless"],
+      "objectKeywords": ["账号", "USDT", "FIN", "前端", "充值"],
+      "requiredParams": ["count", "amount", "confirm-register for account creation", "confirm-recharge for FIN recharge"],
+      "defaultMode": "headless_fin_cdp_api_with_visible_login_fallback",
+      "verifiedModes": ["dry_run"],
+      "lastVerifiedAt": "2026-05-08",
+      "fallback": "If headless FIN auth fails, the script opens the persistent FIN Chrome page for login and waits until the user closes it, then continues API-assisted execution."
+    },
+    {
+      "id": "finance_airdrop_reward_grant",
+      "status": "verified",
+      "script": "scripts/finance-airdrop-reward-grant.mjs",
+      "description": "Create and optionally approve FIN Admin 空投奖励(产品化活动) grant orders through persistent Chrome CDP profile login state.",
+      "domains": ["FIN Admin", "财务管理平台", "空投奖励(产品化活动)", "airdropRewardProd"],
+      "intentKeywords": ["充值", "发放", "下发", "增加", "自动化", "跑通", "创建", "审核", "通过"],
+      "objectKeywords": ["空投奖励", "产品化活动", "FIN", "财务", "USDT", "充值"],
+      "requiredParams": ["uid", "amount", "confirm-create for creation", "confirm-approve and runtime Google code for approval"],
+      "defaultMode": "persistent_cdp_api",
+      "verifiedModes": ["persistent_cdp_dry_run", "persistent_cdp_reopen_tab_dry_run", "cdp_create_approve"],
+      "lastVerifiedAt": "2026-05-08",
+      "fallback": "Use the visible FIN Admin page to observe requests. Do not perform real financial writes without explicit UID, amount, confirmation, and runtime Google code."
+    }
+  ]
+}

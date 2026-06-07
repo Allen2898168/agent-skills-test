@@ -10,7 +10,7 @@ export async function copyPrizeById(page, config, prizeId) {
   return { original, copied, confirmText };
 }
 
-async function searchPrizeById(page, config, prizeId) {
+export async function searchPrizeById(page, config, prizeId) {
   await page.goto(`${config.baseUrl}/activity/prize`, { waitUntil: "domcontentloaded" });
   await sleep(1300);
   await page.locator('input[placeholder="请输入奖品ID"]').first().fill(String(prizeId));
@@ -21,7 +21,7 @@ async function searchPrizeById(page, config, prizeId) {
   return rowToPrize(row);
 }
 
-async function searchPrizeByAlias(page, config, alias) {
+export async function searchPrizeByAlias(page, config, alias) {
   await page.goto(`${config.baseUrl}/activity/prize`, { waitUntil: "domcontentloaded" });
   await sleep(1300);
   await fillLabel(page, "奖品别名", alias);
@@ -50,7 +50,7 @@ async function findCopiedPrize(page, config, original) {
   return rowToPrize(copied);
 }
 
-function rowToPrize(row) {
+export function rowToPrize(row) {
   return {
     id: row[0],
     category: row[1],

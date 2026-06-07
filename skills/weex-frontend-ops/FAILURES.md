@@ -1,0 +1,28 @@
+# 失败复盘索引
+
+本文件是 WEEX 前端页面操作与检查 skill 的失败复盘入口。每次页面操作、脚本执行、缓存命中、视觉检查、网络验证或结果断言中出现失败、阻塞、误判、重试成功或环境问题，都必须记录到对应复盘文档。
+
+## 使用规则
+
+- 执行新流程或重试失败流程前，先查看本索引和相关业务线复盘。
+- 新失败按页面或业务域写入 `failure-reviews/`；跨页面通用问题写入 `failure-reviews/common.md`。
+- 同类失败多次出现时，必须把解决方式反写到原流程、selector、assertion、component helper 或缓存脚本，并重新验证。
+- 单个复盘文件接近 250 行时，按业务域、页面或时间拆分，再更新本索引。
+- 不记录真实密码、token、cookie、API key、完整账号凭证、手机号或其他个人隐私数据；staging/test 测试账号邮箱和 UID 可以完整记录。
+
+## 文档索引
+
+- `failure-reviews/README.md`：目录结构、写入规范和复盘模板。
+- `failure-reviews/common.md`：浏览器、环境、登录态、渲染、网络、截图、selector、缓存匹配等通用失败。
+- `failure-reviews/draw-ui.md`：转盘活动页 UI 展示、字段一致性与基础布局相关失败。
+- `failure-reviews/draw-contract.md`：转盘合约交易任务、页面下单/平仓、活动任务统计相关失败。
+- `failure-reviews/draw-kafka.md`：转盘活动通过 Kafka 回调完成任务时的 Kafka UI、登录态重试和任务回查问题。
+- `failure-reviews/lottery-regression.md`：抽奖回归编排与前端回归脚本相关失败（以回归为入口的阻塞类问题）。
+
+## 当前已知高频问题摘要
+
+- 前端成功不能只看页面没有报错；必须检查 URL、可见文案、DOM 状态、网络响应、console 错误或截图证据中的至少一种。
+- 响应式页面必须明确 viewport；未说明时只验证默认 viewport，不能声称移动端或宽屏已通过。
+- 截图可能包含用户信息、账号资产或活动链接参数；最终回复和复盘不得暴露密码、token、cookie、验证码等敏感信息。STG/test 测试账号邮箱和 UID 可以完整记录；生产或未明确非生产时仍脱敏或避免输出。
+- dry-run 阶段不要顶层加载 Playwright 等重依赖；先输出参数计划和缺失配置，实际执行时再动态加载浏览器模块。
+- 登录相关活动页必须先注入前端登录态再打开目标 URL；后台草稿活动 URL 不能作为前端展示成功依据，活动需先上线。

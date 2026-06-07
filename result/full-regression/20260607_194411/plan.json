@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "dryRun": true,
+  "plan": {
+    "outDir": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/full-regression/20260607_194411",
+    "selection": "全部",
+    "includeLottery": true,
+    "includeUniversal": true,
+    "includeOrchestration": false,
+    "cleanup": true,
+    "rechargeAmount": "1000",
+    "waitForStartMs": "60000"
+  }
+}

@@ -16,6 +16,23 @@ The action cache is the first execution layer for workflows that have already be
    - execute manually with browser automation;
    - update the cache if the fix is reusable.
 
+## Test Case Counting (用例统计口径)
+
+When a user asks for the **total number of test cases** in the activity system, always count **all sub-cases** (细分子用例), not only the number of cached actions.
+
+Counting rules:
+- **Unit = sub-case**.
+- For any workflow script that records execution steps via `steps.push({ name: ... })`, count **1 sub-case per `steps.push`** (this is how the universal regressions output numbered `TC-01/02/...`).
+- For cached actions whose scripts do **not** expose `steps.push`, count them as **1 sub-case** until the script is refactored to emit step-level results.
+- For system-wide totals, sum across the action caches of each domain skill:
+  - activity admin: `skills/weex-admin-ops/scripts/action-cache.json`
+  - FIN admin: `skills/weex-fin-admin-ops/scripts/action-cache.json`
+  - frontend ops: `skills/weex-frontend-ops/scripts/action-cache.json`
+
+Notes:
+- Current state: only the 13 `regress_*_universal_from_scratch` scripts are step-countable; other cached actions default to 1 sub-case each.
+- This rule is for **reporting/metrics**. It does not change execution flow.
+
 ## Cached Actions
 
 | Action ID | Script | Status | Purpose |
@@ -28,6 +45,11 @@ The action cache is the first execution layer for workflows that have already be
 | `delete_register_templates_by_operator` | `scripts/delete-register-templates-by-operator.mjs` | candidate | Dry-run and delete activity registration templates by exact `最近编辑人`; destructive execution requires `--confirm-delete`; invisible deletion and visible/invisible dry-run verified on 2026-05-06. |
 | `create_guide_templates` | `scripts/create-guide-templates.mjs` | candidate | Create activity guide-flow templates for verified activity-type/frequency/step combinations; visible and invisible modes verified on 2026-05-06. |
 | `verify_guide_template_row_actions` | `scripts/guide-template-row-actions.mjs` | candidate | Create a temporary activity guide template, verify `查看` / `修改` / `复制` / `删除`, and delete the temporary records; visible and invisible modes verified on 2026-05-06. |
+| `lottery_admin_main_regression` | `scripts/lottery-admin-main-regression.mjs` | candidate | Run the lottery admin regression orchestration. Headless mode uses API fast paths for backend fixture creation, activity status flow, and row-action equivalents; visible mode keeps real UI writes. |
+| `create_lottery_activity_draft` | `scripts/create-lottery-activity-draft.mjs` | candidate | Create a draft `活动列表 / 转盘抽奖` activity through the verified real-UI workflow, with configurable time and lottery style. |
+| `online_lottery_activity` | `scripts/online-lottery-activity.mjs` | candidate | Put a draft `活动列表 / 转盘抽奖` activity online through the verified list-row confirmation flow. |
+| `configure_race_activity` | `scripts/race-config-wizard-api.mjs` | candidate | Race activity(RACE_COMPETITION) wizard (headless_api): supports minimal/full/create/online/offline/delete presets after high-risk confirmations. |
+| `configure_race_activity_modules` | `scripts/race-activity-module-config-fast-api.mjs` | candidate | Race activity module config (headless_api): snapshot current config and apply module-level updates via `PUT /prod-api/activity/config` after confirmation. |
 
 ## Natural-Language Matching
 
@@ -96,6 +118,50 @@ For activity guide-template row actions:
 - `--visible` enables headed browser mode and performs temporary setup plus all row actions through real UI clicks, field fills, uploads, and confirmation buttons;
 - the script creates a temporary `转盘抽奖` guide template, verifies `查看`, modifies `活动类型` to `交易竞速赛`, verifies `复制` creates `复制从 <原模板名称>`, deletes the copied and original rows, and verifies exact-name searches are absent;
 - run `--dry-run` before execution because the script creates, modifies, copies, and deletes guide-template records.
+
+For lottery activity drafts:
+- use `--action create_lottery_activity_draft` for explicit execution;
+- `--dry-run` prints the verified creation plan without writing data;
+- actual creation supports `--visible` and `--headless-ui`; both modes run the same strict real-UI browser workflow;
+- optional parameters include `--title-exact`, `--title-prefix`, `--subtitle`, `--alias-exact`, `--alias-prefix`, `--start`, `--end`, `--style`, `--activity-task-labels`, and `--no-preapply`; verified style labels are `圆形转盘`, `飞镖转盘`, `彩蛋`, `环形跑马灯`, and `足球射门`;
+- use `--title-exact`, `--subtitle`, and `--alias-exact` for user-facing short values; prefix options append a timestamp and can violate the 15-character title/subtitle/alias hard rule.
+- `--activity-task-labels` accepts one or more `活动任务信息` labels/ids separated by `|` or comma. The script selects each task, clicks the task-card `+`, fills row sort coefficients, and verifies the final row count.
+- the verified write path is `活动列表 / 转盘抽奖`, path `/activities/lottery/add`, and uses real page clicks, dropdowns, uploads, table scrolling, and submit in browser mode;
+- run `node skills/weex-admin-ops/scripts/run-cached-action.mjs --query "活动列表 转盘抽奖 新增草稿 浏览器模式" --dry-run` to inspect the planned defaults and assertions;
+- the script creates draft records only. For frontend display validation, put each activity online with the row `上线` action and verify `POST /prod-api/activity/lottery/online` business `code=200` before opening `https://stg-www.weex.tech/zh-CN/events/draw/<alias>`;
+- natural language such as `创建一个带权重配置的 转盘抽奖活动 全配置 浏览器模式` should match this activity-create action, not the roulette task action; when in doubt, use explicit `--action create_lottery_activity_draft`;
+- the latest cache-backed visible path was verified through direct script execution on 2026-05-11 for five lottery styles. On 2026-05-14, the same draft-create path was also verified in `--headless-ui` mode for activity `9107`, followed by a successful real-UI online action returning `POST /prod-api/activity/lottery/online` business `code=200`.
+
+For lottery activity online:
+- use `--action online_lottery_activity` for explicit execution;
+- default mode is invisible/headless real UI, and `--visible` enables headed browser mode;
+- pass `--activity-alias <showUrl>` or `--activity-id <id>`; alias is recommended because the row action is driven from the list result;
+- the script searches the target row, clicks row action `上线`, fills the verification input in the confirmation dialog, clicks `确定`, and verifies `POST /prod-api/activity/lottery/online` business `code=200` plus final `status=ONLINE`;
+- natural language such as `把活动ID 9107 的转盘抽奖活动上线` or `上线活动别名 jonathan-test-20260514051431` should match this action.
+
+For race competition activity:
+- use `--action configure_race_activity` for explicit execution;
+- default flow is `--wizard`, returning supported modules and a one-shot spec template;
+- supported presets are `minimal_create_verify_delete`、`full_create_verify_delete`、`create_draft`、`online`、`offline`、`delete`;
+- verified create template is `8352 / jyjss`;
+- `9209 / hahha` is not suitable as a create template because real snapshot shows `requirementsCount=0` and `stageCount=0`;
+- natural language such as `创建一个交易竞速赛最小配置活动`、`跑交易竞速赛最全配置回归并删除` should match this action.
+
+For race competition activity module config:
+- use `--action configure_race_activity_modules` for explicit execution;
+- no-spec mode returns `--wizard` + `snapshot` guidance;
+- `update` requires `--spec-file` or `--spec-json`, plus `confirm=true` and `confirmations.moduleWrites=true`;
+- supported modules are `base / userApply / speedConfig / prizePool / leaderboard / pageSetting / i18n / faq`.
+
+For lottery admin main regression orchestration:
+- use `--action lottery_admin_main_regression` for explicit execution;
+- `--dry-run` prints the staged plan, covered case IDs, and child commands without writing data;
+- headless mode defaults to `headless_api`: prize creation/search, prize row actions, registration-template creation/search/row actions, roulette-task creation, lottery draft creation, list checks, online, copy/delete-equivalent, and offline use API calls with list/detail verification;
+- visible mode still uses real UI writes for state-changing operations;
+- optional parameters include `--title-prefix`, `--alias-prefix`, `--uid`, `--country`, and `--visible`;
+- the script reports phase-level results and covered case IDs from `docs/workflows/lottery-regression-manifest.json`;
+- latest headless API validation: 2026-05-25, `55 PASS / 0 FAIL / 0 SKIPPED`, report `orchestrations/lottery-regression/artifacts/reports/20260525_163530_api_opt/admin.json`;
+- natural language such as `帮我跑一轮转盘抽奖后管主回归自动化` should match this action.
 
 ## Cache Graduation Rules
 

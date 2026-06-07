@@ -5,6 +5,12 @@ import { fileURLToPath } from "node:url";
 import { parseFlags, printJson, readJson } from "./lib/cli.mjs";
 import { commandFor } from "./cache/command.mjs";
 import { matchAction } from "./cache/matcher.mjs";
+import {
+  decorateCsvValues,
+  decorateValue,
+  resolveOptionValue,
+} from "./lib/option-decorators.mjs";
+import { loadActivityTaskTypeCatalog, loadLotteryRaffleStyleCatalog } from "./lib/catalogs.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -46,11 +52,34 @@ Options:
   --steps <csv>      Step counts for create_guide_templates, 1-3
   --operator <name>   Recent editor/operator for delete_register_templates_by_operator
   --confirm-delete    Required by delete_register_templates_by_operator for actual deletion
+  --confirm           Required by configure_lottery_activity to execute presets
+  --types <csv>       Types for verify_activity_tasks_all_types (e.g. LOTTERY,GUESS)
+  --page-size <n>     Page size for verify_activity_tasks_all_types template search
+  --candidates <n>    Candidates for verify_activity_tasks_complex_all_types detail scoring
+  --max-attempts <n>  Max attempts for verify_activity_tasks_complex_all_types when uniqueness conflicts occur
+  --spec-file <path>  One-shot lottery spec file for configure_lottery_activity
+  --spec-json <json>  One-shot lottery spec JSON for configure_lottery_activity
+  --template-id <id>  Newbie full-config template activityId
+  --template-alias <x> Newbie full-config template showUrl
+  --title-exact <x>   Exact title for create_lottery_activity_draft
+  --title-prefix <x>  Title prefix for create_lottery_activity_draft dry-run plan
+  --subtitle <x>      Exact subtitle for create_lottery_activity_draft
+  --alias-exact <x>   Exact alias for create_lottery_activity_draft
+  --alias-prefix <x>  Alias prefix for create_lottery_activity_draft dry-run plan
+  --start <text>      Planned start time for create_lottery_activity_draft
+  --end <text>        Planned end time for create_lottery_activity_draft
+  --style <text>      Lottery style for create_lottery_activity_draft
+  --activity-task-labels <text> Task labels/ids for create_lottery_activity_draft, separated by | or comma
+  --no-preapply       Disable pre-apply for create_lottery_activity_draft
+  --activity-alias <x> Activity alias/showUrl for online_lottery_activity
+  --activity-id <id>  Activity id for online_lottery_activity
+  --uid <uid>         Default uid for lottery_admin_main_regression task setup
+  --country <text>    Default country for lottery_admin_main_regression country scope
 `;
 }
 
 function parseCacheArgs() {
-  const parsed = parseFlags(process.argv.slice(2), { booleans: ["--list", "--visible", "--dry-run", "--country-first", "--confirm-delete"] });
+  const parsed = parseFlags(process.argv.slice(2), { booleans: ["--list", "--visible", "--dry-run", "--country-first", "--confirm-delete", "--confirm", "--no-preapply"] });
   const passthrough = {};
   for (const [key, value] of Object.entries(parsed)) {
     if (!["help", "list", "visible", "dryRun", "query", "action"].includes(key)) passthrough[key] = value;
@@ -67,6 +96,29 @@ function runMatchedCommand(commandArgs) {
   return result.status ?? 1;
 }
 
+function decorateCommand(command) {
+  const raffleStyles = loadLotteryRaffleStyleCatalog(executionRoot).styles || [];
+  const activityTypes = loadActivityTaskTypeCatalog(executionRoot).list || [];
+  const out = [...command];
+  for (let i = 0; i < out.length - 1; i += 1) {
+    const flag = out[i];
+    const next = out[i + 1];
+    if (flag === "--raffle-style") {
+      out[i + 1] = decorateValue(resolveOptionValue(next, raffleStyles), raffleStyles);
+      continue;
+    }
+    if (flag === "--activity-type") {
+      out[i + 1] = decorateValue(resolveOptionValue(next, activityTypes), activityTypes);
+      continue;
+    }
+    if (flag === "--activity-types") {
+      out[i + 1] = decorateCsvValues(next, activityTypes);
+      continue;
+    }
+  }
+  return out;
+}
+
 function main() {
   const args = parseCacheArgs();
   if (args.help) {
@@ -81,7 +133,14 @@ function main() {
   const match = matchAction(manifest, args);
   const { commandArgs } = commandFor(match, args, skillRoot);
   if (args.dryRun) {
-    printJson({ ok: true, cachedAction: match.action.id, score: match.score, command: [process.execPath, ...commandArgs] });
+    const command = [process.execPath, ...commandArgs];
+    printJson({
+      ok: true,
+      cachedAction: match.action.id,
+      score: match.score,
+      command,
+      displayCommand: decorateCommand(command),
+    });
     return 0;
   }
   return runMatchedCommand(commandArgs);

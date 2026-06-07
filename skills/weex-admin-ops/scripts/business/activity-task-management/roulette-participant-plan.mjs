@@ -1,14 +1,14 @@
 import { timestamp } from "../../lib/cli.mjs";
 
 const SCOPE_DEFS = {
-  all: { label: "报名的所有用户", slug: "all" },
-  vip: { label: "VIP 等级", slug: "vip" },
-  newuser: { label: "注册新用户", slug: "newuser" },
-  nocharge: { label: "未充值新用户", slug: "nocharge" },
-  olduser: { label: "老用户", slug: "olduser" },
-  agent: { label: "指定代理", slug: "agent", requiresUid: true },
-  user: { label: "指定用户", slug: "user", requiresUid: true },
-  country: { label: "指定国家或地区", slug: "country", requiresCountry: true },
+  all: { label: "报名的所有用户", slug: "all", shortTag: "all" },
+  vip: { label: "VIP 等级", slug: "vip", shortTag: "vip" },
+  newuser: { label: "注册新用户", slug: "newuser", shortTag: "new" },
+  nocharge: { label: "未充值新用户", slug: "nocharge", shortTag: "nchg" },
+  olduser: { label: "老用户", slug: "olduser", shortTag: "old" },
+  agent: { label: "指定代理", slug: "agent", shortTag: "agt", requiresUid: true },
+  user: { label: "指定用户", slug: "user", shortTag: "usr", requiresUid: true },
+  country: { label: "指定国家或地区", slug: "country", shortTag: "cty", requiresCountry: true },
 };
 
 const DEFAULT_SCOPE_ORDER = ["all", "vip", "newuser", "nocharge", "olduser", "agent", "user", "country"];
@@ -25,23 +25,30 @@ export function buildRouletteParticipantPlan(args) {
     return {
       scope,
       scopeLabel: def.label,
-      name: `${args.namePrefix || "转盘抽奖_scope"}_${def.slug}_${ts}`,
-      content: args.content || "自动化转盘抽奖参与范围任务",
-      tag: args.tag || `roulette_scope_${def.slug}`,
-      remark: args.remark || `自动化不可见模式：参与范围-${def.label}`,
+      name: `${args.namePrefix || "转盘抽奖"}_${def.slug}_${ts}`,
+      content: args.content || "自动化参与范围任务",
+      tag: args.tag || buildShortTag(def, ts),
+      remark: args.remark || `自动化-${def.label}`,
       enName: args.enName || `Roulette scope ${def.slug} ${ts}`,
       enContent: args.enContent || "Automated roulette participant scope task",
-      enTag: args.enTag || `roulette_scope_${def.slug}`,
+      enTag: args.enTag || buildShortTag(def, ts),
       uid,
       country,
       useFirstCountry,
       vipWhitelist: args.vipWhitelist || "同等级允许",
+      taskCondition: args.taskCondition || "KOL绑定",
+      rewardMode: args.rewardMode || "单一奖励",
+      rewardType: args.rewardType || "正常奖励",
       rewardMin: args.rewardMin || "10",
       rewardMax: args.rewardMax || "",
       dailyLimit: args.dailyLimit || "5",
       totalLimit: args.totalLimit || "50",
     };
   });
+}
+
+function buildShortTag(def, ts) {
+  return `r${def.shortTag}${String(ts).slice(-5)}`;
 }
 
 export function participantScopeCatalog() {

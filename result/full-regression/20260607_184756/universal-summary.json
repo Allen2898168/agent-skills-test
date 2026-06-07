@@ -1,0 +1,99 @@
+{
+  "total": 141,
+  "pass": 12,
+  "fail": 1,
+  "rows": [
+    {
+      "script": "regression-agent-tracepro-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_184941/AGENT_TRACE_PRO_universal_from_scratch.md",
+      "error": ""
+    },
+    {
+      "script": "regression-agent-universal-from-scratch",
+      "ok": false,
+      "exitCode": 1,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185002/AGENT_universal_from_scratch_failed.md",
+      "error": "online failed: {\"code\":500,\"msg\":\"已有上线状态的人人代理活动\"}"
+    },
+    {
+      "script": "regression-competition-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185022/TRADING_COMPETITION_universal_from_scratch.md",
+      "error": ""
+    },
+    {
+      "script": "regression-contract-mining-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185041/CONTRACT_MINING_universal_from_scratch.md",
+      "error": ""
+    },
+    {
+      "script": "regression-customized-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185115/CUSTOMIZED_universal_from_scratch.md",
+      "error": ""
+    },
+    {
+      "script": "regression-flip-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185142/FLIP_universal_from_scratch.md",
+      "error": ""
+    },
+    {
+      "script": "regression-guess-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185208/GUESS_universal_from_scratch.md",
+      "error": ""
+    },
+    {
+      "script": "regression-lottery-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185235/LOTTERY_universal_from_scratch.md",
+      "error": ""
+    },
+    {
+      "script": "regression-monopoly-worldcup-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185255/MONOPOLY_WORLD_CUP_universal_from_scratch.md",
+      "error": ""
+    },
+    {
+      "script": "regression-newbie-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185335/BEGINNER_TASK_universal_from_scratch.md",
+      "error": ""
+    },
+    {
+      "script": "regression-race-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185353/RACE_COMPETITION_universal_from_scratch.md",
+      "error": ""
+    },
+    {
+      "script": "regression-recharge-trans-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185408/RECHARGE_TRANS_TASK_universal_from_scratch.md",
+      "error": ""
+    },
+    {
+      "script": "regression-tracepro-universal-from-scratch",
+      "ok": true,
+      "exitCode": 0,
+      "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185433/TRACE_PRO_universal_from_scratch.md",
+      "error": ""
+    }
+  ],
+  "scriptCount": 13
+}

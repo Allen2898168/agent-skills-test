@@ -1,5 +1,35 @@
 # 通用失败复盘
 
+## 2026-05-07 一次性脚本未加载 skill-local `.env.local`
+- 业务线：通用脚本运行。
+- 场景：可见浏览器模式探测 `活动列表 / 转盘抽奖` 时，在 inline Node 脚本中调用 `pathsFrom('./skills/weex-admin-ops/scripts/lib/runtime.mjs')` 后再执行登录配置检查。
+- 失败表现：脚本未进入浏览器，抛出 `WEEX_ADMIN_PASSWORD is required`。
+- 失败原因：inline 脚本传入相对路径时，`pathsFrom()` 以当前执行上下文推导出的根目录不等于项目根或 skill 根，导致 `loadLocalEnv()` 没有读取到 `skills/weex-admin-ops/.env.local`。
+- 解决方式：一次性脚本中改用 `process.cwd()` 作为项目根显式调用 `loadLocalEnv(repoRoot)` 和 `adminConfig(repoRoot)`；当前规范要求活动后台本机密钥只放在 `skills/weex-admin-ops/.env.local`。
+- 验证结果：重跑后成功登录 staging，进入 `/activity/prize`，再通过左侧菜单进入 `/activities/lottery`。
+- 关联文件：`scripts/lib/runtime.mjs`。
+- 后续处理：inline 探测脚本优先使用当前工作目录加载本机环境；可复用脚本仍使用 `import.meta.url` 推导根目录。
+
+## 2026-05-07 DOM 提取脚本把元素对象当字符串处理
+- 业务线：通用浏览器探测。
+- 场景：可见浏览器模式打开 `活动列表 / 转盘抽奖 / 新增` 后，提取页面模块、label、按钮和表格头。
+- 失败表现：页面已打开到 `/activities/lottery/add`，但 `page.evaluate()` 中执行 `clean(element)` 抛出 `(s || "").trim is not a function`，浏览器会话中断。
+- 失败原因：提取脚本把 DOM 元素对象直接传给字符串清洗函数，没有先读取 `innerText`、`textContent` 或 `placeholder`。
+- 解决方式：补充 `txt(element)` 包装函数，先取元素文本再调用 `clean()`。
+- 验证结果：重跑后成功提取新增页模块、可见字段、按钮、表格列，并确认依赖接口均返回 HTTP 200、业务 `code=200`。
+- 关联流程：活动列表转盘抽奖新增页只读探测。
+- 后续处理：后续 inline DOM 探测统一区分元素对象和字符串，避免只读探测阶段中断。
+
+## 2026-05-07 维护脚本执行目录和路径前缀重复
+- 业务线：通用维护验证。
+- 场景：更新交接记录和失败复盘后运行知识结构校验。
+- 失败表现：在 `skills/weex-admin-ops` 目录下执行 `node skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs`，路径被解析为 `skills/weex-admin-ops/skills/weex-admin-ops/...`，提示找不到模块。
+- 失败原因：命令同时使用了 skill 目录作为工作目录和仓库相对路径前缀。
+- 解决方式：从仓库根目录执行 `node skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs`，或在 skill 目录下执行 `node scripts/maintenance/validate-knowledge-structure.mjs`。
+- 验证结果：从仓库根目录重跑后输出 `WEEX admin skill knowledge structure is valid.`。
+- 关联文件：`scripts/maintenance/validate-knowledge-structure.mjs`。
+- 后续处理：后续维护校验先确认当前工作目录，再选择对应路径。
+
 ## 2026-05-06 可见浏览器模式误用接口写入
 - 业务线：通用浏览器模式。
 - 场景：用户要求“浏览器模式”创建活动流程引导配置。
@@ -50,6 +80,25 @@
 - 关联文件：本轮 inline 创建脚本。
 - 后续处理：如果沉淀 API 辅助脚本，应封装认证头捕获或统一复用页面网络层，不打印或保存 token。
 
+## 2026-05-31 子脚本重复登录导致父 session `code=401`
+- 业务线：通用脚本编排（headless_api）。
+- 场景：一个父脚本持有 `createAdminApiSession()` 返回的 token，同时调用多个“子脚本”执行写操作；子脚本内部会再次执行 API 登录获取新 token。
+- 失败表现：父脚本后续调用（如 `GET /prod-api/activity/apply/{id}` 或 `POST /prod-api/activity/config`）HTTP 200，但业务 `code=401`，提示认证失败。
+- 失败原因：部分后管登录策略下，同账号再次登录可能使旧 token 失效；父脚本继续使用旧 token 会被拒绝。
+- 解决方式：父脚本在进入关键阶段（尤其创建活动/上下线/删除前）必须 `close()` 并重新 `createAdminApiSession()` 刷新 token；或避免并发/频繁登录，必要时增加资源锁。
+- 验证结果：小活动(TRACE_PRO) 通用回归脚本在“依赖创建完成→创建活动”前刷新 session 后稳定通过。
+- 关联脚本：`scripts/regression-tracepro-universal-from-scratch.mjs`。
+
+## 2026-06-07 资源卡从零创建后列表回查丢失
+- 业务线：通用依赖脚本 / 资源位信息卡片。
+- 场景：执行 `node orchestrations/full-regression/scripts/run-full-regression.mjs --selection '后管回归' --no-include-lottery --confirm-run`，其中 `regression-agent-tracepro-universal-from-scratch.mjs` 创建 `AGENT_TRACE_PRO` 依赖资源卡。
+- 失败表现：`regression-agent-tracepro-universal-from-scratch` 失败为 `resource cards create failed: Created resource card not found in list: 资源卡_从零_20260607182403_2`；失败产物：`result/universal-regression/20260607_202407/AGENT_TRACE_PRO_universal_from_scratch_failed.md`。
+- 失败原因：资源卡从零创建后立即按名称回查时未稳定命中第二张资源卡，当前脚本缺少列表回查重试与精确匹配兜底。
+- 解决方式：`create-resource-card-from-scratch-fast-api.mjs` 需要补创建后列表重试，并优先按精确名称/创建 ID 命中，避免把列表瞬时空窗当作创建失败。
+- 验证结果：同一轮 universal 后管回归其余 `11` 条脚本通过，仅 `AGENT_TRACE_PRO` 因资源卡回查失败中断。
+- 关联文件：`skills/weex-admin-ops/scripts/create-resource-card-from-scratch-fast-api.mjs`、`skills/weex-admin-ops/scripts/regression-agent-tracepro-universal-from-scratch.mjs`。
+- 后续处理：补稳后需先单跑 `regression-agent-tracepro-universal-from-scratch.mjs` 再恢复到全量后管回归。
+
 ## 2026-05-05 staging 登录页普通验证码误判
 - 业务线：通用登录。
 - 场景：脚本登录 staging 后台时，页面短暂出现 `placeholder="验证码"`。
@@ -59,6 +108,16 @@
 - 验证结果：可见模式登录 `/activity/register` 和 `/activity/task` 均成功，最终 URL 离开 `/login`，登录接口返回 `code=200`。
 - 关联文件：`scripts/lib/browser.mjs`、`references/login.md`。
 - 后续处理：新登录脚本必须复用公共登录 helper。
+
+## 2026-05-25 100+ manifest 全量中后管奖品阶段超时
+- 业务线：抽奖回归 / 后管奖品管理。
+- 场景：执行 `node orchestrations/lottery-regression/scripts/lottery-regression-dispatcher.mjs --all`。
+- 失败表现：`create_regression_prizes` 子命令 `create-regression-prizes-fast-api.mjs` 在 `300000ms` 内未返回，导致 `PM-01`-`PM-07` 失败，依赖奖品集的活动配置、活动列表和上下线 case 被跳过。
+- 失败原因：单独运行 `create-regression-prizes-fast-api.mjs` 只耗时约 `16s` 并通过，说明脚本本身不是稳定超时；根因是 100+ 调度器同时启动后管主回归和未传活动别名的前端主回归，两个入口都会使用同一个后管账号创建/上线活动，造成同账号后管登录态互相干扰。
+- 解决方式：`orchestrations/lottery-regression/scripts/lottery-regression-dispatcher.mjs` 已为会使用后管登录态的入口标记 `ADMIN_SESSION` 资源锁；调度器允许无依赖入口并发，但同一时刻只运行一个占用 `ADMIN_SESSION` 的入口。
+- 验证结果：单跑 `PM-01`-`PM-07` 得到 `PASS 7`；重跑 100+ manifest 时 `create_regression_prizes` 耗时约 `14.7s` 且通过，原 7 个 fail 已消除。
+- 关联流程或脚本：`orchestrations/lottery-regression/scripts/lottery-regression-dispatcher.mjs`、`skills/weex-admin-ops/scripts/create-regression-prizes-fast-api.mjs`。
+- 后续处理：已吸收到固定调度流程；后续不要让两个后管登录态写入口并发执行。
 
 ## 2026-05-06 Element UI 下拉旧浮层干扰
 - 业务线：通用组件。
@@ -86,7 +145,7 @@
 - 失败表现：脚本启动失败，提示找不到 `playwright` 模块，未打开浏览器，未创建后台数据。
 - 失败原因：当前 shell 的系统 Node 没有安装 Playwright；Codex 桌面线程提供了 bundled runtime。
 - 解决方式：使用 `load_workspace_dependencies` 返回的 Node 和 `NODE_PATH`，例如设置为当前机器 Codex bundled runtime 返回的 `node_modules` 路径。
-- 验证结果：使用 bundled runtime 后成功创建临时报名模板 ID `2773`；本轮 one-off 可见浏览器脚本首次用系统 Node 复现同类错误，切换到 bundled runtime 后完成复杂报名模板 ID `2776`-`2779` 的创建、查看、修改和删除。
+- 验证结果：使用 bundled runtime 后成功创建临时报名模板 ID `2773`；本轮 one-off 可见浏览器脚本首次用系统 Node 复现同类错误，切换到 bundled runtime 后完成复杂报名模板 ID `2776`-`2779` 的创建、查看、修改和删除；2026-05-07 创建转盘抽奖活动 ID `9022` 前再次复现，切换 bundled runtime 后通过。
 - 关联文件：`scripts/lib/runtime.mjs`。
 - 后续处理：后续本地直接运行浏览器脚本前，优先确认 Node runtime 是否包含 Playwright；当前可用方案是使用 Codex bundled runtime 的 Node 和 `NODE_PATH`。
 
@@ -129,3 +188,12 @@
 - 验证结果：使用绝对源路径重新复制后，独立目录中的结构校验、奖品 dry-run、动作缓存 dry-run 和默认图片路径检查均通过。
 - 关联文件：``。
 - 后续处理：后续 standalone 验证命令不要依赖调用时的当前目录。
+
+## 2026-05-28 新增脚本语法错误导致子进程执行失败
+- 业务线：转盘抽奖/无头 API 脚本。
+- 场景：执行 `create-lottery-contract-doge-position-airdrop-fast-api.mjs` 创建“DOGE 仓位空投奖品”依赖。
+- 失败表现：子脚本 `create-position-airdrop-prize-fast-api.mjs` 在启动阶段报 `SyntaxError: Unexpected token ','`，父编排只显示 `unknown`。
+- 失败原因：`String(baseUrl).replace(/\\/+$/, "")` 的正则字面量写错，导致 JS 解析把 `/` 提前当作正则结束符。
+- 解决方式：改为 `String(baseUrl).replace(/\/+$/, "")`（去掉多余反斜杠），恢复正常解析。
+- 验证结果：`create-position-airdrop-prize-fast-api.mjs --dry-run` 通过；后续编排创建+上线验证通过。
+- 关联文件：`scripts/create-position-airdrop-prize-fast-api.mjs`、`scripts/create-lottery-contract-doge-position-airdrop-fast-api.mjs`。

@@ -9,6 +9,7 @@
 - 当前接力摘要：`docs/session-handoff.md`
 - 后管操作 skill：`skills/weex-admin-ops/SKILL.md`
 - 操作流程索引：`skills/weex-admin-ops/references/operations/index.md`
+- 用例库总览（统一口径）：`docs/test-cases/index.md`
 - 动作缓存说明：`skills/weex-admin-ops/references/action-cache.md`
 - 失败复盘入口：`skills/weex-admin-ops/FAILURES.md`
 - 暂存流程说明：`temp/README.md`
@@ -26,6 +27,40 @@
 - `temp/`：用户明确要求暂不沉淀到 skill 的已跑通流程。
 
 ## 常用命令
+首次检查依赖、配置和登录态：
+
+```bash
+npm run first-run
+```
+
+只检查某个 skill：
+
+```bash
+node tools/first-run-check.mjs --skill frontend
+node tools/first-run-check.mjs --skill fin
+node tools/first-run-check.mjs --skill admin
+```
+
+对话式配置时，Codex 会把用户提供的缺失值写入对应 skill 的 `.env.local`，不回显真实值。也可以用 stdin 写入：
+
+```bash
+node tools/configure-skill-env.mjs --skill frontend --from-stdin
+```
+
+执行后粘贴 JSON，再按 `Ctrl-D` 结束输入。不要把密码、验证码、token、cookie 写在 shell 命令参数里。
+
+安装项目运行依赖：
+
+```bash
+npm install
+```
+
+脚本会在发现缺少 `playwright` 等项目依赖时自动执行 `npm install --no-audit --no-fund`。如需禁用自动安装，设置：
+
+```bash
+WEEX_AUTO_INSTALL_DEPS=false
+```
+
 动作缓存 dry-run：
 
 ```bash
@@ -48,6 +83,12 @@ node skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs
 
 ```bash
 node -e "JSON.parse(require('fs').readFileSync('skills/weex-admin-ops/scripts/action-cache.json','utf8')); console.log('action-cache json ok')"
+```
+
+生成通用回归（从零配置）自动化用例库文档：
+
+```bash
+npm run generate:test-cases
 ```
 
 Git 空白检查：
@@ -79,4 +120,4 @@ git diff --check
 - 不提交真实密码、Google 验证码、token、cookie、API key 或完整账号凭证。
 - staging 默认用户名可以记录为 `auto`。
 - 密码和 Google 验证码必须来自本机环境变量或未提交的 `.env.local`。
-- 仓库只保留 `.env.example` 模板。
+- 仓库保留 `.env.example` 模板；`.env.local` 可以在本机保存运行值，但真实密码、Google 验证码、token、cookie、API key 不进入提交。

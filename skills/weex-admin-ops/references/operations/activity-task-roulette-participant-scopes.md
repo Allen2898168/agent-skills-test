@@ -64,7 +64,7 @@ Validated common defaults:
 - Task participant scope: exactly one selected scope per task.
 - Task risk: `不审核KYC`.
 - Task combo: `单一任务条件`.
-- Task condition 1: `kyc任务`, then `无kyc限制`.
+- Task condition 1: `KOL绑定`.
 - Judge start time: `报名活动后`.
 - Task update count: `仅1次，直至结束`.
 - Reward mode: `单一奖励`.
@@ -99,7 +99,8 @@ Validated component notes:
 - Avoid letting the open country dropdown intercept the later `正常奖励` selector.
 - `任务名称`、`任务内容` and `任务标签` each have separate multilingual switches. Open and fill English by form item; do not assume one visible English input covers all three fields.
 - In invisible mode, `任务组合` renders as a select with placeholder `请选择任务数`; select the first available option instead of clicking option text.
-- `KYC限制` and `任务奖励模式` render as radios; click `无kyc限制` and `单一奖励`.
+- `任务条件1` must select a non-KYC branch. Current cached path uses `KOL绑定`; do not use `kyc任务` because it hides old-user participation scenarios.
+- `任务奖励模式` renders as radios; click `单一奖励`.
 - `任务备注` is required for successful submit.
 
 Validation failures:

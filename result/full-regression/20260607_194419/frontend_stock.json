@@ -1,0 +1,2054 @@
+{
+  "ok": true,
+  "actionId": "lottery_frontend_main_regression",
+  "mode": "headless_ui",
+  "requestedCaseIds": [
+    "FE-23",
+    "FE-45",
+    "FE-46",
+    "FE-57",
+    "FE-85"
+  ],
+  "selectedCaseIds": [
+    "FE-81",
+    "FE-82",
+    "FE-84",
+    "FE-23",
+    "FE-45",
+    "FE-46",
+    "FE-57",
+    "FE-85"
+  ],
+  "executionSelection": {
+    "requestedCaseIds": [
+      "FE-23",
+      "FE-45",
+      "FE-46",
+      "FE-57",
+      "FE-85"
+    ],
+    "expandedCaseIds": [
+      "FE-81",
+      "FE-82",
+      "FE-84",
+      "FE-23",
+      "FE-45",
+      "FE-46",
+      "FE-57",
+      "FE-85"
+    ],
+    "selectedEntries": [
+      {
+        "caseId": "FE-23",
+        "caseName": "库存不足时五连抽返回固定提示且不扣次数",
+        "module": "页面状态UI",
+        "priority": "P1",
+        "packId": "frontend_low_stock",
+        "scenarioKey": "LOW_STOCK_ACTIVITY_DRAW_GT5",
+        "dependsOnCaseIds": [
+          "FE-84"
+        ]
+      },
+      {
+        "caseId": "FE-45",
+        "caseName": "小库存模板下五连抽可能被库存规则拦截",
+        "module": "五连抽主流程",
+        "priority": "P1",
+        "packId": "frontend_low_stock",
+        "scenarioKey": "LOW_STOCK_ACTIVITY_DRAW_GT5",
+        "dependsOnCaseIds": [
+          "FE-84"
+        ]
+      },
+      {
+        "caseId": "FE-46",
+        "caseName": "五连抽失败不消耗次数",
+        "module": "五连抽主流程",
+        "priority": "P1",
+        "packId": "frontend_low_stock",
+        "scenarioKey": "LOW_STOCK_ACTIVITY_DRAW_GT5",
+        "dependsOnCaseIds": [
+          "FE-84"
+        ]
+      },
+      {
+        "caseId": "FE-57",
+        "caseName": "小库存模板下五连抽库存不足提示正确",
+        "module": "异常提示与容错UI",
+        "priority": "P0",
+        "packId": "frontend_low_stock",
+        "scenarioKey": "LOW_STOCK_ACTIVITY_DRAW_GT5",
+        "dependsOnCaseIds": [
+          "FE-84"
+        ]
+      },
+      {
+        "caseId": "FE-84",
+        "caseName": "充值任务-报名后发送MQ回调",
+        "module": "前后端联动展示",
+        "priority": "P0",
+        "packId": "frontend_backend_linkage",
+        "scenarioKey": "NORMAL_ACTIVITY_SIGNED_UP",
+        "executionClass": "CHAIN_CONTINUE",
+        "activityPolicy": "REUSE_PREVIOUS_ACTIVITY",
+        "accountPolicy": "REUSE_PREVIOUS_ACCOUNT",
+        "requiredState": "已报名、次数为0、充值任务未完成",
+        "nextState": "发MQ后次数>0或任务完成态更新",
+        "dependsOnCaseIds": [
+          "FE-82"
+        ]
+      },
+      {
+        "caseId": "FE-85",
+        "caseName": "小库存单抽首次成功后再次提示库存不足",
+        "module": "小库存专项",
+        "priority": "P0",
+        "packId": "frontend_low_stock",
+        "scenarioKey": "LOW_STOCK_ACTIVITY_DRAW_GT5",
+        "dependsOnCaseIds": [
+          "FE-84"
+        ]
+      },
+      {
+        "caseId": "FE-81",
+        "caseName": "活动开始后未报名显示立即报名",
+        "module": "报名链路",
+        "priority": "P0",
+        "packId": "frontend_signup_flow",
+        "scenarioKey": "NORMAL_ACTIVITY_ONLINE",
+        "executionClass": "FRESH_ROOT",
+        "activityPolicy": "CREATE_NEW_NORMAL_ACTIVITY_STARTED",
+        "accountPolicy": "UNREGISTERED_ACCOUNT",
+        "requiredState": "活动进行中、账号未报名",
+        "nextState": "仍为未报名可见立即报名"
+      },
+      {
+        "caseId": "FE-82",
+        "caseName": "点击立即报名后切换为抽奖状态",
+        "module": "报名链路",
+        "priority": "P0",
+        "packId": "frontend_signup_flow",
+        "scenarioKey": "NORMAL_ACTIVITY_ONLINE",
+        "executionClass": "CHAIN_CONTINUE",
+        "activityPolicy": "REUSE_PREVIOUS_ACTIVITY",
+        "accountPolicy": "REUSE_PREVIOUS_ACCOUNT",
+        "requiredState": "承接FE-81",
+        "nextState": "账号变为已报名，按钮切到抽奖",
+        "dependsOnCaseIds": [
+          "FE-81"
+        ]
+      }
+    ],
+    "forceFreshActivity": false,
+    "effectiveActivityAlias": "s54267807",
+    "ignoredActivityAlias": ""
+  },
+  "createdActivity": {
+    "activityId": "",
+    "activityAlias": "s54267807",
+    "adminSnapshotPath": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/orchestrations/lottery-regression/artifacts/tmp/admin-snapshot-s54267807.json",
+    "prestartActivityId": "",
+    "prestartActivityAlias": "",
+    "drawPayloadPath": ""
+  },
+  "timings": {
+    "totalDurationMs": 341763,
+    "phases": [
+      {
+        "id": "admin_activity_snapshot",
+        "ok": true,
+        "durationMs": 2449,
+        "childCount": 1,
+        "childDurationsMs": [
+          2444
+        ]
+      },
+      {
+        "id": "frontend_readonly_checks",
+        "ok": true,
+        "durationMs": 147540,
+        "childCount": 1,
+        "childDurationsMs": [
+          147540
+        ]
+      },
+      {
+        "id": "frontend_signup_flow",
+        "ok": true,
+        "durationMs": 31365,
+        "childCount": 1,
+        "childDurationsMs": [
+          31364
+        ]
+      },
+      {
+        "id": "frontend_recharge_prepare",
+        "ok": true,
+        "durationMs": 57080,
+        "childCount": 1,
+        "childDurationsMs": [
+          57080
+        ]
+      },
+      {
+        "id": "frontend_low_stock_five_draw",
+        "ok": true,
+        "durationMs": 44121,
+        "childCount": 1,
+        "childDurationsMs": [
+          44121
+        ]
+      },
+      {
+        "id": "frontend_low_stock_single_draw",
+        "ok": true,
+        "durationMs": 59204,
+        "childCount": 1,
+        "childDurationsMs": [
+          59204
+        ]
+      }
+    ]
+  },
+  "phaseResults": [
+    {
+      "phaseId": "admin_activity_snapshot",
+      "description": "Fetch admin snapshot for frontend consistency assertions.",
+      "caseIds": [],
+      "cases": [],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs",
+          "--action",
+          "snapshot",
+          "--activity-alias",
+          "s54267807"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "mode": "headless_api",
+        "finalUrl": "/activities/lottery",
+        "target": {
+          "activityId": "10070",
+          "activityAlias": "s54267807"
+        },
+        "activityId": "10070",
+        "alias": "s54267807",
+        "snapshot": {
+          "title": "小库存模板20260525122120",
+          "subtitle": "严格 UI 复杂配置副标题",
+          "rules": "",
+          "raffleStyle": "CIRCLE",
+          "prizeCount": 8
+        },
+        "snapshotMeta": {
+          "i18nLangUsed": "zh_CN",
+          "i18nAvailableLangs": [
+            "en_US",
+            "zh_CN"
+          ]
+        },
+        "durationMs": 2221,
+        "adminSnapshotPath": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/orchestrations/lottery-regression/artifacts/tmp/admin-snapshot-s54267807.json"
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-admin-ops/scripts/lottery-activity-fast-api.mjs",
+            "--action",
+            "snapshot",
+            "--activity-alias",
+            "s54267807"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "mode": "headless_api",
+            "finalUrl": "/activities/lottery",
+            "target": {
+              "activityId": "10070",
+              "activityAlias": "s54267807"
+            },
+            "activityId": "10070",
+            "alias": "s54267807",
+            "snapshot": {
+              "title": "小库存模板20260525122120",
+              "subtitle": "严格 UI 复杂配置副标题",
+              "rules": "",
+              "raffleStyle": "CIRCLE",
+              "prizeCount": 8
+            },
+            "snapshotMeta": {
+              "i18nLangUsed": "zh_CN",
+              "i18nAvailableLangs": [
+                "en_US",
+                "zh_CN"
+              ]
+            },
+            "durationMs": 2221,
+            "adminSnapshotPath": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/orchestrations/lottery-regression/artifacts/tmp/admin-snapshot-s54267807.json"
+          },
+          "attempt": 1,
+          "exitCode": 0,
+          "durationMs": 2444
+        }
+      ],
+      "durationMs": 2449
+    },
+    {
+      "phaseId": "frontend_readonly_checks",
+      "description": "Open the draw page and verify readonly logged-in frontend signals.",
+      "caseIds": [],
+      "cases": [],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+          "--phase",
+          "readonly",
+          "--activity-alias",
+          "s54267807",
+          "--admin-snapshot-path",
+          "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/orchestrations/lottery-regression/artifacts/tmp/admin-snapshot-s54267807.json",
+          "--wait-for-start-ms",
+          "60000"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "phase": "readonly",
+        "assertCaseIds": [],
+        "account": {
+          "alias": "DEFAULT",
+          "username": "8186595891@weex.com",
+          "uid": "8186595891"
+        },
+        "page": {
+          "activityAlias": "s54267807",
+          "url": "https://stg-www.weex.tech/zh-CN/events/draw/s54267807",
+          "urlMatchesAlias": true,
+          "opened": true,
+          "loginFormVisible": false,
+          "myPrizeVisible": true,
+          "mainButtonState": "立即报名",
+          "drawButtonVariant": "",
+          "drawCount": null,
+          "guestVisible": false,
+          "activityTitle": "小库存模板20260525122120",
+          "activityTitleVisible": true,
+          "activitySubtitle": "自动化测试 - 实物_20260525041425",
+          "activitySubtitleVisible": true,
+          "rulesText": "",
+          "rulesVisible": false,
+          "prizeCount": 8,
+          "prizeAreaVisible": false,
+          "mainVisualVisible": true,
+          "horizontalOverflow": false,
+          "countdownText": "距离结束：29天:23时:43分:55秒",
+          "countdownVisible": true,
+          "countdownTicking": true,
+          "pageErrorVisible": false,
+          "buttons": [
+            "合约交易",
+            "打开",
+            "充币",
+            "立即报名",
+            "去充值",
+            "去交易",
+            "去交易"
+          ],
+          "bodySnippet": "买币\n市场\n合约交易\n现货交易\n理财\n产品验收0210222\n更多\n充币\n活动日历\n我的奖品\n分享\n小库存模板20260525122120\n06/07 19:44:30 - 07/07 19:44:30 (UTC+2)\n\n自动化测试 - 实物_20260525041425\n\n1 自动化测试 - 币对 BTC_20260525041425\n\n1 USDT 合约赠金\n\n1 USDT 合约赠金\n\n1 USDT 合约赠金\n\n自动化测试 - 实物_20260522070743\n\n1 自动化测试 - 币对 BTC_20260522070743\n\n自动化测试 - 实物_20260521233753\n\n立即报名\n距离结束：\n29\n天\n:\n23\n时\n:\n43\n分\n:\n55\n秒\n净充值\n自动化测试 - 非首\n去充值\n累计\n\n0\n净充值 ≥10 USDT\n×\n100\n首次\n\n0\n净充值 ≥100 USDT\n×\n10\n合约交易\n合约交易量\n去交易\n累计\n\n0\n合约交易量 ≥100 USDT\n×\n10\n现货交易\n现货交易量\n去交易\n累计\n\n0\n现货交易量 ≥100 USDT\n×\n10\n关于\n关于我们\n品牌信息\n官方博客\n就业机会\n媒体报道\n加入 WEEX 社群\nWXT专区\nWEEX × LALIGA\n帮助\n帮助中心\n费率标准\n交易规则\n常见问题\n官方验证渠道\n合规性\n法律声明\n风险提示\n条款与协议\n隐私说明\n廉正举报\n反洗钱政策\n执法请求指南\n联系我们\n联系客服Bot\nVIP服务\n产品\n合约交易\n现货交易\n一键跟单\n市场\nWEEX商城\n服务\n储备金证明\n邀请好友\nOTC\n下载\n合伙人\nVIP服务\nAPI\n经纪商\n上币申请\n网站地图\n资源\n教程中心\n学习\nQ&A\n现货交易\n合约交易\n名词解释\n加密货币价格\n货币预测\nWXT 价格\nBTC 价格\nETH 价格\nDOGE 价格\n如何购买加密货币\n如何购买 "
+        },
+        "adminSnapshotPath": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/orchestrations/lottery-regression/artifacts/tmp/admin-snapshot-s54267807.json",
+        "expected": {
+          "title": "小库存模板20260525122120",
+          "subtitle": "严格 UI 复杂配置副标题",
+          "rules": "",
+          "raffleStyle": "CIRCLE",
+          "prizeCount": 8
+        },
+        "consistency": {
+          "titleMatched": true,
+          "subtitleMatched": false,
+          "rulesMatched": true,
+          "prizeCountMatched": true,
+          "expectedPrizeCount": 8,
+          "detectedPrizeCount": 8,
+          "basicModulesVisible": true
+        },
+        "assertionOk": true,
+        "linkageReadonly": {
+          "languageSwitch": null,
+          "faq": null,
+          "calendarTab": null
+        },
+        "readonlyCasePass": {
+          "FE-79": true,
+          "FE-01": true,
+          "FE-02": true,
+          "FE-03": true,
+          "FE-04": false,
+          "FE-05": true,
+          "FE-06": true,
+          "FE-07": true,
+          "FE-08": true,
+          "FE-75": true,
+          "FE-76": true,
+          "FE-77": true,
+          "FE-78": true,
+          "FE-17": true,
+          "FE-19": true
+        },
+        "screenshotPath": null,
+        "failedResponses": []
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+            "--phase",
+            "readonly",
+            "--activity-alias",
+            "s54267807",
+            "--admin-snapshot-path",
+            "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/orchestrations/lottery-regression/artifacts/tmp/admin-snapshot-s54267807.json",
+            "--wait-for-start-ms",
+            "60000"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "phase": "readonly",
+            "assertCaseIds": [],
+            "account": {
+              "alias": "DEFAULT",
+              "username": "8186595891@weex.com",
+              "uid": "8186595891"
+            },
+            "page": {
+              "activityAlias": "s54267807",
+              "url": "https://stg-www.weex.tech/zh-CN/events/draw/s54267807",
+              "urlMatchesAlias": true,
+              "opened": true,
+              "loginFormVisible": false,
+              "myPrizeVisible": true,
+              "mainButtonState": "立即报名",
+              "drawButtonVariant": "",
+              "drawCount": null,
+              "guestVisible": false,
+              "activityTitle": "小库存模板20260525122120",
+              "activityTitleVisible": true,
+              "activitySubtitle": "自动化测试 - 实物_20260525041425",
+              "activitySubtitleVisible": true,
+              "rulesText": "",
+              "rulesVisible": false,
+              "prizeCount": 8,
+              "prizeAreaVisible": false,
+              "mainVisualVisible": true,
+              "horizontalOverflow": false,
+              "countdownText": "距离结束：29天:23时:43分:55秒",
+              "countdownVisible": true,
+              "countdownTicking": true,
+              "pageErrorVisible": false,
+              "buttons": [
+                "合约交易",
+                "打开",
+                "充币",
+                "立即报名",
+                "去充值",
+                "去交易",
+                "去交易"
+              ],
+              "bodySnippet": "买币\n市场\n合约交易\n现货交易\n理财\n产品验收0210222\n更多\n充币\n活动日历\n我的奖品\n分享\n小库存模板20260525122120\n06/07 19:44:30 - 07/07 19:44:30 (UTC+2)\n\n自动化测试 - 实物_20260525041425\n\n1 自动化测试 - 币对 BTC_20260525041425\n\n1 USDT 合约赠金\n\n1 USDT 合约赠金\n\n1 USDT 合约赠金\n\n自动化测试 - 实物_20260522070743\n\n1 自动化测试 - 币对 BTC_20260522070743\n\n自动化测试 - 实物_20260521233753\n\n立即报名\n距离结束：\n29\n天\n:\n23\n时\n:\n43\n分\n:\n55\n秒\n净充值\n自动化测试 - 非首\n去充值\n累计\n\n0\n净充值 ≥10 USDT\n×\n100\n首次\n\n0\n净充值 ≥100 USDT\n×\n10\n合约交易\n合约交易量\n去交易\n累计\n\n0\n合约交易量 ≥100 USDT\n×\n10\n现货交易\n现货交易量\n去交易\n累计\n\n0\n现货交易量 ≥100 USDT\n×\n10\n关于\n关于我们\n品牌信息\n官方博客\n就业机会\n媒体报道\n加入 WEEX 社群\nWXT专区\nWEEX × LALIGA\n帮助\n帮助中心\n费率标准\n交易规则\n常见问题\n官方验证渠道\n合规性\n法律声明\n风险提示\n条款与协议\n隐私说明\n廉正举报\n反洗钱政策\n执法请求指南\n联系我们\n联系客服Bot\nVIP服务\n产品\n合约交易\n现货交易\n一键跟单\n市场\nWEEX商城\n服务\n储备金证明\n邀请好友\nOTC\n下载\n合伙人\nVIP服务\nAPI\n经纪商\n上币申请\n网站地图\n资源\n教程中心\n学习\nQ&A\n现货交易\n合约交易\n名词解释\n加密货币价格\n货币预测\nWXT 价格\nBTC 价格\nETH 价格\nDOGE 价格\n如何购买加密货币\n如何购买 "
+            },
+            "adminSnapshotPath": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/orchestrations/lottery-regression/artifacts/tmp/admin-snapshot-s54267807.json",
+            "expected": {
+              "title": "小库存模板20260525122120",
+              "subtitle": "严格 UI 复杂配置副标题",
+              "rules": "",
+              "raffleStyle": "CIRCLE",
+              "prizeCount": 8
+            },
+            "consistency": {
+              "titleMatched": true,
+              "subtitleMatched": false,
+              "rulesMatched": true,
+              "prizeCountMatched": true,
+              "expectedPrizeCount": 8,
+              "detectedPrizeCount": 8,
+              "basicModulesVisible": true
+            },
+            "assertionOk": true,
+            "linkageReadonly": {
+              "languageSwitch": null,
+              "faq": null,
+              "calendarTab": null
+            },
+            "readonlyCasePass": {
+              "FE-79": true,
+              "FE-01": true,
+              "FE-02": true,
+              "FE-03": true,
+              "FE-04": false,
+              "FE-05": true,
+              "FE-06": true,
+              "FE-07": true,
+              "FE-08": true,
+              "FE-75": true,
+              "FE-76": true,
+              "FE-77": true,
+              "FE-78": true,
+              "FE-17": true,
+              "FE-19": true
+            },
+            "screenshotPath": null,
+            "failedResponses": []
+          },
+          "attempt": 1,
+          "exitCode": 0,
+          "durationMs": 147540
+        }
+      ],
+      "durationMs": 147540
+    },
+    {
+      "phaseId": "frontend_signup_flow",
+      "description": "Verify not-signed-up to signed-up state transition.",
+      "caseIds": [
+        "FE-81",
+        "FE-82"
+      ],
+      "cases": [
+        {
+          "caseId": "FE-81",
+          "caseName": "活动开始后未报名显示立即报名",
+          "module": "报名链路",
+          "priority": "P0",
+          "packId": "frontend_signup_flow",
+          "scenarioKey": "NORMAL_ACTIVITY_ONLINE",
+          "executionClass": "FRESH_ROOT",
+          "activityPolicy": "CREATE_NEW_NORMAL_ACTIVITY_STARTED",
+          "accountPolicy": "UNREGISTERED_ACCOUNT",
+          "requiredState": "活动进行中、账号未报名",
+          "nextState": "仍为未报名可见立即报名"
+        },
+        {
+          "caseId": "FE-82",
+          "caseName": "点击立即报名后切换为抽奖状态",
+          "module": "报名链路",
+          "priority": "P0",
+          "packId": "frontend_signup_flow",
+          "scenarioKey": "NORMAL_ACTIVITY_ONLINE",
+          "executionClass": "CHAIN_CONTINUE",
+          "activityPolicy": "REUSE_PREVIOUS_ACTIVITY",
+          "accountPolicy": "REUSE_PREVIOUS_ACCOUNT",
+          "requiredState": "承接FE-81",
+          "nextState": "账号变为已报名，按钮切到抽奖",
+          "dependsOnCaseIds": [
+            "FE-81"
+          ]
+        }
+      ],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+          "--phase",
+          "signup",
+          "--activity-alias",
+          "s54267807",
+          "--wait-for-start-ms",
+          "60000"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "phase": "signup",
+        "account": {
+          "alias": "DEFAULT",
+          "username": "8186595891@weex.com",
+          "uid": "8186595891"
+        },
+        "page": {
+          "activityAlias": "s54267807",
+          "url": "https://stg-www.weex.tech/zh-CN/events/draw/s54267807",
+          "urlMatchesAlias": true,
+          "opened": true,
+          "loginFormVisible": false,
+          "myPrizeVisible": true,
+          "mainButtonState": "立即报名",
+          "drawButtonVariant": "",
+          "drawCount": null,
+          "guestVisible": false,
+          "activityTitle": "小库存模板20260525122120",
+          "activityTitleVisible": true,
+          "activitySubtitle": "",
+          "activitySubtitleVisible": false,
+          "rulesText": "",
+          "rulesVisible": false,
+          "prizeCount": null,
+          "prizeAreaVisible": false,
+          "mainVisualVisible": false,
+          "horizontalOverflow": false,
+          "countdownText": "距离结束：29天:23时:41分:32秒",
+          "countdownVisible": true,
+          "countdownTicking": true,
+          "pageErrorVisible": false,
+          "buttons": [
+            "合约交易",
+            "打开",
+            "充币",
+            "立即报名",
+            "去充值",
+            "去交易",
+            "去交易"
+          ],
+          "bodySnippet": "买币\n市场\n合约交易\n现货交易\n理财\n产品验收0210222\n更多\n充币\n活动日历\n我的奖品\n分享\n小库存模板20260525122120\n06/07 19:44:30 - 07/07 19:44:30 (UTC+2)\n\n自动化测试 - 实物_20260525041425\n\n1 自动化测试 - 币对 BTC_20260525041425\n\n1 USDT 合约赠金\n\n1 USDT 合约赠金\n\n1 USDT 合约赠金\n\n自动化测试 - 实物_20260522070743\n\n1 自动化测试 - 币对 BTC_20260522070743\n\n自动化测试 - 实物_20260521233753\n\n立即报名\n距离结束：\n29\n天\n:\n23\n时\n:\n41\n分\n:\n32\n秒\n净充值\n自动化测试 - 非首\n去充值\n累计\n\n0\n净充值 ≥10 USDT\n×\n100\n首次\n\n0\n净充值 ≥100 USDT\n×\n10\n合约交易\n合约交易量\n去交易\n累计\n\n0\n合约交易量 ≥100 USDT\n×\n10\n现货交易\n现货交易量\n去交易\n累计\n\n0\n现货交易量 ≥100 USDT\n×\n10\n关于\n关于我们\n品牌信息\n官方博客\n就业机会\n媒体报道\n加入 WEEX 社群\nWXT专区\nWEEX × LALIGA\n帮助\n帮助中心\n费率标准\n交易规则\n常见问题\n官方验证渠道\n合规性\n法律声明\n风险提示\n条款与协议\n隐私说明\n廉正举报\n反洗钱政策\n执法请求指南\n联系我们\n联系客服Bot\nVIP服务\n产品\n合约交易\n现货交易\n一键跟单\n市场\nWEEX商城\n服务\n储备金证明\n邀请好友\nOTC\n下载\n合伙人\nVIP服务\nAPI\n经纪商\n上币申请\n网站地图\n资源\n教程中心\n学习\nQ&A\n现货交易\n合约交易\n名词解释\n加密货币价格\n货币预测\nWXT 价格\nBTC 价格\nETH 价格\nDOGE 价格\n如何购买加密货币\n如何购买 "
+        },
+        "signup": {
+          "initialState": "立即报名",
+          "finalState": "抽奖",
+          "reopenedState": "抽奖",
+          "done": true
+        },
+        "screenshotPath": null,
+        "failedResponses": []
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+            "--phase",
+            "signup",
+            "--activity-alias",
+            "s54267807",
+            "--wait-for-start-ms",
+            "60000"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "phase": "signup",
+            "account": {
+              "alias": "DEFAULT",
+              "username": "8186595891@weex.com",
+              "uid": "8186595891"
+            },
+            "page": {
+              "activityAlias": "s54267807",
+              "url": "https://stg-www.weex.tech/zh-CN/events/draw/s54267807",
+              "urlMatchesAlias": true,
+              "opened": true,
+              "loginFormVisible": false,
+              "myPrizeVisible": true,
+              "mainButtonState": "立即报名",
+              "drawButtonVariant": "",
+              "drawCount": null,
+              "guestVisible": false,
+              "activityTitle": "小库存模板20260525122120",
+              "activityTitleVisible": true,
+              "activitySubtitle": "",
+              "activitySubtitleVisible": false,
+              "rulesText": "",
+              "rulesVisible": false,
+              "prizeCount": null,
+              "prizeAreaVisible": false,
+              "mainVisualVisible": false,
+              "horizontalOverflow": false,
+              "countdownText": "距离结束：29天:23时:41分:32秒",
+              "countdownVisible": true,
+              "countdownTicking": true,
+              "pageErrorVisible": false,
+              "buttons": [
+                "合约交易",
+                "打开",
+                "充币",
+                "立即报名",
+                "去充值",
+                "去交易",
+                "去交易"
+              ],
+              "bodySnippet": "买币\n市场\n合约交易\n现货交易\n理财\n产品验收0210222\n更多\n充币\n活动日历\n我的奖品\n分享\n小库存模板20260525122120\n06/07 19:44:30 - 07/07 19:44:30 (UTC+2)\n\n自动化测试 - 实物_20260525041425\n\n1 自动化测试 - 币对 BTC_20260525041425\n\n1 USDT 合约赠金\n\n1 USDT 合约赠金\n\n1 USDT 合约赠金\n\n自动化测试 - 实物_20260522070743\n\n1 自动化测试 - 币对 BTC_20260522070743\n\n自动化测试 - 实物_20260521233753\n\n立即报名\n距离结束：\n29\n天\n:\n23\n时\n:\n41\n分\n:\n32\n秒\n净充值\n自动化测试 - 非首\n去充值\n累计\n\n0\n净充值 ≥10 USDT\n×\n100\n首次\n\n0\n净充值 ≥100 USDT\n×\n10\n合约交易\n合约交易量\n去交易\n累计\n\n0\n合约交易量 ≥100 USDT\n×\n10\n现货交易\n现货交易量\n去交易\n累计\n\n0\n现货交易量 ≥100 USDT\n×\n10\n关于\n关于我们\n品牌信息\n官方博客\n就业机会\n媒体报道\n加入 WEEX 社群\nWXT专区\nWEEX × LALIGA\n帮助\n帮助中心\n费率标准\n交易规则\n常见问题\n官方验证渠道\n合规性\n法律声明\n风险提示\n条款与协议\n隐私说明\n廉正举报\n反洗钱政策\n执法请求指南\n联系我们\n联系客服Bot\nVIP服务\n产品\n合约交易\n现货交易\n一键跟单\n市场\nWEEX商城\n服务\n储备金证明\n邀请好友\nOTC\n下载\n合伙人\nVIP服务\nAPI\n经纪商\n上币申请\n网站地图\n资源\n教程中心\n学习\nQ&A\n现货交易\n合约交易\n名词解释\n加密货币价格\n货币预测\nWXT 价格\nBTC 价格\nETH 价格\nDOGE 价格\n如何购买加密货币\n如何购买 "
+            },
+            "signup": {
+              "initialState": "立即报名",
+              "finalState": "抽奖",
+              "reopenedState": "抽奖",
+              "done": true
+            },
+            "screenshotPath": null,
+            "failedResponses": []
+          },
+          "attempt": 1,
+          "exitCode": 0,
+          "durationMs": 31364
+        }
+      ],
+      "durationMs": 31365
+    },
+    {
+      "phaseId": "frontend_recharge_prepare",
+      "description": "Prepare draw count through recharge task linkage.",
+      "caseIds": [
+        "FE-84"
+      ],
+      "cases": [
+        {
+          "caseId": "FE-84",
+          "caseName": "充值任务-报名后发送MQ回调",
+          "module": "前后端联动展示",
+          "priority": "P0",
+          "packId": "frontend_backend_linkage",
+          "scenarioKey": "NORMAL_ACTIVITY_SIGNED_UP",
+          "executionClass": "CHAIN_CONTINUE",
+          "activityPolicy": "REUSE_PREVIOUS_ACTIVITY",
+          "accountPolicy": "REUSE_PREVIOUS_ACCOUNT",
+          "requiredState": "已报名、次数为0、充值任务未完成",
+          "nextState": "发MQ后次数>0或任务完成态更新",
+          "dependsOnCaseIds": [
+            "FE-82"
+          ]
+        }
+      ],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+          "--phase",
+          "recharge",
+          "--activity-alias",
+          "s54267807",
+          "--recharge-amount",
+          "1000",
+          "--wait-for-start-ms",
+          "60000"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "phase": "recharge",
+        "account": {
+          "alias": "DEFAULT",
+          "username": "8186595891@weex.com",
+          "uid": "8186595891"
+        },
+        "page": {
+          "activityAlias": "s54267807",
+          "url": "https://stg-www.weex.tech/zh-CN/events/draw/s54267807",
+          "urlMatchesAlias": true,
+          "opened": true,
+          "loginFormVisible": false,
+          "myPrizeVisible": true,
+          "mainButtonState": "抽奖",
+          "drawButtonVariant": "抽奖",
+          "drawCount": 0,
+          "guestVisible": false,
+          "activityTitle": "小库存模板20260525122120",
+          "activityTitleVisible": true,
+          "activitySubtitle": "",
+          "activitySubtitleVisible": false,
+          "rulesText": "",
+          "rulesVisible": false,
+          "prizeCount": null,
+          "prizeAreaVisible": false,
+          "mainVisualVisible": false,
+          "horizontalOverflow": false,
+          "countdownText": "距离结束：29天:23时:41分:3秒",
+          "countdownVisible": true,
+          "countdownTicking": true,
+          "pageErrorVisible": false,
+          "buttons": [
+            "合约交易",
+            "打开",
+            "充币",
+            "抽奖",
+            "去充值",
+            "去交易",
+            "去交易"
+          ],
+          "bodySnippet": "买币\n市场\n合约交易\n现货交易\n理财\n产品验收0210222\n更多\n充币\n活动日历\n我的奖品\n分享\n小库存模板20260525122120\n06/07 19:44:30 - 07/07 19:44:30 (UTC+2)\n\n自动化测试 - 实物_20260525041425\n\n1 自动化测试 - 币对 BTC_20260525041425\n\n1 USDT 合约赠金\n\n1 USDT 合约赠金\n\n1 USDT 合约赠金\n\n自动化测试 - 实物_20260522070743\n\n1 自动化测试 - 币对 BTC_20260522070743\n\n自动化测试 - 实物_20260521233753\n\n可用抽奖次数：0\n抽奖\n距离结束：\n29\n天\n:\n23\n时\n:\n41\n分\n:\n3\n秒\n净充值\n自动化测试 - 非首\n去充值\n累计\n\n0\n净充值 ≥10 USDT\n×\n100\n首次\n\n0\n净充值 ≥100 USDT\n×\n10\n合约交易\n合约交易量\n去交易\n累计\n\n0\n合约交易量 ≥100 USDT\n×\n10\n现货交易\n现货交易量\n去交易\n累计\n\n0\n现货交易量 ≥100 USDT\n×\n10\n关于\n关于我们\n品牌信息\n官方博客\n就业机会\n媒体报道\n加入 WEEX 社群\nWXT专区\nWEEX × LALIGA\n帮助\n帮助中心\n费率标准\n交易规则\n常见问题\n官方验证渠道\n合规性\n法律声明\n风险提示\n条款与协议\n隐私说明\n廉正举报\n反洗钱政策\n执法请求指南\n联系我们\n联系客服Bot\nVIP服务\n产品\n合约交易\n现货交易\n一键跟单\n市场\nWEEX商城\n服务\n储备金证明\n邀请好友\nOTC\n下载\n合伙人\nVIP服务\nAPI\n经纪商\n上币申请\n网站地图\n资源\n教程中心\n学习\nQ&A\n现货交易\n合约交易\n名词解释\n加密货币价格\n货币预测\nWXT 价格\nBTC 价格\nETH 价格\nDOGE 价格\n如何购买加密货币"
+        },
+        "signup": {
+          "initialState": "抽奖",
+          "finalState": "抽奖",
+          "reopenedState": "抽奖",
+          "done": true
+        },
+        "mqRecharge": {
+          "ok": true,
+          "sent": true,
+          "uid": "8186595891",
+          "amount": "1000",
+          "countBefore": 0,
+          "countAfter": 110
+        },
+        "screenshotPath": null,
+        "failedResponses": []
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+            "--phase",
+            "recharge",
+            "--activity-alias",
+            "s54267807",
+            "--recharge-amount",
+            "1000",
+            "--wait-for-start-ms",
+            "60000"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "phase": "recharge",
+            "account": {
+              "alias": "DEFAULT",
+              "username": "8186595891@weex.com",
+              "uid": "8186595891"
+            },
+            "page": {
+              "activityAlias": "s54267807",
+              "url": "https://stg-www.weex.tech/zh-CN/events/draw/s54267807",
+              "urlMatchesAlias": true,
+              "opened": true,
+              "loginFormVisible": false,
+              "myPrizeVisible": true,
+              "mainButtonState": "抽奖",
+              "drawButtonVariant": "抽奖",
+              "drawCount": 0,
+              "guestVisible": false,
+              "activityTitle": "小库存模板20260525122120",
+              "activityTitleVisible": true,
+              "activitySubtitle": "",
+              "activitySubtitleVisible": false,
+              "rulesText": "",
+              "rulesVisible": false,
+              "prizeCount": null,
+              "prizeAreaVisible": false,
+              "mainVisualVisible": false,
+              "horizontalOverflow": false,
+              "countdownText": "距离结束：29天:23时:41分:3秒",
+              "countdownVisible": true,
+              "countdownTicking": true,
+              "pageErrorVisible": false,
+              "buttons": [
+                "合约交易",
+                "打开",
+                "充币",
+                "抽奖",
+                "去充值",
+                "去交易",
+                "去交易"
+              ],
+              "bodySnippet": "买币\n市场\n合约交易\n现货交易\n理财\n产品验收0210222\n更多\n充币\n活动日历\n我的奖品\n分享\n小库存模板20260525122120\n06/07 19:44:30 - 07/07 19:44:30 (UTC+2)\n\n自动化测试 - 实物_20260525041425\n\n1 自动化测试 - 币对 BTC_20260525041425\n\n1 USDT 合约赠金\n\n1 USDT 合约赠金\n\n1 USDT 合约赠金\n\n自动化测试 - 实物_20260522070743\n\n1 自动化测试 - 币对 BTC_20260522070743\n\n自动化测试 - 实物_20260521233753\n\n可用抽奖次数：0\n抽奖\n距离结束：\n29\n天\n:\n23\n时\n:\n41\n分\n:\n3\n秒\n净充值\n自动化测试 - 非首\n去充值\n累计\n\n0\n净充值 ≥10 USDT\n×\n100\n首次\n\n0\n净充值 ≥100 USDT\n×\n10\n合约交易\n合约交易量\n去交易\n累计\n\n0\n合约交易量 ≥100 USDT\n×\n10\n现货交易\n现货交易量\n去交易\n累计\n\n0\n现货交易量 ≥100 USDT\n×\n10\n关于\n关于我们\n品牌信息\n官方博客\n就业机会\n媒体报道\n加入 WEEX 社群\nWXT专区\nWEEX × LALIGA\n帮助\n帮助中心\n费率标准\n交易规则\n常见问题\n官方验证渠道\n合规性\n法律声明\n风险提示\n条款与协议\n隐私说明\n廉正举报\n反洗钱政策\n执法请求指南\n联系我们\n联系客服Bot\nVIP服务\n产品\n合约交易\n现货交易\n一键跟单\n市场\nWEEX商城\n服务\n储备金证明\n邀请好友\nOTC\n下载\n合伙人\nVIP服务\nAPI\n经纪商\n上币申请\n网站地图\n资源\n教程中心\n学习\nQ&A\n现货交易\n合约交易\n名词解释\n加密货币价格\n货币预测\nWXT 价格\nBTC 价格\nETH 价格\nDOGE 价格\n如何购买加密货币"
+            },
+            "signup": {
+              "initialState": "抽奖",
+              "finalState": "抽奖",
+              "reopenedState": "抽奖",
+              "done": true
+            },
+            "mqRecharge": {
+              "ok": true,
+              "sent": true,
+              "uid": "8186595891",
+              "amount": "1000",
+              "countBefore": 0,
+              "countAfter": 110
+            },
+            "screenshotPath": null,
+            "failedResponses": []
+          },
+          "attempt": 1,
+          "exitCode": 0,
+          "durationMs": 57080
+        }
+      ],
+      "durationMs": 57080
+    },
+    {
+      "phaseId": "frontend_low_stock_five_draw",
+      "description": "Run low-stock five-draw failure and no-deduction checks.",
+      "caseIds": [
+        "FE-23",
+        "FE-45",
+        "FE-46",
+        "FE-57"
+      ],
+      "cases": [
+        {
+          "caseId": "FE-23",
+          "caseName": "库存不足时五连抽返回固定提示且不扣次数",
+          "module": "页面状态UI",
+          "priority": "P1",
+          "packId": "frontend_low_stock",
+          "scenarioKey": "LOW_STOCK_ACTIVITY_DRAW_GT5",
+          "dependsOnCaseIds": [
+            "FE-84"
+          ]
+        },
+        {
+          "caseId": "FE-45",
+          "caseName": "小库存模板下五连抽可能被库存规则拦截",
+          "module": "五连抽主流程",
+          "priority": "P1",
+          "packId": "frontend_low_stock",
+          "scenarioKey": "LOW_STOCK_ACTIVITY_DRAW_GT5",
+          "dependsOnCaseIds": [
+            "FE-84"
+          ]
+        },
+        {
+          "caseId": "FE-46",
+          "caseName": "五连抽失败不消耗次数",
+          "module": "五连抽主流程",
+          "priority": "P1",
+          "packId": "frontend_low_stock",
+          "scenarioKey": "LOW_STOCK_ACTIVITY_DRAW_GT5",
+          "dependsOnCaseIds": [
+            "FE-84"
+          ]
+        },
+        {
+          "caseId": "FE-57",
+          "caseName": "小库存模板下五连抽库存不足提示正确",
+          "module": "异常提示与容错UI",
+          "priority": "P0",
+          "packId": "frontend_low_stock",
+          "scenarioKey": "LOW_STOCK_ACTIVITY_DRAW_GT5",
+          "dependsOnCaseIds": [
+            "FE-84"
+          ]
+        }
+      ],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+          "--phase",
+          "five_draw",
+          "--activity-alias",
+          "s54267807",
+          "--wait-for-start-ms",
+          "60000"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "phase": "five_draw",
+        "account": {
+          "alias": "DEFAULT",
+          "username": "8186595891@weex.com",
+          "uid": "8186595891"
+        },
+        "page": {
+          "activityAlias": "s54267807",
+          "url": "https://stg-www.weex.tech/zh-CN/events/draw/s54267807",
+          "urlMatchesAlias": true,
+          "opened": true,
+          "loginFormVisible": false,
+          "myPrizeVisible": true,
+          "mainButtonState": "抽奖",
+          "drawButtonVariant": "抽奖×5",
+          "drawCount": 110,
+          "guestVisible": false,
+          "activityTitle": "小库存模板20260525122120",
+          "activityTitleVisible": true,
+          "activitySubtitle": "",
+          "activitySubtitleVisible": false,
+          "rulesText": "",
+          "rulesVisible": false,
+          "prizeCount": null,
+          "prizeAreaVisible": false,
+          "mainVisualVisible": false,
+          "horizontalOverflow": false,
+          "countdownText": "距离结束：29天:23时:40分:2秒",
+          "countdownVisible": true,
+          "countdownTicking": true,
+          "pageErrorVisible": false,
+          "buttons": [
+            "合约交易",
+            "打开",
+            "充币",
+            "抽奖 × 1",
+            "抽奖 × 5",
+            "去充值",
+            "去交易",
+            "去交易"
+          ],
+          "bodySnippet": "买币\n市场\n合约交易\n现货交易\n理财\n产品验收0210222\n更多\n充币\n活动日历\n我的奖品\n分享\n小库存模板20260525122120\n06/07 19:44:30 - 07/07 19:44:30 (UTC+2)\n\n自动化测试 - 实物_20260525041425\n\n1 自动化测试 - 币对 BTC_20260525041425\n\n1 USDT 合约赠金\n\n1 USDT 合约赠金\n\n1 USDT 合约赠金\n\n自动化测试 - 实物_20260522070743\n\n1 自动化测试 - 币对 BTC_20260522070743\n\n自动化测试 - 实物_20260521233753\n\n可用抽奖次数：110\n抽奖 × 1\n抽奖 × 5\n距离结束：\n29\n天\n:\n23\n时\n:\n40\n分\n:\n2\n秒\n净充值\n自动化测试 - 非首\n去充值\n累计\n\n1,000\n净充值 ≥10 USDT\n×\n100\n首次\n\n1,000\n净充值 ≥100 USDT\n×\n10\n合约交易\n合约交易量\n去交易\n累计\n\n0\n合约交易量 ≥100 USDT\n×\n10\n现货交易\n现货交易量\n去交易\n累计\n\n0\n现货交易量 ≥100 USDT\n×\n10\n关于\n关于我们\n品牌信息\n官方博客\n就业机会\n媒体报道\n加入 WEEX 社群\nWXT专区\nWEEX × LALIGA\n帮助\n帮助中心\n费率标准\n交易规则\n常见问题\n官方验证渠道\n合规性\n法律声明\n风险提示\n条款与协议\n隐私说明\n廉正举报\n反洗钱政策\n执法请求指南\n联系我们\n联系客服Bot\nVIP服务\n产品\n合约交易\n现货交易\n一键跟单\n市场\nWEEX商城\n服务\n储备金证明\n邀请好友\nOTC\n下载\n合伙人\nVIP服务\nAPI\n经纪商\n上币申请\n网站地图\n资源\n教程中心\n学习\nQ&A\n现货交易\n合约交易\n名词解释\n加密货币价格\n货币预测\nWXT 价格\nBTC 价格\nET"
+        },
+        "signup": {
+          "initialState": "抽奖",
+          "finalState": "抽奖",
+          "reopenedState": "抽奖",
+          "done": true
+        },
+        "mqRecharge": {
+          "ok": true,
+          "sent": false,
+          "uid": "8186595891",
+          "amount": "1000",
+          "countBefore": 110,
+          "countAfter": 110
+        },
+        "fiveDraw": {
+          "requestObserved": true,
+          "requestSent": true,
+          "buttonVisibleBefore": true,
+          "buttonDisabledDuringDraw": false,
+          "buttonRestoredAfterDraw": true,
+          "duplicateClickBlocked": true,
+          "requestCountDelta": 1,
+          "apiSuccess": false,
+          "apiCode": "51031",
+          "apiMessage": "当日奖品所剩不多，请尝试单次抽奖。",
+          "popupVisible": false,
+          "popupRewardSummary": "",
+          "popupRewardCount": 0,
+          "failurePromptVisible": true,
+          "countBefore": 110,
+          "countAfter": 110
+        },
+        "fiveDrawRewardRecord": {
+          "opened": false,
+          "dialogVisible": false,
+          "fieldHeaders": [],
+          "hasRewardRow": false,
+          "hasReadableRewardValue": false,
+          "latestRewardText": "",
+          "dataLineCount": 0
+        },
+        "failedResponses": []
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+            "--phase",
+            "five_draw",
+            "--activity-alias",
+            "s54267807",
+            "--wait-for-start-ms",
+            "60000"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "phase": "five_draw",
+            "account": {
+              "alias": "DEFAULT",
+              "username": "8186595891@weex.com",
+              "uid": "8186595891"
+            },
+            "page": {
+              "activityAlias": "s54267807",
+              "url": "https://stg-www.weex.tech/zh-CN/events/draw/s54267807",
+              "urlMatchesAlias": true,
+              "opened": true,
+              "loginFormVisible": false,
+              "myPrizeVisible": true,
+              "mainButtonState": "抽奖",
+              "drawButtonVariant": "抽奖×5",
+              "drawCount": 110,
+              "guestVisible": false,
+              "activityTitle": "小库存模板20260525122120",
+              "activityTitleVisible": true,
+              "activitySubtitle": "",
+              "activitySubtitleVisible": false,
+              "rulesText": "",
+              "rulesVisible": false,
+              "prizeCount": null,
+              "prizeAreaVisible": false,
+              "mainVisualVisible": false,
+              "horizontalOverflow": false,
+              "countdownText": "距离结束：29天:23时:40分:2秒",
+              "countdownVisible": true,
+              "countdownTicking": true,
+              "pageErrorVisible": false,
+              "buttons": [
+                "合约交易",
+                "打开",
+                "充币",
+                "抽奖 × 1",
+                "抽奖 × 5",
+                "去充值",
+                "去交易",
+                "去交易"
+              ],
+              "bodySnippet": "买币\n市场\n合约交易\n现货交易\n理财\n产品验收0210222\n更多\n充币\n活动日历\n我的奖品\n分享\n小库存模板20260525122120\n06/07 19:44:30 - 07/07 19:44:30 (UTC+2)\n\n自动化测试 - 实物_20260525041425\n\n1 自动化测试 - 币对 BTC_20260525041425\n\n1 USDT 合约赠金\n\n1 USDT 合约赠金\n\n1 USDT 合约赠金\n\n自动化测试 - 实物_20260522070743\n\n1 自动化测试 - 币对 BTC_20260522070743\n\n自动化测试 - 实物_20260521233753\n\n可用抽奖次数：110\n抽奖 × 1\n抽奖 × 5\n距离结束：\n29\n天\n:\n23\n时\n:\n40\n分\n:\n2\n秒\n净充值\n自动化测试 - 非首\n去充值\n累计\n\n1,000\n净充值 ≥10 USDT\n×\n100\n首次\n\n1,000\n净充值 ≥100 USDT\n×\n10\n合约交易\n合约交易量\n去交易\n累计\n\n0\n合约交易量 ≥100 USDT\n×\n10\n现货交易\n现货交易量\n去交易\n累计\n\n0\n现货交易量 ≥100 USDT\n×\n10\n关于\n关于我们\n品牌信息\n官方博客\n就业机会\n媒体报道\n加入 WEEX 社群\nWXT专区\nWEEX × LALIGA\n帮助\n帮助中心\n费率标准\n交易规则\n常见问题\n官方验证渠道\n合规性\n法律声明\n风险提示\n条款与协议\n隐私说明\n廉正举报\n反洗钱政策\n执法请求指南\n联系我们\n联系客服Bot\nVIP服务\n产品\n合约交易\n现货交易\n一键跟单\n市场\nWEEX商城\n服务\n储备金证明\n邀请好友\nOTC\n下载\n合伙人\nVIP服务\nAPI\n经纪商\n上币申请\n网站地图\n资源\n教程中心\n学习\nQ&A\n现货交易\n合约交易\n名词解释\n加密货币价格\n货币预测\nWXT 价格\nBTC 价格\nET"
+            },
+            "signup": {
+              "initialState": "抽奖",
+              "finalState": "抽奖",
+              "reopenedState": "抽奖",
+              "done": true
+            },
+            "mqRecharge": {
+              "ok": true,
+              "sent": false,
+              "uid": "8186595891",
+              "amount": "1000",
+              "countBefore": 110,
+              "countAfter": 110
+            },
+            "fiveDraw": {
+              "requestObserved": true,
+              "requestSent": true,
+              "buttonVisibleBefore": true,
+              "buttonDisabledDuringDraw": false,
+              "buttonRestoredAfterDraw": true,
+              "duplicateClickBlocked": true,
+              "requestCountDelta": 1,
+              "apiSuccess": false,
+              "apiCode": "51031",
+              "apiMessage": "当日奖品所剩不多，请尝试单次抽奖。",
+              "popupVisible": false,
+              "popupRewardSummary": "",
+              "popupRewardCount": 0,
+              "failurePromptVisible": true,
+              "countBefore": 110,
+              "countAfter": 110
+            },
+            "fiveDrawRewardRecord": {
+              "opened": false,
+              "dialogVisible": false,
+              "fieldHeaders": [],
+              "hasRewardRow": false,
+              "hasReadableRewardValue": false,
+              "latestRewardText": "",
+              "dataLineCount": 0
+            },
+            "failedResponses": []
+          },
+          "attempt": 1,
+          "exitCode": 0,
+          "durationMs": 44121
+        }
+      ],
+      "durationMs": 44121
+    },
+    {
+      "phaseId": "frontend_low_stock_single_draw",
+      "description": "Run low-stock single-draw success then shortage checks.",
+      "caseIds": [
+        "FE-85"
+      ],
+      "cases": [
+        {
+          "caseId": "FE-85",
+          "caseName": "小库存单抽首次成功后再次提示库存不足",
+          "module": "小库存专项",
+          "priority": "P0",
+          "packId": "frontend_low_stock",
+          "scenarioKey": "LOW_STOCK_ACTIVITY_DRAW_GT5",
+          "dependsOnCaseIds": [
+            "FE-84"
+          ]
+        }
+      ],
+      "commands": [
+        [
+          "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+          "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+          "--phase",
+          "low_stock_single_draw",
+          "--activity-alias",
+          "s54267807",
+          "--wait-for-start-ms",
+          "60000"
+        ]
+      ],
+      "ok": true,
+      "payload": {
+        "ok": true,
+        "phase": "low_stock_single_draw",
+        "account": {
+          "alias": "DEFAULT",
+          "username": "8186595891@weex.com",
+          "uid": "8186595891"
+        },
+        "page": {
+          "activityAlias": "s54267807",
+          "url": "https://stg-www.weex.tech/zh-CN/events/draw/s54267807",
+          "urlMatchesAlias": true,
+          "opened": true,
+          "loginFormVisible": false,
+          "myPrizeVisible": true,
+          "mainButtonState": "抽奖",
+          "drawButtonVariant": "抽奖×5",
+          "drawCount": 110,
+          "guestVisible": false,
+          "activityTitle": "小库存模板20260525122120",
+          "activityTitleVisible": true,
+          "activitySubtitle": "",
+          "activitySubtitleVisible": false,
+          "rulesText": "",
+          "rulesVisible": false,
+          "prizeCount": null,
+          "prizeAreaVisible": false,
+          "mainVisualVisible": false,
+          "horizontalOverflow": false,
+          "countdownText": "距离结束：29天:23时:39分:17秒",
+          "countdownVisible": true,
+          "countdownTicking": true,
+          "pageErrorVisible": false,
+          "buttons": [
+            "合约交易",
+            "打开",
+            "充币",
+            "抽奖 × 1",
+            "抽奖 × 5",
+            "去充值",
+            "去交易",
+            "去交易"
+          ],
+          "bodySnippet": "买币\n市场\n合约交易\n现货交易\n理财\n产品验收0210222\n更多\n充币\n活动日历\n我的奖品\n分享\n小库存模板20260525122120\n06/07 19:44:30 - 07/07 19:44:30 (UTC+2)\n\n自动化测试 - 实物_20260525041425\n\n1 自动化测试 - 币对 BTC_20260525041425\n\n1 USDT 合约赠金\n\n1 USDT 合约赠金\n\n1 USDT 合约赠金\n\n自动化测试 - 实物_20260522070743\n\n1 自动化测试 - 币对 BTC_20260522070743\n\n自动化测试 - 实物_20260521233753\n\n可用抽奖次数：110\n抽奖 × 1\n抽奖 × 5\n距离结束：\n29\n天\n:\n23\n时\n:\n39\n分\n:\n17\n秒\n净充值\n自动化测试 - 非首\n去充值\n累计\n\n1,000\n净充值 ≥10 USDT\n×\n100\n首次\n\n1,000\n净充值 ≥100 USDT\n×\n10\n合约交易\n合约交易量\n去交易\n累计\n\n0\n合约交易量 ≥100 USDT\n×\n10\n现货交易\n现货交易量\n去交易\n累计\n\n0\n现货交易量 ≥100 USDT\n×\n10\n关于\n关于我们\n品牌信息\n官方博客\n就业机会\n媒体报道\n加入 WEEX 社群\nWXT专区\nWEEX × LALIGA\n帮助\n帮助中心\n费率标准\n交易规则\n常见问题\n官方验证渠道\n合规性\n法律声明\n风险提示\n条款与协议\n隐私说明\n廉正举报\n反洗钱政策\n执法请求指南\n联系我们\n联系客服Bot\nVIP服务\n产品\n合约交易\n现货交易\n一键跟单\n市场\nWEEX商城\n服务\n储备金证明\n邀请好友\nOTC\n下载\n合伙人\nVIP服务\nAPI\n经纪商\n上币申请\n网站地图\n资源\n教程中心\n学习\nQ&A\n现货交易\n合约交易\n名词解释\n加密货币价格\n货币预测\nWXT 价格\nBTC 价格\nE"
+        },
+        "signup": {
+          "initialState": "抽奖",
+          "finalState": "抽奖",
+          "reopenedState": "抽奖",
+          "done": true
+        },
+        "mqRecharge": {
+          "ok": true,
+          "sent": false,
+          "uid": "8186595891",
+          "amount": "1000",
+          "countBefore": 110,
+          "countAfter": 110
+        },
+        "lowStockSingleDraw": {
+          "first": {
+            "requestObserved": true,
+            "requestSent": true,
+            "buttonVisibleBefore": true,
+            "buttonDisabledDuringDraw": false,
+            "duplicateClickBlocked": true,
+            "requestCountDelta": 1,
+            "apiSuccess": true,
+            "apiCode": "00000",
+            "apiMessage": "success",
+            "failurePromptVisible": false,
+            "popupVisible": true,
+            "countBefore": 110,
+            "countAfter": 109,
+            "popupPrizeText": "自动化测试 - 实物_20260525041425"
+          },
+          "second": {
+            "requestObserved": false,
+            "requestSent": true,
+            "buttonVisibleBefore": true,
+            "buttonDisabledDuringDraw": false,
+            "duplicateClickBlocked": true,
+            "requestCountDelta": 1,
+            "apiSuccess": false,
+            "apiCode": "51020",
+            "apiMessage": "今日奖品已被抽完，请明天再来！",
+            "failurePromptVisible": true,
+            "popupVisible": false,
+            "countBefore": 109,
+            "countAfter": 109
+          }
+        },
+        "failedResponses": []
+      },
+      "childResults": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/node/25.3.0/bin/node",
+            "skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs",
+            "--phase",
+            "low_stock_single_draw",
+            "--activity-alias",
+            "s54267807",
+            "--wait-for-start-ms",
+            "60000"
+          ],
+          "ok": true,
+          "payload": {
+            "ok": true,
+            "phase": "low_stock_single_draw",
+            "account": {
+              "alias": "DEFAULT",
+              "username": "8186595891@weex.com",
+              "uid": "8186595891"
+            },
+            "page": {
+              "activityAlias": "s54267807",
+              "url": "https://stg-www.weex.tech/zh-CN/events/draw/s54267807",
+              "urlMatchesAlias": true,
+              "opened": true,
+              "loginFormVisible": false,
+              "myPrizeVisible": true,
+              "mainButtonState": "抽奖",
+              "drawButtonVariant": "抽奖×5",
+              "drawCount": 110,
+              "guestVisible": false,
+              "activityTitle": "小库存模板20260525122120",
+              "activityTitleVisible": true,
+              "activitySubtitle": "",
+              "activitySubtitleVisible": false,
+              "rulesText": "",
+              "rulesVisible": false,
+              "prizeCount": null,
+              "prizeAreaVisible": false,
+              "mainVisualVisible": false,
+              "horizontalOverflow": false,
+              "countdownText": "距离结束：29天:23时:39分:17秒",
+              "countdownVisible": true,
+              "countdownTicking": true,
+              "pageErrorVisible": false,
+              "buttons": [
+                "合约交易",
+                "打开",
+                "充币",
+                "抽奖 × 1",
+                "抽奖 × 5",
+                "去充值",
+                "去交易",
+                "去交易"
+              ],
+              "bodySnippet": "买币\n市场\n合约交易\n现货交易\n理财\n产品验收0210222\n更多\n充币\n活动日历\n我的奖品\n分享\n小库存模板20260525122120\n06/07 19:44:30 - 07/07 19:44:30 (UTC+2)\n\n自动化测试 - 实物_20260525041425\n\n1 自动化测试 - 币对 BTC_20260525041425\n\n1 USDT 合约赠金\n\n1 USDT 合约赠金\n\n1 USDT 合约赠金\n\n自动化测试 - 实物_20260522070743\n\n1 自动化测试 - 币对 BTC_20260522070743\n\n自动化测试 - 实物_20260521233753\n\n可用抽奖次数：110\n抽奖 × 1\n抽奖 × 5\n距离结束：\n29\n天\n:\n23\n时\n:\n39\n分\n:\n17\n秒\n净充值\n自动化测试 - 非首\n去充值\n累计\n\n1,000\n净充值 ≥10 USDT\n×\n100\n首次\n\n1,000\n净充值 ≥100 USDT\n×\n10\n合约交易\n合约交易量\n去交易\n累计\n\n0\n合约交易量 ≥100 USDT\n×\n10\n现货交易\n现货交易量\n去交易\n累计\n\n0\n现货交易量 ≥100 USDT\n×\n10\n关于\n关于我们\n品牌信息\n官方博客\n就业机会\n媒体报道\n加入 WEEX 社群\nWXT专区\nWEEX × LALIGA\n帮助\n帮助中心\n费率标准\n交易规则\n常见问题\n官方验证渠道\n合规性\n法律声明\n风险提示\n条款与协议\n隐私说明\n廉正举报\n反洗钱政策\n执法请求指南\n联系我们\n联系客服Bot\nVIP服务\n产品\n合约交易\n现货交易\n一键跟单\n市场\nWEEX商城\n服务\n储备金证明\n邀请好友\nOTC\n下载\n合伙人\nVIP服务\nAPI\n经纪商\n上币申请\n网站地图\n资源\n教程中心\n学习\nQ&A\n现货交易\n合约交易\n名词解释\n加密货币价格\n货币预测\nWXT 价格\nBTC 价格\nE"
+            },
+            "signup": {
+              "initialState": "抽奖",
+              "finalState": "抽奖",
+              "reopenedState": "抽奖",
+              "done": true
+            },
+            "mqRecharge": {
+              "ok": true,
+              "sent": false,
+              "uid": "8186595891",
+              "amount": "1000",
+              "countBefore": 110,
+              "countAfter": 110
+            },
+            "lowStockSingleDraw": {
+              "first": {
+                "requestObserved": true,
+                "requestSent": true,
+                "buttonVisibleBefore": true,
+                "buttonDisabledDuringDraw": false,
+                "duplicateClickBlocked": true,
+                "requestCountDelta": 1,
+                "apiSuccess": true,
+                "apiCode": "00000",
+                "apiMessage": "success",
+                "failurePromptVisible": false,
+                "popupVisible": true,
+                "countBefore": 110,
+                "countAfter": 109,
+                "popupPrizeText": "自动化测试 - 实物_20260525041425"
+              },
+              "second": {
+                "requestObserved": false,
+                "requestSent": true,
+                "buttonVisibleBefore": true,
+                "buttonDisabledDuringDraw": false,
+                "duplicateClickBlocked": true,
+                "requestCountDelta": 1,
+                "apiSuccess": false,
+                "apiCode": "51020",
+                "apiMessage": "今日奖品已被抽完，请明天再来！",
+                "failurePromptVisible": true,
+                "popupVisible": false,
+                "countBefore": 109,
+                "countAfter": 109
+              }
+            },
+            "failedResponses": []
+          },
+          "attempt": 1,
+          "exitCode": 0,
+          "durationMs": 59204
+        }
+      ],
+      "durationMs": 59204
+    }
+  ],
+  "caseResults": [
+    {
+      "caseId": "FE-81",
+      "caseName": "活动开始后未报名显示立即报名",
+      "module": "报名链路",
+      "priority": "P0",
+      "phaseId": "frontend_signup_flow",
+      "status": "PASS",
+      "evidence": {
+        "page": {
+          "activityAlias": "s54267807",
+          "url": "https://stg-www.weex.tech/zh-CN/events/draw/s54267807",
+          "mainButtonState": "立即报名",
+          "drawButtonVariant": "",
+          "loginFormVisible": false,
+          "myPrizeVisible": true,
+          "guestVisible": false,
+          "activityTitle": "小库存模板20260525122120",
+          "activityTitleVisible": true,
+          "activitySubtitle": "",
+          "activitySubtitleVisible": false,
+          "rulesVisible": false,
+          "prizeCount": null,
+          "prizeAreaVisible": false,
+          "mainVisualVisible": false,
+          "horizontalOverflow": false,
+          "countdownText": "距离结束：29天:23时:41分:32秒",
+          "countdownVisible": true,
+          "countdownTicking": true,
+          "pageErrorVisible": false,
+          "buttons": [
+            "合约交易",
+            "打开",
+            "充币",
+            "立即报名",
+            "去充值",
+            "去交易",
+            "去交易"
+          ]
+        },
+        "consistency": null,
+        "signup": {
+          "initialState": "立即报名",
+          "finalState": "抽奖",
+          "reopenedState": "抽奖",
+          "done": true
+        },
+        "mqRecharge": null,
+        "draw": null,
+        "fiveDraw": null,
+        "fiveDrawRewardRecord": null,
+        "lowStockSingleDraw": null,
+        "styleDisplay": null,
+        "exceptionUi": null,
+        "rewardRecordExtended": null,
+        "responsiveUi": null,
+        "weightSpecial": null,
+        "rewardRecord": null,
+        "linkage": null,
+        "linkageReadonly": null
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "FE-82",
+      "caseName": "点击立即报名后切换为抽奖状态",
+      "module": "报名链路",
+      "priority": "P0",
+      "phaseId": "frontend_signup_flow",
+      "status": "PASS",
+      "evidence": {
+        "page": {
+          "activityAlias": "s54267807",
+          "url": "https://stg-www.weex.tech/zh-CN/events/draw/s54267807",
+          "mainButtonState": "立即报名",
+          "drawButtonVariant": "",
+          "loginFormVisible": false,
+          "myPrizeVisible": true,
+          "guestVisible": false,
+          "activityTitle": "小库存模板20260525122120",
+          "activityTitleVisible": true,
+          "activitySubtitle": "",
+          "activitySubtitleVisible": false,
+          "rulesVisible": false,
+          "prizeCount": null,
+          "prizeAreaVisible": false,
+          "mainVisualVisible": false,
+          "horizontalOverflow": false,
+          "countdownText": "距离结束：29天:23时:41分:32秒",
+          "countdownVisible": true,
+          "countdownTicking": true,
+          "pageErrorVisible": false,
+          "buttons": [
+            "合约交易",
+            "打开",
+            "充币",
+            "立即报名",
+            "去充值",
+            "去交易",
+            "去交易"
+          ]
+        },
+        "consistency": null,
+        "signup": {
+          "initialState": "立即报名",
+          "finalState": "抽奖",
+          "reopenedState": "抽奖",
+          "done": true
+        },
+        "mqRecharge": null,
+        "draw": null,
+        "fiveDraw": null,
+        "fiveDrawRewardRecord": null,
+        "lowStockSingleDraw": null,
+        "styleDisplay": null,
+        "exceptionUi": null,
+        "rewardRecordExtended": null,
+        "responsiveUi": null,
+        "weightSpecial": null,
+        "rewardRecord": null,
+        "linkage": null,
+        "linkageReadonly": null
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "FE-84",
+      "caseName": "充值任务-报名后发送MQ回调",
+      "module": "前后端联动展示",
+      "priority": "P0",
+      "phaseId": "frontend_recharge_prepare",
+      "status": "PASS",
+      "evidence": {
+        "page": {
+          "activityAlias": "s54267807",
+          "url": "https://stg-www.weex.tech/zh-CN/events/draw/s54267807",
+          "mainButtonState": "抽奖",
+          "drawButtonVariant": "抽奖",
+          "loginFormVisible": false,
+          "myPrizeVisible": true,
+          "guestVisible": false,
+          "activityTitle": "小库存模板20260525122120",
+          "activityTitleVisible": true,
+          "activitySubtitle": "",
+          "activitySubtitleVisible": false,
+          "rulesVisible": false,
+          "prizeCount": null,
+          "prizeAreaVisible": false,
+          "mainVisualVisible": false,
+          "horizontalOverflow": false,
+          "countdownText": "距离结束：29天:23时:41分:3秒",
+          "countdownVisible": true,
+          "countdownTicking": true,
+          "pageErrorVisible": false,
+          "buttons": [
+            "合约交易",
+            "打开",
+            "充币",
+            "抽奖",
+            "去充值",
+            "去交易",
+            "去交易"
+          ]
+        },
+        "consistency": null,
+        "signup": {
+          "initialState": "抽奖",
+          "finalState": "抽奖",
+          "reopenedState": "抽奖",
+          "done": true
+        },
+        "mqRecharge": {
+          "uid": "8186595891",
+          "amount": "1000",
+          "ok": true,
+          "sent": true,
+          "countBefore": 0,
+          "countAfter": 110
+        },
+        "draw": null,
+        "fiveDraw": null,
+        "fiveDrawRewardRecord": null,
+        "lowStockSingleDraw": null,
+        "styleDisplay": null,
+        "exceptionUi": null,
+        "rewardRecordExtended": null,
+        "responsiveUi": null,
+        "weightSpecial": null,
+        "rewardRecord": null,
+        "linkage": null,
+        "linkageReadonly": null
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "FE-23",
+      "caseName": "库存不足时五连抽返回固定提示且不扣次数",
+      "module": "页面状态UI",
+      "priority": "P1",
+      "phaseId": "frontend_low_stock_five_draw",
+      "status": "PASS",
+      "evidence": {
+        "page": {
+          "activityAlias": "s54267807",
+          "url": "https://stg-www.weex.tech/zh-CN/events/draw/s54267807",
+          "mainButtonState": "抽奖",
+          "drawButtonVariant": "抽奖×5",
+          "loginFormVisible": false,
+          "myPrizeVisible": true,
+          "guestVisible": false,
+          "activityTitle": "小库存模板20260525122120",
+          "activityTitleVisible": true,
+          "activitySubtitle": "",
+          "activitySubtitleVisible": false,
+          "rulesVisible": false,
+          "prizeCount": null,
+          "prizeAreaVisible": false,
+          "mainVisualVisible": false,
+          "horizontalOverflow": false,
+          "countdownText": "距离结束：29天:23时:40分:2秒",
+          "countdownVisible": true,
+          "countdownTicking": true,
+          "pageErrorVisible": false,
+          "buttons": [
+            "合约交易",
+            "打开",
+            "充币",
+            "抽奖 × 1",
+            "抽奖 × 5",
+            "去充值",
+            "去交易",
+            "去交易"
+          ]
+        },
+        "consistency": null,
+        "signup": {
+          "initialState": "抽奖",
+          "finalState": "抽奖",
+          "reopenedState": "抽奖",
+          "done": true
+        },
+        "mqRecharge": {
+          "uid": "8186595891",
+          "amount": "1000",
+          "ok": true,
+          "sent": false,
+          "countBefore": 110,
+          "countAfter": 110
+        },
+        "draw": null,
+        "fiveDraw": {
+          "requestObserved": true,
+          "requestSent": true,
+          "buttonVisibleBefore": true,
+          "buttonDisabledDuringDraw": false,
+          "buttonRestoredAfterDraw": true,
+          "duplicateClickBlocked": true,
+          "requestCountDelta": 1,
+          "apiSuccess": false,
+          "apiCode": "51031",
+          "apiMessage": "当日奖品所剩不多，请尝试单次抽奖。",
+          "popupVisible": false,
+          "popupRewardSummary": "",
+          "popupRewardCount": 0,
+          "failurePromptVisible": true,
+          "countBefore": 110,
+          "countAfter": 110
+        },
+        "fiveDrawRewardRecord": {
+          "opened": false,
+          "dialogVisible": false,
+          "fieldHeaders": [],
+          "hasRewardRow": false,
+          "hasReadableRewardValue": false,
+          "latestRewardText": "",
+          "allRewardText": "",
+          "dataLineCount": 0
+        },
+        "lowStockSingleDraw": null,
+        "styleDisplay": null,
+        "exceptionUi": null,
+        "rewardRecordExtended": null,
+        "responsiveUi": null,
+        "weightSpecial": null,
+        "rewardRecord": null,
+        "linkage": null,
+        "linkageReadonly": null
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "FE-45",
+      "caseName": "小库存模板下五连抽可能被库存规则拦截",
+      "module": "五连抽主流程",
+      "priority": "P1",
+      "phaseId": "frontend_low_stock_five_draw",
+      "status": "PASS",
+      "evidence": {
+        "page": {
+          "activityAlias": "s54267807",
+          "url": "https://stg-www.weex.tech/zh-CN/events/draw/s54267807",
+          "mainButtonState": "抽奖",
+          "drawButtonVariant": "抽奖×5",
+          "loginFormVisible": false,
+          "myPrizeVisible": true,
+          "guestVisible": false,
+          "activityTitle": "小库存模板20260525122120",
+          "activityTitleVisible": true,
+          "activitySubtitle": "",
+          "activitySubtitleVisible": false,
+          "rulesVisible": false,
+          "prizeCount": null,
+          "prizeAreaVisible": false,
+          "mainVisualVisible": false,
+          "horizontalOverflow": false,
+          "countdownText": "距离结束：29天:23时:40分:2秒",
+          "countdownVisible": true,
+          "countdownTicking": true,
+          "pageErrorVisible": false,
+          "buttons": [
+            "合约交易",
+            "打开",
+            "充币",
+            "抽奖 × 1",
+            "抽奖 × 5",
+            "去充值",
+            "去交易",
+            "去交易"
+          ]
+        },
+        "consistency": null,
+        "signup": {
+          "initialState": "抽奖",
+          "finalState": "抽奖",
+          "reopenedState": "抽奖",
+          "done": true
+        },
+        "mqRecharge": {
+          "uid": "8186595891",
+          "amount": "1000",
+          "ok": true,
+          "sent": false,
+          "countBefore": 110,
+          "countAfter": 110
+        },
+        "draw": null,
+        "fiveDraw": {
+          "requestObserved": true,
+          "requestSent": true,
+          "buttonVisibleBefore": true,
+          "buttonDisabledDuringDraw": false,
+          "buttonRestoredAfterDraw": true,
+          "duplicateClickBlocked": true,
+          "requestCountDelta": 1,
+          "apiSuccess": false,
+          "apiCode": "51031",
+          "apiMessage": "当日奖品所剩不多，请尝试单次抽奖。",
+          "popupVisible": false,
+          "popupRewardSummary": "",
+          "popupRewardCount": 0,
+          "failurePromptVisible": true,
+          "countBefore": 110,
+          "countAfter": 110
+        },
+        "fiveDrawRewardRecord": {
+          "opened": false,
+          "dialogVisible": false,
+          "fieldHeaders": [],
+          "hasRewardRow": false,
+          "hasReadableRewardValue": false,
+          "latestRewardText": "",
+          "allRewardText": "",
+          "dataLineCount": 0
+        },
+        "lowStockSingleDraw": null,
+        "styleDisplay": null,
+        "exceptionUi": null,
+        "rewardRecordExtended": null,
+        "responsiveUi": null,
+        "weightSpecial": null,
+        "rewardRecord": null,
+        "linkage": null,
+        "linkageReadonly": null
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "FE-46",
+      "caseName": "五连抽失败不消耗次数",
+      "module": "五连抽主流程",
+      "priority": "P1",
+      "phaseId": "frontend_low_stock_five_draw",
+      "status": "PASS",
+      "evidence": {
+        "page": {
+          "activityAlias": "s54267807",
+          "url": "https://stg-www.weex.tech/zh-CN/events/draw/s54267807",
+          "mainButtonState": "抽奖",
+          "drawButtonVariant": "抽奖×5",
+          "loginFormVisible": false,
+          "myPrizeVisible": true,
+          "guestVisible": false,
+          "activityTitle": "小库存模板20260525122120",
+          "activityTitleVisible": true,
+          "activitySubtitle": "",
+          "activitySubtitleVisible": false,
+          "rulesVisible": false,
+          "prizeCount": null,
+          "prizeAreaVisible": false,
+          "mainVisualVisible": false,
+          "horizontalOverflow": false,
+          "countdownText": "距离结束：29天:23时:40分:2秒",
+          "countdownVisible": true,
+          "countdownTicking": true,
+          "pageErrorVisible": false,
+          "buttons": [
+            "合约交易",
+            "打开",
+            "充币",
+            "抽奖 × 1",
+            "抽奖 × 5",
+            "去充值",
+            "去交易",
+            "去交易"
+          ]
+        },
+        "consistency": null,
+        "signup": {
+          "initialState": "抽奖",
+          "finalState": "抽奖",
+          "reopenedState": "抽奖",
+          "done": true
+        },
+        "mqRecharge": {
+          "uid": "8186595891",
+          "amount": "1000",
+          "ok": true,
+          "sent": false,
+          "countBefore": 110,
+          "countAfter": 110
+        },
+        "draw": null,
+        "fiveDraw": {
+          "requestObserved": true,
+          "requestSent": true,
+          "buttonVisibleBefore": true,
+          "buttonDisabledDuringDraw": false,
+          "buttonRestoredAfterDraw": true,
+          "duplicateClickBlocked": true,
+          "requestCountDelta": 1,
+          "apiSuccess": false,
+          "apiCode": "51031",
+          "apiMessage": "当日奖品所剩不多，请尝试单次抽奖。",
+          "popupVisible": false,
+          "popupRewardSummary": "",
+          "popupRewardCount": 0,
+          "failurePromptVisible": true,
+          "countBefore": 110,
+          "countAfter": 110
+        },
+        "fiveDrawRewardRecord": {
+          "opened": false,
+          "dialogVisible": false,
+          "fieldHeaders": [],
+          "hasRewardRow": false,
+          "hasReadableRewardValue": false,
+          "latestRewardText": "",
+          "allRewardText": "",
+          "dataLineCount": 0
+        },
+        "lowStockSingleDraw": null,
+        "styleDisplay": null,
+        "exceptionUi": null,
+        "rewardRecordExtended": null,
+        "responsiveUi": null,
+        "weightSpecial": null,
+        "rewardRecord": null,
+        "linkage": null,
+        "linkageReadonly": null
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "FE-57",
+      "caseName": "小库存模板下五连抽库存不足提示正确",
+      "module": "异常提示与容错UI",
+      "priority": "P0",
+      "phaseId": "frontend_low_stock_five_draw",
+      "status": "PASS",
+      "evidence": {
+        "page": {
+          "activityAlias": "s54267807",
+          "url": "https://stg-www.weex.tech/zh-CN/events/draw/s54267807",
+          "mainButtonState": "抽奖",
+          "drawButtonVariant": "抽奖×5",
+          "loginFormVisible": false,
+          "myPrizeVisible": true,
+          "guestVisible": false,
+          "activityTitle": "小库存模板20260525122120",
+          "activityTitleVisible": true,
+          "activitySubtitle": "",
+          "activitySubtitleVisible": false,
+          "rulesVisible": false,
+          "prizeCount": null,
+          "prizeAreaVisible": false,
+          "mainVisualVisible": false,
+          "horizontalOverflow": false,
+          "countdownText": "距离结束：29天:23时:40分:2秒",
+          "countdownVisible": true,
+          "countdownTicking": true,
+          "pageErrorVisible": false,
+          "buttons": [
+            "合约交易",
+            "打开",
+            "充币",
+            "抽奖 × 1",
+            "抽奖 × 5",
+            "去充值",
+            "去交易",
+            "去交易"
+          ]
+        },
+        "consistency": null,
+        "signup": {
+          "initialState": "抽奖",
+          "finalState": "抽奖",
+          "reopenedState": "抽奖",
+          "done": true
+        },
+        "mqRecharge": {
+          "uid": "8186595891",
+          "amount": "1000",
+          "ok": true,
+          "sent": false,
+          "countBefore": 110,
+          "countAfter": 110
+        },
+        "draw": null,
+        "fiveDraw": {
+          "requestObserved": true,
+          "requestSent": true,
+          "buttonVisibleBefore": true,
+          "buttonDisabledDuringDraw": false,
+          "buttonRestoredAfterDraw": true,
+          "duplicateClickBlocked": true,
+          "requestCountDelta": 1,
+          "apiSuccess": false,
+          "apiCode": "51031",
+          "apiMessage": "当日奖品所剩不多，请尝试单次抽奖。",
+          "popupVisible": false,
+          "popupRewardSummary": "",
+          "popupRewardCount": 0,
+          "failurePromptVisible": true,
+          "countBefore": 110,
+          "countAfter": 110
+        },
+        "fiveDrawRewardRecord": {
+          "opened": false,
+          "dialogVisible": false,
+          "fieldHeaders": [],
+          "hasRewardRow": false,
+          "hasReadableRewardValue": false,
+          "latestRewardText": "",
+          "allRewardText": "",
+          "dataLineCount": 0
+        },
+        "lowStockSingleDraw": null,
+        "styleDisplay": null,
+        "exceptionUi": null,
+        "rewardRecordExtended": null,
+        "responsiveUi": null,
+        "weightSpecial": null,
+        "rewardRecord": null,
+        "linkage": null,
+        "linkageReadonly": null
+      },
+      "errorMessage": ""
+    },
+    {
+      "caseId": "FE-85",
+      "caseName": "小库存单抽首次成功后再次提示库存不足",
+      "module": "小库存专项",
+      "priority": "P0",
+      "phaseId": "frontend_low_stock_single_draw",
+      "status": "PASS",
+      "evidence": {
+        "page": {
+          "activityAlias": "s54267807",
+          "url": "https://stg-www.weex.tech/zh-CN/events/draw/s54267807",
+          "mainButtonState": "抽奖",
+          "drawButtonVariant": "抽奖×5",
+          "loginFormVisible": false,
+          "myPrizeVisible": true,
+          "guestVisible": false,
+          "activityTitle": "小库存模板20260525122120",
+          "activityTitleVisible": true,
+          "activitySubtitle": "",
+          "activitySubtitleVisible": false,
+          "rulesVisible": false,
+          "prizeCount": null,
+          "prizeAreaVisible": false,
+          "mainVisualVisible": false,
+          "horizontalOverflow": false,
+          "countdownText": "距离结束：29天:23时:39分:17秒",
+          "countdownVisible": true,
+          "countdownTicking": true,
+          "pageErrorVisible": false,
+          "buttons": [
+            "合约交易",
+            "打开",
+            "充币",
+            "抽奖 × 1",
+            "抽奖 × 5",
+            "去充值",
+            "去交易",
+            "去交易"
+          ]
+        },
+        "consistency": null,
+        "signup": {
+          "initialState": "抽奖",
+          "finalState": "抽奖",
+          "reopenedState": "抽奖",
+          "done": true
+        },
+        "mqRecharge": {
+          "uid": "8186595891",
+          "amount": "1000",
+          "ok": true,
+          "sent": false,
+          "countBefore": 110,
+          "countAfter": 110
+        },
+        "draw": null,
+        "fiveDraw": null,
+        "fiveDrawRewardRecord": null,
+        "lowStockSingleDraw": {
+          "first": {
+            "requestSent": true,
+            "apiSuccess": true,
+            "apiCode": "00000",
+            "apiMessage": "success",
+            "popupVisible": true,
+            "popupPrizeText": "自动化测试 - 实物_20260525041425",
+            "countBefore": 110,
+            "countAfter": 109
+          },
+          "second": {
+            "requestSent": true,
+            "apiSuccess": false,
+            "apiCode": "51020",
+            "apiMessage": "今日奖品已被抽完，请明天再来！",
+            "failurePromptVisible": true,
+            "countBefore": 109,
+            "countAfter": 109
+          }
+        },
+        "styleDisplay": null,
+        "exceptionUi": null,
+        "rewardRecordExtended": null,
+        "responsiveUi": null,
+        "weightSpecial": null,
+        "rewardRecord": null,
+        "linkage": null,
+        "linkageReadonly": null
+      },
+      "errorMessage": ""
+    }
+  ]
+}

@@ -3,6 +3,7 @@
 ## Environment Bases
 
 - staging: `https://stg-activity.weex.tech`
+- staging frontend web: `https://stg-www.weex.tech`
 
 ## Known Pages
 
@@ -138,7 +139,50 @@ Observed page signals:
 Operations likely available:
 - 搜索
 - 新增
+
+### Lottery Activity
+
+Status: candidate
+Last verified: 2026-05-07
+
+Business domain:
+活动列表 / 转盘抽奖。
+
+Path:
+`/activities/lottery`
+
+Add path:
+`/activities/lottery/add`
+
+Observed page signals:
+- Search form includes `活动id`, `活动标题`, `活动别名`, `活动类型`, and `活动日期`.
+- Add page includes activity basic information, lottery prize configuration, lottery weight configuration, color sign configuration, share information, daily prize limits, accumulated-count reweighting, activity tasks, multilingual content, FAQ, and activity calendar modules.
+
+Operations likely available:
+- 搜索
+- 新增
+- 查看
+- 修改
 - 查看
 - 修改
 - 复制
 - 删除
+
+### Lottery Activity Frontend Page
+
+Status: candidate
+Last verified: 2026-05-07
+
+Business domain:
+活动列表 / 转盘抽奖 / 前台访问地址。
+
+Frontend URL pattern:
+`https://stg-www.weex.tech/zh-CN/events/draw/<ACTIVITY_ALIAS>`
+
+Observed example:
+- Alias: `jonathan-test`
+- Frontend URL: `https://stg-www.weex.tech/zh-CN/events/draw/jonathan-test`
+
+Notes:
+- The backend activity alias maps directly to the frontend path suffix.
+- The alias must already satisfy backend validation rules for `活动别名`, which currently allow lowercase letters, digits, and `-`.

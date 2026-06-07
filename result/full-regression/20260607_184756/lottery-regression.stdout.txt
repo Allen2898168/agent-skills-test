@@ -1,0 +1,426 @@
+{
+  "ok": true,
+  "mode": "headless_full",
+  "reportRoot": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/orchestrations/lottery-regression/artifacts/reports/20260607_184756",
+  "aliases": {
+    "normal": "",
+    "weight": "",
+    "stock": ""
+  },
+  "selection": {
+    "mode": "selection",
+    "requested": [
+      "后管回归"
+    ],
+    "selectedScenarios": [
+      {
+        "scenarioId": "admin_activity_list",
+        "groupId": "admin",
+        "title": "活动列表",
+        "status": "ready",
+        "selectionAliases": [
+          "活动列表"
+        ],
+        "description": "活动列表搜索与行操作可见性。",
+        "caseIds": [
+          "AL-01",
+          "AL-02",
+          "AL-03",
+          "AL-04",
+          "AL-05",
+          "AL-06",
+          "AL-07"
+        ],
+        "automationCaseIds": [
+          "AL-01",
+          "AL-02",
+          "AL-03",
+          "AL-04",
+          "AL-05",
+          "AL-06",
+          "AL-07"
+        ],
+        "entrypoint": "lottery_admin_main_regression",
+        "allowInAll": true,
+        "preconditions": [
+          "ADMIN_SESSION"
+        ]
+      },
+      {
+        "scenarioId": "admin_register_template",
+        "groupId": "admin",
+        "title": "报名模板",
+        "status": "ready",
+        "selectionAliases": [
+          "报名模板",
+          "报名模版"
+        ],
+        "description": "模板列表搜索、模板新增、模板行操作。",
+        "caseIds": [
+          "RT-01",
+          "RT-02",
+          "RT-03",
+          "RT-04",
+          "RT-05",
+          "RT-06",
+          "RT-07",
+          "RT-08",
+          "RT-09"
+        ],
+        "automationCaseIds": [
+          "RT-01",
+          "RT-02",
+          "RT-03",
+          "RT-04",
+          "RT-05",
+          "RT-06",
+          "RT-07",
+          "RT-08",
+          "RT-09"
+        ],
+        "entrypoint": "lottery_admin_main_regression",
+        "allowInAll": true,
+        "preconditions": [
+          "ADMIN_SESSION"
+        ]
+      },
+      {
+        "scenarioId": "admin_task_management",
+        "groupId": "admin",
+        "title": "任务管理",
+        "status": "ready",
+        "selectionAliases": [
+          "任务管理"
+        ],
+        "description": "任务搜索、转盘任务新增、任务条件覆盖、奖励模式覆盖。",
+        "caseIds": [
+          "TM-01",
+          "TM-02",
+          "TM-03",
+          "TM-04",
+          "TM-05",
+          "TM-06",
+          "TM-07",
+          "TM-08",
+          "TM-09",
+          "TM-10",
+          "TM-11"
+        ],
+        "automationCaseIds": [
+          "TM-01",
+          "TM-02",
+          "TM-03",
+          "TM-04",
+          "TM-05",
+          "TM-06",
+          "TM-07",
+          "TM-08",
+          "TM-09",
+          "TM-10",
+          "TM-11"
+        ],
+        "entrypoint": "lottery_admin_main_regression",
+        "allowInAll": true,
+        "preconditions": [
+          "ADMIN_SESSION"
+        ]
+      },
+      {
+        "scenarioId": "admin_prize_management",
+        "groupId": "admin",
+        "title": "奖品管理",
+        "status": "ready",
+        "selectionAliases": [
+          "奖品管理"
+        ],
+        "description": "奖品搜索、新增、复制、修改、删除。",
+        "caseIds": [
+          "PM-01",
+          "PM-02",
+          "PM-03",
+          "PM-04",
+          "PM-05",
+          "PM-06",
+          "PM-07",
+          "PM-08",
+          "PM-09",
+          "PM-10",
+          "PM-11"
+        ],
+        "automationCaseIds": [
+          "PM-01",
+          "PM-02",
+          "PM-03",
+          "PM-04",
+          "PM-05",
+          "PM-06",
+          "PM-07",
+          "PM-08",
+          "PM-09",
+          "PM-10",
+          "PM-11"
+        ],
+        "entrypoint": "lottery_admin_main_regression",
+        "allowInAll": true,
+        "preconditions": [
+          "ADMIN_SESSION"
+        ]
+      },
+      {
+        "scenarioId": "admin_activity_config",
+        "groupId": "admin",
+        "title": "活动配置 / 活动信息",
+        "status": "partial",
+        "selectionAliases": [
+          "活动配置",
+          "活动信息",
+          "活动配置/活动信息"
+        ],
+        "description": "活动草稿创建、奖池、任务绑定、多语言、FAQ、颜色签等配置。AC-15 已接自动化，固定使用小于 10 字符的新建活动别名执行复制链路。",
+        "caseIds": [
+          "AC-01",
+          "AC-02",
+          "AC-03",
+          "AC-04",
+          "AC-05",
+          "AC-06",
+          "AC-07",
+          "AC-08",
+          "AC-09",
+          "AC-10",
+          "AC-11",
+          "AC-12",
+          "AC-13",
+          "AC-14",
+          "AC-15"
+        ],
+        "automationCaseIds": [
+          "AC-01",
+          "AC-02",
+          "AC-03",
+          "AC-04",
+          "AC-05",
+          "AC-06",
+          "AC-07",
+          "AC-08",
+          "AC-09",
+          "AC-10",
+          "AC-11",
+          "AC-12",
+          "AC-13",
+          "AC-14",
+          "AC-15"
+        ],
+        "entrypoint": "lottery_admin_main_regression",
+        "allowInAll": true,
+        "preconditions": [
+          "ADMIN_SESSION",
+          "REGISTER_TEMPLATE_READY",
+          "ROULETTE_TASK_READY",
+          "PRIZE_SET_READY"
+        ]
+      },
+      {
+        "scenarioId": "admin_status_flow",
+        "groupId": "admin",
+        "title": "上下线 / 状态流转",
+        "status": "ready",
+        "selectionAliases": [
+          "上下线",
+          "状态流转",
+          "上下线/状态流转"
+        ],
+        "description": "活动上线、下线、删除、状态切换。ST-03 固定对草稿状态活动执行删除，不再依赖长别名源活动复制。",
+        "caseIds": [
+          "ST-01",
+          "ST-02",
+          "ST-03"
+        ],
+        "automationCaseIds": [
+          "ST-01",
+          "ST-02",
+          "ST-03"
+        ],
+        "entrypoint": "lottery_admin_main_regression",
+        "allowInAll": true,
+        "preconditions": [
+          "ADMIN_SESSION",
+          "NORMAL_ACTIVITY_DRAFT"
+        ]
+      }
+    ],
+    "unresolved": [],
+    "input": "后管回归"
+  },
+  "timings": [
+    {
+      "id": "first_run_check_admin",
+      "durationMs": 386,
+      "ok": true,
+      "duration": "386ms"
+    },
+    {
+      "id": "run_admin",
+      "durationMs": 80910,
+      "ok": true,
+      "duration": "80.91s"
+    }
+  ],
+  "entrypoints": [
+    {
+      "id": "admin",
+      "entrypoint": "lottery_admin_main_regression"
+    }
+  ],
+  "entrypointTimings": {
+    "admin": {
+      "phaseTimings": {
+        "create_regression_prizes": {
+          "ok": true,
+          "durationMs": 6632
+        },
+        "prize_row_actions": {
+          "ok": true,
+          "durationMs": 4822
+        },
+        "create_register_templates": {
+          "ok": true,
+          "durationMs": 2883
+        },
+        "verify_register_template_search": {
+          "ok": true,
+          "durationMs": 2764
+        },
+        "verify_register_template_row_actions": {
+          "ok": true,
+          "durationMs": 3795
+        },
+        "create_roulette_tasks": {
+          "ok": true,
+          "durationMs": 11724
+        },
+        "create_roulette_condition_tasks": {
+          "ok": true,
+          "durationMs": 7349
+        },
+        "create_roulette_reward_mode_tasks": {
+          "ok": true,
+          "durationMs": 4358
+        },
+        "create_lottery_activity_draft": {
+          "ok": true,
+          "durationMs": 3996
+        },
+        "verify_activity_list_draft": {
+          "ok": true,
+          "durationMs": 2418
+        },
+        "online_lottery_activity": {
+          "ok": true,
+          "durationMs": 3604
+        },
+        "verify_activity_list_online": {
+          "ok": true,
+          "durationMs": 4126
+        },
+        "offline_lottery_activity": {
+          "ok": true,
+          "durationMs": 2997
+        }
+      }
+    }
+  },
+  "caseSummary": {
+    "total": 56,
+    "pass": 56,
+    "fail": 0,
+    "skipped": 0,
+    "byEntrypoint": {
+      "admin": {
+        "total": 56,
+        "pass": 56,
+        "fail": 0,
+        "skipped": 0,
+        "failedCases": [],
+        "skippedCases": [],
+        "phaseTimings": [
+          {
+            "id": "create_regression_prizes",
+            "ok": true,
+            "durationMs": 6632
+          },
+          {
+            "id": "prize_row_actions",
+            "ok": true,
+            "durationMs": 4822
+          },
+          {
+            "id": "create_register_templates",
+            "ok": true,
+            "durationMs": 2883
+          },
+          {
+            "id": "verify_register_template_search",
+            "ok": true,
+            "durationMs": 2764
+          },
+          {
+            "id": "verify_register_template_row_actions",
+            "ok": true,
+            "durationMs": 3795
+          },
+          {
+            "id": "create_roulette_tasks",
+            "ok": true,
+            "durationMs": 11724
+          },
+          {
+            "id": "create_roulette_condition_tasks",
+            "ok": true,
+            "durationMs": 7349
+          },
+          {
+            "id": "create_roulette_reward_mode_tasks",
+            "ok": true,
+            "durationMs": 4358
+          },
+          {
+            "id": "create_lottery_activity_draft",
+            "ok": true,
+            "durationMs": 3996
+          },
+          {
+            "id": "verify_activity_list_draft",
+            "ok": true,
+            "durationMs": 2418
+          },
+          {
+            "id": "online_lottery_activity",
+            "ok": true,
+            "durationMs": 3604
+          },
+          {
+            "id": "verify_activity_list_online",
+            "ok": true,
+            "durationMs": 4126
+          },
+          {
+            "id": "offline_lottery_activity",
+            "ok": true,
+            "durationMs": 2997
+          }
+        ]
+      }
+    }
+  },
+  "failedCases": [],
+  "skippedCases": [],
+  "totalDurationMs": 81299,
+  "totalDuration": "81.30s",
+  "results": [
+    {
+      "id": "admin",
+      "ok": true
+    }
+  ]
+}

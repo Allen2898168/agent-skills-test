@@ -1,0 +1,53 @@
+{
+  "ok": true,
+  "caseId": "RECHARGE_TRANS_TASK_universal_from_scratch",
+  "created": {
+    "registerTemplateId": "3565",
+    "taskId": "7044",
+    "activityId": "10047",
+    "activityAlias": "rtr51242313",
+    "activityTitle": "充值交易通用回归165402"
+  },
+  "links": [
+    {
+      "label": "后台充值交易列表",
+      "url": "https://stg-activity.weex.tech/activities/depositTrade"
+    }
+  ],
+  "durationMs": 13039,
+  "cleanup": {
+    "unbind": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteActivity": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteTask": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteRegisterTemplate": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    }
+  },
+  "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185408/RECHARGE_TRANS_TASK_universal_from_scratch.md"
+}

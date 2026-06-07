@@ -12,6 +12,7 @@ Always ask before using or changing:
 - Risk-control rules.
 - Production environment.
 - Delete, batch delete, import, export, reward issuance, or irreversible update.
+- Any state change that is protected by a fresh Google verification step, such as activity `上线`.
 
 ## Safe Defaults
 
@@ -47,7 +48,7 @@ These can be suggested, but still mention them before execution when creating or
 - Use optional `web-access` CDP only when Chrome remote debugging is available and the operation benefits from reusing the user's existing Chrome login state or live browser context.
 - If CDP is unavailable, continue with bundled Playwright scripts; `web-access` is not a hard dependency for this skill.
 - Bundled prize creation script: `scripts/create-prizes.mjs`.
-- Do not pass secrets as command-line arguments. Use `WEEX_ADMIN_PASSWORD` and `WEEX_ADMIN_GOOGLE_CODE`.
+- Do not pass secrets as command-line arguments. Use `WEEX_ADMIN_PASSWORD` and `WEEX_ADMIN_GOOGLE_CODE` from `skills/weex-admin-ops/.env.local` or same-skill current process environment variables.
 
 ## Cached Action Defaults
 
@@ -69,16 +70,27 @@ These can be suggested, but still mention them before execution when creating or
 
 ## Credential Defaults
 
-- At the start of a new project task that may require login or admin page operation, check whether `WEEX_ADMIN_USERNAME`, `WEEX_ADMIN_PASSWORD`, and `WEEX_ADMIN_GOOGLE_CODE` are present without printing their values.
+- At the start of a new project task that may require login or admin page operation, check whether `WEEX_ADMIN_USERNAME`, `WEEX_ADMIN_PASSWORD`, and `WEEX_ADMIN_GOOGLE_CODE` are present in `skills/weex-admin-ops/.env.local` or same-skill current process environment variables without printing their values.
 - If `WEEX_ADMIN_USERNAME` is unavailable and the target is staging, use the staging default username `auto` and state that default explicitly.
 - Do not store the default password or Google code in the skill.
 - Read the password from `WEEX_ADMIN_PASSWORD`; it is required before login.
 - Read the Google code from `WEEX_ADMIN_GOOGLE_CODE`; it is required before login.
 - If either `WEEX_ADMIN_PASSWORD` or `WEEX_ADMIN_GOOGLE_CODE` is unavailable, stop before login or state-changing admin operation and ask the user to set the missing environment variable.
+- Do not read activity admin credentials from root `.env.local`, other skill directories, `WEEX_FIN_*`, `WEEX_FRONTEND_*`, or legacy fallback variables.
+- If an already logged-in page later asks for a Google verification code again during a protected action, such as `上线`, treat that as a fresh required runtime secret:
+  - use the current user-provided code for that run, or
+  - use `WEEX_ADMIN_GOOGLE_CODE`,
+  - but never persist the real code to the repository.
 
 ## Activity Defaults
 
 No verified default configuration for creating a newbie activity has been captured yet.
+
+For `活动列表 / 转盘抽奖`:
+- `用户报名模版` default fixed value: `【2442】 全平台-无任何限制`.
+- `活动别名` default rule: keep the alias within `10` characters.
+- Use longer aliases only when the tester explicitly asks for alias boundary-value testing.
+- This default should still be surfaced to the user as part of the configurable-item confirmation step before execution.
 
 When the user asks to create a newbie activity with default configuration:
 1. Search `operations.md` for a verified playbook.
@@ -91,6 +103,9 @@ When the user asks to create a newbie activity with default configuration:
   - default suggested `输入最小数值=10`
   - default suggested `输入最大数值` left blank
 - These values must still be shown to the user as defaults and confirmed before execution.
+- For `转盘抽奖` task condition defaults, do not suggest or auto-select `kyc任务`.
+- `kyc任务` is prohibited for general lottery-task configuration because it hides old-user scenarios.
+- If the user asks for a lottery task and does not specify `任务条件1`, prefer a non-KYC branch that is already validated for the current chain, such as `KOL绑定`, or ask the user to choose an explicit non-KYC task type.
 - If the chosen task condition or backend rule requires a different prize type, do not keep the default lottery-count reward. Explain the restriction and ask for a valid reward choice.
 
 ## Prize Image Defaults

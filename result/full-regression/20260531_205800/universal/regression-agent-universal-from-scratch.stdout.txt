@@ -1,0 +1,71 @@
+{
+  "ok": true,
+  "caseId": "AGENT_universal_from_scratch",
+  "created": {
+    "registerTemplateId": "3485",
+    "prizeId": "1303",
+    "invitedTaskId": "6437",
+    "inviteTaskId": "6438",
+    "activityId": "9877",
+    "activityAlias": "agr55407809",
+    "activityTitle": "人人代理通用回归192327"
+  },
+  "links": [
+    {
+      "label": "后台人人代理列表",
+      "url": "https://stg-activity.weex.tech/activities/agency"
+    }
+  ],
+  "durationMs": 17505,
+  "cleanup": {
+    "unbind": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteActivity": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteInviteTask": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteInvitedTask": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deletePrize": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteRegisterTemplate": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    }
+  },
+  "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260531_212334/AGENT_universal_from_scratch.md"
+}

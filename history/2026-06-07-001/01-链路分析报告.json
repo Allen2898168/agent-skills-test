@@ -1,0 +1,80 @@
+{
+  "runId": "2026-06-07-001",
+  "stageId": "linkage_analysis",
+  "stageName": "链路分析",
+  "agentRole": "链路分析 subagent",
+  "status": "PASS",
+  "decision": "PARTIAL_COVERAGE_REUSE_WITH_GAP_FIXES",
+  "summary": "仓库已具备“活动后管全量回归”的主要编排与脚本入口，但 lottery 任务阶段稳定性和 AGENT 环境前置检查仍有缺口，现状应判定为 PARTIAL。",
+  "inputs": [
+    "history/2026-06-07-001/00-任务说明.md",
+    "history/2026-06-07-001/run-state.json",
+    "orchestrations/automation-review-pipeline/schemas/stage-report.schema.json",
+    "orchestrations/automation-review-pipeline/scripts/resolve-entry-mode.mjs",
+    "orchestrations/full-regression/scripts/run-full-regression.mjs",
+    "skills/weex-admin-ops/scripts/action-cache.json",
+    "docs/session-handoff.md"
+  ],
+  "findings": [
+    "现有仓库已存在后管全量回归聚合入口：orchestrations/full-regression/scripts/run-full-regression.mjs 支持 --selection '后管回归'。",
+    "转盘抽奖后管回归已在 docs/workflows/lottery-regression-manifest.json 中定义为独立选择集，包含 56 条 admin 用例，入口为 lottery_admin_main_regression。",
+    "skills/weex-admin-ops/scripts/ 下已存在 13 条 regression-*-universal-from-scratch.mjs，可覆盖通用活动类型后管回归。",
+    "docs/session-handoff.md 已记录 2026-06-07 的直接全量回归与 subagent 拆分执行，证明该需求已有现实执行基础。",
+    "lottery 后管任务阶段 TM-01~TM-11 当前仍不稳定，AGENT 通用回归也缺少在线活动前置检查，因此不能判定为 FULL。"
+  ],
+  "evidence": [
+    "orchestrations/automation-review-pipeline/scripts/resolve-entry-mode.mjs：命中“全量回归”必须走 automation_review_pipeline。",
+    "orchestrations/full-regression/scripts/run-full-regression.mjs：支持 --selection 参数，可直接选择 '后管回归'。",
+    "docs/workflows/lottery-regression-manifest.json：groupId=admin/title=后管回归/adminCaseCount=56/entrypoint=lottery_admin_main_regression。",
+    "skills/weex-admin-ops/scripts/action-cache.json：已有 lottery_admin_main_regression 与 regress_full_test_cases 两类缓存入口。",
+    "docs/session-handoff.md：2026-06-07 已记录“活动后管全量回归（仅后管范围）”和“按 subagent 链路执行活动后管全量回归”两次真实运行。",
+    "skills/weex-admin-ops/failure-reviews/activity-task-management.md：2026-06-07 记录 TM-01~TM-11 失败与 7076/reward-mode 回查问题。",
+    "skills/weex-admin-ops/failure-reviews/activity-management.md：2026-06-07 记录 AGENT 通用回归因已有在线活动而失败。"
+  ],
+  "risks": [
+    "若直接把现有入口视为 FULL 并进入执行，lottery 任务阶段可能再次因 7076 基线或 reward-mode 回查问题导致整段跳过。",
+    "若不先补 AGENT 在线活动前置检查，通用回归仍可能因环境中已有在线 AGENT 活动而失败。",
+    "若主 agent 直接串行跑 orchestrations/full-regression/scripts/run-full-regression.mjs，会违反本次 automation_review_pipeline 的 subagent 编排约束。"
+  ],
+  "nextAction": "进入 coverage_review，并按“PARTIAL 但可继续推进”审阅；若批准，则在 script_integration 先补 lottery 任务阶段和 AGENT 前置检查，再复用现有后管入口。",
+  "relatedCommands": [
+    "node tools/first-run-check.mjs --skill admin",
+    "node orchestrations/automation-review-pipeline/scripts/resolve-entry-mode.mjs --requirement '全量回归活动后管'",
+    "node orchestrations/full-regression/scripts/run-full-regression.mjs --selection '后管回归' --confirm-run",
+    "node orchestrations/lottery-regression/scripts/run-full-headless.mjs --selection '后管回归' --recharge-amount 1000 --wait-for-start-ms 60000"
+  ],
+  "relatedFiles": [
+    "history/2026-06-07-001/00-任务说明.md",
+    "history/2026-06-07-001/run-state.json",
+    "orchestrations/automation-review-pipeline/README.md",
+    "orchestrations/automation-review-pipeline/prompts/01-链路分析.md",
+    "orchestrations/automation-review-pipeline/scripts/resolve-entry-mode.mjs",
+    "orchestrations/full-regression/README.md",
+    "orchestrations/full-regression/scripts/run-full-regression.mjs",
+    "docs/workflows/lottery-regression-manifest.json",
+    "skills/weex-admin-ops/scripts/action-cache.json",
+    "skills/weex-admin-ops/scripts/lottery-admin-main-regression.mjs",
+    "skills/weex-admin-ops/failure-reviews/activity-management.md",
+    "skills/weex-admin-ops/failure-reviews/activity-task-management.md",
+    "docs/session-handoff.md"
+  ],
+  "timestamp": "2026-06-07T18:12:11Z",
+  "existingCoverage": "PARTIAL",
+  "suggestedFlow": [
+    "按 automation_review_pipeline 继续进入 coverage_review，不把本次需求降级为主 agent 直接执行总入口。",
+    "script_integration 复用 lottery 后管入口和 13 条通用活动回归脚本，形成后管回归的分阶段子任务。",
+    "在执行前补 lottery_admin_main_regression 的任务详情/列表回查稳定性，以及 AGENT 通用回归的在线活动前置检查。",
+    "validation_review 通过后再进入 execution_run，最终在 history/<runId>/ 下沉淀阶段产物。"
+  ],
+  "dependentSkills": [
+    "skills/weex-admin-ops",
+    "orchestrations/lottery-regression",
+    "orchestrations/full-regression",
+    "orchestrations/automation-review-pipeline"
+  ],
+  "entrypoints": [
+    "node orchestrations/lottery-regression/scripts/run-full-headless.mjs --selection '后管回归' --recharge-amount 1000 --wait-for-start-ms 60000",
+    "skills/weex-admin-ops/scripts/regression-*-universal-from-scratch.mjs (13 scripts)",
+    "node orchestrations/full-regression/scripts/run-full-regression.mjs --selection '后管回归' --confirm-run"
+  ]
+}

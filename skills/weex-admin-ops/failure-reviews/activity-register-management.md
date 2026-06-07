@@ -1,5 +1,15 @@
 # 活动用户报名管理失败复盘
 
+## 2026-06-07 lottery 后管回归报名模板新增与行操作回查失真
+- 业务线：活动用户报名管理 / 转盘抽奖后管回归。
+- 场景：执行 `node orchestrations/lottery-regression/scripts/run-full-headless.mjs --selection '后管回归' --recharge-amount 1000 --wait-for-start-ms 60000`，进入 `create_register_templates` 和 `verify_register_template_row_actions` 阶段。
+- 失败表现：`RT-03`~`RT-06` 统一失败为 `Created register template not found: 自动化报名模板_auto_20260607182351_api_2353`；`RT-07`~`RT-09` 统一失败为 `code=401 / 请求访问：/activity/apply，认证失败`。
+- 失败原因：报名模板新增脚本在创建后立即按名称回查时未命中目标模板；随后行操作脚本再次写 `/activity/apply` 时出现认证失效，导致查看/修改/删除分支全挂。
+- 解决方式：报名模板快路径需要补创建后列表回查重试；行操作脚本需要在临时报名模板创建前刷新 API session，避免沿用失效授权。
+- 验证结果：本轮报告目录 `orchestrations/lottery-regression/artifacts/reports/20260607_202339/` 中，报名模板模块 `PASS 0 / FAIL 7 / SKIPPED 2`，直接阻断后续活动配置依赖。
+- 关联文件：`skills/weex-admin-ops/scripts/create-register-templates-fast-api.mjs`、`skills/weex-admin-ops/scripts/register-template-row-actions-fast-api.mjs`、`orchestrations/lottery-regression/artifacts/reports/20260607_202339/admin.json`。
+- 后续处理：补稳后先单跑 `RT-03`~`RT-09`，通过后再回归 `lottery_admin_main_regression`。
+
 ## 2026-05-05 限制用户权限未进入动作缓存
 - 业务线：活动用户报名管理。
 - 场景：创建报名模板时指定 `限制用户权限=看到和进入页面`。
@@ -27,7 +37,7 @@
 - 失败原因：查看弹窗中的模板名称是 disabled/input 值，不一定出现在 `innerText` 中；页面还可能存在其他可见 `.el-dialog`，按最后一个可见弹窗取标题会误命中非业务弹窗。
 - 解决方式：查看断言改为同时检查详情接口响应 `code=200`、业务弹窗标题 `用户报名管理（查看）`，以及详情响应体中的模板名称；业务弹窗应按标题文本定位，不按最后一个可见 `.el-dialog`。
 - 验证结果：使用标题定位后，临时报名模板 ID `2773` 的查看、修改、删除确认和删除后搜索回查均通过。
-- 关联文件：`scripts/lib/element-ui/common.mjs`、`references/operations/activity-register-management.md`。
+- 关联文件：`scripts/lib/element-ui-common.mjs`、`references/operations/activity-register-management.md`。
 - 后续处理：已补充标题定位型 dialog helper，并在 `register-template-row-actions.mjs` 中验证可见和不可见模式通过；后续操作列脚本应复用该 helper，避免复用最后可见弹窗策略。
 
 ## 2026-05-06 操作列自然语言缓存误命中
@@ -50,3 +60,12 @@
 - 关联流程：活动用户报名管理批量删除。
 - 关联文件：`scripts/delete-register-templates-by-operator.mjs`、`references/operations/activity-register-management-bulk-delete.md`。
 - 后续处理：如果需要删除 ID `2729`，必须先确认活动 `8990,8993` 的处理方式，再解除引用或调整活动配置后重试。
+
+## 2026-05-28 报名模板一旦被活动使用即无法清理（即使活动已删除）
+- 业务线：活动用户报名管理。
+- 场景：无头 API 创建转盘抽奖活动并显式绑定新建报名模板（applyConfigId），随后删除该活动并尝试删除报名模板。
+- 失败表现：`DELETE /prod-api/activity/apply/<id>` 返回 HTTP 200 但业务 `code=500`，提示 `该报名模版已经被(<activityId>)使用`；即使活动已通过 `/prod-api/activity/lottery/delete` 删除且列表回查不存在，报名模板仍无法删除。
+- 失败原因：后端对报名模板的“已被使用”判定可能包含历史引用或异步清理延迟，导致无法作为“临时依赖”实现完全清理。
+- 解决方式：默认全链路回归/全配置创建时**复用已存在的稳定报名模板**（例如模板自带 `applyConfigId`），避免为“可清理验证”创建新报名模板；若必须新建报名模板，视为持久化资产，不在 cleanup 阶段强删。
+- 验证结果：改用复用模板 `applyConfigId=2729` 后，转盘抽奖“显式绑定依赖（奖品/任务）创建→验证→删除”可全清理；仅跳过报名模板删除。
+- 关联文件：`scripts/create-lottery-full-config-explicit-deps-fast-api.mjs`。

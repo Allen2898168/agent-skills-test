@@ -1,0 +1,93 @@
+{
+  "ok": true,
+  "caseId": "MONOPOLY_WORLD_CUP_universal_from_scratch",
+  "created": {
+    "registerTemplateId": "3492",
+    "dicePrizeId": "1314",
+    "integralPrizeId": "1315",
+    "noRewardPrizeId": "1316",
+    "dailyDiceTaskId": "6448",
+    "activityId": "9884",
+    "activityAlias": "mwcr55552203",
+    "activityTitle": "大富翁通用回归192552"
+  },
+  "links": [
+    {
+      "label": "后台大富翁列表",
+      "url": "https://stg-activity.weex.tech/activities/monopoly"
+    }
+  ],
+  "durationMs": 17034,
+  "cleanup": {
+    "offline": {
+      "ok": false,
+      "status": 200,
+      "body": {
+        "code": 500,
+        "msg": "任务不是上线状态不可下线"
+      }
+    },
+    "unbindActivity": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteActivity": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteTask": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deletePrizes": [
+      {
+        "id": "1314",
+        "ok": true,
+        "status": 200,
+        "body": {
+          "code": 200,
+          "msg": "操作成功"
+        }
+      },
+      {
+        "id": "1315",
+        "ok": true,
+        "status": 200,
+        "body": {
+          "code": 200,
+          "msg": "操作成功"
+        }
+      },
+      {
+        "id": "1316",
+        "ok": true,
+        "status": 200,
+        "body": {
+          "code": 200,
+          "msg": "操作成功"
+        }
+      }
+    ],
+    "deleteRegisterTemplate": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    }
+  },
+  "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260531_212558/MONOPOLY_WORLD_CUP_universal_from_scratch.md"
+}

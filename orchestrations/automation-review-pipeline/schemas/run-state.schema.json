@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "run-state.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "runId",
+    "title",
+    "requirement",
+    "tags",
+    "historyDir",
+    "createdAt",
+    "updatedAt",
+    "overallStatus",
+    "currentStageId",
+    "nextStageId",
+    "stages"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "enum": [1]
+    },
+    "runId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requirement": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "historyDir": {
+      "type": "string",
+      "minLength": 1
+    },
+    "createdAt": {
+      "type": "string",
+      "minLength": 1
+    },
+    "updatedAt": {
+      "type": "string",
+      "minLength": 1
+    },
+    "overallStatus": {
+      "type": "string",
+      "enum": ["IN_PROGRESS", "PASS", "FAIL", "BLOCKED"]
+    },
+    "currentStageId": {
+      "type": "string"
+    },
+    "nextStageId": {
+      "type": "string"
+    },
+    "stages": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "linkage_analysis",
+        "coverage_review",
+        "rework_advice",
+        "script_integration",
+        "validation_review",
+        "execution_run"
+      ],
+      "properties": {
+        "linkage_analysis": { "$ref": "#/$defs/stageState" },
+        "coverage_review": { "$ref": "#/$defs/stageState" },
+        "rework_advice": { "$ref": "#/$defs/stageState" },
+        "script_integration": { "$ref": "#/$defs/stageState" },
+        "validation_review": { "$ref": "#/$defs/stageState" },
+        "execution_run": { "$ref": "#/$defs/stageState" }
+      }
+    }
+  },
+  "$defs": {
+    "stageState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stageId",
+        "stageName",
+        "status",
+        "decision",
+        "reportMarkdown",
+        "reportJson",
+        "recordedAt"
+      ],
+      "properties": {
+        "stageId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stageName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": ["PENDING", "PASS", "FAIL", "SKIPPED", "BLOCKED"]
+        },
+        "decision": {
+          "type": "string"
+        },
+        "reportMarkdown": {
+          "type": "string"
+        },
+        "reportJson": {
+          "type": "string"
+        },
+        "recordedAt": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

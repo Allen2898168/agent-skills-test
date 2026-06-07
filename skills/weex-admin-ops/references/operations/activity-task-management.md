@@ -7,6 +7,13 @@ Use this file for detailed activity-task-management workflows.
 
 Keep this file focused on page entry and navigation. Store search and create playbooks in dedicated activity-task files.
 
+Current validated playbook split:
+- Common add-dialog rules: `activity-task-create-common.md`
+- Search filters: `activity-task-search.md`
+- Reward-mode branches: `activity-task-roulette-reward-modes.md`
+- Task-condition discovery and create: `activity-task-roulette-conditions.md`
+- Participant-scope discovery and create: `activity-task-roulette-participant-scopes.md`
+
 ## Open Activity Task Management
 
 Status: candidate
@@ -40,6 +47,9 @@ Optional screenshot:
 - Suggested file name: `00-进入活动任务管理.png`.
 
 Related detailed playbooks:
+- Common add-dialog rules: `activity-task-create-common.md`
 - Search filters: `activity-task-search.md`
 - Roulette reward modes: `activity-task-roulette-reward-modes.md`
+- Roulette conditions: `activity-task-roulette-conditions.md`
+- Roulette participant scopes: `activity-task-roulette-participant-scopes.md`
 - Roulette task conditions: `activity-task-roulette-conditions.md`

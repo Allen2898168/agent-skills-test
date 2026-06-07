@@ -1,3 +1,5 @@
+import { resolveAdminRestorePath, shouldRestoreAdminSession } from "./admin-session.mjs";
+
 export async function sleep(ms) {
   await new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -7,6 +9,7 @@ export async function bodyText(page) {
 }
 
 async function loginToPath(page, config, path) {
+  let lastLoginResponse = null;
   const captchaState = { observed: false, enabled: null };
   const captchaResponse = page.waitForResponse(async response => {
     if (!response.url().includes("/prod-api/captchaImage")) return false;
@@ -39,17 +42,40 @@ async function loginToPath(page, config, path) {
     response.url().includes("/prod-api/login") && response.request().method() === "POST"
   ), { timeout: 12000 }).catch(() => null);
   await clickLoginButton(page);
-  if (!(await loginResponse)) {
+  lastLoginResponse = await loginResponse;
+  if (!lastLoginResponse) {
     loginResponse = page.waitForResponse(response => (
       response.url().includes("/prod-api/login") && response.request().method() === "POST"
     ), { timeout: 12000 }).catch(() => null);
     await clickLoginButton(page);
-    await loginResponse;
+    lastLoginResponse = await loginResponse;
+  }
+  if (lastLoginResponse) {
+    const promoted = await promoteLoginTokenToCookie(page, lastLoginResponse, path);
+    if (promoted) return;
   }
   await page.waitForURL(url => !url.toString().includes("/login"), { timeout: 18000 }).catch(() => {});
   await sleep(3000);
-  if (page.url().includes("/login")) throw new Error("Login did not leave login page");
+  if (page.url().includes("/login")) {
+    const promoted = await promoteLoginTokenToCookie(page, lastLoginResponse, path);
+    if (promoted) return;
+    const retried = await retryLoginOnce(page, config, path, lastLoginResponse);
+    if (!retried.ok) throw new Error(retried.error);
+    return;
+  }
   if (page.url().includes("/user/profile")) throw new Error(`Redirected to profile page: ${page.url()}`);
+}
+
+export async function ensureAdminSession(page, config, path) {
+  const dialogText = await page.locator(".el-message-box:visible, .el-message-box__wrapper:visible").last().innerText({ timeout: 1200 }).catch(() => "");
+  if (!shouldRestoreAdminSession({ currentUrl: page.url(), dialogText })) return false;
+  await loginToPath(page, config, path);
+  return true;
+}
+
+export async function ensureAdminSessionForCurrentPage(page, config, fallbackPath = "/") {
+  const restorePath = resolveAdminRestorePath(page.url(), fallbackPath);
+  return ensureAdminSession(page, config, restorePath);
 }
 
 async function waitForOrdinaryCaptchaHidden(page, timeout) {
@@ -82,6 +108,95 @@ async function clickLoginButton(page) {
     return true;
   }).catch(() => false);
   if (!clicked) await page.locator('button:has-text("登")').first().click({ force: true });
+}
+
+async function retryLoginOnce(page, config, path, previousResponse) {
+  const previousBody = redactSensitive(await safeJson(previousResponse));
+  const previousText = await bodyText(page);
+  await page.goto(`${config.baseUrl}/login?redirect=${encodeURIComponent(path)}`, { waitUntil: "domcontentloaded" });
+  await page.locator('input[placeholder="账号"]').waitFor({ state: "visible", timeout: 12000 }).catch(() => {});
+  await page.locator('input[placeholder="密码"]').waitFor({ state: "visible", timeout: 12000 }).catch(() => {});
+  await page.locator('input[placeholder="谷歌验证码"]').waitFor({ state: "visible", timeout: 12000 }).catch(() => {});
+  await page.locator('input[placeholder="账号"]').fill(config.username);
+  await page.locator('input[placeholder="密码"]').fill(config.password);
+  await page.locator('input[placeholder="谷歌验证码"]').fill(config.googleCode);
+  const loginResponse = page.waitForResponse(response => (
+    response.url().includes("/prod-api/login") && response.request().method() === "POST"
+  ), { timeout: 12000 }).catch(() => null);
+  await clickLoginButton(page);
+  const retriedResponse = await loginResponse;
+  await page.waitForURL(url => !url.toString().includes("/login"), { timeout: 18000 }).catch(() => {});
+  await sleep(3000);
+  if (page.url().includes("/login")) {
+    const promoted = await promoteLoginTokenToCookie(page, retriedResponse, path);
+    if (promoted) return { ok: true };
+    const retriedBody = redactSensitive(await safeJson(retriedResponse));
+    const currentText = await bodyText(page);
+    return {
+      ok: false,
+      error: `Login did not leave login page after retry: ${JSON.stringify({
+        previousBody,
+        retriedBody,
+        previousText: String(previousText).slice(0, 200),
+        currentText: String(currentText).slice(0, 200),
+      })}`,
+    };
+  }
+  if (page.url().includes("/user/profile")) {
+    return { ok: false, error: `Redirected to profile page after retry: ${page.url()}` };
+  }
+  return { ok: true };
+}
+
+async function safeJson(response) {
+  if (!response) return null;
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+function redactSensitive(value) {
+  if (!value || typeof value !== "object") return value;
+  if (Array.isArray(value)) return value.map(redactSensitive);
+  return Object.fromEntries(Object.entries(value).map(([key, entryValue]) => {
+    if (/token|cookie|authorization|password|pwd|code/i.test(key)) return [key, "<redacted>"];
+    if (entryValue && typeof entryValue === "object") return [key, redactSensitive(entryValue)];
+    return [key, entryValue];
+  }));
+}
+
+async function promoteLoginTokenToCookie(page, response, path) {
+  const body = await safeJson(response);
+  const token = body?.token || body?.data?.token || "";
+  const code = Number(body?.code || body?.data?.code || 0);
+  if (!(code === 200 && token)) return false;
+  const currentUrl = new URL(page.url());
+  await page.context().addCookies([{
+    name: "Admin-Token",
+    value: String(token),
+    domain: currentUrl.hostname,
+    path: "/",
+    httpOnly: false,
+    secure: currentUrl.protocol === "https:",
+    sameSite: "Lax",
+  }]);
+  await page.evaluate(value => {
+    try {
+      const raw = String(value);
+      const bearer = raw.startsWith("Bearer ") ? raw : `Bearer ${raw}`;
+      for (const key of ["token", "Token", "Admin-Token", "admin-token", "authorization", "Authorization"]) {
+        const normalizedKey = String(key).toLowerCase();
+        const storedValue = normalizedKey.includes("authorization") ? bearer : raw;
+        window.localStorage?.setItem?.(key, storedValue);
+        window.sessionStorage?.setItem?.(key, storedValue);
+      }
+    } catch {}
+  }, String(token)).catch(() => {});
+  await page.goto(`${currentUrl.origin}${path}`, { waitUntil: "domcontentloaded" });
+  await sleep(2000);
+  return !page.url().includes("/login");
 }
 
 export async function loginToPrizePage(page, config) {

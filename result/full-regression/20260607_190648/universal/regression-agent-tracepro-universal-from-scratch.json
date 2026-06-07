@@ -1,0 +1,93 @@
+{
+  "ok": true,
+  "caseId": "AGENT_TRACE_PRO_universal_from_scratch",
+  "created": {
+    "registerTemplateId": "3578",
+    "prizeId": "1462",
+    "taskId": "7060",
+    "resourceCardIds": [
+      "224",
+      "225",
+      "226"
+    ],
+    "activityId": "10054",
+    "activityAlias": "atpr53632886",
+    "activityTitle": "代理小活动通用回归173352"
+  },
+  "links": [
+    {
+      "label": "后台代理小活动列表",
+      "url": "https://stg-activity.weex.tech/activities/copyTrading"
+    }
+  ],
+  "durationMs": 21928,
+  "cleanup": {
+    "unbind": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteActivity": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteTask": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deletePrize": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteRegisterTemplate": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteResourceCards": [
+      {
+        "ok": true,
+        "status": 200,
+        "body": {
+          "code": 200,
+          "msg": "操作成功"
+        }
+      },
+      {
+        "ok": true,
+        "status": 200,
+        "body": {
+          "code": 200,
+          "msg": "操作成功"
+        }
+      },
+      {
+        "ok": true,
+        "status": 200,
+        "body": {
+          "code": 200,
+          "msg": "操作成功"
+        }
+      }
+    ]
+  },
+  "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_193359/AGENT_TRACE_PRO_universal_from_scratch.md"
+}

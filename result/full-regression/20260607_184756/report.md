@@ -1,0 +1,115 @@
+# 全量回归报告（20260607_184756）
+
+## 总览
+- 口径：140 文档用例 + 141 脚本子用例 + 4 编排用例 = 285
+- 结果：PASS 68 / FAIL 1 / SKIPPED 88 / TOTAL 285
+
+## 套件明细
+- 转盘抽奖文档用例（140）：PASS 56 / FAIL 0 / SKIPPED 84
+  - SKIPPED FE-01 落地页打开正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-02 首屏主视觉展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-03 活动标题展示正确（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-04 活动副标题展示正确（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-05 活动规则展示正确（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-06 奖池区域展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-07 我的奖品入口展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-08 页面基础模块无错位（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-09 圆形转盘样式展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-10 飞镖转盘样式展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-11 彩蛋样式展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-12 跑马灯样式展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-13 足球射门样式展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-14 奖池图片与奖品名称展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-15 非转盘样式不展示五连抽按钮（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-16 未登录态页面展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-17 已登录态页面展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-18 活动未开始态展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-19 活动进行中展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-20 活动已结束态展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-21 抽奖次数为0展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-22 抽奖次数大于0展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-23 库存不足时五连抽返回固定提示且不扣次数（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-24 单抽按钮可点击（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-25 可用次数大于5时展示并可点击五连抽按钮（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-26 抽奖旋转期间再次点击仍只生效一次（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-27 抽奖结束后按钮恢复正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-28 单抽按钮防重复点击（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-29 五连抽按钮防重复点击（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-30 我的奖品入口可点击（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-31 弹窗关闭交互正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-32 单抽接口正常请求（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-33 单抽成功展示奖品弹窗（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-34 单抽成功后可用次数消耗（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-35 单抽成功后优先按次数扣减确认成功（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-36 单抽成功后奖励记录可回查（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-37 单抽成功后奖品信息符合预期（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-38 单抽失败不展示错误奖品内容（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-39 单抽失败不消耗次数（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-40 五连抽接口正常请求（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-41 五连抽成功展示奖品弹窗（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-42 五连抽成功后抽奖次数消耗5次（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-43 五连抽成功后奖励记录可回查（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-44 五连抽奖励记录字段正确（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-45 小库存模板下五连抽可能被库存规则拦截（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-46 五连抽失败不消耗次数（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-47 五连抽结果展示完整（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-48 我的奖品入口打开奖励记录弹窗（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-49 奖励记录弹窗基础UI正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-50 奖励记录字段展示正确（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-51 奖励记录空数据态展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-52 奖励记录有数据态展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-53 奖励记录时间筛选可操作（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-54 奖励记录滚动展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-55 弹窗关闭后页面状态正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-56 奖品弹窗与奖励记录结果一致（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-57 小库存模板下五连抽库存不足提示正确（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-58 抽奖失败提示展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-59 接口超时提示展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-60 网络异常提示展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-61 异常后按钮恢复正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-62 异常后不出现重复弹窗（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-63 异常后页面不崩溃（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-64 二次权重专项校验-N+1生效（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-65 未配置二次权重场景不做专项校验（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-66 需要验证二次权重时使用专项活动（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-67 二次权重命中后奖励记录正确（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-68 H5页面展示正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-69 常见移动端宽度下布局正常（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-70 不同屏高下主按钮不被遮挡（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-71 弹窗在移动端不超出屏幕（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-72 长文案或长奖品名不破版（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-73 后管活动标题改动后前端展示正确（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-75 后管多语言配置后前端切语言展示正确（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-76 后管FAQ配置后前端展示正确（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-77 后管奖池配置后前端奖品展示正确（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-78 后管活动日历入口开启后前端显示正确（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-84 充值任务-报名后发送MQ回调（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-85 小库存单抽首次成功后再次提示库存不足（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-79 活动别名URL打开正确活动页（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-80 活动未开始时显示即将开始（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-81 活动开始后未报名显示立即报名（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-82 点击立即报名后切换为抽奖状态（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - SKIPPED FE-83 已报名账号再次进入活动页直显抽奖（未纳入当前自动化回归输出口径/无可执行 phase 映射）
+  - 产物：/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/full-regression/20260607_184756/lottery-regression-summary.json
+
+- 通用回归脚本子用例（141）：PASS 12 / FAIL 1
+- regression-agent-tracepro-universal-from-scratch: PASS /Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_184941/AGENT_TRACE_PRO_universal_from_scratch.md
+- regression-agent-universal-from-scratch: FAIL /Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185002/AGENT_universal_from_scratch_failed.md
+- regression-competition-universal-from-scratch: PASS /Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185022/TRADING_COMPETITION_universal_from_scratch.md
+- regression-contract-mining-universal-from-scratch: PASS /Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185041/CONTRACT_MINING_universal_from_scratch.md
+- regression-customized-universal-from-scratch: PASS /Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185115/CUSTOMIZED_universal_from_scratch.md
+- regression-flip-universal-from-scratch: PASS /Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185142/FLIP_universal_from_scratch.md
+- regression-guess-universal-from-scratch: PASS /Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185208/GUESS_universal_from_scratch.md
+- regression-lottery-universal-from-scratch: PASS /Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185235/LOTTERY_universal_from_scratch.md
+- regression-monopoly-worldcup-universal-from-scratch: PASS /Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185255/MONOPOLY_WORLD_CUP_universal_from_scratch.md
+- regression-newbie-universal-from-scratch: PASS /Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185335/BEGINNER_TASK_universal_from_scratch.md
+- regression-race-universal-from-scratch: PASS /Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185353/RACE_COMPETITION_universal_from_scratch.md
+- regression-recharge-trans-universal-from-scratch: PASS /Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185408/RECHARGE_TRANS_TASK_universal_from_scratch.md
+- regression-tracepro-universal-from-scratch: PASS /Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185433/TRACE_PRO_universal_from_scratch.md
+
+- 编排用例（4）：PASS 0 / FAIL 0 / SKIPPED 4
+- ALL: SKIPPED（默认关闭：避免状态污染与额外耗时；如需执行请加 --include-orchestration）
+
+## 原始报告与证据
+- lottery-regression reportRoot：/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/orchestrations/lottery-regression/artifacts/reports/20260607_184756
+- 汇总 JSON：/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/full-regression/20260607_184756/summary.json

@@ -1,0 +1,270 @@
+{
+  "version": 1,
+  "actions": [
+    {
+      "id": "frontend_login_cookie",
+      "operation": "auth.login.cookie",
+      "description": "Use runtime WEEX frontend credentials, loginTool token generation, and WEEX token cookie injection to open a STG frontend login-state page.",
+      "keywords": [
+        "登录前端",
+        "前端登录",
+        "打开前端登录态",
+        "cookie 注入登录",
+        "前端浏览器模式登录"
+      ],
+      "script": "scripts/frontend-login-cookie.mjs",
+      "defaultParameters": {
+        "environment": "stg",
+        "targetUrl": "https://stg-www.weex.tech/zh-CN/account",
+        "credentialSource": "skills/weex-frontend-ops/.env.local or same-skill WEEX_FRONTEND_* runtime environment variables",
+        "passwordPriority": "account-specific password first, otherwise WEEX_FRONTEND_COMMON_PASSWORD",
+        "loginToolSource": "bundled skills/weex-frontend-ops/vendor/loginTool, with optional WEEX_FRONTEND_LOGIN_TOOL_DIR override",
+        "visible": false,
+        "screenshot": "only when --screenshot or WEEX_FRONTEND_SAVE_SCREENSHOT=true is set"
+      },
+      "requiresConfirmation": false,
+      "successAssertions": [
+        "WEEX_TOKEN_COOKIE_STAGING cookie is present",
+        "login form text is absent",
+        "account overview, account security text, or /account URL is visible"
+      ],
+      "status": "candidate",
+      "lastVerifiedAt": "2026-05-08"
+    },
+    {
+      "id": "frontend_register_api",
+      "operation": "auth.register.email.api",
+      "description": "Create a STG WEEX frontend email account through the validated test API path, inject the returned token cookie, and verify the account overview page.",
+      "keywords": [
+        "注册前端账号",
+        "前端注册",
+        "快速注册",
+        "注册账号链路",
+        "stg 前端注册"
+      ],
+      "script": "scripts/frontend-register-api.mjs",
+      "defaultParameters": {
+        "environment": "stg",
+        "registerUrl": "https://stg-www.weex.tech/zh-CN/register",
+        "accountUrl": "https://stg-www.weex.tech/zh-CN/account",
+        "credentialSource": "WEEX_FRONTEND_COMMON_PASSWORD from skills/weex-frontend-ops/.env.local or same-skill WEEX_FRONTEND_* runtime environment variables",
+        "email": "generated codexapi<timestamp>@weex.com unless --email is provided",
+        "inviteCode": "optional --invite-code",
+        "visible": false,
+        "confirmFlag": "--confirm-register is required for account creation",
+        "screenshot": "only when --screenshot or WEEX_FRONTEND_SAVE_SCREENSHOT=true is set"
+      },
+      "requiresConfirmation": true,
+      "successAssertions": [
+        "register/submit returns code 00000",
+        "WEEX_TOKEN_COOKIE_STAGING cookie is present",
+        "account overview, account security text, or /account URL is visible"
+      ],
+      "status": "candidate",
+      "lastVerifiedAt": "2026-05-08"
+    },
+    {
+      "id": "frontend_register_batch_api",
+      "operation": "auth.register.email.batch.api",
+      "description": "Create multiple STG WEEX frontend email accounts through the validated test API path, with optional invite code, account-count concurrency capped at 100, and automatic backfill for failed submissions.",
+      "keywords": [
+        "批量注册前端账号",
+        "创建多个账号",
+        "给我账号",
+        "邀请码",
+        "批量账号"
+      ],
+      "script": "scripts/frontend-register-batch-api.mjs",
+      "defaultParameters": {
+        "environment": "stg",
+        "credentialSource": "WEEX_FRONTEND_COMMON_PASSWORD from skills/weex-frontend-ops/.env.local or same-skill WEEX_FRONTEND_* runtime environment variables",
+        "count": "required --count",
+        "inviteCode": "optional --invite-code",
+        "concurrency": "defaults to count, capped at 100",
+        "confirmFlag": "--confirm-register is required for account creation",
+        "outputCsv": "optional --output-csv"
+      },
+      "requiresConfirmation": true,
+      "successAssertions": [
+        "each account returns register/submit code 00000",
+        "each successful account has a UID",
+        "failed submissions are backfilled with new emails until requested count is reached or max attempts is exceeded"
+      ],
+      "status": "candidate",
+      "lastVerifiedAt": "2026-05-08"
+    },
+    {
+      "id": "frontend_assets_transfer",
+      "operation": "auth.assets.transfer.api",
+      "description": "Use runtime WEEX frontend credentials and loginTool access token to call the STG authenticated asset transfer API from spot to contract.",
+      "keywords": [
+        "前端划转",
+        "现货划转合约",
+        "资金从现货划转到合约",
+        "assets transfer",
+        "frontend assets transfer"
+      ],
+      "script": "scripts/frontend-assets-transfer.mjs",
+      "defaultParameters": {
+        "environment": "stg",
+        "loginGatewayBaseUrl": "https://stg-gateway.weex.tech",
+        "gatewayBaseUrl": "https://stg-gateway2.weex.tech",
+        "endpoint": "/v1/assets/transfer",
+        "credentialSource": "skills/weex-frontend-ops/.env.local or same-skill WEEX_FRONTEND_* runtime environment variables",
+        "payload": {
+          "amount": 1000,
+          "fromAccountType": 10,
+          "toAccountType": 8,
+          "transferCoinId": "2"
+        },
+        "confirmFlag": "--confirm-transfer is required for real transfer"
+      },
+      "requiresConfirmation": true,
+      "successAssertions": [
+        "loginTool login returns an accessToken without printing it",
+        "transfer response HTTP status is 2xx",
+        "transfer response business code is 00000"
+      ],
+      "status": "candidate",
+      "lastVerifiedAt": "2026-05-08"
+    },
+    {
+      "id": "frontend_contract_place_order",
+      "operation": "contract.trade.place_order.api",
+      "description": "Use skill-local WEEX_FRONTEND_CONTRACT_* credentials to call the STG contract Open API PlaceOrder endpoint for activity trade-task verification.",
+      "keywords": [
+        "合约 API 下单",
+        "交易任务 API",
+        "走 API 交易",
+        "PlaceOrder",
+        "contract place order"
+      ],
+      "script": "scripts/frontend-contract-place-order.mjs",
+      "defaultParameters": {
+        "environment": "stg",
+        "baseUrl": "https://stg-api-contract.weex.tech",
+        "endpoint": "/capi/v3/order",
+        "credentialSource": "skills/weex-frontend-ops/.env.local WEEX_FRONTEND_CONTRACT_* only",
+        "payload": {
+          "symbol": "BTCUSDT",
+          "side": "BUY",
+          "positionSide": "LONG",
+          "type": "MARKET",
+          "quantity": "<required>"
+        },
+        "confirmFlag": "--confirm-order is required for real order placement"
+      },
+      "requiresConfirmation": true,
+      "successAssertions": [
+        "ticker or balance check confirms the selected contract API base is reachable",
+        "dry-run shows the exact order body without printing API secrets",
+        "PlaceOrder response HTTP status is 2xx and returns success payload"
+      ],
+      "status": "candidate",
+      "lastVerifiedAt": "2026-05-12"
+    },
+    {
+      "id": "frontend_draw_signup_trade_close_verify",
+      "operation": "draw.signup.trade.close.verify",
+      "description": "For draw trading-volume tasks that only count after signup: open draw page and complete signup, place a contract API order, close position in real futures page, then verify taskCompletions/frequency on draw page.",
+      "keywords": [
+        "转盘报名后交易",
+        "报名后交易才有效",
+        "转盘任务完成验证",
+        "报名 交易 平仓",
+        "draw signup trade"
+      ],
+      "script": "scripts/frontend-draw-signup-trade-close-verify.mjs",
+      "defaultParameters": {
+        "environment": "stg",
+        "activityHost": "https://stg-www.weex.tech",
+        "activityAlias": "<required>",
+        "taskId": "optional, used for strict task completion assertion",
+        "symbol": "ETHUSDT",
+        "side": "BUY",
+        "positionSide": "LONG",
+        "type": "MARKET",
+        "quantity": "0.5",
+        "accountCredentialSource": "local generated/fin-system-accounts/*.json with email/password/apiKey/secret/passphrase",
+        "confirmFlag": "--confirm-run is required for real execution",
+        "visible": "pass --visible when browser mode is required"
+      },
+      "requiresConfirmation": true,
+      "successAssertions": [
+        "apply returns code 00000 or applyStatus becomes true",
+        "contract order request returns HTTP 2xx success payload",
+        "futures one-key close and confirm are executed",
+        "taskCompletions contains COMPLETED for target task or TRADING_VOLUME"
+      ],
+      "status": "candidate",
+      "lastVerifiedAt": "2026-05-12"
+    },
+    {
+      "id": "frontend_draw_kafka_recharge_verify",
+      "operation": "draw.kafka.recharge.verify",
+      "description": "For internal STG draw recharge-task checks: open draw page with a new account, complete signup when required, send Kafka callback value, then verify taskCompletions/frequency on the draw page.",
+      "keywords": [
+        "转盘充值任务",
+        "kafka 回调充值",
+        "充值任务回查",
+        "转盘 kafka 充值",
+        "draw kafka recharge"
+      ],
+      "script": "scripts/frontend-draw-kafka-recharge-verify.mjs",
+      "defaultParameters": {
+        "environment": "stg",
+        "activityAlias": "<required>",
+        "activityId": "<required>",
+        "taskId": "4991",
+        "email": "<required>",
+        "uid": "<required>",
+        "amount": 200,
+        "kafkaUrl": "http://10.5.53.28:8080/ui/clusters/new-stg-kafka/all-topics/flink.exchange.spot_capital_order_info/messages?keySerde=String&valueSerde=String&limit=100",
+        "confirmFlag": "--confirm-run is required for real execution",
+        "visible": "pass --visible when browser mode is required"
+      },
+      "requiresConfirmation": true,
+      "successAssertions": [
+        "signup is done by apply/applyStatus or 已报名 indicator",
+        "Kafka produce endpoint returns HTTP 200",
+        "taskCompletions contains RECHARGE task status COMPLETED",
+        "frequency.doTaskGetCount > 0"
+      ],
+      "status": "candidate",
+      "lastVerifiedAt": "2026-05-13"
+    },
+    {
+      "id": "frontend_draw_weight_special_verify",
+      "operation": "draw.weight.special.verify",
+      "description": "For draw cumulative re-weighting checks: run N visible single draws, capture each success popup, close via popup top-right X, and assert the target draw popup prize text.",
+      "keywords": [
+        "二次权重前端验证",
+        "累计次数再权重前端",
+        "第六次抽奖",
+        "连续单抽验证",
+        "draw weight special"
+      ],
+      "script": "scripts/frontend-draw-weight-special-verify.mjs",
+      "defaultParameters": {
+        "environment": "stg",
+        "activityHost": "https://stg-www.weex.tech",
+        "activityAlias": "<required>",
+        "drawTimes": 6,
+        "expectedPrizeId": "5",
+        "expectedPrizeText": "<required for stable assertion>",
+        "account": "default frontend test account unless --account-alias is provided",
+        "visible": "pass --visible when browser mode is required"
+      },
+      "requiresConfirmation": false,
+      "successAssertions": [
+        "initial draw count is at least drawTimes",
+        "each luckDraw response has business code 00000",
+        "each draw shows the 恭喜你 popup",
+        "draw count decreases by drawTimes",
+        "target draw popup contains expectedPrizeText"
+      ],
+      "status": "candidate",
+      "lastVerifiedAt": "2026-05-29"
+    }
+  ]
+}

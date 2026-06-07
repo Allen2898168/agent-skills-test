@@ -1,0 +1,15 @@
+{
+  "ok": false,
+  "mode": "headless_api",
+  "error": "precondition failed: existing online AGENT activity 9978 (allming-6233470)",
+  "created": {
+    "registerTemplateId": "3641",
+    "prizeId": "1531",
+    "invitedTaskId": "7125",
+    "inviteTaskId": "7126",
+    "activityId": "10101",
+    "activityAlias": "agr56661215",
+    "activityTitle": "人人代理通用回归182421"
+  },
+  "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_202428/AGENT_universal_from_scratch_failed.md"
+}

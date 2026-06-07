@@ -185,6 +185,7 @@ Related references:
 ## Split Relationship Files
 
 - Activity common module relationships: `relationships/activity-common-module.md`
+- Activity management relationships: `relationships/activity-management.md`
 
 ### Activity Registration Template References Block Deletion
 

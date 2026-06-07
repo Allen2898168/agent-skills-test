@@ -12,3 +12,7 @@
 - `activity-register-platform-a.md` / `activity-register-platform-b.md`：报名模板平台范围流程。
 - `activity-register-recent.md`：最近报名模板创建记录、注册时间范围、下一步和安全说明。
 - `joker-activity.md`：小丑牌活动多语言回填链路。
+- `frontend-ops-register.md`：前端页面操作 skill、STG 登录和邮箱注册链路探测。
+- `2026-05-11-runtime-self-contained.md`：项目运行时自包含、首次配置检查、对话式配置和 FIN 登录恢复规则。
+- `2026-05-11-to-22-lottery-and-runtime.md`：抽奖回归早期链路、FIN/前端账号资金链路、运行时自包含和相关失败恢复记录。
+- `2026-05-26-to-2026-05-28-and-earlier.md`：2026-05-26～2026-05-28 及更早的会话交接记录归档（从 `docs/session-handoff.md` 拆分）。

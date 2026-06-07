@@ -1,0 +1,4 @@
+interface:
+  display_name: "WEEX Frontend Ops"
+  short_description: "Browser frontend checks with evidence capture"
+  default_prompt: "Use $weex-frontend-ops to operate and verify a WEEX frontend page with reproducible browser evidence."

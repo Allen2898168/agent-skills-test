@@ -1,0 +1,702 @@
+{
+  "meta": {
+    "name": "lottery-regression-manifest",
+    "version": 1,
+    "updatedAt": "2026-05-22",
+    "adminCaseCount": 56,
+    "frontendCaseCount": 84,
+    "totalCaseCount": 140,
+    "references": [
+      "docs/test-cases/lottery-admin-regression-cases.md",
+      "docs/test-cases/lottery-frontend-regression-cases.md",
+      "docs/workflows/lottery-regression-orchestration-design.md"
+    ]
+  },
+  "executionPolicy": {
+    "showStatuses": ["ready", "partial", "planned", "blocked"],
+    "runStatusesForAll": ["ready", "partial"],
+    "statusLabels": {
+      "ready": "可执行",
+      "partial": "部分可执行",
+      "planned": "已定义未接自动化",
+      "blocked": "当前阻塞"
+    }
+  },
+  "scenarioGroups": [
+    {
+      "groupId": "admin",
+      "title": "后管回归",
+      "selectionAliases": ["后管回归", "后管", "后台回归"],
+      "description": "活动后台配置、活动创建、状态流转等后管场景。"
+    },
+    {
+      "groupId": "frontend",
+      "title": "前端回归",
+      "selectionAliases": ["前端回归", "前端", "落地页回归"],
+      "description": "活动前端落地页展示、报名、抽奖、奖励记录等前端场景。"
+    },
+    {
+      "groupId": "special",
+      "title": "专项回归",
+      "selectionAliases": ["专项回归", "专项"],
+      "description": "二次权重、小库存、五连抽、MQ 联动等专项场景。"
+    }
+  ],
+  "scenarioCatalog": [
+    {
+      "scenarioId": "admin_activity_list",
+      "groupId": "admin",
+      "title": "活动列表",
+      "status": "ready",
+      "selectionAliases": ["活动列表"],
+      "description": "活动列表搜索与行操作可见性。",
+      "caseIds": ["AL-01", "AL-02", "AL-03", "AL-04", "AL-05", "AL-06", "AL-07"],
+      "automationCaseIds": ["AL-01", "AL-02", "AL-03", "AL-04", "AL-05", "AL-06", "AL-07"],
+      "entrypoint": "lottery_admin_main_regression",
+      "allowInAll": true,
+      "preconditions": ["ADMIN_SESSION"]
+    },
+    {
+      "scenarioId": "admin_register_template",
+      "groupId": "admin",
+      "title": "报名模板",
+      "status": "ready",
+      "selectionAliases": ["报名模板", "报名模版"],
+      "description": "模板列表搜索、模板新增、模板行操作。",
+      "caseIds": ["RT-01", "RT-02", "RT-03", "RT-04", "RT-05", "RT-06", "RT-07", "RT-08", "RT-09"],
+      "automationCaseIds": ["RT-01", "RT-02", "RT-03", "RT-04", "RT-05", "RT-06", "RT-07", "RT-08", "RT-09"],
+      "entrypoint": "lottery_admin_main_regression",
+      "allowInAll": true,
+      "preconditions": ["ADMIN_SESSION"]
+    },
+    {
+      "scenarioId": "admin_task_management",
+      "groupId": "admin",
+      "title": "任务管理",
+      "status": "ready",
+      "selectionAliases": ["任务管理"],
+      "description": "任务搜索、转盘任务新增、任务条件覆盖、奖励模式覆盖。",
+      "caseIds": ["TM-01", "TM-02", "TM-03", "TM-04", "TM-05", "TM-06", "TM-07", "TM-08", "TM-09", "TM-10", "TM-11"],
+      "automationCaseIds": ["TM-01", "TM-02", "TM-03", "TM-04", "TM-05", "TM-06", "TM-07", "TM-08", "TM-09", "TM-10", "TM-11"],
+      "entrypoint": "lottery_admin_main_regression",
+      "allowInAll": true,
+      "preconditions": ["ADMIN_SESSION"]
+    },
+    {
+      "scenarioId": "admin_prize_management",
+      "groupId": "admin",
+      "title": "奖品管理",
+      "status": "ready",
+      "selectionAliases": ["奖品管理"],
+      "description": "奖品搜索、新增、复制、修改、删除。",
+      "caseIds": ["PM-01", "PM-02", "PM-03", "PM-04", "PM-05", "PM-06", "PM-07", "PM-08", "PM-09", "PM-10", "PM-11"],
+      "automationCaseIds": ["PM-01", "PM-02", "PM-03", "PM-04", "PM-05", "PM-06", "PM-07", "PM-08", "PM-09", "PM-10", "PM-11"],
+      "entrypoint": "lottery_admin_main_regression",
+      "allowInAll": true,
+      "preconditions": ["ADMIN_SESSION"]
+    },
+    {
+      "scenarioId": "admin_activity_config",
+      "groupId": "admin",
+      "title": "活动配置 / 活动信息",
+      "status": "partial",
+      "selectionAliases": ["活动配置", "活动信息", "活动配置/活动信息"],
+      "description": "活动草稿创建、奖池、任务绑定、多语言、FAQ、颜色签等配置。AC-15 已接自动化，固定使用小于 10 字符的新建活动别名执行复制链路。",
+      "caseIds": ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05", "AC-06", "AC-07", "AC-08", "AC-09", "AC-10", "AC-11", "AC-12", "AC-13", "AC-14", "AC-15"],
+      "automationCaseIds": ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05", "AC-06", "AC-07", "AC-08", "AC-09", "AC-10", "AC-11", "AC-12", "AC-13", "AC-14", "AC-15"],
+      "entrypoint": "lottery_admin_main_regression",
+      "allowInAll": true,
+      "preconditions": ["ADMIN_SESSION", "REGISTER_TEMPLATE_READY", "ROULETTE_TASK_READY", "PRIZE_SET_READY"]
+    },
+    {
+      "scenarioId": "admin_status_flow",
+      "groupId": "admin",
+      "title": "上下线 / 状态流转",
+      "status": "ready",
+      "selectionAliases": ["上下线", "状态流转", "上下线/状态流转"],
+      "description": "活动上线、下线、删除、状态切换。ST-03 固定对草稿状态活动执行删除，不再依赖长别名源活动复制。",
+      "caseIds": ["ST-01", "ST-02", "ST-03"],
+      "automationCaseIds": ["ST-01", "ST-02", "ST-03"],
+      "entrypoint": "lottery_admin_main_regression",
+      "allowInAll": true,
+      "preconditions": ["ADMIN_SESSION", "NORMAL_ACTIVITY_DRAFT"]
+    },
+    {
+      "scenarioId": "frontend_page_basic",
+      "groupId": "frontend",
+      "title": "页面基础展示",
+      "status": "partial",
+      "selectionAliases": ["页面基础展示"],
+      "description": "前端落地页基础 UI 与信息展示。首批已接活动页打开与我的奖品入口可见性。",
+      "caseIds": ["FE-01", "FE-02", "FE-03", "FE-05", "FE-06", "FE-07", "FE-08"],
+      "automationCaseIds": ["FE-01", "FE-02", "FE-03", "FE-05", "FE-06", "FE-07", "FE-08"],
+      "entrypoint": "lottery_frontend_main_regression",
+      "allowInAll": true,
+      "preconditions": ["NORMAL_ACTIVITY_ONLINE", "FRONTEND_SESSION"]
+    },
+    {
+      "scenarioId": "frontend_style_display",
+      "groupId": "frontend",
+      "title": "抽奖样式展示",
+      "status": "partial",
+      "selectionAliases": ["抽奖样式展示", "样式展示"],
+      "description": "转盘/飞镖/彩蛋/跑马灯/足球射门等样式展示。已接前端样式容器、奖品图/名称、非转盘五连抽限制的标准证据采集。",
+      "caseIds": ["FE-09", "FE-10", "FE-11", "FE-12", "FE-13", "FE-14", "FE-15"],
+      "automationCaseIds": ["FE-09", "FE-10", "FE-11", "FE-12", "FE-13", "FE-14", "FE-15"],
+      "entrypoint": "lottery_frontend_main_regression",
+      "allowInAll": true,
+      "preconditions": ["NORMAL_ACTIVITY_ONLINE"]
+    },
+    {
+      "scenarioId": "frontend_state_ui",
+      "groupId": "frontend",
+      "title": "登录态 / 活动态 / 次数态",
+      "status": "partial",
+      "selectionAliases": ["登录态", "活动态", "次数态", "登录态 / 活动态 / 次数态"],
+      "description": "登录状态、活动状态、抽奖次数状态展示。首批已接已登录态、活动进行中与次数大于0。",
+      "caseIds": ["FE-16", "FE-17", "FE-18", "FE-19", "FE-20", "FE-21", "FE-22", "FE-23"],
+      "automationCaseIds": ["FE-16", "FE-17", "FE-18", "FE-19", "FE-21", "FE-22"],
+      "entrypoint": "lottery_frontend_main_regression",
+      "allowInAll": true,
+      "preconditions": ["NORMAL_ACTIVITY_ONLINE", "FRONTEND_SESSION"]
+    },
+    {
+      "scenarioId": "frontend_signup_flow",
+      "groupId": "frontend",
+      "title": "报名链路",
+      "status": "partial",
+      "selectionAliases": ["报名链路", "报名"],
+      "description": "活动别名访问、立即报名、报名成功后切换抽奖态。首批已接报名主链路。",
+      "caseIds": ["FE-79", "FE-80", "FE-81", "FE-82", "FE-83"],
+      "automationCaseIds": ["FE-79", "FE-80", "FE-81", "FE-82", "FE-83"],
+      "entrypoint": "lottery_frontend_main_regression",
+      "allowInAll": true,
+      "preconditions": ["NORMAL_ACTIVITY_ONLINE", "FRONTEND_SESSION"]
+    },
+    {
+      "scenarioId": "frontend_single_draw",
+      "groupId": "frontend",
+      "title": "单抽主流程",
+      "status": "partial",
+      "selectionAliases": ["单抽主流程", "单抽"],
+      "description": "单抽请求、成功弹窗、扣次、奖励记录回查。首批已接单抽请求、成功弹窗与扣次。",
+      "caseIds": ["FE-24", "FE-26", "FE-27", "FE-28", "FE-32", "FE-33", "FE-34", "FE-35", "FE-36", "FE-37", "FE-38", "FE-39"],
+      "automationCaseIds": ["FE-24", "FE-26", "FE-27", "FE-28", "FE-32", "FE-33", "FE-34", "FE-35", "FE-36", "FE-37", "FE-38", "FE-39"],
+      "entrypoint": "lottery_frontend_main_regression",
+      "allowInAll": true,
+      "preconditions": ["NORMAL_ACTIVITY_SIGNED_UP", "NORMAL_ACTIVITY_DRAW_GE1", "REWARD_RECORD_DELAY_READY"]
+    },
+    {
+      "scenarioId": "frontend_five_draw",
+      "groupId": "frontend",
+      "title": "五连抽主流程",
+      "status": "partial",
+      "selectionAliases": ["五连抽主流程", "五连抽"],
+      "description": "五连抽请求、五连抽按钮、结果展示、记录回查。已接普通活动五连抽成功链路；小库存失败分支仍在小库存专项。",
+      "caseIds": ["FE-25", "FE-29", "FE-40", "FE-41", "FE-42", "FE-43", "FE-44", "FE-47"],
+      "automationCaseIds": ["FE-25", "FE-29", "FE-40", "FE-41", "FE-42", "FE-43", "FE-44", "FE-47"],
+      "entrypoint": "lottery_frontend_main_regression",
+      "allowInAll": true,
+      "preconditions": ["NORMAL_ACTIVITY_SIGNED_UP", "NORMAL_ACTIVITY_DRAW_GT5", "REWARD_RECORD_DELAY_READY"]
+    },
+    {
+      "scenarioId": "frontend_reward_record",
+      "groupId": "frontend",
+      "title": "我的奖品 / 奖励记录",
+      "status": "partial",
+      "selectionAliases": ["我的奖品", "奖励记录", "我的奖品 / 奖励记录"],
+      "description": "我的奖品入口和奖励记录弹窗回查。首批已接入口、弹窗与基础字段。",
+      "caseIds": ["FE-48", "FE-49", "FE-50", "FE-51", "FE-52", "FE-53", "FE-54", "FE-55", "FE-56"],
+      "automationCaseIds": ["FE-48", "FE-49", "FE-50", "FE-51", "FE-52", "FE-53", "FE-54", "FE-55", "FE-56"],
+      "entrypoint": "lottery_frontend_main_regression",
+      "allowInAll": true,
+      "preconditions": ["NORMAL_ACTIVITY_ONLINE", "REWARD_RECORD_DELAY_READY"]
+    },
+    {
+      "scenarioId": "frontend_interaction_basic",
+      "groupId": "frontend",
+      "title": "按钮与交互态",
+      "status": "planned",
+      "selectionAliases": ["按钮交互", "交互态", "按钮与交互态"],
+      "description": "按钮点击与弹窗关闭等交互校验。",
+      "caseIds": ["FE-30", "FE-31"],
+      "allowInAll": false,
+      "preconditions": ["NORMAL_ACTIVITY_ONLINE", "FRONTEND_SESSION"]
+    },
+    {
+      "scenarioId": "frontend_responsive_ui",
+      "groupId": "frontend",
+      "title": "响应式与兼容性UI",
+      "status": "partial",
+      "selectionAliases": ["响应式", "兼容性", "响应式与兼容性UI"],
+      "description": "移动端/H5 适配相关用例。已接多移动视口、低屏高、弹窗/长文案溢出基础检查。",
+      "caseIds": ["FE-68", "FE-69", "FE-70", "FE-71", "FE-72"],
+      "automationCaseIds": ["FE-68", "FE-69", "FE-70", "FE-71", "FE-72"],
+      "entrypoint": "lottery_frontend_main_regression",
+      "allowInAll": true,
+      "preconditions": ["RESPONSIVE_VIEWPORT_READY"]
+    },
+    {
+      "scenarioId": "frontend_exception_ui",
+      "groupId": "frontend",
+      "title": "异常提示与容错 UI",
+      "status": "partial",
+      "selectionAliases": ["异常提示", "容错UI", "异常提示与容错 UI"],
+      "description": "失败、超时、弱网等异常提示与恢复。已接单抽失败注入、不扣次数、提示与恢复态检查。",
+      "caseIds": ["FE-38", "FE-39", "FE-57", "FE-58", "FE-59", "FE-60", "FE-61", "FE-62", "FE-63"],
+      "automationCaseIds": ["FE-38", "FE-39", "FE-58", "FE-59", "FE-60", "FE-61", "FE-62", "FE-63"],
+      "entrypoint": "lottery_frontend_main_regression",
+      "allowInAll": true,
+      "preconditions": ["ERROR_INJECTION_READY"]
+    },
+    {
+      "scenarioId": "frontend_backend_linkage",
+      "groupId": "frontend",
+      "title": "前后端联动展示",
+      "status": "partial",
+      "selectionAliases": ["前后端联动展示", "联动展示"],
+      "description": "后管变更前端回显，以及充值 MQ 联动。首批已接充值 MQ 联动。",
+      "caseIds": ["FE-73", "FE-75", "FE-76", "FE-77", "FE-78", "FE-84"],
+      "automationCaseIds": ["FE-73", "FE-75", "FE-76", "FE-77", "FE-78", "FE-84"],
+      "entrypoint": "lottery_frontend_main_regression",
+      "allowInAll": true,
+      "preconditions": ["NORMAL_ACTIVITY_ONLINE", "NORMAL_ACTIVITY_SIGNED_UP"]
+    },
+    {
+      "scenarioId": "special_weight",
+      "groupId": "special",
+      "title": "二次权重专项",
+      "status": "partial",
+      "selectionAliases": ["二次权重专项", "二次权重"],
+      "description": "累计次数再权重场景专项回归。已接前端 N+1 次命中与奖励记录验证。",
+      "caseIds": ["AC-14", "FE-64", "FE-65", "FE-66", "FE-67"],
+      "automationCaseIds": ["FE-64", "FE-65", "FE-66", "FE-67"],
+      "entrypoint": "lottery_frontend_main_regression",
+      "allowInAll": true,
+      "preconditions": ["WEIGHT_ACTIVITY_ONLINE", "WEIGHT_ACTIVITY_DRAW_GE3", "REWARD_RECORD_DELAY_READY"]
+    },
+    {
+      "scenarioId": "special_low_stock",
+      "groupId": "special",
+      "title": "小库存专项",
+      "status": "partial",
+      "selectionAliases": ["小库存专项", "库存不足专项", "小库存"],
+      "description": "库存不足、奖品被抢光、五连抽被拦截等场景。先验证五连抽库存不足不扣次数，再验证小库存单抽先成功后库存不足。",
+      "caseIds": ["FE-23", "FE-45", "FE-46", "FE-57", "FE-85"],
+      "automationCaseIds": ["FE-23", "FE-45", "FE-46", "FE-57", "FE-85"],
+      "entrypoint": "lottery_frontend_main_regression",
+      "allowInAll": true,
+      "preconditions": ["LOW_STOCK_ACTIVITY_ONLINE", "LOW_STOCK_ACTIVITY_DRAW_GT5"]
+    },
+    {
+      "scenarioId": "special_five_draw",
+      "groupId": "special",
+      "title": "五连抽专项",
+      "status": "planned",
+      "selectionAliases": ["五连抽专项"],
+      "description": "仅聚焦五连抽流程与专项断言。",
+      "caseIds": ["FE-25", "FE-29", "FE-40", "FE-41", "FE-42", "FE-43", "FE-44", "FE-45", "FE-46", "FE-47"],
+      "allowInAll": false,
+      "preconditions": ["NORMAL_ACTIVITY_DRAW_GT5"]
+    },
+    {
+      "scenarioId": "special_recharge_mq",
+      "groupId": "special",
+      "title": "充值任务 / MQ 联动专项",
+      "status": "planned",
+      "selectionAliases": ["充值任务", "MQ联动", "充值任务 / MQ 联动专项"],
+      "description": "报名后发送充值 MQ 并回查任务完成态和次数。",
+      "caseIds": ["FE-84"],
+      "allowInAll": false,
+      "preconditions": ["NORMAL_ACTIVITY_SIGNED_UP"]
+    }
+  ],
+  "scenarios": {
+    "ADMIN_SESSION": {
+      "description": "后台已登录，可执行后管只读或写操作。"
+    },
+    "FRONTEND_SESSION": {
+      "description": "前端已登录，可访问抽奖活动页。"
+    },
+    "REGISTER_TEMPLATE_READY": {
+      "description": "已有可绑定报名模版。"
+    },
+    "ROULETTE_TASK_READY": {
+      "description": "已有可绑定转盘任务。"
+    },
+    "PRIZE_SET_READY": {
+      "description": "已有可绑定奖品集。"
+    },
+    "NORMAL_ACTIVITY_DRAFT": {
+      "description": "普通回归活动草稿已创建。"
+    },
+    "NORMAL_ACTIVITY_ONLINE": {
+      "description": "普通回归活动已上线。"
+    },
+    "NORMAL_ACTIVITY_SIGNED_UP": {
+      "description": "普通回归活动已完成报名。"
+    },
+    "NORMAL_ACTIVITY_DRAW_GE1": {
+      "description": "普通回归活动可用抽奖次数至少 1。"
+    },
+    "NORMAL_ACTIVITY_DRAW_GT5": {
+      "description": "普通回归活动可用抽奖次数大于 5。"
+    },
+    "WEIGHT_ACTIVITY_ONLINE": {
+      "description": "二次权重专项活动已上线。"
+    },
+    "WEIGHT_ACTIVITY_DRAW_GE3": {
+      "description": "二次权重专项活动可连续抽奖至少 6 次，用于验证累计 5 次后的第 6 次命中奖品。"
+    },
+    "LOW_STOCK_ACTIVITY_ONLINE": {
+      "description": "小库存专项活动已上线。"
+    },
+    "LOW_STOCK_ACTIVITY_DRAW_GT5": {
+      "description": "小库存专项活动可用抽奖次数大于 5。"
+    },
+    "REWARD_RECORD_DELAY_READY": {
+      "description": "抽奖完成后已等待 5 秒，再检查奖励记录。"
+    },
+    "ERROR_INJECTION_READY": {
+      "description": "已准备异常注入条件，例如超时、弱网、接口异常。"
+    },
+    "RESPONSIVE_VIEWPORT_READY": {
+      "description": "已切换到指定移动端或兼容性视口。"
+    }
+  },
+  "packs": [
+    {
+      "packId": "admin_activity_list_readonly",
+      "type": "bundle",
+      "lane": "admin",
+      "description": "活动列表只读搜索与行操作可见性检查。"
+    },
+    {
+      "packId": "admin_register_template_readonly",
+      "type": "bundle",
+      "lane": "admin",
+      "description": "报名模版只读搜索。"
+    },
+    {
+      "packId": "admin_register_template_write",
+      "type": "bundle",
+      "lane": "admin",
+      "description": "报名模版新增、查看、修改、删除。"
+    },
+    {
+      "packId": "admin_task_readonly",
+      "type": "bundle",
+      "lane": "admin",
+      "description": "任务管理只读搜索。"
+    },
+    {
+      "packId": "admin_task_write",
+      "type": "bundle",
+      "lane": "admin",
+      "description": "转盘任务新增与奖励模式覆盖。"
+    },
+    {
+      "packId": "admin_prize_readonly",
+      "type": "bundle",
+      "lane": "admin",
+      "description": "奖品管理只读搜索。"
+    },
+    {
+      "packId": "admin_prize_write",
+      "type": "bundle",
+      "lane": "admin",
+      "description": "奖品新增与行操作。"
+    },
+    {
+      "packId": "admin_activity_draft_core",
+      "type": "bundle",
+      "lane": "admin",
+      "description": "活动草稿最小链路、核心字段、任务绑定。"
+    },
+    {
+      "packId": "admin_activity_extended_config",
+      "type": "bundle",
+      "lane": "admin",
+      "description": "多语言、FAQ、颜色签、每日限制、累计次数再权重。"
+    },
+    {
+      "packId": "admin_activity_copy",
+      "type": "bundle",
+      "lane": "admin",
+      "description": "活动复制链路。"
+    },
+    {
+      "packId": "admin_activity_status_flow",
+      "type": "bundle",
+      "lane": "admin",
+      "description": "上线、下线、删除等状态流转。"
+    },
+    {
+      "packId": "frontend_page_basic",
+      "type": "bundle",
+      "lane": "frontend",
+      "description": "页面基础展示。"
+    },
+    {
+      "packId": "frontend_style_display",
+      "type": "bundle",
+      "lane": "frontend",
+      "description": "抽奖样式展示。"
+    },
+    {
+      "packId": "frontend_state_ui",
+      "type": "bundle",
+      "lane": "frontend",
+      "description": "登录态、活动态、次数态。"
+    },
+    {
+      "packId": "frontend_interaction_basic",
+      "type": "bundle",
+      "lane": "frontend",
+      "description": "按钮、交互态、弹窗开关。"
+    },
+    {
+      "packId": "frontend_single_draw",
+      "type": "bundle",
+      "lane": "frontend",
+      "description": "单抽主流程。"
+    },
+    {
+      "packId": "frontend_five_draw",
+      "type": "bundle",
+      "lane": "frontend",
+      "description": "普通活动下五连抽主流程。"
+    },
+    {
+      "packId": "frontend_reward_record",
+      "type": "bundle",
+      "lane": "frontend",
+      "description": "我的奖品与奖励记录。"
+    },
+    {
+      "packId": "frontend_exception_ui",
+      "type": "bundle",
+      "lane": "frontend",
+      "description": "异常提示与容错 UI。"
+    },
+    {
+      "packId": "frontend_weight_special",
+      "type": "bundle",
+      "lane": "frontend",
+      "description": "二次权重专项。"
+    },
+    {
+      "packId": "frontend_responsive_ui",
+      "type": "bundle",
+      "lane": "frontend",
+      "description": "响应式与兼容性检查。"
+    },
+    {
+      "packId": "frontend_backend_linkage",
+      "type": "bundle",
+      "lane": "frontend",
+      "description": "前后端联动展示与 MQ 任务联动。"
+    },
+    {
+      "packId": "frontend_signup_flow",
+      "type": "bundle",
+      "lane": "frontend",
+      "description": "活动报名链路。"
+    },
+    {
+      "packId": "frontend_low_stock",
+      "type": "bundle",
+      "lane": "frontend",
+      "description": "小库存专项。"
+    },
+    {
+      "packId": "lottery_admin_main_regression",
+      "type": "entrypoint",
+      "lane": "admin",
+      "description": "后管主回归入口。"
+    },
+    {
+      "packId": "lottery_frontend_main_regression",
+      "type": "entrypoint",
+      "lane": "frontend",
+      "description": "前端主回归入口。"
+    },
+    {
+      "packId": "lottery_five_draw_regression",
+      "type": "entrypoint",
+      "lane": "frontend",
+      "description": "五连抽专项入口。"
+    },
+    {
+      "packId": "lottery_low_stock_regression",
+      "type": "entrypoint",
+      "lane": "frontend",
+      "description": "小库存专项入口。"
+    },
+    {
+      "packId": "lottery_weight_regression",
+      "type": "entrypoint",
+      "lane": "frontend",
+      "description": "二次权重专项入口。"
+    }
+  ],
+  "entries": [
+    { "caseId": "AL-01", "caseName": "列表搜索-活动ID", "module": "活动列表", "priority": "P0", "packId": "admin_activity_list_readonly", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "AL-02", "caseName": "列表搜索-活动标题", "module": "活动列表", "priority": "P1", "packId": "admin_activity_list_readonly", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "AL-03", "caseName": "列表搜索-活动别名", "module": "活动列表", "priority": "P0", "packId": "admin_activity_list_readonly", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "AL-04", "caseName": "列表搜索-活动类型", "module": "活动列表", "priority": "P1", "packId": "admin_activity_list_readonly", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "AL-05", "caseName": "列表搜索-活动日期", "module": "活动列表", "priority": "P1", "packId": "admin_activity_list_readonly", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "AL-06", "caseName": "草稿活动行操作", "module": "活动列表", "priority": "P0", "packId": "admin_activity_status_flow", "scenarioKey": "NORMAL_ACTIVITY_DRAFT" },
+    { "caseId": "AL-07", "caseName": "已上线活动行操作", "module": "活动列表", "priority": "P0", "packId": "admin_activity_copy", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+
+    { "caseId": "RT-01", "caseName": "模版列表搜索-模版名称", "module": "报名模版", "priority": "P0", "packId": "admin_register_template_readonly", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "RT-02", "caseName": "模版列表搜索-模版ID", "module": "报名模版", "priority": "P0", "packId": "admin_register_template_readonly", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "RT-03", "caseName": "模版新增-最小主链路（全平台用户）", "module": "报名模版", "priority": "P0", "packId": "admin_register_template_write", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "RT-04", "caseName": "模版新增-全平台用户+用户手动点击报名", "module": "报名模版", "priority": "P1", "packId": "admin_register_template_write", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "RT-05", "caseName": "模版新增-平台用户参与范围分支", "module": "报名模版", "priority": "P1", "packId": "admin_register_template_write", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "RT-06", "caseName": "模版新增-可参与注册时间范围", "module": "报名模版", "priority": "P1", "packId": "admin_register_template_write", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "RT-07", "caseName": "模版行操作-查看", "module": "报名模版", "priority": "P0", "packId": "admin_register_template_write", "scenarioKey": "REGISTER_TEMPLATE_READY" },
+    { "caseId": "RT-08", "caseName": "模版行操作-修改", "module": "报名模版", "priority": "P0", "packId": "admin_register_template_write", "scenarioKey": "REGISTER_TEMPLATE_READY" },
+    { "caseId": "RT-09", "caseName": "模版行操作-删除", "module": "报名模版", "priority": "P0", "packId": "admin_register_template_write", "scenarioKey": "REGISTER_TEMPLATE_READY" },
+
+    { "caseId": "TM-01", "caseName": "任务列表搜索-任务编号", "module": "任务管理", "priority": "P0", "packId": "admin_task_readonly", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "TM-02", "caseName": "任务列表搜索-任务别名", "module": "任务管理", "priority": "P0", "packId": "admin_task_readonly", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "TM-03", "caseName": "任务列表搜索-任务标签", "module": "任务管理", "priority": "P0", "packId": "admin_task_readonly", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "TM-04", "caseName": "任务列表搜索-备注", "module": "任务管理", "priority": "P1", "packId": "admin_task_readonly", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "TM-05", "caseName": "任务列表搜索-开始时间", "module": "任务管理", "priority": "P1", "packId": "admin_task_readonly", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "TM-06", "caseName": "任务列表搜索-结束时间", "module": "任务管理", "priority": "P1", "packId": "admin_task_readonly", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "TM-07", "caseName": "新增任务-最小必填链路", "module": "任务管理", "priority": "P0", "packId": "admin_task_write", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "TM-08", "caseName": "任务条件分支覆盖", "module": "任务管理", "priority": "P0", "packId": "admin_task_write", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "TM-09", "caseName": "奖励模式-单一奖励", "module": "任务管理", "priority": "P0", "packId": "admin_task_write", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "TM-10", "caseName": "奖励模式-限时奖励不同", "module": "任务管理", "priority": "P1", "packId": "admin_task_write", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "TM-11", "caseName": "奖励模式-正常奖励+权益奖励", "module": "任务管理", "priority": "P1", "packId": "admin_task_write", "scenarioKey": "ADMIN_SESSION" },
+
+    { "caseId": "PM-01", "caseName": "奖品列表搜索-奖品ID", "module": "奖品管理", "priority": "P0", "packId": "admin_prize_readonly", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "PM-02", "caseName": "奖品列表搜索-奖品分类/子分类", "module": "奖品管理", "priority": "P0", "packId": "admin_prize_readonly", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "PM-03", "caseName": "奖品列表搜索-奖品名称/别名", "module": "奖品管理", "priority": "P1", "packId": "admin_prize_readonly", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "PM-04", "caseName": "新增奖品-赠金", "module": "奖品管理", "priority": "P0", "packId": "admin_prize_write", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "PM-05", "caseName": "新增奖品-币种BTC", "module": "奖品管理", "priority": "P0", "packId": "admin_prize_write", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "PM-06", "caseName": "新增奖品-实物", "module": "奖品管理", "priority": "P0", "packId": "admin_prize_write", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "PM-07", "caseName": "新增奖品-虚拟积分或资格", "module": "奖品管理", "priority": "P1", "packId": "admin_prize_write", "scenarioKey": "ADMIN_SESSION" },
+    { "caseId": "PM-08", "caseName": "奖品行操作-查看", "module": "奖品管理", "priority": "P0", "packId": "admin_prize_write", "scenarioKey": "PRIZE_SET_READY" },
+    { "caseId": "PM-09", "caseName": "奖品行操作-修改", "module": "奖品管理", "priority": "P0", "packId": "admin_prize_write", "scenarioKey": "PRIZE_SET_READY" },
+    { "caseId": "PM-10", "caseName": "奖品行操作-复制", "module": "奖品管理", "priority": "P0", "packId": "admin_prize_write", "scenarioKey": "PRIZE_SET_READY" },
+    { "caseId": "PM-11", "caseName": "奖品行操作-删除", "module": "奖品管理", "priority": "P0", "packId": "admin_prize_write", "scenarioKey": "PRIZE_SET_READY" },
+
+    { "caseId": "AC-01", "caseName": "新增活动-最小必填草稿", "module": "活动配置/活动信息", "priority": "P0", "packId": "admin_activity_draft_core", "scenarioKey": "PRIZE_SET_READY" },
+    { "caseId": "AC-02", "caseName": "长度限制-活动标题/副标题", "module": "活动配置/活动信息", "priority": "P0", "packId": "admin_activity_draft_core", "scenarioKey": "NORMAL_ACTIVITY_DRAFT" },
+    { "caseId": "AC-03", "caseName": "活动别名规则", "module": "活动配置/活动信息", "priority": "P0", "packId": "admin_activity_draft_core", "scenarioKey": "NORMAL_ACTIVITY_DRAFT" },
+    { "caseId": "AC-04", "caseName": "是否支持预报名-支持", "module": "活动配置/活动信息", "priority": "P0", "packId": "admin_activity_draft_core", "scenarioKey": "NORMAL_ACTIVITY_DRAFT" },
+    { "caseId": "AC-05", "caseName": "是否支持预报名-不支持", "module": "活动配置/活动信息", "priority": "P0", "packId": "admin_activity_draft_core", "scenarioKey": "NORMAL_ACTIVITY_DRAFT" },
+    { "caseId": "AC-06", "caseName": "是否显示活动日历入口", "module": "活动配置/活动信息", "priority": "P1", "packId": "admin_activity_extended_config", "scenarioKey": "NORMAL_ACTIVITY_DRAFT" },
+    { "caseId": "AC-07", "caseName": "奖品配置区", "module": "活动配置/活动信息", "priority": "P0", "packId": "admin_activity_draft_core", "scenarioKey": "NORMAL_ACTIVITY_DRAFT" },
+    { "caseId": "AC-08", "caseName": "活动任务信息绑定", "module": "活动配置/活动信息", "priority": "P0", "packId": "admin_activity_draft_core", "scenarioKey": "NORMAL_ACTIVITY_DRAFT" },
+    { "caseId": "AC-09", "caseName": "多语言配置-文本", "module": "活动配置/活动信息", "priority": "P1", "packId": "admin_activity_extended_config", "scenarioKey": "NORMAL_ACTIVITY_DRAFT" },
+    { "caseId": "AC-10", "caseName": "多语言配置-图片", "module": "活动配置/活动信息", "priority": "P1", "packId": "admin_activity_extended_config", "scenarioKey": "NORMAL_ACTIVITY_DRAFT" },
+    { "caseId": "AC-11", "caseName": "常见问题配置", "module": "活动配置/活动信息", "priority": "P1", "packId": "admin_activity_extended_config", "scenarioKey": "NORMAL_ACTIVITY_DRAFT" },
+    { "caseId": "AC-12", "caseName": "颜色签配置", "module": "活动配置/活动信息", "priority": "P1", "packId": "admin_activity_extended_config", "scenarioKey": "NORMAL_ACTIVITY_DRAFT" },
+    { "caseId": "AC-13", "caseName": "奖品每日限制配置", "module": "活动配置/活动信息", "priority": "P1", "packId": "admin_activity_extended_config", "scenarioKey": "NORMAL_ACTIVITY_DRAFT" },
+    { "caseId": "AC-14", "caseName": "累计次数再权重配置", "module": "活动配置/活动信息", "priority": "P1", "packId": "admin_activity_extended_config", "scenarioKey": "WEIGHT_ACTIVITY_ONLINE" },
+    { "caseId": "AC-15", "caseName": "活动复制", "module": "活动配置/活动信息", "priority": "P0", "packId": "admin_activity_copy", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+
+    { "caseId": "ST-01", "caseName": "草稿上线", "module": "上下线/状态流转", "priority": "P0", "packId": "admin_activity_status_flow", "scenarioKey": "NORMAL_ACTIVITY_DRAFT" },
+    { "caseId": "ST-02", "caseName": "已上线活动下线", "module": "上下线/状态流转", "priority": "P0", "packId": "admin_activity_status_flow", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "ST-03", "caseName": "草稿删除", "module": "上下线/状态流转", "priority": "P0", "packId": "admin_activity_status_flow", "scenarioKey": "NORMAL_ACTIVITY_DRAFT" },
+
+    { "caseId": "FE-01", "caseName": "落地页打开正常", "module": "页面基础UI", "priority": "P0", "packId": "frontend_page_basic", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-02", "caseName": "首屏主视觉展示正常", "module": "页面基础UI", "priority": "P0", "packId": "frontend_page_basic", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-03", "caseName": "活动标题展示正确", "module": "页面基础UI", "priority": "P0", "packId": "frontend_page_basic", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-04", "caseName": "活动副标题展示正确", "module": "页面基础UI", "priority": "P1", "packId": "frontend_page_basic", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-05", "caseName": "活动规则展示正确", "module": "页面基础UI", "priority": "P1", "packId": "frontend_page_basic", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-06", "caseName": "奖池区域展示正常", "module": "页面基础UI", "priority": "P1", "packId": "frontend_page_basic", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-07", "caseName": "我的奖品入口展示正常", "module": "页面基础UI", "priority": "P1", "packId": "frontend_page_basic", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-08", "caseName": "页面基础模块无错位", "module": "页面基础UI", "priority": "P1", "packId": "frontend_page_basic", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+
+    { "caseId": "FE-09", "caseName": "圆形转盘样式展示正常", "module": "抽奖样式UI", "priority": "P0", "packId": "frontend_style_display", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-10", "caseName": "飞镖转盘样式展示正常", "module": "抽奖样式UI", "priority": "P1", "packId": "frontend_style_display", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-11", "caseName": "彩蛋样式展示正常", "module": "抽奖样式UI", "priority": "P1", "packId": "frontend_style_display", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-12", "caseName": "跑马灯样式展示正常", "module": "抽奖样式UI", "priority": "P1", "packId": "frontend_style_display", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-13", "caseName": "足球射门样式展示正常", "module": "抽奖样式UI", "priority": "P1", "packId": "frontend_style_display", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-14", "caseName": "奖池图片与奖品名称展示正常", "module": "抽奖样式UI", "priority": "P1", "packId": "frontend_style_display", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-15", "caseName": "非转盘样式不展示五连抽按钮", "module": "抽奖样式UI", "priority": "P1", "packId": "frontend_style_display", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+
+    { "caseId": "FE-16", "caseName": "未登录态页面展示正常", "module": "页面状态UI", "priority": "P0", "packId": "frontend_state_ui", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-17", "caseName": "已登录态页面展示正常", "module": "页面状态UI", "priority": "P0", "packId": "frontend_state_ui", "scenarioKey": "FRONTEND_SESSION" },
+    { "caseId": "FE-18", "caseName": "活动未开始态展示正常", "module": "页面状态UI", "priority": "P0", "packId": "frontend_state_ui", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-19", "caseName": "活动进行中展示正常", "module": "页面状态UI", "priority": "P0", "packId": "frontend_state_ui", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-20", "caseName": "活动已结束态展示正常", "module": "页面状态UI", "priority": "P0", "packId": "frontend_state_ui", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-21", "caseName": "抽奖次数为0展示正常", "module": "页面状态UI", "priority": "P0", "packId": "frontend_state_ui", "scenarioKey": "NORMAL_ACTIVITY_SIGNED_UP", "executionClass": "CHAIN_CONTINUE", "activityPolicy": "REUSE_PREVIOUS_ACTIVITY", "accountPolicy": "REUSE_PREVIOUS_ACCOUNT", "requiredState": "承接FE-82，已报名且次数为0", "nextState": "仍为已报名且次数为0", "dependsOnCaseIds": ["FE-82"] },
+    { "caseId": "FE-22", "caseName": "抽奖次数大于0展示正常", "module": "页面状态UI", "priority": "P0", "packId": "frontend_state_ui", "scenarioKey": "NORMAL_ACTIVITY_DRAW_GE1", "executionClass": "CHAIN_CONTINUE", "activityPolicy": "REUSE_PREVIOUS_ACTIVITY", "accountPolicy": "REUSE_PREVIOUS_ACCOUNT", "requiredState": "承接FE-84，已报名且次数>0", "nextState": "页面展示可用抽奖次数>0", "dependsOnCaseIds": ["FE-84"] },
+    { "caseId": "FE-23", "caseName": "库存不足时五连抽返回固定提示且不扣次数", "module": "页面状态UI", "priority": "P1", "packId": "frontend_low_stock", "scenarioKey": "LOW_STOCK_ACTIVITY_DRAW_GT5", "dependsOnCaseIds": ["FE-84"] },
+
+    { "caseId": "FE-24", "caseName": "单抽按钮可点击", "module": "按钮与交互态", "priority": "P0", "packId": "frontend_interaction_basic", "scenarioKey": "NORMAL_ACTIVITY_DRAW_GE1", "executionClass": "CHAIN_CONTINUE", "activityPolicy": "REUSE_PREVIOUS_ACTIVITY", "accountPolicy": "REUSE_PREVIOUS_ACCOUNT", "requiredState": "承接FE-84，可抽奖", "nextState": "单抽按钮可操作", "dependsOnCaseIds": ["FE-84"] },
+    { "caseId": "FE-25", "caseName": "可用次数大于5时展示并可点击五连抽按钮", "module": "按钮与交互态", "priority": "P0", "packId": "frontend_interaction_basic", "scenarioKey": "NORMAL_ACTIVITY_DRAW_GT5", "dependsOnCaseIds": ["FE-84"] },
+    { "caseId": "FE-26", "caseName": "抽奖旋转期间再次点击仍只生效一次", "module": "按钮与交互态", "priority": "P1", "packId": "frontend_interaction_basic", "scenarioKey": "NORMAL_ACTIVITY_DRAW_GE1", "executionClass": "CHAIN_CONTINUE", "activityPolicy": "REUSE_PREVIOUS_ACTIVITY", "accountPolicy": "REUSE_PREVIOUS_ACCOUNT", "requiredState": "承接FE-84，可抽奖", "nextState": "单抽事务中重复点击仍只生效一次", "dependsOnCaseIds": ["FE-84"] },
+    { "caseId": "FE-27", "caseName": "抽奖结束后按钮恢复正常", "module": "按钮与交互态", "priority": "P1", "packId": "frontend_interaction_basic", "scenarioKey": "NORMAL_ACTIVITY_DRAW_GE1" },
+    { "caseId": "FE-28", "caseName": "单抽按钮防重复点击", "module": "按钮与交互态", "priority": "P1", "packId": "frontend_interaction_basic", "scenarioKey": "NORMAL_ACTIVITY_DRAW_GE1", "executionClass": "CHAIN_CONTINUE", "activityPolicy": "REUSE_PREVIOUS_ACTIVITY", "accountPolicy": "REUSE_PREVIOUS_ACCOUNT", "requiredState": "承接FE-84，可抽奖", "nextState": "单抽事务防重态正确", "dependsOnCaseIds": ["FE-84"] },
+    { "caseId": "FE-29", "caseName": "五连抽按钮防重复点击", "module": "按钮与交互态", "priority": "P1", "packId": "frontend_five_draw", "scenarioKey": "NORMAL_ACTIVITY_DRAW_GT5", "dependsOnCaseIds": ["FE-40"] },
+    { "caseId": "FE-30", "caseName": "我的奖品入口可点击", "module": "按钮与交互态", "priority": "P1", "packId": "frontend_interaction_basic", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-31", "caseName": "弹窗关闭交互正常", "module": "按钮与交互态", "priority": "P1", "packId": "frontend_interaction_basic", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+
+    { "caseId": "FE-32", "caseName": "单抽接口正常请求", "module": "单抽主流程", "priority": "P0", "packId": "frontend_single_draw", "scenarioKey": "NORMAL_ACTIVITY_DRAW_GE1", "executionClass": "CHAIN_CONTINUE", "activityPolicy": "REUSE_PREVIOUS_ACTIVITY", "accountPolicy": "REUSE_PREVIOUS_ACCOUNT", "requiredState": "承接FE-84，可抽奖", "nextState": "完成一次单抽事务", "dependsOnCaseIds": ["FE-84"] },
+    { "caseId": "FE-33", "caseName": "单抽成功展示奖品弹窗", "module": "单抽主流程", "priority": "P0", "packId": "frontend_single_draw", "scenarioKey": "NORMAL_ACTIVITY_DRAW_GE1", "executionClass": "CHAIN_CONTINUE", "activityPolicy": "REUSE_PREVIOUS_ACTIVITY", "accountPolicy": "REUSE_PREVIOUS_ACCOUNT", "requiredState": "承接FE-32", "nextState": "奖品弹窗展示", "dependsOnCaseIds": ["FE-32"] },
+    { "caseId": "FE-34", "caseName": "单抽成功后可用次数消耗", "module": "单抽主流程", "priority": "P0", "packId": "frontend_single_draw", "scenarioKey": "NORMAL_ACTIVITY_DRAW_GE1", "executionClass": "CHAIN_CONTINUE", "activityPolicy": "REUSE_PREVIOUS_ACTIVITY", "accountPolicy": "REUSE_PREVIOUS_ACCOUNT", "requiredState": "承接FE-32", "nextState": "次数减少1", "dependsOnCaseIds": ["FE-32"] },
+    { "caseId": "FE-35", "caseName": "单抽成功后优先按次数扣减确认成功", "module": "单抽主流程", "priority": "P0", "packId": "frontend_single_draw", "scenarioKey": "NORMAL_ACTIVITY_DRAW_GE1", "executionClass": "CHAIN_CONTINUE", "activityPolicy": "REUSE_PREVIOUS_ACTIVITY", "accountPolicy": "REUSE_PREVIOUS_ACCOUNT", "requiredState": "承接FE-32", "nextState": "次数优先扣减确认成功", "dependsOnCaseIds": ["FE-32"] },
+    { "caseId": "FE-36", "caseName": "单抽成功后奖励记录可回查", "module": "单抽主流程", "priority": "P1", "packId": "frontend_reward_record", "scenarioKey": "REWARD_RECORD_DELAY_READY", "executionClass": "CHAIN_CONTINUE", "activityPolicy": "REUSE_PREVIOUS_ACTIVITY", "accountPolicy": "REUSE_PREVIOUS_ACCOUNT", "requiredState": "承接FE-32，单抽已成功", "nextState": "奖励记录中可回查到抽奖结果", "dependsOnCaseIds": ["FE-32"] },
+    { "caseId": "FE-37", "caseName": "单抽成功后奖品信息符合预期", "module": "单抽主流程", "priority": "P1", "packId": "frontend_reward_record", "scenarioKey": "REWARD_RECORD_DELAY_READY", "executionClass": "CHAIN_CONTINUE", "activityPolicy": "REUSE_PREVIOUS_ACTIVITY", "accountPolicy": "REUSE_PREVIOUS_ACCOUNT", "requiredState": "承接FE-32，单抽已成功", "nextState": "奖励记录存在可读中奖信息", "dependsOnCaseIds": ["FE-32"] },
+    { "caseId": "FE-38", "caseName": "单抽失败不展示错误奖品内容", "module": "单抽主流程", "priority": "P1", "packId": "frontend_single_draw", "scenarioKey": "ERROR_INJECTION_READY", "dependsOnCaseIds": ["FE-84"] },
+    { "caseId": "FE-39", "caseName": "单抽失败不消耗次数", "module": "单抽主流程", "priority": "P1", "packId": "frontend_single_draw", "scenarioKey": "ERROR_INJECTION_READY", "dependsOnCaseIds": ["FE-84"] },
+
+    { "caseId": "FE-40", "caseName": "五连抽接口正常请求", "module": "五连抽主流程", "priority": "P0", "packId": "frontend_five_draw", "scenarioKey": "NORMAL_ACTIVITY_DRAW_GT5", "dependsOnCaseIds": ["FE-84"] },
+    { "caseId": "FE-41", "caseName": "五连抽成功展示奖品弹窗", "module": "五连抽主流程", "priority": "P0", "packId": "frontend_five_draw", "scenarioKey": "NORMAL_ACTIVITY_DRAW_GT5", "dependsOnCaseIds": ["FE-40"] },
+    { "caseId": "FE-42", "caseName": "五连抽成功后抽奖次数消耗5次", "module": "五连抽主流程", "priority": "P0", "packId": "frontend_five_draw", "scenarioKey": "NORMAL_ACTIVITY_DRAW_GT5", "dependsOnCaseIds": ["FE-40"] },
+    { "caseId": "FE-43", "caseName": "五连抽成功后奖励记录可回查", "module": "五连抽主流程", "priority": "P0", "packId": "frontend_five_draw", "scenarioKey": "REWARD_RECORD_DELAY_READY", "dependsOnCaseIds": ["FE-40"] },
+    { "caseId": "FE-44", "caseName": "五连抽奖励记录字段正确", "module": "五连抽主流程", "priority": "P0", "packId": "frontend_five_draw", "scenarioKey": "REWARD_RECORD_DELAY_READY", "dependsOnCaseIds": ["FE-40"] },
+    { "caseId": "FE-45", "caseName": "小库存模板下五连抽可能被库存规则拦截", "module": "五连抽主流程", "priority": "P1", "packId": "frontend_low_stock", "scenarioKey": "LOW_STOCK_ACTIVITY_DRAW_GT5", "dependsOnCaseIds": ["FE-84"] },
+    { "caseId": "FE-46", "caseName": "五连抽失败不消耗次数", "module": "五连抽主流程", "priority": "P1", "packId": "frontend_low_stock", "scenarioKey": "LOW_STOCK_ACTIVITY_DRAW_GT5", "dependsOnCaseIds": ["FE-84"] },
+    { "caseId": "FE-47", "caseName": "五连抽结果展示完整", "module": "五连抽主流程", "priority": "P1", "packId": "frontend_five_draw", "scenarioKey": "NORMAL_ACTIVITY_DRAW_GT5", "dependsOnCaseIds": ["FE-40"] },
+
+    { "caseId": "FE-48", "caseName": "我的奖品入口打开奖励记录弹窗", "module": "我的奖品/奖励记录", "priority": "P0", "packId": "frontend_reward_record", "scenarioKey": "NORMAL_ACTIVITY_ONLINE", "executionClass": "REUSABLE_READONLY", "activityPolicy": "REUSE_EXISTING_OR_PREVIOUS_ACTIVITY", "accountPolicy": "REUSE_CURRENT_ACCOUNT", "requiredState": "活动页可打开", "nextState": "奖励记录弹窗被打开" },
+    { "caseId": "FE-49", "caseName": "奖励记录弹窗基础UI正常", "module": "我的奖品/奖励记录", "priority": "P0", "packId": "frontend_reward_record", "scenarioKey": "NORMAL_ACTIVITY_ONLINE", "executionClass": "CHAIN_CONTINUE", "activityPolicy": "REUSE_PREVIOUS_ACTIVITY", "accountPolicy": "REUSE_PREVIOUS_ACCOUNT", "requiredState": "承接FE-48", "nextState": "奖励记录弹窗UI正常", "dependsOnCaseIds": ["FE-48"] },
+    { "caseId": "FE-50", "caseName": "奖励记录字段展示正确", "module": "我的奖品/奖励记录", "priority": "P0", "packId": "frontend_reward_record", "scenarioKey": "REWARD_RECORD_DELAY_READY", "executionClass": "CHAIN_CONTINUE", "activityPolicy": "REUSE_PREVIOUS_ACTIVITY", "accountPolicy": "REUSE_PREVIOUS_ACCOUNT", "requiredState": "承接FE-48", "nextState": "奖励记录字段完整展示", "dependsOnCaseIds": ["FE-48"] },
+    { "caseId": "FE-51", "caseName": "奖励记录空数据态展示正常", "module": "我的奖品/奖励记录", "priority": "P1", "packId": "frontend_reward_record", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-52", "caseName": "奖励记录有数据态展示正常", "module": "我的奖品/奖励记录", "priority": "P1", "packId": "frontend_reward_record", "scenarioKey": "REWARD_RECORD_DELAY_READY" },
+    { "caseId": "FE-53", "caseName": "奖励记录时间筛选可操作", "module": "我的奖品/奖励记录", "priority": "P1", "packId": "frontend_reward_record", "scenarioKey": "REWARD_RECORD_DELAY_READY" },
+    { "caseId": "FE-54", "caseName": "奖励记录滚动展示正常", "module": "我的奖品/奖励记录", "priority": "P1", "packId": "frontend_reward_record", "scenarioKey": "REWARD_RECORD_DELAY_READY" },
+    { "caseId": "FE-55", "caseName": "弹窗关闭后页面状态正常", "module": "我的奖品/奖励记录", "priority": "P1", "packId": "frontend_reward_record", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-56", "caseName": "奖品弹窗与奖励记录结果一致", "module": "我的奖品/奖励记录", "priority": "P1", "packId": "frontend_reward_record", "scenarioKey": "REWARD_RECORD_DELAY_READY", "dependsOnCaseIds": ["FE-32"] },
+
+    { "caseId": "FE-57", "caseName": "小库存模板下五连抽库存不足提示正确", "module": "异常提示与容错UI", "priority": "P0", "packId": "frontend_low_stock", "scenarioKey": "LOW_STOCK_ACTIVITY_DRAW_GT5", "dependsOnCaseIds": ["FE-84"] },
+    { "caseId": "FE-58", "caseName": "抽奖失败提示展示正常", "module": "异常提示与容错UI", "priority": "P1", "packId": "frontend_exception_ui", "scenarioKey": "ERROR_INJECTION_READY", "dependsOnCaseIds": ["FE-84"] },
+    { "caseId": "FE-59", "caseName": "接口超时提示展示正常", "module": "异常提示与容错UI", "priority": "P1", "packId": "frontend_exception_ui", "scenarioKey": "ERROR_INJECTION_READY", "dependsOnCaseIds": ["FE-84"] },
+    { "caseId": "FE-60", "caseName": "网络异常提示展示正常", "module": "异常提示与容错UI", "priority": "P1", "packId": "frontend_exception_ui", "scenarioKey": "ERROR_INJECTION_READY", "dependsOnCaseIds": ["FE-84"] },
+    { "caseId": "FE-61", "caseName": "异常后按钮恢复正常", "module": "异常提示与容错UI", "priority": "P1", "packId": "frontend_exception_ui", "scenarioKey": "ERROR_INJECTION_READY", "dependsOnCaseIds": ["FE-84"] },
+    { "caseId": "FE-62", "caseName": "异常后不出现重复弹窗", "module": "异常提示与容错UI", "priority": "P1", "packId": "frontend_exception_ui", "scenarioKey": "ERROR_INJECTION_READY", "dependsOnCaseIds": ["FE-84"] },
+    { "caseId": "FE-63", "caseName": "异常后页面不崩溃", "module": "异常提示与容错UI", "priority": "P1", "packId": "frontend_exception_ui", "scenarioKey": "ERROR_INJECTION_READY", "dependsOnCaseIds": ["FE-84"] },
+
+    { "caseId": "FE-64", "caseName": "二次权重专项校验-N+1生效", "module": "二次权重与专项校验", "priority": "P0", "packId": "frontend_weight_special", "scenarioKey": "WEIGHT_ACTIVITY_DRAW_GE3" },
+    { "caseId": "FE-65", "caseName": "未配置二次权重场景不做专项校验", "module": "二次权重与专项校验", "priority": "P1", "packId": "frontend_weight_special", "scenarioKey": "NORMAL_ACTIVITY_DRAW_GE1" },
+    { "caseId": "FE-66", "caseName": "需要验证二次权重时使用专项活动", "module": "二次权重与专项校验", "priority": "P1", "packId": "frontend_weight_special", "scenarioKey": "WEIGHT_ACTIVITY_ONLINE" },
+    { "caseId": "FE-67", "caseName": "二次权重命中后奖励记录正确", "module": "二次权重与专项校验", "priority": "P1", "packId": "frontend_weight_special", "scenarioKey": "WEIGHT_ACTIVITY_DRAW_GE3" },
+
+    { "caseId": "FE-68", "caseName": "H5页面展示正常", "module": "响应式与兼容性UI", "priority": "P1", "packId": "frontend_responsive_ui", "scenarioKey": "RESPONSIVE_VIEWPORT_READY" },
+    { "caseId": "FE-69", "caseName": "常见移动端宽度下布局正常", "module": "响应式与兼容性UI", "priority": "P1", "packId": "frontend_responsive_ui", "scenarioKey": "RESPONSIVE_VIEWPORT_READY" },
+    { "caseId": "FE-70", "caseName": "不同屏高下主按钮不被遮挡", "module": "响应式与兼容性UI", "priority": "P1", "packId": "frontend_responsive_ui", "scenarioKey": "RESPONSIVE_VIEWPORT_READY" },
+    { "caseId": "FE-71", "caseName": "弹窗在移动端不超出屏幕", "module": "响应式与兼容性UI", "priority": "P1", "packId": "frontend_responsive_ui", "scenarioKey": "RESPONSIVE_VIEWPORT_READY" },
+    { "caseId": "FE-72", "caseName": "长文案或长奖品名不破版", "module": "响应式与兼容性UI", "priority": "P1", "packId": "frontend_responsive_ui", "scenarioKey": "RESPONSIVE_VIEWPORT_READY" },
+
+    { "caseId": "FE-73", "caseName": "后管活动标题改动后前端展示正确", "module": "前后端联动展示", "priority": "P0", "packId": "frontend_backend_linkage", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-75", "caseName": "后管多语言配置后前端切语言展示正确", "module": "前后端联动展示", "priority": "P1", "packId": "frontend_backend_linkage", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-76", "caseName": "后管FAQ配置后前端展示正确", "module": "前后端联动展示", "priority": "P1", "packId": "frontend_backend_linkage", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-77", "caseName": "后管奖池配置后前端奖品展示正确", "module": "前后端联动展示", "priority": "P1", "packId": "frontend_backend_linkage", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-78", "caseName": "后管活动日历入口开启后前端显示正确", "module": "前后端联动展示", "priority": "P1", "packId": "frontend_backend_linkage", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-84", "caseName": "充值任务-报名后发送MQ回调", "module": "前后端联动展示", "priority": "P0", "packId": "frontend_backend_linkage", "scenarioKey": "NORMAL_ACTIVITY_SIGNED_UP", "executionClass": "CHAIN_CONTINUE", "activityPolicy": "REUSE_PREVIOUS_ACTIVITY", "accountPolicy": "REUSE_PREVIOUS_ACCOUNT", "requiredState": "已报名、次数为0、充值任务未完成", "nextState": "发MQ后次数>0或任务完成态更新", "dependsOnCaseIds": ["FE-82"] },
+    { "caseId": "FE-85", "caseName": "小库存单抽首次成功后再次提示库存不足", "module": "小库存专项", "priority": "P0", "packId": "frontend_low_stock", "scenarioKey": "LOW_STOCK_ACTIVITY_DRAW_GT5", "dependsOnCaseIds": ["FE-84"] },
+
+    { "caseId": "FE-79", "caseName": "活动别名URL打开正确活动页", "module": "报名链路", "priority": "P0", "packId": "frontend_signup_flow", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-80", "caseName": "活动未开始时显示即将开始", "module": "报名链路", "priority": "P0", "packId": "frontend_signup_flow", "scenarioKey": "NORMAL_ACTIVITY_ONLINE" },
+    { "caseId": "FE-81", "caseName": "活动开始后未报名显示立即报名", "module": "报名链路", "priority": "P0", "packId": "frontend_signup_flow", "scenarioKey": "NORMAL_ACTIVITY_ONLINE", "executionClass": "FRESH_ROOT", "activityPolicy": "CREATE_NEW_NORMAL_ACTIVITY_STARTED", "accountPolicy": "UNREGISTERED_ACCOUNT", "requiredState": "活动进行中、账号未报名", "nextState": "仍为未报名可见立即报名" },
+    { "caseId": "FE-82", "caseName": "点击立即报名后切换为抽奖状态", "module": "报名链路", "priority": "P0", "packId": "frontend_signup_flow", "scenarioKey": "NORMAL_ACTIVITY_ONLINE", "executionClass": "CHAIN_CONTINUE", "activityPolicy": "REUSE_PREVIOUS_ACTIVITY", "accountPolicy": "REUSE_PREVIOUS_ACCOUNT", "requiredState": "承接FE-81", "nextState": "账号变为已报名，按钮切到抽奖", "dependsOnCaseIds": ["FE-81"] },
+    { "caseId": "FE-83", "caseName": "已报名账号再次进入活动页直显抽奖", "module": "报名链路", "priority": "P0", "packId": "frontend_signup_flow", "scenarioKey": "NORMAL_ACTIVITY_SIGNED_UP", "executionClass": "CHAIN_CONTINUE", "activityPolicy": "REUSE_PREVIOUS_ACTIVITY", "accountPolicy": "REUSE_PREVIOUS_ACCOUNT", "requiredState": "承接FE-82，账号已报名", "nextState": "再次进入直显抽奖按钮", "dependsOnCaseIds": ["FE-82"] }
+  ]
+}

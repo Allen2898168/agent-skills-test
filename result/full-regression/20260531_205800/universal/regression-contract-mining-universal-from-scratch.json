@@ -1,0 +1,62 @@
+{
+  "ok": true,
+  "caseId": "CONTRACT_MINING_universal_from_scratch",
+  "created": {
+    "registerTemplateId": "3487",
+    "prizeId": "1306",
+    "taskId": "6440",
+    "activityId": "9879",
+    "activityAlias": "cmr55445039",
+    "activityTitle": "合约挖矿通用回归192405"
+  },
+  "links": [
+    {
+      "label": "后台合约挖矿列表",
+      "url": "https://stg-activity.weex.tech/activities/contractMining/index"
+    }
+  ],
+  "durationMs": 15218,
+  "cleanup": {
+    "unbind": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteActivity": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteTask": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deletePrize": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteRegisterTemplate": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    }
+  },
+  "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260531_212411/CONTRACT_MINING_universal_from_scratch.md"
+}

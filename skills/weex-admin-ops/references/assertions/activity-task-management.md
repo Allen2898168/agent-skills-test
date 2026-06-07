@@ -29,6 +29,10 @@ Optional screenshots:
 
 ## Create Assertions
 
+- Add dialog common branch:
+  - Selecting `活动类型 = 转盘抽奖` exposes `任务组合`, `任务条件1`, `任务参与范围`, `任务风控`, `判定开始时间`, `任务次数更新`, `任务奖励模式`, `每日领奖人数上限`, and `总领奖人数上限`.
+  - `任务备注` must be filled before submit.
+  - `任务名称`、`任务内容` and `任务标签` multilingual values must be verified per form item when the flow requires English.
 - Create roulette task: submitting the add dialog should return HTTP 200 from `POST /prod-api/activity/task`.
 - Treat creation as successful only if the page shows `新增任务成功` and searching by the unique task alias returns a row.
 - Single reward roulette task: returned row contains the generated task alias and was validated with created ID `4737`.
@@ -39,3 +43,4 @@ Optional screenshots:
 - When validating created single-reward condition tasks, search or inspect by task name. The generated `任务标签` is not the same as the list search field `任务别名`.
 - `首次登录APP` single-reward branch should not use the default lottery-count reward; the backend returned `任务奖品只能选择合约抵扣金` when `抽奖次数` was used.
 - `新老现货划转任务` can be blocked by a backend uniqueness rule. If `POST /prod-api/activity/task` returns `code=500` with `新老划转任务重复，已配置新老划转任务的编号是:<id>`, treat the form flow as reaching backend validation, not as a UI fill failure.
+- If submit returns HTTP 200 but the page shows `保存任务失败` or `system busy, please retry later`, treat the create as failed and do not record the branch as validated.

@@ -1,0 +1,15 @@
+{
+  "ok": false,
+  "mode": "headless_api",
+  "error": "resource cards create failed: Created resource card not found in list: 资源卡_从零_20260607182403_2",
+  "created": {
+    "registerTemplateId": "3640",
+    "prizeId": "1530",
+    "taskId": "7123",
+    "resourceCardIds": [],
+    "activityId": "",
+    "activityAlias": "",
+    "activityTitle": ""
+  },
+  "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_202407/AGENT_TRACE_PRO_universal_from_scratch_failed.md"
+}

@@ -1,0 +1,26 @@
+version: 1
+id: FE-22
+name: 抽奖次数大于0展示正常
+deps: [FE-84]
+
+includes:
+  - ../flows/activity-online.yml
+
+steps:
+  - id: fe22_draw_count_visible
+    run: node
+    whenSet: [activityAlias]
+    args:
+      - skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs
+      - --phase
+      - readonly
+      - --activity-alias
+      - "{{activityAlias}}"
+      - --save-screenshot
+      - --screenshot-path
+      - "{{screenshotDir}}/FE-22_draw_count.png"
+    assert:
+      - path: ok
+        equals: true
+      - path: page.drawCount
+        gte: 1

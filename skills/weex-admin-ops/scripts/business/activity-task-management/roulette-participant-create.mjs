@@ -1,6 +1,7 @@
 import { bodyText, sleep } from "../../lib/browser.mjs";
-import { clickVisibleDialogText as clickDialogText, dialog, fillLabel, selectFirstByLabel, selectPlaceholder, visibleFormErrors } from "../../lib/element-ui.mjs";
+import { clickVisibleDialogText as clickDialogText, dialog, fillLabel, selectFirstByLabel, selectFirstOpenOption, selectOptionByLabel, selectPlaceholder, visibleFormErrors } from "../../lib/element-ui.mjs";
 import { fillEnglishIfVisible, fillRewardRange, firstNumericCell, searchTaskByName, selectCountry } from "./roulette-participant-ui.mjs";
+import { rowToTask } from "./search.mjs";
 
 export async function createRouletteParticipantTasks(page, config, plan) {
   const created = [];
@@ -20,7 +21,22 @@ async function createOneTask(page, config, task) {
   await fillDefaultTaskConfig(page, task);
   const submit = await submitTask(page, task.name);
   const row = await searchTaskByName(page, config, task.name);
-  return { id: firstNumericCell(row), name: task.name, scope: task.scopeLabel, selected, submit, row };
+  const parsedRow = rowToTask(row);
+  return {
+    id: firstNumericCell(row),
+    name: task.name,
+    tag: task.tag,
+    remark: task.remark,
+    scope: task.scopeLabel,
+    taskCondition: task.taskCondition,
+    rewardMode: task.rewardMode,
+    rewardMin: task.rewardMin,
+    rewardMax: task.rewardMax,
+    selected,
+    submit,
+    updatedAt: parsedRow.updatedAt || "",
+    row,
+  };
 }
 
 async function fillBaseText(page, task) {
@@ -49,13 +65,12 @@ async function fillScopeExtra(page, task) {
 
 async function fillDefaultTaskConfig(page, task) {
   await clickDialogText(page, "不审核KYC");
-  if (!(await optionalClickDialogText(page, "单一任务条件"))) await selectFirstByLabel(page, "任务组合");
-  await selectFirstByLabel(page, "任务条件1");
-  await clickDialogText(page, "无kyc限制");
+  await ensureTaskCombo(page);
+  await selectOptionByLabel(page, "任务条件1", task.taskCondition);
   await clickDialogText(page, "报名活动后");
   await clickDialogText(page, "仅1次，直至结束");
-  await clickDialogText(page, "单一奖励");
-  await selectFirstByLabel(page, "正常奖励");
+  await clickDialogText(page, task.rewardMode);
+  await selectFirstByLabel(page, task.rewardType);
   await fillRewardRange(page, task.rewardMin, task.rewardMax);
   await fillLabel(page, "每日领奖人数上限", task.dailyLimit);
   await fillLabel(page, "总领奖人数上限", task.totalLimit);
@@ -68,6 +83,34 @@ async function optionalClickDialogText(page, text) {
   } catch {
     return false;
   }
+}
+
+async function ensureTaskCombo(page) {
+  if (await optionalClickDialogText(page, "单一任务条件")) return;
+  const selectedByLabel = await selectFirstByLabel(page, "任务组合", false, true).catch(() => null);
+  if (selectedByLabel) return;
+  const selectedByPlaceholder = await selectTaskComboByPlaceholder(page);
+  if (selectedByPlaceholder) return;
+}
+
+async function selectTaskComboByPlaceholder(page) {
+  const opened = await page.evaluate(() => {
+    const visible = element => {
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return rect.width > 0 && rect.height > 0 && style.visibility !== "hidden" && style.display !== "none";
+    };
+    const input = [...document.querySelectorAll('input[placeholder*="请选择任务"]')]
+      .filter(visible)
+      .at(-1);
+    if (!input) return false;
+    const select = input.closest(".el-select") || input;
+    select.click();
+    return true;
+  }).catch(() => false);
+  if (!opened) return null;
+  await sleep(500);
+  return selectFirstOpenOption(page, false, true);
 }
 
 async function submitTask(page, name) {

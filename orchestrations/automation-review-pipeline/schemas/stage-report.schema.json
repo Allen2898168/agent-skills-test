@@ -1,0 +1,228 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "stage-report.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "runId",
+    "stageId",
+    "stageName",
+    "agentRole",
+    "status",
+    "decision",
+    "summary",
+    "inputs",
+    "findings",
+    "evidence",
+    "risks",
+    "nextAction",
+    "relatedCommands",
+    "relatedFiles",
+    "timestamp"
+  ],
+  "properties": {
+    "runId": { "type": "string", "minLength": 1 },
+    "stageId": {
+      "type": "string",
+      "enum": [
+        "linkage_analysis",
+        "coverage_review",
+        "rework_advice",
+        "script_integration",
+        "validation_review",
+        "execution_run"
+      ]
+    },
+    "stageName": { "type": "string", "minLength": 1 },
+    "agentRole": { "type": "string", "minLength": 1 },
+    "status": { "type": "string", "enum": ["PASS", "FAIL", "SKIPPED", "BLOCKED"] },
+    "decision": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string", "minLength": 1 },
+    "inputs": { "$ref": "#/$defs/stringList" },
+    "findings": { "$ref": "#/$defs/stringList" },
+    "evidence": { "$ref": "#/$defs/stringList" },
+    "risks": { "$ref": "#/$defs/stringList" },
+    "nextAction": { "type": "string", "minLength": 1 },
+    "relatedCommands": { "$ref": "#/$defs/stringList" },
+    "relatedFiles": { "$ref": "#/$defs/stringList" },
+    "timestamp": { "type": "string", "minLength": 1 },
+    "existingCoverage": {
+      "type": "string",
+      "enum": ["NONE", "PARTIAL", "FULL"]
+    },
+    "suggestedFlow": { "$ref": "#/$defs/stringList" },
+    "dependentSkills": { "$ref": "#/$defs/stringList" },
+    "entrypoints": { "$ref": "#/$defs/stringList" },
+    "coverageDecision": {
+      "type": "string",
+      "enum": ["APPROVE", "REJECT"]
+    },
+    "rejectReasonType": {
+      "type": "string",
+      "enum": [
+        "NO_VALUE",
+        "TOO_RISKY",
+        "ALREADY_COVERED",
+        "INSUFFICIENT_INFO",
+        "NOT_AUTOMATABLE"
+      ]
+    },
+    "reworkTargetStage": {
+      "type": "string",
+      "enum": [
+        "linkage_analysis",
+        "coverage_review",
+        "script_integration",
+        "validation_review"
+      ]
+    },
+    "reworkItems": { "$ref": "#/$defs/stringList" },
+    "acceptanceCriteria": { "$ref": "#/$defs/stringList" },
+    "integrationDecision": {
+      "type": "string",
+      "enum": ["READY", "NOT_READY"]
+    },
+    "scriptPlan": { "$ref": "#/$defs/stringList" },
+    "artifactPlan": { "$ref": "#/$defs/stringList" },
+    "validationDecision": {
+      "type": "string",
+      "enum": ["APPROVE", "REJECT"]
+    },
+    "gaps": { "$ref": "#/$defs/stringList" },
+    "requiredFixes": { "$ref": "#/$defs/stringList" },
+    "executionDecision": {
+      "type": "string",
+      "enum": ["PASS", "FAIL"]
+    },
+    "executedCommands": { "$ref": "#/$defs/stringList" },
+    "outputArtifacts": { "$ref": "#/$defs/stringList" },
+    "verificationEvidence": { "$ref": "#/$defs/stringList" }
+  },
+  "$defs": {
+    "stringList": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "xStageSpecific": {
+    "linkage_analysis": {
+      "type": "object",
+      "required": [
+        "existingCoverage",
+        "suggestedFlow",
+        "dependentSkills",
+        "entrypoints"
+      ],
+      "properties": {
+        "existingCoverage": {
+          "type": "string",
+          "enum": ["NONE", "PARTIAL", "FULL"]
+        },
+        "suggestedFlow": { "$ref": "#/$defs/stringList" },
+        "dependentSkills": { "$ref": "#/$defs/stringList" },
+        "entrypoints": { "$ref": "#/$defs/stringList" }
+      },
+      "additionalProperties": false
+    },
+    "coverage_review": {
+      "type": "object",
+      "required": [
+        "coverageDecision"
+      ],
+      "properties": {
+        "coverageDecision": {
+          "type": "string",
+          "enum": ["APPROVE", "REJECT"]
+        },
+        "rejectReasonType": {
+          "type": "string",
+          "enum": [
+            "NO_VALUE",
+            "TOO_RISKY",
+            "ALREADY_COVERED",
+            "INSUFFICIENT_INFO",
+            "NOT_AUTOMATABLE"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "rework_advice": {
+      "type": "object",
+      "required": [
+        "reworkTargetStage",
+        "reworkItems",
+        "acceptanceCriteria"
+      ],
+      "properties": {
+        "reworkTargetStage": {
+          "type": "string",
+          "enum": [
+            "linkage_analysis",
+            "coverage_review",
+            "script_integration",
+            "validation_review"
+          ]
+        },
+        "reworkItems": { "$ref": "#/$defs/stringList" },
+        "acceptanceCriteria": { "$ref": "#/$defs/stringList" }
+      },
+      "additionalProperties": false
+    },
+    "script_integration": {
+      "type": "object",
+      "required": [
+        "integrationDecision",
+        "scriptPlan",
+        "artifactPlan"
+      ],
+      "properties": {
+        "integrationDecision": {
+          "type": "string",
+          "enum": ["READY", "NOT_READY"]
+        },
+        "scriptPlan": { "$ref": "#/$defs/stringList" },
+        "artifactPlan": { "$ref": "#/$defs/stringList" }
+      },
+      "additionalProperties": false
+    },
+    "validation_review": {
+      "type": "object",
+      "required": [
+        "validationDecision",
+        "gaps",
+        "requiredFixes"
+      ],
+      "properties": {
+        "validationDecision": {
+          "type": "string",
+          "enum": ["APPROVE", "REJECT"]
+        },
+        "gaps": { "$ref": "#/$defs/stringList" },
+        "requiredFixes": { "$ref": "#/$defs/stringList" }
+      },
+      "additionalProperties": false
+    },
+    "execution_run": {
+      "type": "object",
+      "required": [
+        "executedCommands",
+        "outputArtifacts",
+        "verificationEvidence"
+      ],
+      "properties": {
+        "executionDecision": {
+          "type": "string",
+          "enum": ["PASS", "FAIL"]
+        },
+        "executedCommands": { "$ref": "#/$defs/stringList" },
+        "outputArtifacts": { "$ref": "#/$defs/stringList" },
+        "verificationEvidence": { "$ref": "#/$defs/stringList" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

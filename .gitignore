@@ -1,4 +1,7 @@
-.env.local
-.env.*.local
 .DS_Store
-**/.DS_Store
+node_modules/
+generated/
+**/.env.local
+orchestrations/**/artifacts/
+skills/**/artifacts/
+activity-web/

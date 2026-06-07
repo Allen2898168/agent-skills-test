@@ -1,0 +1,21 @@
+version: 1
+id: flow.frontend_signup
+
+steps:
+  - id: frontend_signup
+    run: node
+    whenSet: [activityAlias]
+    args:
+      - skills/weex-frontend-ops/scripts/lottery-frontend-main-flow.mjs
+      - --phase
+      - signup
+      - --activity-alias
+      - "{{activityAlias}}"
+    capture:
+      signupInitialState: signup.initialState
+      signupFinalState: signup.finalState
+      signupDone: signup.done
+    assert:
+      - path: ok
+        equals: true
+

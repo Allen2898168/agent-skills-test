@@ -128,6 +128,14 @@ Common failure modes:
 Related helper:
 - `scripts/lib/element-ui.mjs`
 
+### Visible Character Counter / Maxlength
+
+Status: candidate
+Last verified: 2026-05-18
+
+Detailed counter/maxlength inspection pattern is split out to keep this shared file small:
+- `components/visible-character-limits.md`
+
 ### Joker Activity Components
 
 Status: candidate

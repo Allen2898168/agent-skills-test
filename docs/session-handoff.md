@@ -1,166 +1,248 @@
 # 会话交接记录
 
 ## 当前状态
-- 当前目标：建立并维护 WEEX 活动后台管理页面的可接力操作规范、自动化操作 skill、动作缓存和会话交接机制。
-- 目标环境：staging，`https://stg-activity.weex.tech`。
-- 权威 skill：项目内 `skills/weex-admin-ops/`。
-- 最近更新时间：2026-05-06。
-- 历史交接已按业务域归档到 `docs/session-handoffs/`；当前文件只保留接力摘要和入口索引。
 
-## 必读入口
-- 项目规范：`AGENTS.md`。
-- 后管操作 skill：`skills/weex-admin-ops/SKILL.md`。
-- 操作索引：`skills/weex-admin-ops/references/operations/index.md`。
-- 动作缓存说明：`skills/weex-admin-ops/references/action-cache.md`。
-- 组件复用说明：`skills/weex-admin-ops/references/components.md`。
-- 业务关联关系：`skills/weex-admin-ops/references/relationships.md`。
+- 当前目标：维护 WEEX 活动后台、FIN Admin 财务后台与前端页面操作自动化 skill、动作缓存、失败复盘、运行时依赖和首次配置检查。
+- 活动后台权威 skill：`skills/weex-admin-ops/`，默认 staging：`https://stg-activity.weex.tech`。
+- FIN Admin 权威 skill：`skills/weex-fin-admin-ops/`，默认 staging：`https://stg-admin-web-fin.weex.tech`。
+- 前端权威 skill：`skills/weex-frontend-ops/`，目标 URL 按用户输入或 `references/routes.md`。
+- 最近更新时间：2026-05-31。
 - 历史交接索引：`docs/session-handoffs/README.md`。
 
+## 必读入口
+
+- 项目规范：`AGENTS.md`。
+- 当前首次检查：`node tools/first-run-check.mjs --skill <admin|fin|frontend|all>`。
+- 后管无头 API preflight：`node tools/admin-preflight.mjs`（无头链路审计/API surface 校验）。
+- 对话配置写入：`node tools/configure-skill-env.mjs --skill <admin|fin|frontend> --from-stdin`。
+- 后管 skill：`skills/weex-admin-ops/SKILL.md`。
+- FIN Admin skill：`skills/weex-fin-admin-ops/SKILL.md`。
+- 前端 skill：`skills/weex-frontend-ops/SKILL.md`。
+- 三个失败复盘入口：`skills/weex-admin-ops/FAILURES.md`、`skills/weex-fin-admin-ops/FAILURES.md`、`skills/weex-frontend-ops/FAILURES.md`。
+
 ## 最近完成
-- 本轮按用户要求在可见浏览器模式完成复杂报名模板和活动流程引导配置验证，未保存截图：
-  - 报名模板：通过真实 UI 创建并清理 4 条复杂参与范围记录，ID `2776`-`2779`，覆盖 `指定参赛代理或用户+VIP等级+团体报名`、`指定参赛代理或用户+风控标签+团体报名`、`混合条件+注册+手动点击`、`非活跃用户+注册时间范围+注册+手动点击`。
-  - 报名模板验证：每条均完成列表回查、`查看` 弹窗详情接口 `code=200`、修改名称后 `PUT /prod-api/activity/apply` `code=200`、删除确认后 `DELETE /prod-api/activity/apply/{id}` `code=200`，并按修改后名称回查不存在。
-  - 活动流程引导配置：通过真实 UI 创建并清理 3 条 1/2/3 步记录，ID `84`-`86`，覆盖 `交易大赛/每次访问/1步`、`转盘抽奖/每日首次访问/2步`、`小丑牌活动/用户首次访问/3步`，上传次数分别为 4/8/12 且无上传失败。
-  - 活动流程引导配置验证：每条均完成 `查看`、修改活动类型为 `交易竞速赛` 后详情回查 `activityType=RACE_COMPETITION`、`复制` 生成 ID `87`-`89`、删除复制件和原件并回查不存在。
-  - 环境复盘：系统 Node 缺少 Playwright，已按既有方案切换 Codex bundled runtime 完成执行，并更新 `skills/weex-admin-ops/failure-reviews/common.md`。
-- 已跑通并沉淀 `活动通用模块管理 / 活动流程引导配置` 操作列 `查看 / 修改 / 复制 / 删除`：
-  - 新增脚本：`skills/weex-admin-ops/scripts/guide-template-row-actions.mjs`。
-  - 新增业务模块：`skills/weex-admin-ops/scripts/business/activity-common-module/guide-template-row-actions.mjs`。
-  - 新增动作缓存：`verify_guide_template_row_actions`，自然语言 `活动流程引导配置 操作列 查看 修改 复制 删除 浏览器模式` dry-run 应命中该动作。
-  - 无浏览器模式：临时 ID `80` 创建后，通过页面操作列完成 `查看`、将活动类型修改为 `交易竞速赛`、复制为 ID `81`（名称前缀 `复制从 `）、删除复制件和原件；两条记录均回查不存在。
-  - 可见浏览器模式：临时 ID `82` 通过真实 UI 点击新增、填写、上传 4 个媒体字段并确认创建；随后通过页面操作列完成 `查看`、将活动类型修改为 `交易竞速赛`、复制为 ID `83`、删除复制件和原件；两条记录均回查不存在。
-  - 页面行为确认：`复制` 不弹二次确认，直接触发 `POST /prod-api/activity/guideTemplate/copy`；`删除` 有二次确认弹窗，文案包含 `确认删除该活动吗`。
-  - 已清理失败尝试遗留的临时 ID `79`。
-  - 已更新 `skills/weex-admin-ops/references/operations/activity-guide-template.md`、`references/action-cache.md`、`references/operations/index.md`、`scripts/action-cache.json`、缓存 matcher/command 和失败复盘 `failure-reviews/activity-common-module.md`。
-  - 已修正公共 Element UI 表格 helper：操作列固定列点击先按主表可见行定位序号，再点右侧固定操作列同序号可见按钮。
-- 已将“浏览器模式写操作必须真实 UI 点击”提升为强制规则：
-  - 已更新 `AGENTS.md`、`skills/weex-admin-ops/SKILL.md`、`references/defaults.md`、`references/action-cache.md`。
-  - 规则：用户明确要求 `浏览器模式/可见操作/打开浏览器/让我看着` 时，写操作必须通过页面点击、填写、选择、上传、确认完成；接口只能做只读验证或页面触发后的证据采集。默认不可见模式可继续使用已验证的接口辅助路径。
-- 已修正并重跑原 `create-guide-templates.mjs --visible` 脚本验证：
-  - 新增记录 ID `73`，名称 `浏览器_转盘抽奖_每次访问_3步_01_20260506130517`。
-  - 脚本输出 `writePath=visible_ui_clicks`，上传次数 `uploadCount=12`，`uploadFailures=[]`。
-  - 最终 URL `/activity/guide`，创建结果成功。
-- 已修正“浏览器模式”语义误判：此前 ID `69` 和 ID `71` 虽在可见浏览器会话中运行，但写入是复用认证头调用接口，不算真实 UI 点击创建。
-- 已补跑真实可见浏览器 UI 点击路径，创建 1 条三步骤转盘抽奖流程引导配置：
-  - 名称：`浏览器UI_转盘抽奖_每次访问_3步_01_20260506130117`。
-  - ID：`72`。
-  - UI 行为：点击 `新增`，选择 `转盘抽奖` 和 `每次访问`，点击两次 `新增步骤`，填写 3 个步骤的标题、内容和按钮文案，为每个步骤通过页面上传控件上传 H5/Web 静图和动图，共 12 次上传，最后点击 `确认`。
-  - 创建验证：页面确认触发 `POST /prod-api/activity/guideTemplate`，HTTP 200，业务 `code=200`。
-  - 详情验证：按名称列表回查命中 ID `72`；详情回查 `activityType=LOTTERY`、`displayFrequency=EVERY_VISIT`，且 `step1I18nConfig`、`step2I18nConfig`、`step3I18nConfig` 均存在。
-  - 已修正 `scripts/create-guide-templates.mjs`：`--visible` 现在走真实 UI 点击/上传/确认路径；不可见模式仍走接口写入并验证。
-  - 已记录失败复盘：可见浏览器模式误用接口写入、UI 创建遗漏图片字段。
-- 已按用户要求用可见浏览器模式再创建 1 条三步骤转盘抽奖流程引导配置：
-  - 名称：`浏览器_转盘抽奖_每次访问_3步_01_20260506125815`。
-  - ID：`71`。
-  - 创建验证：`scripts/create-guide-templates.mjs --activity-types lottery --frequencies every_visit --steps 3 --visible` 返回成功，最终 URL `/activity/guide`。
-  - 详情验证：`GET /prod-api/activity/guideTemplate/71` HTTP 200，业务 `code=200`，`activityType=LOTTERY`，`displayFrequency=EVERY_VISIT`，且 `step1I18nConfig`、`step2I18nConfig`、`step3I18nConfig` 均存在。
-  - 用户未要求截图，因此未保存截图。
-- 已按用户要求用默认不可见浏览器模式再创建 1 条三步骤转盘抽奖流程引导配置：
-  - 名称：`无浏览器_转盘抽奖_每次访问_3步_01_20260506125632`。
-  - ID：`70`。
-  - 创建验证：`scripts/create-guide-templates.mjs --activity-types lottery --frequencies every_visit --steps 3` 返回成功，最终 URL `/activity/guide`。
-  - 详情验证：`GET /prod-api/activity/guideTemplate/70` HTTP 200，业务 `code=200`，`activityType=LOTTERY`，`displayFrequency=EVERY_VISIT`，且 `step1I18nConfig`、`step2I18nConfig`、`step3I18nConfig` 均存在。
-  - 用户未要求截图，因此未保存截图。
-- 已按用户要求用可见浏览器模式创建 1 条三步骤转盘抽奖流程引导配置：
-  - 名称：`浏览器_转盘抽奖_每次访问_3步_01_20260506125358`。
-  - ID：`69`。
-  - 创建验证：动作缓存 `create_guide_templates` 命中，最终 URL `/activity/guide`；创建脚本返回成功，按名称回查命中。
-  - 详情验证：`GET /prod-api/activity/guideTemplate/69` HTTP 200，业务 `code=200`，`activityType=LOTTERY`，`displayFrequency=EVERY_VISIT`，且 `step1I18nConfig`、`step2I18nConfig`、`step3I18nConfig` 均存在。
-  - 用户未要求截图，因此未保存截图。
-  - 为支持该单条链路，已扩展 `scripts/create-guide-templates.mjs` 支持 `--activity-types`、`--frequencies`、`--steps` 参数，并扩展自然语言解析 `三个步骤 + 转盘抽奖 + 浏览器模式`。
-- 已在 staging 探索 `活动通用模块管理 / 活动流程引导配置`：
-  - 入口路径：`/activity/guide`，菜单项在 `活动通用模块管理` 下；从 `/activity/prize` 登录后确认该模块已展开，并可点击进入。
-  - 页面搜索字段：`ID`、`模版名称`、`活动类型`；表格列：`ID`、`名称`、`活动类型`、`最近编辑人`、`更新时间`、`操作`。
-  - 搜索验证：`ID=37`、`模版名称=Wesley`、`活动类型=交易大赛` 均触发 `/prod-api/activity/guideTemplate/list`，HTTP 200，业务 `code=200`，列表回查命中预期记录。
-  - 新增弹窗字段：`模版名称`、`活动类型`、`引导弹窗显示频率`，以及每个步骤的 `活动简介标题`、`H5活动简介内容`、`H5配图（静图）`、`H5配图（动图）`、`Web配图（静图）`、`Web配图（动图）`、`按钮文案`。
-  - 活动类型下拉选项共 13 个；显示频率选项为 `每次访问`、`每日首次访问`、`用户首次访问`。
-  - 默认只有 `步骤1` 且无删除按钮；点击 `新增步骤` 后出现 `步骤1`、`步骤2`，两个步骤右上角均出现 `删除`。
-- 已按正式命名规则创建活动流程引导模板，默认步骤内容使用测试文案和既有 staging 图片/动图 URL；用户未要求截图，因此未保存截图：
-  - 不可见模式创建成功 15 条，ID `39`-`53`，覆盖 12 个有效活动类型的首频率、交易大赛另外两个频率、交易大赛首频率两步骤；每条均通过创建接口 `code=200` 和按模板名称列表回查验证。
-  - 可见浏览器模式创建成功 15 条，ID `54`-`68`，覆盖同一组组合；每条均通过创建接口 `code=200` 和按模板名称列表回查验证。
-  - `暂无特殊配置 / NONE` 在两种模式下创建均失败，后端返回 HTTP 200 但业务 `code=500`，提示 `系统繁忙，请稍后再试！`，未创建记录。
-  - 临时认证试跑记录 ID `38` 已清理，`DELETE /prod-api/activity/guideTemplate/38` 返回 `code=200`，按名称回查 `total=0`。
-  - 已按用户确认沉淀该链路到 `skills/weex-admin-ops/`：
-    - 新增 playbook：`skills/weex-admin-ops/references/operations/activity-guide-template.md`。
-    - 新增脚本：`skills/weex-admin-ops/scripts/create-guide-templates.mjs`。
-    - 新增业务模块：`skills/weex-admin-ops/scripts/business/activity-common-module/guide-template-plan.mjs`、`guide-template-create.mjs`。
-    - 新增动作缓存：`create_guide_templates`；默认 dry-run 可预览 15 个已验证组合，真实执行会创建记录，`--visible` 启用可见浏览器模式。
-    - 已更新 operation index、routes、action-cache 和 relationships；`暂无特殊配置 / NONE` 已在 `skills/weex-admin-ops/references/relationships/activity-common-module.md` 标记为后端阻塞分支，脚本默认排除，只有 `--include-none` 才复测。
-    - 已验证脚本 dry-run、显式 action dry-run、自然语言 dry-run、`--include-none` dry-run 和 skill 知识结构校验。
-- 已创建 `非活跃用户` 报名模板：ID `2772`，名称 `非活跃用户报名模板_注册时间_20260506104509`。
-- 该模板的可参与注册时间范围为 `2026-05-06 00:00:00` 到 `2026-05-07 23:59:59`。
-- 创建验证：`POST /prod-api/activity/apply` HTTP 200，响应 `code=200`；按模板名称搜索返回 ID `2772`。
-- 用户未要求截图，因此未保存截图。
-- 已沉淀报名模板注册时间范围能力：新增 `scripts/lib/element-ui-datetime.mjs`，扩展 `create-register-templates.mjs` 的 `--register-start` / `--register-end`，并更新动作缓存自然语言解析。
-- 已拆分报名模板 operation 文档：新增 `activity-register-management-date-range.md` 和 `activity-register-management-platform-scopes.md`。
-- 已拆分公共 Element UI helper：`scripts/lib/element-ui.mjs` 作为兼容导出入口，具体实现拆到 `scripts/lib/element-ui/` 子模块。
-- 已将历史交接从本文件拆分到 `docs/session-handoffs/`，避免单文件过长。
-- 已将 docs 增长管理写入 `AGENTS.md` 和 `skills/weex-admin-ops/SKILL.md`：`docs/session-handoff.md` 只保留当前摘要，历史归档到 `docs/session-handoffs/`，任意 `docs/**/*.md` 接近 250 行必须先拆分。
-- 已新增 `skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs`，用于检查 skill 知识结构和文件长度。
-- 已新增失败复盘体系：`skills/weex-admin-ops/FAILURES.md` 作为入口，`skills/weex-admin-ops/failure-reviews/` 按业务线保存失败场景、原因、解决方式和验证结果。
-- 已将失败复盘强制规则写入 `AGENTS.md` 和 `skills/weex-admin-ops/SKILL.md`：遇到失败必须主动更新复盘；重试前先查复盘；同类失败重复出现时必须反写原流程并验证。
-- 已补强仓库入口 README，明确根目录 `scripts/` 是项目治理脚本、`skills/weex-admin-ops/scripts/` 是后管业务动作脚本。
-- 已修正 `AGENTS.md` 中动作缓存路径歧义，并调整 `temp/` 启动规则：仅在当前任务相关或用户明确要求时汇总暂存流程。
-- 已在默认不可见浏览器模式跑通 `活动用户报名管理` 操作列 `查看 / 修改 / 删除`：
-  - 临时报名模板 ID `2773`，原名称 `操作列临时模板_auto_20260506113121`。
-  - 查看：`GET /prod-api/activity/apply/2773` HTTP 200，响应 `code=200`，弹窗标题 `用户报名管理（查看）`。
-  - 修改：名称改为 `操作列临时模板_auto_20260506113121_已修改`，`PUT /prod-api/activity/apply` HTTP 200，响应 `code=200`，按新名称搜索返回 ID `2773`。
-  - 删除：二次确认弹窗文案包含目标模板名称，确认后 `DELETE /prod-api/activity/apply/2773` HTTP 200，响应 `code=200`，按新名称搜索不再返回该记录。
-  - 本轮未保存截图；用户未要求截图。
-- 已按用户确认沉淀该链路到 `skills/weex-admin-ops/`，并新增动作缓存脚本：
-  - 脚本：`skills/weex-admin-ops/scripts/register-template-row-actions.mjs`。
-  - 缓存动作：`verify_register_template_row_actions`。
-  - 不可见脚本验证：临时 ID `2774` 创建、查看、修改、删除并回查不存在，全部通过。
-  - 可见脚本验证：临时 ID `2775` 创建、查看、修改、删除并回查不存在，全部通过。
-  - 已修正自然语言缓存匹配，`活动用户报名管理 操作列 查看 修改 删除 浏览器模式` dry-run 命中 `verify_register_template_row_actions`。
-- 已记录本轮失败复盘：
-  - 系统 Node 缺少 Playwright，改用 Codex bundled runtime 后通过。
-  - 查看弹窗断言不能依赖 `innerText` 或最后一个可见 `.el-dialog`，已抽出按标题定位业务弹窗的公共 helper。
-  - 操作列自然语言 dry-run 初次误命中创建模板动作，已通过动作评分修正。
-- 已按用户确认，在默认不可见浏览器模式删除 `活动用户报名管理` 下 `最近编辑人=auto` 的报名模板：
-  - 页面搜索接口 `operator=auto` 返回 63 条，其中 ID `177` 的 `operator=auto_test` 属于模糊匹配，已排除。
-  - 精确 `operator=auto` 候选 62 条，已成功删除 61 条。
-  - ID `2729`（`自动化报名模板_auto_manual_20260505161031`）删除失败，后端提示该报名模板已被活动 `8990,8993` 使用，已保留。
-  - 删除后回查：精确 `operator=auto` 仅剩 ID `2729`；模糊匹配还包含已排除的 ID `177`。
-  - 用户未要求截图，因此未保存截图。
-  - 已在 `skills/weex-admin-ops/failure-reviews/activity-register-management.md` 记录“已被活动引用的报名模板不可删除”复盘。
-- 已按用户要求沉淀“按最近编辑人批量删除报名模板”链路：
-  - 新增脚本：`skills/weex-admin-ops/scripts/delete-register-templates-by-operator.mjs`。
-  - 新增业务模块：`skills/weex-admin-ops/scripts/business/activity-register-management/bulk-delete.mjs`。
-  - 新增动作缓存：`delete_register_templates_by_operator`，默认只 dry-run，实际删除必须传 `--confirm-delete`。
-  - 新增 playbook：`skills/weex-admin-ops/references/operations/activity-register-management-bulk-delete.md`。
-  - 已补充报名模板被活动引用后不能删除的关联关系。
-  - 已验证自然语言缓存命中、显式 action dry-run、不可见 dry-run 和可见 dry-run；当前 dry-run 均只列出剩余被引用模板 ID `2729`，并跳过 ID `177`。
-- 已将后管 skill 专用资产和证据目录迁入 `skills/weex-admin-ops/`：
-  - `assets/default-prize-images/default-bonus-prize.webp` 已迁移到 `skills/weex-admin-ops/assets/default-prize-images/default-bonus-prize.webp`。
-  - `artifacts/screenshots/` 已迁移到 `skills/weex-admin-ops/artifacts/screenshots/`，历史截图通过 `git mv` 保留。
-  - 已全量替换 AGENTS、README、docs、temp 和 skill references 中的旧路径。
-  - 已修改 `skills/weex-admin-ops/scripts/lib/runtime.mjs`，默认奖品图片从 skill 内部 assets 读取。
-  - 受影响奖品创建链路验证通过：dry-run 通过；不可见模式创建实物奖品 ID `509`；可见模式创建实物奖品 ID `510`；两次均观察到图片上传接口和奖品创建接口 HTTP 200。
-- 已为“skill 可单独复制复用”继续迁移根目录治理内容：
-  - `FAILURES.md` 已迁移到 `skills/weex-admin-ops/FAILURES.md`。
-  - `failure-reviews/` 已迁移到 `skills/weex-admin-ops/failure-reviews/`。
-  - 原根目录知识结构校验脚本已迁移为 `skills/weex-admin-ops/scripts/maintenance/validate-knowledge-structure.mjs`。
-  - 校验脚本已改为以 skill 根目录为基准，不依赖根目录 docs。
-  - 已修复 `pathsFrom()` 和 `run-cached-action.mjs` 对仓库外层目录的假设，使 skill 在仓库内和独立复制目录中都能解析默认 assets。
-  - 已复制 skill 到 `/tmp/weex-admin-ops-standalone-test` 做独立验证：结构校验、奖品 dry-run、动作缓存 dry-run 和默认图片路径检查均通过。
-  - 已进一步修正 `scripts/lib/runtime.mjs`，`pathsFrom()` 兼容 `import.meta.url` 和普通文件路径，方便 standalone 维护校验。
-  - 已确认根目录不再保留 skill 专用 `scripts/`、`assets/`、`artifacts/`、`FAILURES.md`、`failure-reviews/`；这些内容均位于 `skills/weex-admin-ops/` 内。
-  - 已清理 skill 内部文档和脚本 usage 注释中的仓库路径前缀，统一改为 skill 根目录相对路径，例如 `scripts/...`、`assets/...`、`artifacts/...`。
-  - 已重新复制 skill 到临时独立目录验证：结构校验、奖品 dry-run、两个动作缓存 dry-run 和默认图片路径检查均通过。
+
+- 2026-06-07 按 `automation_review_pipeline` 执行“全量回归活动后管”：
+  - runId：`history/2026-06-07-001/`；已完成 `链路分析 -> 覆盖审阅 -> 脚本整合 -> 校验审阅`，执行阶段真实拆成 `lottery` 后管子阶段与 `universal` 后管子阶段。
+  - 执行前补 gate：`create-roulette-participant-scope-tasks-fast-api.mjs`、`create-roulette-condition-tasks-fast-api.mjs`、`create-roulette-reward-mode-tasks-fast-api.mjs` 增加“多候选模板详情 + 创建后回查重试”；`regression-agent-universal-from-scratch.mjs` 增加在线 `AGENT` 活动前置检查。
+  - `lottery` 子阶段失败：报告目录 `orchestrations/lottery-regression/artifacts/reports/20260607_202339/`，结果 `PASS 7 / FAIL 22 / SKIPPED 27`；失败集中在奖品行操作 `PM-08~11`、报名模板 `RT-03~09`、任务管理 `TM-01~11`，后续 `AC/AL/ST` 共 `27` 条全部跳过。
+  - `universal` 子阶段失败：报告目录 `result/full-regression/20260607_202349/`，脚本口径 `11 PASS / 2 FAIL`；失败为 `AGENT_TRACE_PRO` 资源卡回查丢失、`AGENT` 前置检查命中在线活动 `9978 / allming-6233470`。
+  - 本轮按规则只跑一次、不重试；已补失败复盘到 `skills/weex-admin-ops/failure-reviews/prize-management.md`、`activity-register-management.md`、`activity-task-management.md`、`common.md`，并更新 `activity-management-agent.md` 的固定前置检查口径。
+
+- 2026-06-07 按 subagent 链路执行“活动后管全量回归”：
+  - 主 agent 先完成启动检查，再拆成两个子阶段并行：`lottery-regression --selection '后管回归'` 与 13 条 `regression-*-universal-from-scratch.mjs`。
+  - lottery 后管子阶段：`PASS 19 / FAIL 12 / SKIPPED 25`，报告目录 `orchestrations/lottery-regression/artifacts/reports/20260607_194818/`；失败集中在 `RT-09`、`TM-01~TM-11`，其中 `TM-01~TM-09` 为 `Task detail failed: 7076`，`TM-10~TM-11` 为 `Created reward-mode task not found: 转盘抽奖_limited_20260607174906`。
+  - universal 通用活动子阶段：脚本口径 `12 PASS / 1 FAIL`，子用例口径 `125 PASS / 1 FAIL / TOTAL 126`；唯一失败为 `result/universal-regression/20260607_194944/AGENT_universal_from_scratch_failed.md`，原因为 `已有上线状态的人人代理活动`。
+  - 本轮合并口径：`PASS 144 / FAIL 13 / SKIPPED 25 / TOTAL 182`。
+  - 失败 AGENT 补偿清理重新执行后，活动 `10074 / agr54577099` 状态为 `DELETED`；任务 `7092/7093`、报名模板 `3614` 已不在列表结果中，奖品 `1492` 删除接口返回 `code=200`，但详情接口仍可读，疑似软删保留。
+
+- 2026-06-07 执行“活动后管 + 完整前端链路”全量回归：
+  - 执行：`node orchestrations/full-regression/scripts/run-full-regression.mjs --selection '全部' --confirm-run`
+  - 汇总：`result/full-regression/20260607_190648/summary.json`，结果 `PASS 141 / FAIL 6 / SKIPPED 10 / TOTAL 285`。
+  - lottery 文档用例：`129 PASS / 5 FAIL / 6 SKIPPED`；失败为 `FE-56/68/69/73/75`，详情见 `orchestrations/lottery-regression/artifacts/reports/20260607_190649/frontend_normal.json`。
+  - frontend stock/weight 专项均通过：`frontend_stock.json`、`frontend_weight.json` 已落盘。
+  - 通用回归脚本：`12 PASS / 1 FAIL`；唯一失败仍是 `AGENT`，失败产物 `result/universal-regression/20260607_193419/AGENT_universal_from_scratch_failed.md`，原因为 staging 已存在在线 `AGENT` 活动。
+  - 报告：`result/full-regression/20260607_190648/report.md`。
+
+- 2026-06-07 基于需求单补充大富翁世界杯后管需求测试用例设计：
+  - 来源：`/Users/gabriel/Downloads/WWLD-13435【大富翁】世界杯.md`
+  - 新增文档：`docs/test-cases/monopoly-worldcup-admin-requirement-cases.md`
+  - 结论：本轮以后管配置与状态流转为主，共整理 39 条用例，覆盖基本信息、报名、未登录说明、配置管理、棋盘、奖励列表、任务、风控、FAQ/活动日历、上下线/审计；未纳入前端交互和 FIN 发奖审核。
+
+- 2026-06-07 执行活动后管全量回归（仅后管范围）：
+  - 执行：`node orchestrations/full-regression/scripts/run-full-regression.mjs --selection '后管回归' --confirm-run`
+  - 汇总：`result/full-regression/20260607_184756/summary.json`，结果 `PASS 68 / FAIL 1 / SKIPPED 88`。
+  - lottery 后管回归：`56 PASS / 0 FAIL / 84 SKIPPED`；本轮只选 `后管回归`，前端 `FE-*` 用例全部按“未纳入当前自动化回归输出口径”跳过。
+  - 通用活动回归：13 条里 `12 PASS / 1 FAIL`；唯一失败为 `AGENT`，失败产物 `result/universal-regression/20260607_185002/AGENT_universal_from_scratch_failed.md`。
+  - 失败原因：`AGENT` 上线返回 `code=500 / 已有上线状态的人人代理活动`，说明 staging 存在其他在线 `AGENT` 活动；本次失败后补偿清理成功，已删除活动 `10036 / agr50994164` 及其依赖。
+  - 已补失败复盘：`skills/weex-admin-ops/failure-reviews/activity-management.md`（2026-06-07 条目）；后续需把“在线 AGENT 活动存在检查”前置到 `regression-agent-universal-from-scratch.mjs`。
+
+- 2026-06-07 已沉淀默认协同规则：
+  - 单活动、单后管、单链路回归：默认单 agent。
+  - 全量回归、全链路回归、跨 `admin/fin/frontend` 回归：默认多 subagent。
+  - 超过 `10` 个用例的回归：默认必须先进入 `orchestrations/` 编排流程；如已有可复用编排，优先直接复用。
+  - 这里的“编排流程”指主 agent 的阶段拆分、依赖调度、结果聚合链路；跨域、可并行或高吞吐阶段默认由主 agent 调度 subagent 执行。
+  - 如果任务表面是单链路，但执行中确认跨多个 skill，允许从单 agent 自动升级为多 subagent。
+  - 2026-06-07 补充约束：命中多 subagent 规则时，不能因为仓库已有 `orchestrations/*/scripts/run-*.mjs` 总入口就让主 agent 直接串行跑完全流程；总入口只能作为阶段子任务入口，不能替代主 agent 的 subagent 调度。
+
+- 2026-06-07 大富翁后管通用回归复跑与 cleanup 修正：
+  - 执行：`node skills/weex-admin-ops/scripts/regression-monopoly-worldcup-universal-from-scratch.mjs --confirm-run`
+  - 首次结果：活动 `10022 / mwcr50227192` 创建、草稿检查、上线、下线、删除均成功；结果文件 `result/universal-regression/20260607_183714/MONOPOLY_WORLD_CUP_universal_from_scratch.md`。
+  - 发现 cleanup 冗余下线：主流程已完成 `offline`，cleanup 再次调用 `/prod-api/activity/monopoly/offline` 返回 `code=500 / 任务不是上线状态不可下线`，但后续解绑和删除仍成功，活动别名回查为空，无残留。
+  - 已修复脚本：`skills/weex-admin-ops/scripts/regression-monopoly-worldcup-universal-from-scratch.mjs` 的 cleanup 支持 `skipOffline`，主流程 offline 成功后跳过重复下线；失败复盘已补 `skills/weex-admin-ops/failure-reviews/activity-management.md`（2026-06-07 条目）。
+
+- 2026-06-07 新增多阶段自动化治理流水线骨架：`orchestrations/automation-review-pipeline/`
+  - 目录包含 `prepare-run / record-stage / finalize-run / build-stage-context`、固定 schema、阶段 prompt 与 `history/` 落盘约定。
+  - 当前仓库版本负责“状态机 + 报告协议 + context packet”；真实 subagent 仍由 Codex 会话层执行。
+  - 2026-06-07 已补入口路由：新增 `resolve-entry-mode.mjs`，把 `subagent链路 / 全量回归 / 全链路回归 / 组合回归 / 跨域回归 / >10 用例` 固定映射到 `automation_review_pipeline`，并要求结果必须落到 `history/<runId>/`。
+  - 已补 12 条自动化测试，并修复首轮高优先级问题：目录缺口撞号、`report.runId` 漏校验、覆盖审阅 rejectReason 误要求、执行阶段 `BLOCKED` 合同缺失。
+  - 已支持 `existingCoverage=NONE/PARTIAL` 且审阅通过时继续进入“补覆盖/补脚本”分支。
+
+- 2026-05-31 子用例“简要中文描述”沉淀完成：
+  - 新增全量导出脚本：`tools/generate-all-test-cases-list.mjs`，可输出 `result/all-test-cases-285.md`，包含 `序号/用例编号/用例内容/简要中文描述`。
+  - 新增命令：`npm run generate:test-cases:all`。
+  - skill 规则已同步到 `skills/weex-admin-ops/SKILL.md`、`skills/weex-fin-admin-ops/SKILL.md`、`skills/weex-frontend-ops/SKILL.md`：子用例输出必须包含中文描述，新增 step name 需补 `tools/lib/result-md.mjs` 的 `DEFAULT_STEP_META_ZH`，不允许长期保留 `执行子步骤：<step>` fallback。
+
+- 2026-05-31 执行“全量用例回归”真实跑批：`node skills/weex-admin-ops/scripts/regress-full-test-cases.mjs --confirm-run`。
+  - 汇总：`result/full-regression/20260531_205800/summary.json`，口径 `285`（140+141+4），结果 `PASS 141 / FAIL 6 / SKIPPED 10`。
+  - 失败集中在 lottery 文档用例前端阶段：`FE-56/68/69/73/75/76`；失败证据见 `result/full-regression/20260531_205800/frontend_normal.json`。
+  - `universal-regression` 13 条脚本均 PASS，产物在 `result/universal-regression/20260531_2123xx~2127xx/*.md`。
+  - 已补充失败复盘：`skills/weex-frontend-ops/failure-reviews/lottery-regression.md`（2026-05-31 条目）。
+
+- 2026-05-31 回归产物 Markdown 标准化：`tools/lib/result-md.mjs` 新增 `testCase` 入参，支持输出“标准测试用例 MD”（用例编号/名称/描述/前置条件/子用例编号与结果）；并已让 13 条通用回归脚本默认写入该标准格式（仍保留未传 `testCase` 时的旧格式兼容）。
+  - 结果生成工具：`tools/lib/result-md.mjs`
+  - 回归脚本接入：`skills/weex-admin-ops/scripts/regression-*-universal-from-scratch.mjs`
+
+- 2026-05-31 用例库统一口径与自动化纳入：新增“用例库总览”入口 `docs/test-cases/index.md`（由 `npm run generate:test-cases` 生成），并把 13 条通用回归脚本按子用例拆分沉淀到 `docs/test-cases/universal-regression/`（统计：子用例 141 条；生成入口：`npm run generate:test-cases`）。
+  - 2026-05-31 “总用例数”默认口径调整：用户问总用例数时，按“可自动化回归用例总数”汇总（文档用例 140 + 已落地自动化子用例：脚本 141 + 编排 4 = 285）；统计入口仍为 `docs/test-cases/index.md`。
+
+- 2026-05-31 通用回归用例/脚本骨架：新增 `result/` 下的“执行产物 Markdown”写入工具，并打通两条“从零配置（不 clone 活动模板）”通用回归脚本（均会创建依赖→创建活动→验证→解绑依赖→清理→输出 md）：
+  - BEGINNER_TASK（新手活动）：`skills/weex-admin-ops/scripts/regression-newbie-universal-from-scratch.mjs`；产物示例：`result/universal-regression/20260531_043955/BEGINNER_TASK_universal_from_scratch.md`。
+  - LOTTERY（转盘抽奖）：`skills/weex-admin-ops/scripts/regression-lottery-universal-from-scratch.mjs`；产物示例：`result/universal-regression/20260531_050303/LOTTERY_universal_from_scratch.md`（已补齐抽奖次数奖品+合约/现货任务“从零创建”，不再依赖 clone 任务模板）。
+  - RACE_COMPETITION（交易竞速赛）：`skills/weex-admin-ops/scripts/regression-race-universal-from-scratch.mjs`；产物示例：`result/universal-regression/20260531_144340/RACE_COMPETITION_universal_from_scratch.md`；并新增 baseline：`skills/weex-admin-ops/references/payload-baselines/race-competition.activity-config.baseline.json`（解决从零 payload 字段不全导致的 `系统繁忙`）。
+  - TRACE_PRO（小活动）：`skills/weex-admin-ops/scripts/regression-tracepro-universal-from-scratch.mjs`；产物示例：`result/universal-regression/20260531_145406/TRACE_PRO_universal_from_scratch.md`；依赖从零：任务 `skills/weex-admin-ops/scripts/create-tracepro-trading-volume-task-from-scratch-fast-api.mjs`、baseline `skills/weex-admin-ops/references/payload-baselines/trace-pro.activity-config.baseline.json`。
+  - AGENT_TRACE_PRO（代理小活动）：`skills/weex-admin-ops/scripts/regression-agent-tracepro-universal-from-scratch.mjs`；产物示例：`result/universal-regression/20260531_150207/AGENT_TRACE_PRO_universal_from_scratch.md`；依赖从零：任务 `skills/weex-admin-ops/scripts/create-agent-tracepro-order-volume-task-from-scratch-fast-api.mjs`、baseline `skills/weex-admin-ops/references/payload-baselines/agent-trace-pro.activity-config.baseline.json`。
+  - MONOPOLY_WORLD_CUP（大富翁世界杯，从零依赖+从零活动+清理）：`skills/weex-admin-ops/scripts/regression-monopoly-worldcup-universal-from-scratch.mjs`；产物示例：`result/universal-regression/20260531_045610/MONOPOLY_WORLD_CUP_universal_from_scratch.md`；并接入 NL/action-cache：`regress_monopoly_world_cup_activity_universal_from_scratch`。
+  - FLIP（小丑牌，从零依赖+从零活动+清理）：`skills/weex-admin-ops/scripts/regression-flip-universal-from-scratch.mjs`；产物示例：`result/universal-regression/20260531_051153/FLIP_universal_from_scratch.md`；并接入 NL/action-cache：`regress_flip_activity_universal_from_scratch`。
+  - CUSTOMIZED（定制化活动，从零依赖+从零活动+清理）：`skills/weex-admin-ops/scripts/regression-customized-universal-from-scratch.mjs`；产物示例：`result/universal-regression/20260531_051908/CUSTOMIZED_universal_from_scratch.md`；并接入 NL/action-cache：`regress_customized_activity_universal_from_scratch`。
+  - TRADING_COMPETITION（交易大赛，从零依赖+从零活动+清理）：`skills/weex-admin-ops/scripts/regression-competition-universal-from-scratch.mjs`；产物示例：`result/universal-regression/20260531_141655/TRADING_COMPETITION_universal_from_scratch.md`；并接入 NL/action-cache：`regress_trading_competition_activity_universal_from_scratch`。
+  - GUESS（竞猜大赛，从零依赖+从零活动+清理）：`skills/weex-admin-ops/scripts/regression-guess-universal-from-scratch.mjs`；产物示例：`result/universal-regression/20260531_151444/GUESS_universal_from_scratch.md`；依赖补齐：`skills/weex-admin-ops/scripts/create-guessing-task-from-scratch-fast-api.mjs` 改为基于 baseline 深拷贝并修正 `guessConfig` 时间/`guessStatus`，避免最小字段创建返回 `system error`。
+  - RECHARGE_TRANS_TASK（充值交易活动，从零依赖+从零活动+清理）：`skills/weex-admin-ops/scripts/regression-recharge-trans-universal-from-scratch.mjs`；产物示例：`result/universal-regression/20260531_152958/RECHARGE_TRANS_TASK_universal_from_scratch.md`；依赖从零：`skills/weex-admin-ops/scripts/create-recharge-trans-trading-volume-task-from-scratch-fast-api.mjs`（补齐 `conditions/order/stock` 等字段后可稳定创建）。
+  - AGENT（人人代理活动，从零依赖+从零活动+清理）：`skills/weex-admin-ops/scripts/regression-agent-universal-from-scratch.mjs`；产物示例：`result/universal-regression/20260531_153236/AGENT_universal_from_scratch.md`；依赖从零：`skills/weex-admin-ops/scripts/create-agent-invite-task-from-scratch-fast-api.mjs`（会先通过 `/prod-api/activity/taskGroup/list` 选择二级新手任务 Tab 作为 `taskGroupId`，再创建 INVITED + INVITE_FRIEND 双任务并绑定 `linkTaskId`）。
+  - CONTRACT_MINING（合约挖矿活动，从零依赖+从零活动+清理）：`skills/weex-admin-ops/scripts/regression-contract-mining-universal-from-scratch.mjs`；产物示例：`result/universal-regression/20260531_153334/CONTRACT_MINING_universal_from_scratch.md`；创建时只保留 1 个 `miningList` 渠道配置并绑定任务，避免后端校验 `任务配置重复`。
+  - 依赖“从零创建”补齐：报名模板从零创建 `skills/weex-admin-ops/scripts/create-register-template-from-scratch-fast-api.mjs`；资源位卡片从零创建 `skills/weex-admin-ops/scripts/create-resource-card-from-scratch-fast-api.mjs`；部分活动依赖仍在逐步去除 clone（如 TRACE_PRO/AGENT_TRACE_PRO 的任务/资源卡脚本尚有 template clone 路径）。
+  - NL/action-cache：新增 `regress_newbie_activity_universal_from_scratch`、`regress_lottery_activity_universal_from_scratch`，并在 matcher 中对包含 `从零/不clone` 的 query 优先命中对应 regress action。
+
+- 2026-05-31 创建并上线 2 个 staging 活动（开始时间均为创建后约 2 分钟，Asia/Shanghai）：
+  - 转盘抽奖「彩蛋」：活动ID `9814`，alias `egg9238462`；任务=合约交易量≥`1U`（taskId `6288`）+现货交易量≥`1U`（taskId `6289`）；奖品池 8 个位置均绑定同一「仓位空投」奖品（prizeId `1208`），权重均为 `1`；后管列表页：`https://stg-activity.weex.tech/activities/lottery`；前台页：`https://stg-www.weex.tech/zh-CN/events/draw/egg9238462`。
+  - 大富翁世界杯（MONOPOLY_WORLD_CUP）全配置：活动ID `9815`，alias `mwc92407499`；使用 `create-monopoly-worldcup-full-config-explicit-deps-fast-api.mjs` 创建依赖并通过 `monopoly-worldcup-activity-fast-api.mjs --action online` 上线；后管列表页：`https://stg-activity.weex.tech/activities/monopoly`。
+
+- 2026-05-30 非转盘/非新手活动 API 全配置写验证补链路：修复 `GUESS / MONOPOLY_WORLD_CUP / AGENT_TRACE_PRO` 在 staging 的 min/full verify + cleanup 不稳定问题。关键修复包括：child 脚本登录导致 token 失效（创建活动前刷新 session + 支持用 `WEEX_ADMIN_AUTHORIZATION` 透传父会话 Authorization）、`create-prizes-fast-api.mjs` 增加 `--confirm-create` 确认开关并同步更新依赖脚本、MONOPOLY_WORLD_CUP 报名模板需使用 `用户手动点击报名`、GUESS/小活动 cleanup 增加解绑报名模板到默认 `2442` 后再删除，避免“模板被活动占用”报错。验证编排：`node skills/weex-admin-ops/scripts/verify-nonlottery-api-full-config-staging.mjs --confirm-run --verify-level <min|full> [--confirm-full-verify]`。
+
+- 2026-05-30 模块级配置脚本 `--wizard` 收口：`CONTRACT_MINING / FLIP / GUESS / MONOPOLY_WORLD_CUP / AGENT_TRACE_PRO` 的模块配置脚本支持不传 `--action`/不传活动 ID 直接输出中文映射 + one-shot spec 模板；并统一 wizard 输出 `moduleNameMapSource/fieldNameMapSource` 为 `references/mappings/*.md`。
+
+- 2026-05-30 活动列表“无 activity-web 运行时依赖”推进：新增 `references/catalogs/*.json`（活动任务类型、转盘抽奖样式、转盘抽奖支持任务）并改造 `newbie/lottery` 的 wizard 与 `verify-activity-tasks-*-all-types` 脚本改为读取 catalog；补齐新手/转盘的模块/字段中文映射（`references/mappings/newbie-activity-fields.md`、`references/mappings/lottery-activity-*.md`）；新增覆盖审计：`scripts/maintenance/audit-activity-api-full-config-coverage-all.mjs`。
+
+- 2026-05-30 新增“全活动类型验证编排 + 能力自检”：新增 `verify-activity-api-full-config-staging.mjs`（按 新手→转盘→非新手非转盘11类 顺序执行 min/full verify + cleanup 的编排入口）；新增 `maintenance/audit-no-activity-web-runtime.mjs`（运行时不依赖 activity-web 审计）与 `maintenance/self-check-activity-api-full-config.mjs`（覆盖审计 + runtime 审计 + 全类型 wizard/module-config 映射输出自检）。同时补齐多个 config-wizard 的 `fieldNameMap/fieldNameMapSource` 输出，确保对话字段提示以中文映射为准。
+
+- 2026-05-30 全活动类型 staging 证据闭环：已跑通 `verify-activity-api-full-config-staging.mjs --verify-level min` 与 `--verify-level full --confirm-full-verify`（默认 `--start-offset-seconds 120`，并执行 cleanup 删除创建的测试活动/依赖），覆盖 新手活动/转盘抽奖/非新手非转盘 11 个类型 的全配置创建、最小验证、最全验证（上线/下线）、清理删除闭环。
+
+- 2026-05-30 自检一致性修复：补齐 `lottery-config-wizard-api.mjs --wizard` 的 `domain/moduleNameMap/fieldNameMap` 顶层输出（与其他活动向导一致），并在 `scripts/action-cache.json` 增加 `configure_beginner_task_activity*` 两个别名 actionId 以兼容按活动类型枚举调用与自然语言匹配。
+
+- 2026-05-30 自然语言与运行时去耦加强：新增 `maintenance/audit-activity-nl-action-cache-match.mjs` 保障“活动列表 13 类活动”自然语言 query 可稳定命中对应 `configure_*_activity`；并把 option decorate 逻辑抽到 `scripts/lib/option-decorators.mjs`，运行时脚本不再 import `activity-web-mappings.mjs`（后者仅保留给维护脚本/测试读取 activity-web 用）。
+
+- 2026-05-30 人人代理(AGENT) 任务 clone 绑定冲突修复：`INVITE_FRIEND` 模板含 `linkTaskId` 时，脚本改为先 clone 创建新的 `INVITED` 被邀请任务，再创建邀请任务并重绑 `linkTaskId`；`create-agent-full-config-explicit-deps-fast-api.mjs` cleanup 同步删除两条任务；staging 已跑通 `verify-nonlottery-api-full-config-staging.mjs --only agent` 的 min/full/cleanup 闭环验证。
+
+- 2026-05-30 非转盘/非新手活动 staging 证据闭环：已跑通 `verify-nonlottery-api-full-config-staging.mjs` 的 `--verify-level min --only all` 与 `--verify-level full --only all`，覆盖 `TRADING_COMPETITION/RACE_COMPETITION/TRACE_PRO/CUSTOMIZED/RECHARGE_TRANS_TASK/AGENT/CONTRACT_MINING/FLIP/GUESS/MONOPOLY_WORLD_CUP/AGENT_TRACE_PRO` 的显式依赖创建、最小验证、最全验证（上线/下线）、清理删除闭环。
+
+- 2026-05-30 合约挖矿（CONTRACT_MINING）修复：创建活动报 `任务配置重复`，原因是模板 `miningList` 多渠道时复用同一任务 ID；修复为按 `miningList` 条目创建多条任务并逐项绑定，同时异常退出也执行 cleanup，避免污染 staging。复盘：`skills/weex-admin-ops/failure-reviews/contract-mining-activity.md`。
+
+- 2026-05-30 风险提示（staging 环境状态变更）：人人代理活动 `9247/allming-6233465` 在 full verify 过程中被下线后，接口提示 `不是未发布状态不可上线`，无法恢复到上线状态（后端限制）。当前已恢复其开始/结束时间字段，但状态保持 `OFFLINE`；后续跑 AGENT full verify 时脚本已改为检测到已有上线活动则直接报前置条件失败，不再自动下线存量活动。
+
+- 2026-05-29 用户确认转盘抽奖活动默认 `用户报名模版` 应使用 `【2442】 全平台-无任何限制`，已替换旧默认 `2729`。新建并上线活动 `9694` / `wt43083858` 后，前端账号 `8186595891@weex.com` / UID `8186595891` 报名成功；通过 MQ 充值回调生成 10 次抽奖次数，不走 FIN 登录。二次权重专项可见浏览器复验通过：连续单抽 6 次均捕获 `恭喜你` 弹窗并用右上角 `X` 关闭，次数 `10 -> 4`，第 6 次弹窗文案为 `100 USDT 合约赠金`。已登记 `frontend_draw_weight_special_verify` action-cache，并更新前端 draw playbook 与失败复盘。
+
+- 2026-05-29 已编辑 staging 转盘抽奖活动 `9107`：累计次数再权重配置为累计 5 次、同用户、奖品 ID `5` 权重 `100`，其余 7 个奖品权重 `0`；详情回查 `ONLINE / IN_PROGRESS` 且权重合计 `100`，用于前端第 6 次抽奖确定性断言。
+
+- 2026-05-29 补齐转盘抽奖后管 AC-14「累计次数再权重配置」自动化覆盖：`lottery-activity-fast-api.mjs --action create-draft` 创建草稿时注入一组 `prizeWeight`（累计 5 次=同用户，8 行、奖品 ID 5 权重 100，其余 0），`lottery-admin-main-regression` 已把 AC-14 纳入 `create_lottery_activity_draft` 阶段，manifest `admin_activity_config.automationCaseIds` 已补 AC-14。
+- 验证：单测 `lottery-admin-main-regression-lib.test.mjs` 通过；dry-run `--case-ids AC-14` 命中创建草稿阶段。注意：早期真实 staging 创建活动 `9691` 使用过均匀权重并已删除；随后按业务口径修正为同一活动只配置一侧，且使用确定性奖品权重，便于第 6 次抽奖断言中奖奖品。
+
+- 2026-05-29 新增 activity-web 源码影响分析工具：
+  - 脚本：`tools/activity-web-impact-check.mjs`，支持 `--activity-web-dir`、`--changed-files`，也可默认从 `activity-web` 执行 `git diff --name-only origin/main...HEAD`。
+  - 核心库：`tools/lib/activity-web-impact.mjs`，将后管源码变更映射为影响业务链路、推荐 `caseId`、推荐 action-cache dry-run 命令，并输出接口/字段/枚举/未接自动化 case 的潜在覆盖缺口。
+  - 测试：`tools/__tests__/activity-web-impact-check.test.mjs` 覆盖转盘奖池组件变更推荐回归，以及新增字段/接口覆盖缺口识别。
+  - 当前真实 `activity-web` 路径 `/Users/jonathan/Documents/Codex/2026-05-05/activity-web` 本地与 `origin/main` 无差异，工具输出影响为空。
+- 2026-05-29 按用户纠正更新转盘抽奖 AC-15/ST-03 口径：复制失败根因是源活动别名过长；回归固定使用小于 10 字符的新建活动别名执行复制，删除用例直接删除草稿状态活动。已移除 manifest 中 AC-15/ST-03 阻塞标记，并同步 row-action playbook 与失败复盘。
+
+- 2026-05-29 交易大赛（TRADING_COMPETITION）API 全配置沉淀增强：
+  - 显式依赖全配脚本：`skills/weex-admin-ops/scripts/create-competition-full-config-explicit-deps-fast-api.mjs`（applyConfigId + prizePoolIds + 交易量任务；支持 min/full verify + cleanup）
+  - 模块级自由配置脚本：`skills/weex-admin-ops/scripts/competition-activity-module-config-fast-api.mjs`（snapshot -> spec -> update）
+  - 中文映射：`skills/weex-admin-ops/references/mappings/competition-activity-modules.md`、`skills/weex-admin-ops/references/mappings/competition-activity-fields.md`
+  - NL/action-cache：`configure_trading_competition_activity`、`configure_trading_competition_activity_modules`
+
+- 2026-05-29 交易竞速赛（RACE_COMPETITION）API 全配置沉淀增强：
+  - 显式依赖全配脚本：`skills/weex-admin-ops/scripts/create-race-full-config-explicit-deps-fast-api.mjs`（applyConfigId + 交易量任务 + 赠金奖品；支持 min/full verify + cleanup）
+  - 模块级自由配置脚本：`skills/weex-admin-ops/scripts/race-activity-module-config-fast-api.mjs`（snapshot -> spec -> update）
+  - 中文映射：`skills/weex-admin-ops/references/mappings/race-activity-modules.md`、`skills/weex-admin-ops/references/mappings/race-activity-fields.md`
+  - NL/action-cache：`configure_race_competition_activity`、`configure_race_competition_activity_modules`
+
+- 2026-05-29 小活动型活动（TRACE_PRO）API 全配置沉淀补齐（已可 dry-run 命中）：
+  - 全配显式依赖脚本：`skills/weex-admin-ops/scripts/create-tracepro-full-config-explicit-deps-fast-api.mjs`（applyConfigId + 赠金奖品 + 交易量任务(带奖品绑定) + 资源卡；支持 min/full verify（online/offline）和 cleanup）
+  - 活动动作脚本：`skills/weex-admin-ops/scripts/tracepro-activity-fast-api.mjs`（snapshot/inspect-template/create-draft/draft-checks/online/offline/delete）
+  - 模块级自由配置脚本：`skills/weex-admin-ops/scripts/tracepro-activity-module-config-fast-api.mjs`（snapshot -> spec -> update）
+  - 中文映射：`skills/weex-admin-ops/references/mappings/tracepro-activity-modules.md`、`skills/weex-admin-ops/references/mappings/tracepro-activity-fields.md`
+  - NL/action-cache：`configure_trace_pro_activity`、`configure_trace_pro_activity_modules`
+  - 资源卡依赖创建能力补齐：`skills/weex-admin-ops/scripts/resource-card-fast-api.mjs --action create-min --activity-type TRACE_PRO`
+
+- 2026-05-29 定制化活动（CUSTOMIZED）API 全配置沉淀补齐（已可 dry-run 命中）：
+  - 全配显式依赖脚本：`skills/weex-admin-ops/scripts/create-customized-full-config-explicit-deps-fast-api.mjs`（applyConfigId + 交易量任务；支持 min/full verify（online/offline）和 cleanup）
+  - 活动动作脚本：`skills/weex-admin-ops/scripts/customized-activity-fast-api.mjs`（snapshot/inspect-template/create-draft/draft-checks/online/offline/delete）
+  - 模块级自由配置脚本：`skills/weex-admin-ops/scripts/customized-activity-module-config-fast-api.mjs`（snapshot -> spec -> update）
+  - 中文映射：`skills/weex-admin-ops/references/mappings/customized-activity-modules.md`、`skills/weex-admin-ops/references/mappings/customized-activity-fields.md`
+  - NL/action-cache：`configure_customized_activity`、`configure_customized_activity_modules`
+
+- 2026-05-29 充值交易活动（RECHARGE_TRANS_TASK）API 全配置沉淀补齐（已可 dry-run 命中）：
+  - 全配显式依赖脚本：`skills/weex-admin-ops/scripts/create-recharge-trans-full-config-explicit-deps-fast-api.mjs`（applyConfigId + 交易量任务；支持 min/full verify（online/offline）和 cleanup）
+  - 活动动作脚本：`skills/weex-admin-ops/scripts/recharge-trans-activity-fast-api.mjs`（snapshot/inspect-template/create-draft/draft-checks/online/offline/delete）
+  - 模块级自由配置脚本：`skills/weex-admin-ops/scripts/recharge-trans-activity-module-config-fast-api.mjs`（snapshot -> spec -> update）
+  - 中文映射：`skills/weex-admin-ops/references/mappings/recharge-trans-activity-modules.md`、`skills/weex-admin-ops/references/mappings/recharge-trans-activity-fields.md`
+  - NL/action-cache：`configure_recharge_trans_task_activity`、`configure_recharge_trans_task_activity_modules`
+
+- 2026-05-29 人人代理活动（AGENT）API 全配置沉淀补齐（已可 dry-run 命中）：
+  - 全配显式依赖脚本：`skills/weex-admin-ops/scripts/create-agent-full-config-explicit-deps-fast-api.mjs`（applyConfigId + 邀请任务；支持 min/full verify（online/offline）和 cleanup）
+  - 活动动作脚本：`skills/weex-admin-ops/scripts/agent-activity-fast-api.mjs`（snapshot/inspect-template/create-draft/draft-checks/online/offline/delete）
+  - 模块级自由配置脚本：`skills/weex-admin-ops/scripts/agent-activity-module-config-fast-api.mjs`（snapshot -> spec -> update）
+  - 中文映射：`skills/weex-admin-ops/references/mappings/agent-activity-modules.md`、`skills/weex-admin-ops/references/mappings/agent-activity-fields.md`
+  - NL/action-cache：`configure_agent_activity`、`configure_agent_activity_modules`
+
+- 2026-05-29 合约挖矿活动（CONTRACT_MINING）API 全配置沉淀补齐（已可 dry-run 命中）：
+  - 全配显式依赖脚本：`skills/weex-admin-ops/scripts/create-contract-mining-full-config-explicit-deps-fast-api.mjs`（applyConfigId + 合约挖矿任务；支持 min/full verify（online/offline）和 cleanup）
+  - 活动动作脚本：`skills/weex-admin-ops/scripts/contract-mining-activity-fast-api.mjs`（snapshot/inspect-template/create-draft/draft-checks/online/offline/delete）
+  - 模块级自由配置脚本：`skills/weex-admin-ops/scripts/contract-mining-activity-module-config-fast-api.mjs`（snapshot -> spec -> update）
+  - 中文映射：`skills/weex-admin-ops/references/mappings/contract-mining-activity-modules.md`、`skills/weex-admin-ops/references/mappings/contract-mining-activity-fields.md`
+  - NL/action-cache：`configure_contract_mining_activity`、`configure_contract_mining_activity_modules`
+
+- 2026-05-29 小丑牌活动（FLIP）API 全配置沉淀补齐（已可 dry-run 命中）：
+  - operations：`skills/weex-admin-ops/references/operations/activity-management-flip.md`
+  - 中文映射：`skills/weex-admin-ops/references/mappings/flip-activity-modules.md`、`skills/weex-admin-ops/references/mappings/flip-activity-fields.md`
+  - NL/action-cache：`configure_flip_activity`、`configure_flip_activity_modules`
+
+- 2026-05-29 竞猜大赛（GUESS）API 全配置沉淀补齐（已可 dry-run 命中；待写操作验证）：
+  - 中文映射：`skills/weex-admin-ops/references/mappings/guess-activity-modules.md`、`skills/weex-admin-ops/references/mappings/guess-activity-fields.md`
+  - NL/action-cache（dry-run 命中）：`configure_guess_activity`、`configure_guess_activity_modules`
+  - 显式依赖全配脚本（min/full verify + cleanup）：`skills/weex-admin-ops/scripts/create-guess-full-config-explicit-deps-fast-api.mjs`
+  - 依赖项脚本：`skills/weex-admin-ops/scripts/create-guess-integral-task-fast-api.mjs`、`skills/weex-admin-ops/scripts/create-guessing-task-fast-api.mjs`
+  - modules 全量配置脚本：`skills/weex-admin-ops/scripts/guess-activity-module-config-fast-api.mjs`（含 i18n/pageSetting/FAQ/guessList/calendar）
+  - operations：`skills/weex-admin-ops/references/operations/activity-management-guess.md`
+
+- 2026-05-29 大富翁世界杯（MONOPOLY_WORLD_CUP）API 全配置沉淀补齐（已可 dry-run 命中；待写操作验证）：
+  - 中文映射：`skills/weex-admin-ops/references/mappings/monopoly-worldcup-activity-modules.md`、`skills/weex-admin-ops/references/mappings/monopoly-worldcup-activity-fields.md`
+  - NL/action-cache（dry-run 命中）：`configure_monopoly_world_cup_activity`、`configure_monopoly_world_cup_activity_modules`
+  - 显式依赖全配脚本（min/full verify + cleanup）：`skills/weex-admin-ops/scripts/create-monopoly-worldcup-full-config-explicit-deps-fast-api.mjs`
+  - modules 全量配置脚本：`skills/weex-admin-ops/scripts/monopoly-worldcup-activity-module-config-fast-api.mjs`
+  - operations：`skills/weex-admin-ops/references/operations/activity-management-monopoly-worldcup.md`
+
+- 2026-05-28 及更早交接记录已归档：`docs/session-handoffs/2026-05-26-to-2026-05-28-and-earlier.md`
+- 2026-05-11 至 2026-05-22 抽奖、FIN、前端运行时与历史链路摘要已归档：`docs/session-handoffs/2026-05-11-to-22-lottery-and-runtime.md`
 
 ## 当前 Git 状态
+
 - 当前分支：`dev`。
-- 最近远端同步提交：`9c493e0 feat: 完善后管自动化流程沉淀与复盘规范`。
-- 最近一次推送后，本地 `dev` 与 `origin/dev` 已确认一致。
-- 本轮活动流程引导配置操作列验证、活动用户报名管理操作列验证、skill/cache 沉淀、批量删除报名模板、skill 资产/证据目录迁移、失败复盘和交接摘要更新尚未提交。
+- 最近本地提交：`b882407 fix: vendor frontend login runtime and auto-install deps`。
+- 本轮架构整改相关文件尚未提交；`.env.local` / `.DS_Store` 仍按用户要求暂不处理。
 
 ## 后续接力建议
-- 继续探索“新手活动”创建流程时，先读取相关 operation index、defaults、components 和 relationships。
-- 后台写操作前必须说明动作并处理必要确认；高风险业务参数不能猜测。
-- 新跑通链路若当前 skill 尚未覆盖，按规则询问或按已授权范围沉淀到 `skills/weex-admin-ops/`，并评估动作缓存。
-- 更新交接时只在本文件记录当前摘要；历史细节写入 `docs/session-handoffs/` 对应业务域。
+
+- 新会话处理业务任务前，先运行 `tools/first-run-check.mjs` 检查对应 skill。
+- 若缺配置，优先让用户选择：
+  - 文件方式：复制对应 `.env.example` 到 skill `.env.local` 后填写。
+  - 对话方式：用户直接提供缺失值，Codex 写入对应 skill `.env.local`，不回显真实值。
+  - 脚本方式：通过 `tools/configure-skill-env.mjs --from-stdin` 写入。
+- FIN 登录态不能随仓库提交；同事首次使用 FIN 能力时需要在自动打开的持久 CDP FIN 页面登录并关闭该页面。
+- 合约充值批量链路如果高并发中途失败，不要重复创建整批账号；先按生成邮箱回查 UID，只补未发放 UID，再重试前端划转。当前组合脚本已内置前端划转 `70008`/`20105` 延迟重试。
+- `.env.local`、`.DS_Store` 仍保持本机未跟踪；真实密码、验证码、token、cookie、API key 不提交。
 
 ## 安全说明
-- 不保存真实密码、验证码、token、cookie、API key 或完整账号凭证。
-- staging 默认用户名可以记录为 `auto`；密码和 Google 验证码必须来自环境变量或未提交的本机文件。
+
+- 不保存真实密码、验证码、token、cookie、API key 或完整账号凭证到可提交文件。
+- STG/test 测试账号邮箱和 UID 可完整记录；生产或未明确非生产时仍需脱敏。
+- 截图仅在用户明确要求时保存。

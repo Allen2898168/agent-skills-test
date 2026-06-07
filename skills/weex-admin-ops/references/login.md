@@ -14,6 +14,7 @@ Credentials:
 - Password: use user-provided `<PASSWORD>` or `WEEX_ADMIN_PASSWORD`.
 - Google code: use user-provided `<GOOGLE_CODE>` or `WEEX_ADMIN_GOOGLE_CODE`.
 - If password or Google code is unavailable, ask the user. Do not store real secrets in this file.
+- Some protected post-login actions can ask for Google verification again; treat those prompts the same way and never store the real value in the repo.
 
 Fields:
 - Account input placeholder: `账号`

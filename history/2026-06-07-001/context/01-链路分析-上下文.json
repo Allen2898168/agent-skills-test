@@ -1,0 +1,61 @@
+{
+  "runId": "2026-06-07-001",
+  "title": "活动后管全量回归",
+  "requirement": "全量回归活动后管",
+  "tags": [],
+  "historyDir": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001",
+  "overallStatus": "IN_PROGRESS",
+  "currentStageId": "",
+  "nextStageId": "linkage_analysis",
+  "nextStageName": "链路分析",
+  "terminal": false,
+  "finalizeReady": false,
+  "stagePromptPath": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/orchestrations/automation-review-pipeline/prompts/01-链路分析.md",
+  "stagePromptText": "# 链路分析 Subagent 模板\n\n你当前负责 **链路分析** 阶段。\n\n## 目标\n\n- 识别这条自动化需求涉及哪些 skill / orchestration / 既有脚本\n- 判断当前覆盖现状：`NONE | PARTIAL | FULL`\n- 给出推荐执行链路和入口\n- 当现有覆盖不足时，判断是否应新增自动化覆盖，而不是只判断“现在有没有现成脚本”\n\n## 输入\n\n- `00-任务说明.md`\n- 已存在的 skill / orchestration / action-cache / reference\n- 当前 run 的 `run-state.json`\n\n## 输出要求\n\n必须产出两份内容：\n\n1. 中文 Markdown 报告\n2. 符合 `stage-report.schema.json` 的 JSON 报告\n\n固定字段：\n\n- `stageId=linkage_analysis`\n- `stageName=链路分析`\n- `agentRole=链路分析 subagent`\n\n阶段特有字段：\n\n- `existingCoverage`\n- `suggestedFlow`\n- `dependentSkills`\n- `entrypoints`\n\nMarkdown 必须包含：\n\n- 任务输入\n- 当前已有覆盖判断\n- 推荐链路\n- 若为 `NONE` 或 `PARTIAL`，明确“新增覆盖/补齐缺口”的建议\n- 证据\n- 下一步\n",
+  "schemaPath": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/orchestrations/automation-review-pipeline/schemas/stage-report.schema.json",
+  "schemaRef": "stage-report.schema.json",
+  "contextFiles": [
+    "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/00-任务说明.md",
+    "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/run-state.json",
+    "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/run-index.json"
+  ],
+  "outputTargets": {
+    "markdown": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/01-链路分析报告.md",
+    "json": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/history/2026-06-07-001/01-链路分析报告.json"
+  },
+  "reportSkeleton": {
+    "runId": "2026-06-07-001",
+    "stageId": "linkage_analysis",
+    "stageName": "链路分析",
+    "agentRole": "链路分析 subagent",
+    "status": "",
+    "decision": "",
+    "summary": "",
+    "inputs": [],
+    "findings": [],
+    "evidence": [],
+    "risks": [],
+    "nextAction": "",
+    "relatedCommands": [],
+    "relatedFiles": [],
+    "timestamp": ""
+  },
+  "stageSpecificHints": [
+    "必须给出 existingCoverage: NONE | PARTIAL | FULL",
+    "必须给出 suggestedFlow / dependentSkills / entrypoints",
+    "若现有覆盖不足但需求仍可自动化，必须明确给出新增覆盖或补缺建议，不能因为没有现成用例就直接否定。"
+  ],
+  "parentInstructions": [
+    "读取本次阶段 prompt 和 contextFiles。",
+    "调用对应 subagent 完成当前阶段。",
+    "要求 subagent 输出中文 Markdown 报告和 machine-readable JSON。",
+    "JSON 必须符合 stage-report.schema.json，并写入 outputTargets 指向的文件。",
+    "完成后调用 record-stage.mjs 记录当前阶段。",
+    "若 nextStageId 为空且 overallStatus 非 IN_PROGRESS，则调用 finalize-run.mjs。"
+  ],
+  "recordedStages": [],
+  "pipelineSignals": {
+    "existingCoverage": "",
+    "coverageDecision": ""
+  }
+}

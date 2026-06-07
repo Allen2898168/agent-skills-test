@@ -5,6 +5,9 @@ export function matchAction(manifest, args) {
     return { action, inferred: {} };
   }
   if (!args.query) throw new Error("Provide --query or --action");
+  if (isFinAdminQuery(args.query)) {
+    throw new Error("FIN Admin request belongs to skills/weex-fin-admin-ops; use that skill's run-cached-action.mjs.");
+  }
   const candidates = manifest.actions
     .map(action => ({ action, score: scoreAction(action, args.query) }))
     .filter(item => item.score > 0)
@@ -17,6 +20,10 @@ export function matchAction(manifest, args) {
   };
 }
 
+function isFinAdminQuery(query) {
+  return /FIN|财务|空投奖励|产品化活动|stg-admin-web-fin|airdropRewardProd/i.test(query);
+}
+
 function scoreAction(action, query) {
   let score = 0;
   if (hasAny(query, action.intentKeywords || [])) score += 2;
@@ -26,8 +33,68 @@ function scoreAction(action, query) {
   if (action.supportedActions?.some(item => query.includes(item))) score += 3;
   if (action.id === "verify_register_template_row_actions" && query.includes("操作列")) score += 3;
   if (action.id === "delete_register_templates_by_operator" && query.includes("最近编辑人") && query.includes("删除")) score += 4;
+  if (action.id === "verify_activity_tasks_all_types" && /活动任务管理|任务管理/.test(query) && /补全|覆盖|全类型|全活动类型|全部类型|任意活动类型/.test(query)) score += 14;
+  if (action.id === "verify_activity_tasks_complex_all_types" && /活动任务管理|任务管理/.test(query) && /最复杂|复杂配置|最复杂配置|全类型/.test(query)) score += 18;
   if (action.id === "create_guide_templates" && /活动.*引导.*配置|引导.*流程.*配置|流程.*引导.*配置|活动流程引导配置/.test(query)) score += 8;
   if (action.id === "verify_guide_template_row_actions" && /活动.*引导.*配置|引导.*流程.*配置|流程.*引导.*配置|活动流程引导配置/.test(query) && query.includes("操作列")) score += 12;
+  if (action.id === "configure_lottery_activity" && /转盘抽奖|抽奖活动/.test(query) && /配置|创建|新增|上线|下线/.test(query)) score += 20;
+  if (action.id === "configure_lottery_activity_modules" && /转盘抽奖|抽奖活动/.test(query) && /单独配置|模块配置|按模块|只改|修改|更新/.test(query)) score += 22;
+  if (action.id === "configure_race_activity" && /交易竞速赛|RACE_COMPETITION/.test(query) && /配置|创建|新增|最小|最全|上线|下线|删除/.test(query)) score += 20;
+  if (action.id === "configure_race_activity_modules" && /交易竞速赛|RACE_COMPETITION/.test(query) && /单独配置|模块配置|按模块|只改|修改|更新/.test(query)) score += 22;
+  if (action.id === "configure_newbie_activity" && /新手活动|BEGINNER_TASK/.test(query) && /配置|创建|新增|全配置|上线|下线|删除/.test(query)) score += 20;
+  if (action.id === "configure_trading_competition_activity" && /交易大赛|交易赛|个人交易赛|TRADING_COMPETITION/i.test(query) && /配置|创建|新增|全配置|上线|下线|删除/.test(query)) score += 20;
+  if (action.id === "configure_race_competition_activity" && /交易竞速赛|竞速赛|RACE_COMPETITION/i.test(query) && /配置|创建|新增|全配置|上线|下线|删除/.test(query)) score += 20;
+  if (action.id === "configure_trace_pro_activity" && /小活动型活动|小活动|TRACE_PRO|copyTrading/i.test(query) && /配置|创建|新增|全配置|上线|下线|删除/.test(query)) score += 20;
+  if (action.id === "configure_agent_trace_pro_activity" && /代理小活动|AGENT_TRACE_PRO|agent_trace_pro/i.test(query) && /配置|创建|新增|全配置|上线|下线|删除/.test(query)) score += 32;
+  if (action.id === "configure_customized_activity" && /定制化活动|定制活动|CUSTOMIZED|commission/i.test(query) && /配置|创建|新增|全配置|上线|下线|删除/.test(query)) score += 20;
+  if (action.id === "configure_recharge_trans_task_activity" && /充值交易活动|充值交易|RECHARGE_TRANS_TASK|depositTrade/i.test(query) && /配置|创建|新增|全配置|上线|下线|删除/.test(query)) score += 20;
+  if (action.id === "configure_agent_activity" && /人人代理活动|人人代理|AGENT|agency/i.test(query) && /配置|创建|新增|全配置|上线|下线|删除/.test(query)) score += 20;
+  if (action.id === "configure_contract_mining_activity" && /合约挖矿活动|合约挖矿|CONTRACT_MINING|contractMining/i.test(query) && /配置|创建|新增|全配置|上线|下线|删除/.test(query)) score += 20;
+  if (action.id === "configure_flip_activity" && /小丑牌活动|小丑牌|FLIP|jokerCard/i.test(query) && /配置|创建|新增|全配置|上线|下线|删除/.test(query)) score += 20;
+  if (action.id === "configure_guess_activity" && /竞猜大赛|竞猜|GUESS|guessCompetition/i.test(query) && /配置|创建|新增|全配置|上线|下线|删除/.test(query)) score += 20;
+  if (action.id === "configure_monopoly_world_cup_activity" && /大富翁世界杯|大富翁|MONOPOLY_WORLD_CUP|monopoly/i.test(query) && /配置|创建|新增|全配置|上线|下线|删除/.test(query)) score += 20;
+  if (action.id === "configure_trading_competition_activity_modules" && /交易大赛|交易赛|个人交易赛|TRADING_COMPETITION/i.test(query) && /单独配置|模块配置|按模块|只改|修改|更新/.test(query)) score += 22;
+  if (action.id === "configure_race_competition_activity_modules" && /交易竞速赛|竞速赛|RACE_COMPETITION/i.test(query) && /单独配置|模块配置|按模块|只改|修改|更新/.test(query)) score += 22;
+  if (action.id === "configure_trace_pro_activity_modules" && /小活动型活动|小活动|TRACE_PRO|copyTrading/i.test(query) && /单独配置|模块配置|按模块|只改|修改|更新/.test(query)) score += 22;
+  if (action.id === "configure_agent_trace_pro_activity_modules" && /代理小活动|AGENT_TRACE_PRO|agent_trace_pro/i.test(query) && /单独配置|模块配置|按模块|只改|修改|更新/.test(query)) score += 34;
+  if (action.id === "configure_customized_activity_modules" && /定制化活动|定制活动|CUSTOMIZED|commission/i.test(query) && /单独配置|模块配置|按模块|只改|修改|更新/.test(query)) score += 22;
+  if (action.id === "configure_recharge_trans_task_activity_modules" && /充值交易活动|充值交易|RECHARGE_TRANS_TASK|depositTrade/i.test(query) && /单独配置|模块配置|按模块|只改|修改|更新/.test(query)) score += 22;
+  if (action.id === "configure_agent_activity_modules" && /人人代理活动|人人代理|AGENT|agency/i.test(query) && /单独配置|模块配置|按模块|只改|修改|更新/.test(query)) score += 22;
+  if (action.id === "configure_contract_mining_activity_modules" && /合约挖矿活动|合约挖矿|CONTRACT_MINING|contractMining/i.test(query) && /单独配置|模块配置|按模块|只改|修改|更新/.test(query)) score += 22;
+  if (action.id === "configure_flip_activity_modules" && /小丑牌活动|小丑牌|FLIP|jokerCard/i.test(query) && /单独配置|模块配置|按模块|只改|修改|更新/.test(query)) score += 22;
+  if (action.id === "configure_guess_activity_modules" && /竞猜大赛|竞猜|GUESS|guessCompetition/i.test(query) && /单独配置|模块配置|按模块|只改|修改|更新/.test(query)) score += 22;
+  if (action.id === "configure_monopoly_world_cup_activity_modules" && /大富翁世界杯|大富翁|MONOPOLY_WORLD_CUP|monopoly/i.test(query) && /单独配置|模块配置|按模块|只改|修改|更新/.test(query)) score += 22;
+  if (action.id === "configure_newbie_activity_modules" && /新手活动|BEGINNER_TASK/.test(query) && /单独配置|模块配置|按模块|只改|修改|更新/.test(query)) score += 22;
+  if (action.id === "create_task_packages" && /任务包/.test(query) && /创建|新增|生成|复制|删除|修改|更新/.test(query)) score += 14;
+  if (action.id === "create_resource_cards" && /(资源位|资源卡|卡片)/.test(query) && /创建|新增|生成|复制|删除|修改|更新/.test(query)) score += 14;
+  if (action.id === "create_multilanguage_templates" && /(多语言|语言模板|多语言模板)/.test(query) && /创建|新增|生成|复制|删除|修改|更新/.test(query)) score += 14;
+  if (action.id === "manage_multilanguage_template_items" && /(渠道标题|邀请码标题|title_channel|title_invite|渠道码|邀请码)/.test(query) && /创建|新增|上传|批量|复制|删除|修改|更新|配置/.test(query)) score += 16;
+  if (action.id === "batch_bind_i18n_templates" && /(批量绑定|绑定模版|绑定模板)/.test(query) && /(新手活动|BEGINNER_TASK|多语言|i18n)/.test(query)) score += 18;
+  if (action.id === "create_lottery_activity_draft" && /活动列表/.test(query) && /转盘抽奖/.test(query) && /新增|创建|草稿|配置|走一下|尝试/.test(query)) score += 14;
+  if (action.id === "create_lottery_activity_draft" && /转盘抽奖.{0,8}活动|活动.{0,8}转盘抽奖/.test(query) && /新增|创建|生成|草稿|配置|全配置|权重配置|走一下|尝试/.test(query)) score += 14;
+  if (action.id === "lottery_admin_main_regression" && /转盘抽奖/.test(query) && /后管|后台|活动后台/.test(query) && /主回归|回归/.test(query)) score += 18;
+  if (action.id === "lottery_admin_main_regression" && /自动化/.test(query) && /跑|执行|开始做/.test(query)) score += 8;
+  if (action.id === "regress_full_test_cases" && /(回归|用例|用例库)/.test(query) && /(全量|全部|全套)/.test(query)) score += 60;
+  if (action.id === "regress_full_test_cases" && /回归全量用例/.test(query)) score += 80;
+  if (action.id === "online_lottery_activity" && /活动列表|转盘抽奖|抽奖活动|活动/.test(query) && /上线|发布/.test(query)) score += 16;
+  if (action.id === "online_lottery_activity" && /活动ID|活动id|活动别名|showUrl|别名/.test(query) && /上线|发布/.test(query)) score += 12;
+  if (action.id === "regress_newbie_activity_universal_from_scratch" && /(新手活动|BEGINNER_TASK)/.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_lottery_activity_universal_from_scratch" && /(转盘抽奖|抽奖活动|LOTTERY)/.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_monopoly_world_cup_activity_universal_from_scratch" && /(大富翁世界杯|大富翁|MONOPOLY_WORLD_CUP|monopoly)/i.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_flip_activity_universal_from_scratch" && /(小丑牌活动|小丑牌|FLIP|joker)/i.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_customized_activity_universal_from_scratch" && /(定制化活动|定制活动|CUSTOMIZED|commission)/i.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_trading_competition_activity_universal_from_scratch" && /(交易大赛|TRADING_COMPETITION|competition)/i.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_race_competition_activity_universal_from_scratch" && /(交易竞速赛|竞速赛|RACE_COMPETITION|speedRace)/i.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_trace_pro_activity_universal_from_scratch"
+    && !/(代理小活动|AGENT_TRACE_PRO|copyTrading)/i.test(query)
+    && /(小活动|小活动型|TRACE_PRO|tracepro)/i.test(query)
+    && /(回归|用例)/.test(query)
+    && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_agent_trace_pro_activity_universal_from_scratch" && /(代理小活动|AGENT_TRACE_PRO|copyTrading)/i.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_guess_activity_universal_from_scratch" && /(竞猜大赛|竞猜|GUESS|guessCompetition)/i.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_recharge_trans_task_activity_universal_from_scratch" && /(充值交易活动|充值交易|RECHARGE_TRANS_TASK|depositTrade)/i.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_agent_activity_universal_from_scratch" && /(人人代理活动|人人代理|\bAGENT\b|agency)/i.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
+  if (action.id === "regress_contract_mining_activity_universal_from_scratch" && /(合约挖矿活动|合约挖矿|CONTRACT_MINING|contractMining)/i.test(query) && /(回归|用例)/.test(query) && /(从零|不clone|不克隆)/.test(query)) score += 40;
   if (action.supportedCategories?.some(item => query.includes(item))) score += 1;
   if (action.supportedSubtypes?.some(item => query.toUpperCase().includes(String(item).toUpperCase()))) score += 1;
   return score;
@@ -42,7 +109,115 @@ function inferParams(query) {
     ...inferRegisterDeleteByOperatorParams(query),
     ...inferGuideTemplateParams(query),
     ...inferGuideRowActionParams(query),
+    ...inferLotteryActivityDraftParams(query),
+    ...inferLotteryOnlineParams(query),
+    ...inferRaceActivityParams(query),
+    ...inferResourceCardParams(query),
+    ...inferMultilanguageTemplateItemParams(query),
+    ...inferBatchBindI18nTemplateParams(query),
     prizeId: inferPrizeId(query),
+  };
+}
+
+function inferResourceCardParams(query) {
+  if (!/(资源位|资源卡|卡片)/.test(query)) return {};
+  const wizard = /自由配置|自定义|不要clone|不用clone|不靠clone/.test(query);
+  let resourceAction;
+  if (query.includes("复制")) resourceAction = "copy";
+  else if (/更新|修改|编辑/.test(query)) resourceAction = "update";
+  else if (/创建|新增|生成/.test(query)) resourceAction = "create";
+  return { wizard: wizard ? true : undefined, resourceAction };
+}
+
+function inferMultilanguageTemplateItemParams(query) {
+  const templateId = inferTemplateId(query);
+  const keyMatch = query.match(/(?:key|键|渠道标题键|标题键)\s*(?:为|是|=|:|：)?\s*([A-Za-z0-9_:-]+)/i);
+  const key = keyMatch?.[1];
+  const itemAction = /批量|上传模板|editTemplate/i.test(query) ? "edit-template" : "upsert";
+  return { templateId, key, itemAction };
+}
+
+function inferBatchBindI18nTemplateParams(query) {
+  const activityIds = inferActivityIds(query);
+  const multiLanguageTemplateId = inferTemplateId(query);
+  const snapshot = /列出|查看|获取/.test(query) && /(新手活动|活动列表)/.test(query) && /(活动\s*(?:id|ID)|activityIds)/.test(query);
+  return {
+    snapshot: snapshot ? true : undefined,
+    multiLanguageTemplateId,
+    activityIds: activityIds.length ? activityIds.join(",") : undefined,
+  };
+}
+
+function inferTemplateId(query) {
+  const m = query.match(/(?:模板\s*(?:id|ID)|template\s*id|templateId|multiLanguageTemplateId)\s*(?:为|是|=|:|：)?\s*(\d+)/i);
+  return m?.[1];
+}
+
+function inferActivityIds(query) {
+  const tail = query.match(/(?:活动\s*(?:id|ID)|activityIds)\s*(?:为|是|=|:|：)?\s*([\d,，\s]+)/i);
+  if (!tail?.[1]) return [];
+  return tail[1]
+    .replace(/[，\s]+/g, ",")
+    .split(",")
+    .map(s => s.trim())
+    .filter(Boolean)
+    .filter(s => /^\d+$/.test(s));
+}
+
+// Module config actions share the same inferred params as online: activityId/activityAlias
+// plus optional spec pointers when user already provided a local file path in query.
+// Note: we intentionally keep inference conservative to avoid accidental writes.
+
+function inferLotteryOnlineParams(query) {
+  if (!/上线|发布/.test(query) || !/转盘抽奖|抽奖活动|活动列表|活动/.test(query)) return {};
+  const activityIdMatch = query.match(/(?:活动\s*(?:id|ID)|activity\s*id)\s*(?:为|是|=|:|：)?\s*(\d+)/i);
+  const activityAliasMatch = query.match(/(?:活动\s*别名|别名|showUrl)\s*(?:为|是|=|:|：)?\s*([A-Za-z0-9_.-]+)/i);
+  return {
+    activityId: activityIdMatch?.[1],
+    activityAlias: activityAliasMatch?.[1],
+    visible: /浏览器模式|可见|打开浏览器|让我看着/.test(query),
+  };
+}
+
+function inferLotteryActivityDraftParams(query) {
+  if (!/转盘抽奖/.test(query) || (!/活动列表/.test(query) && !/活动|草稿|全配置|权重配置/.test(query))) return {};
+  const titlePrefixMatch = query.match(/(?:标题前缀|活动标题前缀)\s*(?:用|为|是|=|:|：)?\s*([\u4e00-\u9fa5A-Za-z0-9_.-]+)/);
+  const aliasPrefixMatch = query.match(/(?:别名前缀|活动别名前缀)\s*(?:用|为|是|=|:|：)?\s*([A-Za-z0-9_.-]+)/);
+  const uidMatch = query.match(/(?:uid|UID)\s*(?:用|为|是|=|:|：)?\s*(\d+)/);
+  const countryMatch = query.match(/(?:国家|地区)\s*(?:用|为|是|=|:|：)\s*([\u4e00-\u9fa5A-Za-z -]+)/);
+  return {
+    titlePrefix: titlePrefixMatch?.[1],
+    aliasPrefix: aliasPrefixMatch?.[1],
+    uid: uidMatch?.[1],
+    country: countryMatch?.[1]?.trim(),
+    noPreapply: /无预报名|不预报名|不要预报名|不支持预报名/.test(query),
+    visible: /浏览器模式|可见|打开浏览器|让我看着/.test(query),
+  };
+}
+
+function inferRaceActivityParams(query) {
+  if (!/交易竞速赛|RACE_COMPETITION/.test(query)) return {};
+  const titlePrefixMatch = query.match(/(?:标题前缀|活动标题前缀)\s*(?:用|为|是|=|:|：)?\s*([\u4e00-\u9fa5A-Za-z0-9_.-]+)/);
+  const aliasPrefixMatch = query.match(/(?:别名前缀|活动别名前缀)\s*(?:用|为|是|=|:|：)?\s*([A-Za-z0-9_.-]+)/);
+  const templateIdMatch = query.match(/(?:模板\s*(?:id|ID)|template\s*id)\s*(?:用|为|是|=|:|：)?\s*(\d+)/i);
+  const templateAliasMatch = query.match(/(?:模板\s*别名|template\s*alias)\s*(?:用|为|是|=|:|：)?\s*([A-Za-z0-9_.-]+)/i);
+  const activityIdMatch = query.match(/(?:活动\s*(?:id|ID)|activity\s*id)\s*(?:为|是|=|:|：)?\s*(\d+)/i);
+  const activityAliasMatch = query.match(/(?:活动\s*别名|别名|showUrl)\s*(?:为|是|=|:|：)?\s*([A-Za-z0-9_.-]+)/i);
+  let preset;
+  if (/最小/.test(query)) preset = "minimal_create_verify_delete";
+  else if (/最全|全量|全配置/.test(query)) preset = "full_create_verify_delete";
+  else if (/上线/.test(query)) preset = "online";
+  else if (/下线/.test(query)) preset = "offline";
+  else if (/删除/.test(query)) preset = "delete";
+  return {
+    titlePrefix: titlePrefixMatch?.[1],
+    aliasPrefix: aliasPrefixMatch?.[1],
+    templateId: templateIdMatch?.[1],
+    templateAlias: templateAliasMatch?.[1],
+    activityId: activityIdMatch?.[1],
+    activityAlias: activityAliasMatch?.[1],
+    preset,
+    visible: /浏览器模式|可见|打开浏览器|让我看着/.test(query),
   };
 }
 

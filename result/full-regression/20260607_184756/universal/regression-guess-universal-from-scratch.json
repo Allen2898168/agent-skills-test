@@ -1,0 +1,71 @@
+{
+  "ok": true,
+  "caseId": "GUESS_universal_from_scratch",
+  "created": {
+    "registerTemplateId": "3560",
+    "prizeId": "1448",
+    "integralTaskId": "7038",
+    "guessTaskId": "7039",
+    "activityId": "10041",
+    "activityAlias": "gcr51121233",
+    "activityTitle": "竞猜大赛通用回归165201"
+  },
+  "links": [
+    {
+      "label": "后台竞猜大赛列表",
+      "url": "https://stg-activity.weex.tech/activities/guessCompetition"
+    }
+  ],
+  "durationMs": 20632,
+  "cleanup": {
+    "unbind": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteActivity": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteIntegralTask": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteGuessTask": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deletePrize": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    },
+    "deleteRegisterTemplate": {
+      "ok": true,
+      "status": 200,
+      "body": {
+        "code": 200,
+        "msg": "操作成功"
+      }
+    }
+  },
+  "resultMd": "/Users/gabriel/Downloads/admin_dashboard/agent-skills-test/result/universal-regression/20260607_185208/GUESS_universal_from_scratch.md"
+}
